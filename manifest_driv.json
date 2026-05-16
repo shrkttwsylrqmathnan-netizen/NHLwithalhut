@@ -1,0 +1,43 @@
+{
+  "id": "nahla_driver_pwa",
+  "scope": ".",
+  "name": "كباتن نحلة | النظام السحابي",
+  "short_name": "كباتن نحلة",
+  "description": "تطبيق إدارة مهام التوصيل لكباتن شركة نحلة في كركوك",
+  "start_url": "./Driver.html",
+  "lang": "ar",
+  "dir": "rtl",
+  "display": "standalone",
+  "background_color": "#f6f6f6",
+  "theme_color": "#111827",
+  "icons": [
+    {
+      "src": "./driver-logo.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "./driver-logo.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "بدء المناوبة",
+      "short_name": "تسجيل حضور",
+      "description": "بدء شفت العمل واستقبال الطلبات",
+      "url": "./Driver.html?action=start_shift",
+      "icons": [{ "src": "./driver-logo.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "أرباحي والديون",
+      "short_name": "الصندوق",
+      "description": "متابعة الطلبات المنجزة والعمولات",
+      "url": "./Driver.html?tab=wallet",
+      "icons": [{ "src": "./driver-logo.png", "sizes": "192x192" }]
+    }
+  ]
+}
