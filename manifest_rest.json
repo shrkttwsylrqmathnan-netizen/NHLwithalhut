@@ -1,0 +1,44 @@
+{
+  "id": "nahla_restaurant_pwa",
+  "scope": ".",
+  "name": "مطاعم نحلة | النظام السحابي",
+  "short_name": "مطاعم نحلة",
+  "description": "منصة إدارة طلبات التوصيل لشركة نحلة في كركوك",
+  "start_url": "./restaurant.html",
+  "lang": "ar",
+  "dir": "rtl",
+  "display": "standalone",
+  "background_color": "#f6f6f6",
+  "theme_color": "#111827",
+  "icons": [
+    {
+      "src": "./rest-logo.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "./rest-logo.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "تصوير وصل جديد",
+      "short_name": "تصوير سريع",
+      "description": "افتح الكاميرا لإرسال طلب فوري",
+      "url": "./restaurant.html?mode=photo",
+      "icons": [{ "src": "./rest-logo.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "الطلبات النشطة",
+      "short_name": "متابعة الطلبات",
+      "description": "متابعة الطلبات المفتوحة حالياً",
+      "url": "./restaurant.html?tab=live",
+      "icons": [{ "src": "./rest-logo.png", "sizes": "192x192" }]
+    }
+  ]
+}
+
