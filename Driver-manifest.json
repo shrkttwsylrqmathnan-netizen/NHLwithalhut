@@ -1,6 +1,6 @@
 {
-  "id": "nahla_driver_pwa",
-  "scope": ".",
+  "id": "nahla_driver_pwa_independent",
+  "scope": "./Driver.html",
   "name": "كباتن نحلة | النظام السحابي",
   "short_name": "كباتن نحلة",
   "description": "تطبيق إدارة مهام التوصيل لكباتن شركة نحلة في كركوك",
