@@ -4,7 +4,7 @@
   "name": "مطاعم نحلة | النظام السحابي",
   "short_name": "مطاعم نحلة",
   "description": "منصة إدارة طلبات التوصيل لشركة نحلة في كركوك",
-  "start_url": "./restaurant.html",
+  "start_url": "./Restaurant.html",
   "lang": "ar",
   "dir": "rtl",
   "display": "standalone",
@@ -29,16 +29,15 @@
       "name": "تصوير وصل جديد",
       "short_name": "تصوير سريع",
       "description": "افتح الكاميرا لإرسال طلب فوري",
-      "url": "./restaurant.html?mode=photo",
+      "url": "./Restaurant.html?mode=photo",
       "icons": [{ "src": "./rest-logo.png", "sizes": "192x192" }]
     },
     {
       "name": "الطلبات النشطة",
       "short_name": "متابعة الطلبات",
       "description": "متابعة الطلبات المفتوحة حالياً",
-      "url": "./restaurant.html?tab=live",
+      "url": "./Restaurant.html?tab=live",
       "icons": [{ "src": "./rest-logo.png", "sizes": "192x192" }]
     }
   ]
 }
-
