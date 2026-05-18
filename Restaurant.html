@@ -410,25 +410,6 @@
         @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
         @keyframes slideDown { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
-
-        /* زر التحديث اليدوي */
-        .manual-refresh-btn {
-            background: var(--nahla-yellow);
-            color: var(--primary-blue-dark);
-            border: none;
-            border-radius: 12px;
-            padding: 12px 20px;
-            font-weight: 800;
-            cursor: pointer;
-            transition: 0.3s;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-            margin: 15px auto 0;
-            width: fit-content;
-        }
-        .manual-refresh-btn:active { transform: scale(0.96); }
     </style>
 </head>
 <body>
@@ -541,11 +522,7 @@
         <div id="waitingBox" class="hidden-section text-center py-4">
             <div class="spinner-border mb-3" style="color: var(--nahla-yellow); width: 3rem; height: 3rem;" role="status"></div>
             <h5 class="fw-black mb-1 text-dark">يتم تهيئة النظام...</h5>
-            <p class="text-muted fw-bold mb-0" style="font-size: 0.8rem;" id="waitingStatusText">طلبك قيد المراجعة من قبل الإدارة</p>
-            <button class="manual-refresh-btn" id="manualRefreshBtn" onclick="checkWaitingStatus(true)">
-                <i data-lucide="refresh-cw" size="16"></i> تحديث الحالة
-            </button>
-            <small class="d-block mt-2 text-muted">اضغط على الزر للتحقق من قبول التسجيل</small>
+            <p class="text-muted fw-bold mb-0" style="font-size: 0.8rem;" id="waitingStatusText">جاري الاتصال بقاعدة البيانات</p>
         </div>
     </div>
 </div>
@@ -741,7 +718,7 @@
 
     if (typeof lucide !== 'undefined') lucide.createIcons();
 
-    // روابط شركة نحلة – تم تحديث الرابط
+    // روابط شركة نحلة
     const API_URL   = "https://script.google.com/macros/s/AKfycbyiFprfbDKMwOG75eZl-V5_M7XmqLkmK49YBQjhHKr_Gka77Gmdgt6uU6K5KeXilMViDw/exec";
     const API_TOKEN = "NAHLA_SECURE_TOKEN_2026";
     const IMGBB_KEY = "1a0e61277eabce5db06f677dfe8d66ee"; 
@@ -811,7 +788,7 @@
     let currentOrderMode = 'manual';
     let base64Receipt    = null; 
     let myCustomPriceList= {};
-    // تم إلغاء المؤقت التلقائي
+    let waitingPollingTimer = null; 
     let globalDriversInfo   = []; 
     
     let pickerMap;
@@ -1439,9 +1416,8 @@
     function showWaitingRoom() {
         document.getElementById('authBox').classList.add('hidden-section');
         document.getElementById('waitingBox').classList.remove('hidden-section');
-        // تم إلغاء المؤقت التلقائي، المستخدم سيضغط على زر التحديث
-        // إعادة تعيين نص الحالة للتوضيح
-        document.getElementById('waitingStatusText').innerText = "طلبك قيد المراجعة من قبل الإدارة";
+        if (waitingPollingTimer) clearInterval(waitingPollingTimer);
+        waitingPollingTimer = setInterval(() => window.checkWaitingStatus(false), 15000);
     }
 
     window.checkWaitingStatus = function(isManual = false) {
@@ -1457,14 +1433,11 @@
             if (savedPass) pass = atob(savedPass);
         }
 
-        // تعطيل الزر مؤقتًا أثناء التحقق
-        const btn = document.getElementById('manualRefreshBtn');
-        if (btn) { btn.disabled = true; btn.innerHTML = `<div class="spinner-border spinner-border-sm me-1"></div> جاري التحقق...`; }
-
         fetch(`${API_URL}?action=checkRes&phone=${phone}&password=${encodeURIComponent(pass)}&token=${API_TOKEN}`)
             .then(r => r.json())
             .then(data => {
                 if (data.status === "active" || data.status === "inactive") {
+                    clearInterval(waitingPollingTimer);
                     localStorage.removeItem('hut_res_pending');
                     localStorage.removeItem('hut_res_pending_pass');
                     currentResName = data.name;
@@ -1484,20 +1457,13 @@
                     document.getElementById('waitingBox').classList.add('hidden-section');
                     enterDashboard();
                 } else if (data.status === "banned") {
-                    localStorage.removeItem('hut_res_pending'); localStorage.removeItem('hut_res_pending_pass');
+                    clearInterval(waitingPollingTimer); localStorage.removeItem('hut_res_pending'); localStorage.removeItem('hut_res_pending_pass');
                     alert("⚠️ حساب محظور."); location.reload();
                 } else if (data.status === "wrong_password" || data.status === "rate_limited") {
-                    localStorage.removeItem('hut_res_pending'); localStorage.removeItem('hut_res_pending_pass');
+                    clearInterval(waitingPollingTimer); localStorage.removeItem('hut_res_pending'); localStorage.removeItem('hut_res_pending_pass');
                     alert("كلمة المرور تغيرت أو تم حظر الحساب مؤقتاً."); location.reload();
-                } else {
-                    // لا يزال قيد الانتظار
-                    alert("⏳ الحساب لا يزال قيد المراجعة. يرجى المحاولة لاحقاً.");
                 }
-            }).catch(() => {
-                alert("تعذر الاتصال بالخادم. تأكد من اتصالك بالإنترنت.");
-            }).finally(() => {
-                if (btn) { btn.disabled = false; btn.innerHTML = `<i data-lucide="refresh-cw" size="16"></i> تحديث الحالة`; lucide.createIcons(); }
-            });
+            }).catch(() => {});
     };
 
     function handleLogin(data, phone, passAttempt) {
@@ -1973,3 +1939,4 @@
 </script>
 </body>
 </html>
+​
