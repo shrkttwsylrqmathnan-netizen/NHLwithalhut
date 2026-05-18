@@ -179,7 +179,12 @@
 
         .waiting-pulse { animation: softPulse 2s infinite; display: inline-block;}
         @keyframes softPulse { 0% { opacity: 1; transform: scale(1); } 50% { opacity: 0.7; transform: scale(0.95); } 100% { opacity: 1; transform: scale(1); } }
-        .btn-refresh-waiting { background: #f1f5f9; color: var(--text-muted); border: 1px solid var(--border-color); font-weight: 700; border-radius: 20px; padding: 10px 20px; transition: 0.2s; border: none; }
+        .btn-refresh-waiting { background: #f1f5f9; color: var(--text-muted); border: 1px solid var(--border-color); font-weight: 700; border-radius: 20px; padding: 12px 20px; transition: 0.2s; border: none; }
+        
+        /* زر تعديل التسجيل الجديد */
+        .btn-edit-registration { background: transparent; color: var(--danger-red); border: 2px solid rgba(239, 68, 68, 0.2); font-weight: 700; border-radius: 20px; padding: 12px 20px; transition: 0.2s; }
+        .btn-edit-registration:active { background: rgba(239, 68, 68, 0.1); transform: scale(0.97); }
+
         .btn-accept-order { background: var(--success-green); color: white; border-radius: 20px; padding: 20px; font-weight: 900; font-size: 1.2rem; width: 100%; border: none; transition: 0.3s; display: flex; align-items: center; justify-content: center; gap: 15px; box-shadow: 0 10px 20px rgba(16, 185, 129, 0.3); margin-bottom: 15px; }
         
         .btn-mute {
@@ -308,13 +313,15 @@
             <svg class="svg-icon text-warning" style="width: 60px; height: 60px;" viewBox="0 0 24 24"><path d="M21 12a9 9 0 1 1-9-9c2.52 0 4.93 1 6.74 2.74L21 8"></path><polyline points="21 3 21 8 16 8"></polyline><polyline points="12 8 12 12 15 15"></polyline></svg>
         </div>
         <h3 class="fw-black mb-2" style="color: var(--primary-blue);">أنت في غرفة الانتظار</h3>
-        <p class="text-muted fw-bold mb-4" style="font-size: 0.9rem;">حسابك مسجل وقيد المراجعة.<br>النظام يفحص حالتك تلقائياً الآن، ستدخل فور موافقة الإدارة.</p>
+        <p class="text-muted fw-bold mb-4" style="font-size: 0.9rem;">حسابك مسجل وقيد المراجعة.<br>سيظل هذا التطبيق صامتاً. انقر على تحديث عندما يخبرك الإدمن بالموافقة.</p>
         <div class="d-flex align-items-center justify-content-center gap-2 mb-4">
-            <div class="spinner-border spinner-border-sm text-primary" role="status"></div>
-            <span class="text-primary fw-bold small" id="waitingStatusText">جاري الاستعلام التلقائي...</span>
+            <span class="text-primary fw-bold small" id="waitingStatusText">في انتظار موافقة الإدارة...</span>
         </div>
-        <button class="btn-refresh-waiting mt-2 w-100" onclick="window.checkWaitingStatus(true)">
-            تحديث يدوي <svg class="svg-icon" style="width: 16px; height:16px; margin-right:5px;" viewBox="0 0 24 24"><polyline points="23 4 23 10 17 10"></polyline><polyline points="1 20 1 14 7 14"></polyline><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg>
+        <button class="btn-refresh-waiting w-100 mb-2" onclick="window.checkWaitingStatus()">
+            تحديث يدوي الآن <svg class="svg-icon" style="width: 16px; height:16px; margin-right:5px;" viewBox="0 0 24 24"><polyline points="23 4 23 10 17 10"></polyline><polyline points="1 20 1 14 7 14"></polyline><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg>
+        </button>
+        <button class="btn-edit-registration w-100" onclick="window.exitWaitingRoom()">
+            تعديل معلومات التسجيل
         </button>
     </div>
 </div>
@@ -462,7 +469,7 @@
     const db  = getDatabase(app);
 
     let driverData = null, countdownInterval, currentOrderData = null, activeOrders = [], isRegistering = false, isOnline = false;
-    let wakeLock = null, waitingPollingTimer = null, heartbeatInterval = null, shiftTimerInterval = null;
+    let wakeLock = null, heartbeatInterval = null, shiftTimerInterval = null;
     let lastLocUpdateTs = 0, lastSentLat = 0, lastSentLng = 0, lastActiveHtml = "";
     let readyNotifiedOrders = new Set();
     let todayRejections = 0;
@@ -735,7 +742,7 @@
             isRegistering = true;
             document.getElementById('loginPassContainer').classList.add('hidden-section');
             document.getElementById('registerFields').classList.remove('hidden-section');
-            document.getElementById('driverPhone').disabled = true;
+            document.getElementById('driverPhone').disabled = false; // تفعيل لكي يقدر يغير الرقم لو أخطأ
             document.getElementById('mainAuthBtn').innerHTML = `إرسال طلب الانضمام <svg class="svg-icon" viewBox="0 0 24 24"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>`;
             document.getElementById('mainAuthBtn').style.background = 'var(--nahla-yellow)';
             document.getElementById('mainAuthBtn').style.color = '#000';
@@ -745,11 +752,29 @@
     function showWaitingRoom() {
         document.getElementById('authBox').classList.add('hidden-section');
         document.getElementById('waitingBox').classList.remove('hidden-section');
-        if (waitingPollingTimer) clearInterval(waitingPollingTimer);
-        waitingPollingTimer = setInterval(() => window.checkWaitingStatus(false), 15000);
+        document.getElementById('waitingStatusText').innerText = "في انتظار موافقة الإدارة...";
     }
 
-    window.checkWaitingStatus = function(isManual = false) {
+    window.exitWaitingRoom = function() {
+        // إزالة الحفظ المؤقت لحالة الانتظار
+        localStorage.removeItem('hut_driver_pending');
+        sessionStorage.removeItem('hut_driver_pending_pass');
+        
+        // تبديل الواجهات
+        document.getElementById('waitingBox').classList.add('hidden-section');
+        document.getElementById('authBox').classList.remove('hidden-section');
+        
+        // تفعيل الحقول وتجهيز الواجهة للتسجيل مجدداً
+        document.getElementById('driverPhone').disabled = false;
+        isRegistering = true;
+        document.getElementById('loginPassContainer').classList.add('hidden-section');
+        document.getElementById('registerFields').classList.remove('hidden-section');
+        document.getElementById('mainAuthBtn').innerHTML = `إرسال طلب الانضمام <svg class="svg-icon" viewBox="0 0 24 24"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>`;
+        document.getElementById('mainAuthBtn').style.background = 'var(--nahla-yellow)';
+        document.getElementById('mainAuthBtn').style.color = '#000';
+    };
+
+    window.checkWaitingStatus = function() {
         let rawPhone = document.getElementById('driverPhone').value.trim() || localStorage.getItem('hut_driver_pending');
         if (!rawPhone) return;
         let phone = rawPhone.replace(/^0+/, '');
@@ -760,12 +785,19 @@
             if (savedPass) pass = atob(savedPass);
         }
 
-        if (isManual) document.getElementById('waitingStatusText').innerText = "جاري التحقق اليدوي...";
+        const btn = document.querySelector('.btn-refresh-waiting');
+        const origHtml = btn.innerHTML;
+        btn.innerHTML = `<div class="spinner-border spinner-border-sm me-2"></div> جاري التحقق...`;
+        btn.disabled = true;
+        document.getElementById('waitingStatusText').innerText = "جاري الاتصال بالخادم...";
+        
         fetch(`${API_URL}?action=checkDriver&phone=${phone}&password=${encodeURIComponent(pass)}&token=${API_TOKEN}`)
             .then(r => r.json()).then(data => {
-                document.getElementById('waitingStatusText').innerText = "جاري الاستعلام التلقائي...";
+                document.getElementById('waitingStatusText').innerText = "في انتظار موافقة الإدارة...";
+                btn.innerHTML = origHtml;
+                btn.disabled = false;
+                
                 if (data.status === "active" || data.status === "inactive") {
-                    clearInterval(waitingPollingTimer);
                     localStorage.removeItem('hut_driver_pending');
                     sessionStorage.removeItem('hut_driver_pending_pass');
                     driverData = { 
@@ -779,12 +811,18 @@
                     document.getElementById('waitingBox').classList.add('hidden-section');
                     showDashboard();
                 } else if (data.status === "banned") {
-                    clearInterval(waitingPollingTimer);
                     localStorage.removeItem('hut_driver_pending');
                     sessionStorage.removeItem('hut_driver_pending_pass');
                     alert("⚠️ عذراً، حسابك محظور."); location.reload();
+                } else {
+                    showToast("حسابك لا يزال قيد المراجعة.", "info");
                 }
-            }).catch(() => {});
+            }).catch(() => {
+                document.getElementById('waitingStatusText').innerText = "في انتظار موافقة الإدارة...";
+                btn.innerHTML = origHtml;
+                btn.disabled = false;
+                showToast("خطأ في الاتصال بالسيرفر", "error");
+            });
     };
 
     function showDashboard() {
@@ -1439,4 +1477,4 @@
     window.closeLedger = function() { document.getElementById('ledgerModal').classList.add('hidden-section'); };
 </script>
 </body>
-</html>​
+</html>
