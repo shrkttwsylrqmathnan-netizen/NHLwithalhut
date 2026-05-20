@@ -626,7 +626,7 @@
                 if (pass) {
                     document.getElementById('driverPassword').value = atob(pass);
                 }
-                if ((Date.now() - session.timestamp) / 3600000 < 24) {
+                if (session) {
                     driverData = session;
                     document.getElementById('driverPhone').value = session.phone;
                     showDashboard();
@@ -1477,4 +1477,4 @@
     window.closeLedger = function() { document.getElementById('ledgerModal').classList.add('hidden-section'); };
 </script>
 </body>
-</html>
+</html>​
