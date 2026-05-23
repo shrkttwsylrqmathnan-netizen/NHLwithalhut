@@ -1,0 +1,2694 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🐝 نحلة — معرض التصاميم العالمية</title>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+*,*::before,*::after { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: 'Cairo', sans-serif;
+  background: #f0f0f0;
+  background: #f0f2f5;
+  color: #111;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+/* ─── GALLERY HEADER ─── */
+.gallery-header {
+  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+  padding: 60px 40px;
+  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 60%, #0f3460 100%);
+  padding: 60px 40px 50px;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+}
+.gallery-header::before {
+  content: '';
+  position: absolute; inset: 0;
+  background: radial-gradient(ellipse at 50% 0%, rgba(255,193,7,0.2), transparent 70%);
+  background: radial-gradient(ellipse at 50% 0%, rgba(255,193,7,0.18), transparent 70%);
+}
+.gallery-header::after {
+  content: '🐝';
+  position: absolute; left: -30px; bottom: -40px;
+  font-size: 14rem; opacity: 0.04;
+}
+.gallery-header h1 {
+  font-size: 2.8rem;
+  font-weight: 900;
+  color: #fff;
+  position: relative;
+  z-index: 1;
+  margin-bottom: 8px;
+  font-size: 3rem; font-weight: 900; color: #fff;
+  position: relative; z-index: 1; margin-bottom: 10px; letter-spacing: -1px;
+}
+.gallery-header h1 span { color: #FFC107; }
+.gallery-header p {
+  color: rgba(255,255,255,0.6);
+  font-size: 1rem;
+  font-weight: 700;
+  position: relative;
+  z-index: 1;
+  color: rgba(255,255,255,0.55); font-size: 1rem;
+  font-weight: 700; position: relative; z-index: 1;
+}
+.gallery-tag {
+  display: inline-flex; align-items: center; gap: 8px;
+  background: rgba(255,193,7,0.12); border: 1px solid rgba(255,193,7,0.3);
+  color: #FFC107; padding: 6px 16px; border-radius: 99px;
+  font-size: 0.75rem; font-weight: 900; letter-spacing: 0.5px;
+  margin-bottom: 20px; position: relative; z-index: 1;
+}
+/* ─── DESIGN NAV ─── */
+.design-nav {
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+  flex-wrap: wrap;
+  padding: 24px 20px;
+  background: #fff;
+  display: flex; gap: 8px; justify-content: center; flex-wrap: wrap;
+  padding: 20px 20px; background: #fff;
+  border-bottom: 2px solid #f0f0f0;
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+  position: sticky; top: 0; z-index: 1000;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.07);
+}
+.nav-btn {
+  padding: 8px 18px;
+  border-radius: 99px;
+  border: 2px solid #e5e7eb;
+  background: #fff;
+  font-family: 'Cairo', sans-serif;
+  font-weight: 800;
+  font-size: 0.78rem;
+  cursor: pointer;
+  color: #6b7280;
+  transition: all 0.2s;
+  padding: 8px 18px; border-radius: 99px;
+  border: 2px solid #e5e7eb; background: #fff;
+  font-family: 'Cairo', sans-serif; font-weight: 800; font-size: 0.78rem;
+  cursor: pointer; color: #6b7280; transition: all 0.2s;
+}
+.nav-btn:hover, .nav-btn.active {
+  background: #FFC107;
+  border-color: #FFC107;
+  color: #111;
+}
+.nav-btn:hover, .nav-btn.active { background: #FFC107; border-color: #FFC107; color: #111; }
+
+/* ─── SECTION LABEL ─── */
+.design-section {
+  margin: 0;
+  padding: 0;
+/* ─── SHOWCASE GRID ─── */
+.showcase-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
+  gap: 48px; padding: 48px;
+  max-width: 1700px; margin: 0 auto;
+}
+.design-label {
+  background: linear-gradient(135deg, #1a1a2e, #16213e);
+  color: #FFC107;
+  font-size: 0.75rem;
+  font-weight: 900;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  padding: 10px 20px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+.showcase-item {}
+.showcase-label {
+  display: flex; align-items: center; gap: 14px; margin-bottom: 18px;
+}
+.design-label span { color: rgba(255,255,255,0.4); }
+/* ════════════════════════════════════════════════════
+   DESIGN 1 — APPLE / MINIMAL LUXURY
+   ════════════════════════════════════════════════════ */
+.d1 {
+  background: #ffffff;
+  min-height: 100vh;
+  font-family: 'Cairo', sans-serif;
+}
+.d1-login {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  padding: 40px 20px;
+  background: linear-gradient(180deg, #fffff8 0%, #ffffff 100%);
+}
+.d1-logo-wrap {
+  width: 88px; height: 88px;
+  background: linear-gradient(135deg, #FFC107, #FF8F00);
+  border-radius: 28px;
+.showcase-num {
+  width: 44px; height: 44px; border-radius: 14px;
+  background: #111; color: #FFC107;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 2.5rem;
+  margin-bottom: 24px;
+  box-shadow: 0 20px 60px rgba(255,193,7,0.35), 0 4px 12px rgba(0,0,0,0.1);
+  font-size: 1.1rem; font-weight: 900; flex-shrink: 0;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+}
+.d1 h2 { font-size: 2rem; font-weight: 900; color: #111; margin-bottom: 4px; letter-spacing: -1px; }
+.d1 .sub { font-size: 0.85rem; color: #9ca3af; font-weight: 700; margin-bottom: 40px; }
+.d1-card {
+  width: 100%; max-width: 380px;
+  background: #fff;
+  border-radius: 24px;
+  padding: 36px 32px;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.04), 0 20px 60px rgba(0,0,0,0.08);
+.showcase-info h3 { font-size: 1.05rem; font-weight: 900; color: #111; }
+.showcase-info p { font-size: 0.72rem; color: #9ca3af; font-weight: 700; margin-top: 2px; }
+.showcase-card {
+  border-radius: 28px; overflow: hidden;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.13);
+  border: 1px solid rgba(0,0,0,0.06);
+  max-height: 720px; overflow-y: auto;
+}
+.d1-label { font-size: 0.72rem; font-weight: 800; color: #9ca3af; margin-bottom: 8px; letter-spacing: 0.5px; text-transform: uppercase; }
+.d1-input {
+  width: 100%; border: 1.5px solid #e5e7eb;
+  border-radius: 14px; padding: 14px 18px;
+  font-family: 'Cairo', sans-serif; font-size: 1rem; font-weight: 700;
+  color: #111; background: #fafafa; margin-bottom: 16px; outline: none;
+  transition: 0.2s;
+}
+.d1-input:focus { border-color: #FFC107; background: #fffff8; }
+.d1-btn {
+  width: 100%; padding: 16px;
+  background: linear-gradient(135deg, #FFC107, #FFAA00);
+  color: #111; border: none; border-radius: 14px;
+  font-family: 'Cairo', sans-serif; font-size: 1.05rem; font-weight: 900;
+  cursor: pointer; margin-top: 8px;
+  box-shadow: 0 8px 24px rgba(255,193,7,0.3);
+  transition: 0.2s;
+}
+.d1-btn:hover { transform: translateY(-2px); box-shadow: 0 12px 32px rgba(255,193,7,0.4); }
+.d1-stats {
+  display: grid; grid-template-columns: repeat(3,1fr); gap: 16px;
+  margin-top: 30px; width: 100%; max-width: 380px;
+}
+.d1-stat {
+  background: #f9fafb; border-radius: 18px; padding: 20px 12px;
+  text-align: center; border: 1px solid #f0f0f0;
+}
+.d1-stat-val { font-size: 1.6rem; font-weight: 900; color: #FFC107; }
+.d1-stat-lbl { font-size: 0.6rem; font-weight: 800; color: #9ca3af; margin-top: 4px; }
+.showcase-card::-webkit-scrollbar { width: 3px; }
+.showcase-card::-webkit-scrollbar-thumb { background: rgba(255,193,7,0.4); border-radius: 99px; }
+
+/* ════════════════════════════════════════════════════
+   DESIGN 2 — UBER / BRUTALIST CLEAN
+   ════════════════════════════════════════════════════ */
+.d2 {
+  background: #fff;
+  min-height: 100vh;
+  font-family: 'Cairo', sans-serif;
+/* ─── SCREEN TABS ─── */
+.screen-tabs {
+  display: flex; background: rgba(0,0,0,0.04);
+  border-bottom: 1px solid rgba(0,0,0,0.06);
+}
+.d2-hero {
+  background: #111;
+  padding: 60px 30px 80px;
+  position: relative;
+  overflow: hidden;
+.screen-tab {
+  flex: 1; padding: 10px 8px;
+  font-family: 'Cairo', sans-serif; font-size: 0.65rem; font-weight: 900;
+  border: none; background: transparent; cursor: pointer; color: #9ca3af;
+  transition: 0.2s; letter-spacing: 0.3px;
+}
+.d2-hero::after {
+  content: '🐝';
+  position: absolute; right: -20px; bottom: -30px;
+  font-size: 12rem; opacity: 0.06;
+}
+.d2-hero h1 {
+  font-size: 3rem; font-weight: 900; color: #FFC107;
+  line-height: 1; margin-bottom: 8px;
+}
+.d2-hero p { color: rgba(255,255,255,0.5); font-weight: 700; font-size: 0.9rem; }
+.d2-body { padding: 30px 24px; }
+.d2-field {
+  margin-bottom: 20px;
+}
+.d2-flabel {
+  font-size: 0.65rem; font-weight: 900; color: #9ca3af;
+  text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 8px;
+}
+.d2-finput {
+  width: 100%; border: none; border-bottom: 2px solid #e5e7eb;
+  padding: 12px 0; font-family: 'Cairo', sans-serif;
+  font-size: 1.1rem; font-weight: 700; color: #111;
+  background: transparent; outline: none; transition: 0.2s;
+}
+.d2-finput:focus { border-color: #FFC107; }
+.d2-btn {
+  width: 100%; padding: 18px;
+  background: #FFC107; color: #111;
+  border: none; border-radius: 6px;
+  font-family: 'Cairo', sans-serif; font-size: 1.1rem; font-weight: 900;
+  cursor: pointer; margin-top: 10px;
+  transition: 0.2s;
+}
+.d2-btn:hover { background: #FFAA00; }
+.d2-dashboard {
+  background: #111; color: #fff;
+  padding: 24px;
+  border-radius: 20px;
+  margin-top: 20px;
+}
+.d2-earn { font-size: 0.7rem; font-weight: 800; color: rgba(255,255,255,0.4); text-transform: uppercase; letter-spacing: 1px; }
+.d2-earn-num { font-size: 3rem; font-weight: 900; color: #FFC107; line-height: 1.1; }
+.d2-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 16px; }
+.d2-stat {
+  background: rgba(255,255,255,0.06); border-radius: 12px;
+  padding: 16px 14px;
+}
+.d2-stat-v { font-size: 1.3rem; font-weight: 900; color: #FFC107; }
+.d2-stat-l { font-size: 0.62rem; font-weight: 800; color: rgba(255,255,255,0.4); margin-top: 4px; }
+.screen-tab.active { color: #FFC107; border-bottom: 2px solid #FFC107; }
+
+/* ════════════════════════════════════════════════════
+   DESIGN 3 — STRIPE / PREMIUM GRADIENT
+   ════════════════════════════════════════════════════ */
+.d3 {
+  background: linear-gradient(135deg, #FFFDE7 0%, #FFF8E1 50%, #ffffff 100%);
+  min-height: 100vh;
+  font-family: 'Cairo', sans-serif;
+/* ─── SHARED ANIMATIONS ─── */
+@keyframes float { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-7px)} }
+@keyframes spin { to{ transform:rotate(360deg); } }
+@keyframes pulse-ring {
+  0%{transform:scale(0.3);opacity:1}
+  100%{transform:scale(1.8);opacity:0}
+}
+.d3-header {
+  background: linear-gradient(135deg, #FF8F00, #FFC107, #FFD54F);
+  padding: 50px 24px 100px;
+  position: relative;
+  clip-path: ellipse(120% 100% at 50% 0%);
+  text-align: center;
+@keyframes pulse-dot { 0%,100%{opacity:1} 50%{opacity:.4} }
+@keyframes cardIn { from{opacity:0;transform:translateY(16px)} to{opacity:1;transform:translateY(0)} }
+@keyframes glow {
+  0%,100%{box-shadow:0 0 20px rgba(255,193,7,0.3)}
+  50%{box-shadow:0 0 40px rgba(255,193,7,0.6)}
+}
+.d3-logo { font-size: 4rem; margin-bottom: 8px; }
+.d3-header h2 { font-size: 2.2rem; font-weight: 900; color: #fff; text-shadow: 0 2px 10px rgba(0,0,0,0.2); margin-bottom: 4px; }
+.d3-header p { color: rgba(255,255,255,0.8); font-weight: 700; }
+.d3-card {
+  max-width: 380px; margin: -50px auto 0;
+  background: #fff;
+  border-radius: 28px;
+  padding: 32px 28px;
+  box-shadow: 0 20px 60px rgba(255,143,0,0.15), 0 4px 20px rgba(0,0,0,0.08);
+  position: relative; z-index: 10;
+}
+.d3-input {
+  width: 100%; border: 2px solid #f3f4f6;
+  border-radius: 16px; padding: 14px 18px;
+  font-family: 'Cairo', sans-serif; font-size: 1rem; font-weight: 700;
+  color: #111; background: #fafafa;
+  margin-bottom: 14px; outline: none; transition: 0.2s;
+}
+.d3-input:focus { border-color: #FFC107; background: #FFFDE7; }
+.d3-btn {
+  width: 100%; padding: 16px;
+  background: linear-gradient(135deg, #FF8F00, #FFC107);
+  color: #fff; border: none; border-radius: 16px;
+  font-family: 'Cairo', sans-serif; font-size: 1.05rem; font-weight: 900;
+  cursor: pointer; box-shadow: 0 8px 24px rgba(255,143,0,0.35);
+  transition: 0.2s;
+}
+.d3-btn:hover { transform: translateY(-2px); }
+.d3-stats { display: grid; grid-template-columns: repeat(3,1fr); gap: 10px; margin-top: 16px; }
+.d3-stat {
+  background: linear-gradient(135deg, #FFFDE7, #FFF8E1);
+  border: 2px solid #FFE082; border-radius: 16px;
+  padding: 16px 8px; text-align: center;
+}
+.d3-stat-v { font-size: 1.4rem; font-weight: 900; color: #FF8F00; }
+.d3-stat-l { font-size: 0.6rem; font-weight: 800; color: #9ca3af; margin-top: 4px; }
+@keyframes bounce2 { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-8px)} }
+
+/* ════════════════════════════════════════════════════
+   DESIGN 4 — AIRBNB / ROUNDED WARMTH
+   ════════════════════════════════════════════════════ */
+.d4 {
+  background: #FFFAF0;
+  min-height: 100vh;
+  font-family: 'Cairo', sans-serif;
+}
+.d4-topbar {
+  background: #fff;
+  padding: 20px 24px;
+  display: flex; align-items: center; justify-content: space-between;
+  border-bottom: 1px solid #f0ebe0;
+  box-shadow: 0 2px 12px rgba(255,193,7,0.08);
+}
+.d4-brand { display: flex; align-items: center; gap: 10px; }
+.d4-bee-logo {
+  width: 40px; height: 40px; border-radius: 14px;
+  background: linear-gradient(135deg, #FFC107, #FFAA00);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.3rem;
+}
+.d4-brand-name { font-size: 1.2rem; font-weight: 900; color: #111; }
+.d4-body { padding: 30px 20px; }
+.d4-hero {
+  background: linear-gradient(135deg, #FFF3CD, #FFF8E1);
+  border: 2px solid #FFE082; border-radius: 24px;
+  padding: 32px 24px; text-align: center; margin-bottom: 24px;
+}
+.d4-hero-bee { font-size: 4rem; margin-bottom: 12px; animation: float 3s ease-in-out infinite; }
+@keyframes float { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-8px)} }
+.d4-hero h2 { font-size: 1.8rem; font-weight: 900; color: #92400e; margin-bottom: 6px; }
+.d4-hero p { color: #b45309; font-size: 0.85rem; font-weight: 700; }
+.d4-input {
+  width: 100%; border: 2px solid #e5d3a3;
+  border-radius: 18px; padding: 16px 20px;
+  font-family: 'Cairo', sans-serif; font-size: 1rem; font-weight: 700;
+  color: #111; background: #fff; margin-bottom: 14px; outline: none; transition: 0.2s;
+}
+.d4-input:focus { border-color: #FFC107; box-shadow: 0 0 0 4px rgba(255,193,7,0.1); }
+.d4-btn {
+  width: 100%; padding: 17px;
+  background: #FFC107; color: #111;
+  border: none; border-radius: 18px;
+  font-family: 'Cairo', sans-serif; font-size: 1.1rem; font-weight: 900;
+  cursor: pointer; box-shadow: 0 6px 20px rgba(255,193,7,0.3);
+  transition: 0.2s;
+}
+.d4-btn:hover { transform: translateY(-1px); background: #FFCA28; }
+.d4-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 20px; }
+.d4-stat {
+  background: #fff; border: 2px solid #f0ebe0; border-radius: 20px;
+  padding: 20px 16px; text-align: center;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.04);
+}
+.d4-stat-v { font-size: 1.6rem; font-weight: 900; color: #FFC107; }
+.d4-stat-l { font-size: 0.62rem; font-weight: 800; color: #9ca3af; margin-top: 4px; }
+/* ════════════════════════════════════════
+   ██ DESIGN 1 — APPLE MINIMAL LUXURY
+   ════════════════════════════════════════ */
+.d1 { background:#fff; font-family:'Cairo',sans-serif; }
+
+/* ════════════════════════════════════════════════════
+   DESIGN 5 — NOTION / EDITORIAL MINIMAL
+   ════════════════════════════════════════════════════ */
+.d5 {
+  background: #fff;
+  min-height: 100vh;
+  font-family: 'Cairo', sans-serif;
+/* login */
+.d1-login { padding:36px 24px; background:linear-gradient(180deg,#fffff8,#fff); text-align:center; }
+.d1-logo {
+  width:80px;height:80px;border-radius:26px;
+  background:linear-gradient(135deg,#FFC107,#FF8F00);
+  display:inline-flex;align-items:center;justify-content:center;
+  font-size:2.2rem;margin-bottom:18px;
+  box-shadow:0 16px 50px rgba(255,193,7,0.35);
+  animation:float 3s ease-in-out infinite;
+}
+.d5-sidebar {
+  width: 280px; position: fixed; top: 0; right: 0; bottom: 0;
+  background: #FFFDE7; border-left: 1px solid #FFE082;
+  padding: 30px 20px; overflow-y: auto;
+  display: none;
+}
+.d5-main { padding: 50px 40px; max-width: 600px; margin: 0 auto; }
+.d5-tag {
+  display: inline-flex; align-items: center; gap: 6px;
+  background: #FFF9C4; border: 1px solid #FFE082;
+  color: #F57F17; border-radius: 6px; padding: 4px 12px;
+  font-size: 0.7rem; font-weight: 800; letter-spacing: 0.5px;
+  margin-bottom: 20px;
+}
+.d5-main h1 { font-size: 3rem; font-weight: 900; color: #111; line-height: 1.1; margin-bottom: 12px; }
+.d5-main h1 em { font-style: normal; color: #FFC107; }
+.d5-divider { height: 3px; background: linear-gradient(90deg, #FFC107, #FFE082, transparent); border-radius: 99px; margin: 24px 0; }
+.d5-field-label { font-size: 0.72rem; font-weight: 900; color: #9ca3af; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; }
+.d5-input {
+  width: 100%; border: 1px solid #e5e7eb;
+  border-radius: 10px; padding: 14px 16px;
+  font-family: 'Cairo', sans-serif; font-size: 1rem; font-weight: 700;
+  color: #111; background: #fafafa; margin-bottom: 14px; outline: none; transition: 0.2s;
+}
+.d5-input:focus { border-color: #FFC107; background: #FFFDE7; box-shadow: 0 0 0 3px rgba(255,193,7,0.1); }
+.d5-btn {
+  display: inline-flex; align-items: center; gap: 10px;
+  padding: 14px 28px;
+  background: #111; color: #FFC107;
+  border: none; border-radius: 10px;
+  font-family: 'Cairo', sans-serif; font-size: 1rem; font-weight: 900;
+  cursor: pointer; transition: 0.2s;
+}
+.d5-btn:hover { background: #FFC107; color: #111; }
+.d5-cards { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 30px; }
+.d5-card {
+  border: 1px solid #e5e7eb; border-radius: 16px;
+  padding: 20px; transition: 0.2s;
+}
+.d5-card:hover { border-color: #FFC107; background: #FFFDE7; }
+.d5-card-icon { font-size: 1.8rem; margin-bottom: 10px; }
+.d5-card-title { font-size: 0.85rem; font-weight: 900; color: #111; }
+.d5-card-val { font-size: 1.4rem; font-weight: 900; color: #FFC107; margin-top: 4px; }
+.d1-title { font-size:1.8rem;font-weight:900;color:#111;letter-spacing:-0.5px; }
+.d1-sub { font-size:0.78rem;color:#9ca3af;font-weight:700;margin:4px 0 28px; }
+.d1-card { background:#fff;border-radius:24px;padding:28px;border:1px solid #f0f0f0;box-shadow:0 8px 40px rgba(0,0,0,0.07);text-align:right; }
+.d1-lbl { font-size:0.65rem;font-weight:900;color:#9ca3af;letter-spacing:.8px;text-transform:uppercase;margin-bottom:7px; }
+.d1-inp { width:100%;border:1.5px solid #e5e7eb;border-radius:14px;padding:13px 16px;font-family:'Cairo',sans-serif;font-size:.95rem;font-weight:700;color:#111;background:#fafafa;margin-bottom:14px;outline:none;transition:.2s; }
+.d1-inp:focus { border-color:#FFC107;background:#fffff8; }
+.d1-btn { width:100%;padding:15px;background:linear-gradient(135deg,#FFC107,#FF8F00);color:#111;border:none;border-radius:14px;font-family:'Cairo',sans-serif;font-size:1rem;font-weight:900;cursor:pointer;box-shadow:0 8px 24px rgba(255,193,7,0.28);transition:.2s;margin-top:6px; }
+.d1-btn:hover { transform:translateY(-2px);box-shadow:0 12px 30px rgba(255,193,7,0.4); }
+
+/* ════════════════════════════════════════════════════
+   DESIGN 6 — REVOLUT / GLASSMORPHISM LIGHT
+   ════════════════════════════════════════════════════ */
+.d6 {
+  background: linear-gradient(135deg, #FFF8E1 0%, #FFFDE7 30%, #f8f9fa 100%);
+  min-height: 100vh;
+  font-family: 'Cairo', sans-serif;
+  position: relative;
+  overflow: hidden;
+}
+.d6::before {
+  content: '';
+  position: absolute;
+  width: 400px; height: 400px;
+  background: radial-gradient(circle, rgba(255,193,7,0.25), transparent 70%);
+  top: -100px; right: -100px; border-radius: 50%;
+}
+.d6::after {
+  content: '';
+  position: absolute;
+  width: 300px; height: 300px;
+  background: radial-gradient(circle, rgba(255,152,0,0.15), transparent 70%);
+  bottom: 100px; left: -50px; border-radius: 50%;
+}
+.d6-body { padding: 50px 24px; position: relative; z-index: 1; }
+.d6-logo-row { display: flex; align-items: center; gap: 12px; margin-bottom: 40px; }
+.d6-logo-icon {
+  width: 50px; height: 50px; border-radius: 18px;
+  background: linear-gradient(135deg, #FFC107, #FF8F00);
+  display: flex; align-items: center; justify-content: center; font-size: 1.5rem;
+  box-shadow: 0 8px 24px rgba(255,193,7,0.35);
+}
+.d6-logo-text h3 { font-size: 1.2rem; font-weight: 900; color: #111; }
+.d6-logo-text p { font-size: 0.72rem; color: #9ca3af; font-weight: 700; }
+.d6-glass-card {
+  background: rgba(255,255,255,0.7);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255,193,7,0.25);
+  border-radius: 28px; padding: 30px;
+  box-shadow: 0 20px 60px rgba(255,193,7,0.12), 0 4px 20px rgba(0,0,0,0.06);
+  margin-bottom: 20px;
+}
+.d6-input {
+  width: 100%; border: 1.5px solid rgba(255,193,7,0.3);
+  border-radius: 16px; padding: 14px 18px;
+  font-family: 'Cairo', sans-serif; font-size: 1rem; font-weight: 700;
+  color: #111; background: rgba(255,255,255,0.8);
+  margin-bottom: 14px; outline: none; transition: 0.2s;
+}
+.d6-input:focus { border-color: #FFC107; background: rgba(255,253,231,0.9); }
+.d6-btn {
+  width: 100%; padding: 16px;
+  background: linear-gradient(135deg, #FFC107, #FF8F00);
+  color: #fff; border: none; border-radius: 16px;
+  font-family: 'Cairo', sans-serif; font-size: 1.05rem; font-weight: 900;
+  cursor: pointer; box-shadow: 0 10px 30px rgba(255,193,7,0.35);
+  transition: 0.2s;
+}
+.d6-btn:hover { transform: translateY(-2px); }
+.d6-earn-card {
+  background: linear-gradient(135deg, #FF8F00, #FFC107);
+  border-radius: 24px; padding: 28px 24px;
+  position: relative; overflow: hidden;
+}
+.d6-earn-card::after { content: '🐝'; position: absolute; left: -10px; bottom: -20px; font-size: 8rem; opacity: 0.1; }
+.d6-earn-lbl { font-size: 0.72rem; font-weight: 800; color: rgba(255,255,255,0.7); text-transform: uppercase; letter-spacing: 0.5px; }
+.d6-earn-num { font-size: 2.8rem; font-weight: 900; color: #fff; letter-spacing: -1px; }
+.d6-earn-unit { font-size: 1rem; color: rgba(255,255,255,0.7); }
+/* dashboard */
+.d1-dash { padding:0; }
+.d1-dash-header { background:linear-gradient(180deg,#FFFDE7,#fff);padding:28px 24px 20px;border-bottom:1px solid #f0f0f0; }
+.d1-dash-row { display:flex;justify-content:space-between;align-items:center;margin-bottom:16px; }
+.d1-dash-name { font-size:1.1rem;font-weight:900;color:#111; }
+.d1-dash-lvl { background:#FFF9C4;color:#F57F17;border:1px solid #FFE082;border-radius:99px;padding:3px 10px;font-size:0.6rem;font-weight:900; }
+.d1-earn-lbl { font-size:0.65rem;font-weight:800;color:#9ca3af;text-transform:uppercase;letter-spacing:.5px;text-align:center;margin-bottom:4px; }
+.d1-earn-num { font-size:2.6rem;font-weight:900;color:#FF8F00;text-align:center;letter-spacing:-1px; }
+.d1-stats-row { display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:20px; }
+.d1-stat { background:#fafafa;border:1px solid #f0f0f0;border-radius:18px;padding:14px 8px;text-align:center; }
+.d1-stat-v { font-size:1.3rem;font-weight:900;color:#FFC107; }
+.d1-stat-l { font-size:0.58rem;font-weight:800;color:#9ca3af;margin-top:3px; }
+.d1-body { padding:20px 24px 30px; }
+
+/* ════════════════════════════════════════════════════
+   DESIGN 7 — CAREEM / PROFESSIONAL DARK ACCENT
+   ════════════════════════════════════════════════════ */
+.d7 {
+  background: #fff;
+  min-height: 100vh;
+  font-family: 'Cairo', sans-serif;
+}
+.d7-header {
+  background: #1C1B1F;
+  padding: 50px 24px 60px;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+}
+.d7-header::before {
+  content: '';
+  position: absolute; bottom: 0; left: 0; right: 0;
+  height: 60px;
+  background: #fff;
+  border-radius: 40px 40px 0 0;
+}
+.d7-logo {
+  width: 70px; height: 70px; border-radius: 24px;
+  background: #FFC107;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 2rem; margin: 0 auto 16px;
+  box-shadow: 0 12px 40px rgba(255,193,7,0.4);
+}
+.d7-header h2 { font-size: 1.8rem; font-weight: 900; color: #fff; margin-bottom: 4px; }
+.d7-header p { font-size: 0.8rem; color: rgba(255,255,255,0.5); font-weight: 700; }
+.d7-body { padding: 10px 24px 40px; }
+.d7-card {
+  background: #fff; border-radius: 24px;
+  border: 1px solid #f0f0f0;
+  box-shadow: 0 8px 30px rgba(0,0,0,0.06);
+  padding: 28px; margin-bottom: 16px;
+}
+.d7-section-title {
+  font-size: 0.65rem; font-weight: 900; color: #9ca3af;
+  text-transform: uppercase; letter-spacing: 1.5px;
+  margin-bottom: 16px; display: flex; align-items: center; gap: 8px;
+}
+.d7-section-title::after { content: ''; flex: 1; height: 1px; background: #f0f0f0; }
+.d7-input {
+  width: 100%; border: 1.5px solid #f0f0f0;
+  border-radius: 14px; padding: 14px 16px;
+  font-family: 'Cairo', sans-serif; font-size: 1rem; font-weight: 700;
+  color: #111; background: #fafafa; margin-bottom: 12px; outline: none; transition: 0.2s;
+}
+.d7-input:focus { border-color: #FFC107; background: #FFFDE7; }
+.d7-btn {
+  width: 100%; padding: 16px;
+  background: #1C1B1F; color: #FFC107;
+  border: none; border-radius: 14px;
+  font-family: 'Cairo', sans-serif; font-size: 1.05rem; font-weight: 900;
+  cursor: pointer; transition: 0.2s;
+  position: relative; overflow: hidden;
+}
+.d7-btn::after { content: ''; position: absolute; inset: 0; background: linear-gradient(to bottom, rgba(255,193,7,0.1), transparent); }
+.d7-btn:hover { background: #FFC107; color: #111; }
+.d7-stats { display: grid; grid-template-columns: repeat(3,1fr); gap: 10px; margin-top: 8px; }
+.d7-stat {
+  text-align: center; padding: 16px 8px;
+  background: #fafafa; border-radius: 16px; border: 1px solid #f0f0f0;
+}
+.d7-stat-v { font-size: 1.4rem; font-weight: 900; color: #1C1B1F; }
+.d7-stat-v.accent { color: #FFC107; }
+.d7-stat-l { font-size: 0.58rem; font-weight: 800; color: #9ca3af; margin-top: 4px; }
+/* radar */
+.d1-radar { background:#FFFDE7;border:2px solid #FFE082;border-radius:24px;padding:28px;text-align:center;margin-bottom:16px;position:relative;overflow:hidden; }
+.d1-radar-rings { width:110px;height:110px;margin:0 auto 16px;position:relative;display:flex;align-items:center;justify-content:center; }
+.d1-ring { position:absolute;inset:0;border-radius:50%;border:2px solid #FFC107;animation:pulse-ring 2.5s ease-out infinite; }
+.d1-ring:nth-child(2){animation-delay:.8s} .d1-ring:nth-child(3){animation-delay:1.6s}
+.d1-core { width:70px;height:70px;border-radius:50%;background:#fff;border:2px solid #FFE082;display:flex;align-items:center;justify-content:center;font-size:1.8rem;position:relative;z-index:2;box-shadow:0 0 20px rgba(255,193,7,0.25);animation:glow 2s ease-in-out infinite; }
+.d1-radar-title { font-size:.95rem;font-weight:900;color:#111;margin-bottom:4px; }
+.d1-radar-desc { font-size:.75rem;color:#9ca3af;font-weight:700; }
+.d1-toggle-row { display:flex;align-items:center;justify-content:center;gap:10px;margin-top:14px; }
+.d1-toggle { position:relative;width:52px;height:28px; }
+.d1-toggle input { opacity:0;width:0;height:0; }
+.d1-slider { position:absolute;cursor:pointer;inset:0;background:#e5e7eb;border-radius:30px;transition:.4s; }
+.d1-slider:before { content:'';position:absolute;width:22px;height:22px;left:3px;bottom:3px;background:#fff;border-radius:50%;transition:.4s;box-shadow:0 2px 6px rgba(0,0,0,.15); }
+.d1-toggle input:checked+.d1-slider { background:linear-gradient(135deg,#FFC107,#FF8F00); }
+.d1-toggle input:checked+.d1-slider:before { transform:translateX(24px); }
+.d1-toggle-lbl { font-size:.8rem;font-weight:800;color:#374151; }
+
+/* ════════════════════════════════════════════════════
+   DESIGN 8 — DUOLINGO / PLAYFUL & BOLD
+   ════════════════════════════════════════════════════ */
+.d8 {
+  background: #FFFDE7;
+  min-height: 100vh;
+  font-family: 'Cairo', sans-serif;
+}
+.d8-header { padding: 40px 24px 30px; text-align: center; }
+.d8-bee-circle {
+  width: 100px; height: 100px; border-radius: 50%;
+  background: #FFC107;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 3rem; margin: 0 auto 20px;
+  box-shadow: 0 6px 0 #E65100, 0 12px 30px rgba(255,193,7,0.3);
+  animation: bounce 2s ease-in-out infinite;
+}
+@keyframes bounce { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-8px)} }
+.d8-header h2 { font-size: 2.2rem; font-weight: 900; color: #111; }
+.d8-header p { font-size: 0.85rem; color: #9ca3af; font-weight: 700; margin-top: 4px; }
+.d8-card {
+  background: #fff; border-radius: 24px;
+  border: 2px solid #FFE082;
+  box-shadow: 0 6px 0 #FFE082;
+  padding: 28px; margin: 0 20px 20px;
+}
+.d8-input {
+  width: 100%; border: 2px solid #FFE082;
+  border-radius: 14px; padding: 14px 18px;
+  font-family: 'Cairo', sans-serif; font-size: 1rem; font-weight: 700;
+  color: #111; background: #FFFDE7; margin-bottom: 14px; outline: none; transition: 0.2s;
+}
+.d8-input:focus { border-color: #FFC107; background: #fff; }
+.d8-btn {
+  width: 100%; padding: 16px;
+  background: #FFC107; color: #111;
+  border: none; border-radius: 14px;
+  font-family: 'Cairo', sans-serif; font-size: 1.1rem; font-weight: 900;
+  cursor: pointer;
+  box-shadow: 0 6px 0 #E65100;
+  transition: 0.1s; position: relative; top: 0;
+}
+.d8-btn:hover { top: 3px; box-shadow: 0 3px 0 #E65100; }
+.d8-progress { margin: 0 20px 20px; }
+.d8-prog-label {
+  display: flex; justify-content: space-between;
+  font-size: 0.75rem; font-weight: 800; color: #6b7280;
+  margin-bottom: 8px;
+}
+.d8-prog-bar {
+  height: 16px; background: #fff; border-radius: 99px;
+  border: 2px solid #FFE082; overflow: hidden;
+}
+.d8-prog-fill {
+  height: 100%; width: 40%;
+  background: linear-gradient(90deg, #FFC107, #FFD54F);
+  border-radius: 99px;
+}
+.d8-stats { display: flex; gap: 10px; padding: 0 20px; }
+.d8-stat {
+  flex: 1; background: #fff; border: 2px solid #FFE082;
+  border-radius: 16px; box-shadow: 0 4px 0 #FFE082;
+  padding: 16px 10px; text-align: center;
+}
+.d8-stat-v { font-size: 1.4rem; font-weight: 900; color: #111; }
+.d8-stat-v.yellow { color: #FFC107; }
+.d8-stat-l { font-size: 0.6rem; font-weight: 800; color: #9ca3af; margin-top: 4px; }
+/* new order alert */
+.d1-alert { background:linear-gradient(135deg,#FFFDE7,#FFF9C4);border:2px solid #FFE082;border-radius:24px;padding:20px;margin-bottom:14px;animation:cardIn .4s; }
+.d1-alert-top { display:flex;justify-content:space-between;align-items:center;margin-bottom:14px; }
+.d1-alert-title { font-size:1.1rem;font-weight:900;color:#111;display:flex;align-items:center;gap:8px; }
+.d1-countdown { width:52px;height:52px;background:#FFC107;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:1.3rem;font-weight:900;color:#111;box-shadow:0 4px 14px rgba(255,193,7,0.4);animation:glow 1.5s ease-in-out infinite; }
+.d1-alert-row { display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid rgba(255,193,7,0.2);align-items:center; }
+.d1-alert-row:last-of-type { border-bottom:none; }
+.d1-albl { font-size:.68rem;font-weight:700;color:#9ca3af; }
+.d1-aval { font-size:.95rem;font-weight:900;color:#111; }
+.d1-aval.price { color:#FF8F00;font-size:1.2rem; }
+.d1-accept { width:100%;padding:14px;background:linear-gradient(135deg,#22c55e,#16a34a);color:#fff;border:none;border-radius:14px;font-family:'Cairo',sans-serif;font-size:1rem;font-weight:900;cursor:pointer;margin-top:12px;box-shadow:0 6px 20px rgba(34,197,94,0.3); }
+
+/* ════════════════════════════════════════════════════
+   DESIGN 9 — LINEAR / TECH PRECISION
+   ════════════════════════════════════════════════════ */
+.d9 {
+  background: #FAFAF9;
+  min-height: 100vh;
+  font-family: 'Cairo', sans-serif;
+}
+.d9-topbar {
+  padding: 18px 24px;
+  background: rgba(255,255,255,0.8);
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid #e5e7eb;
+  display: flex; align-items: center; justify-content: space-between;
+  position: sticky; top: 0; z-index: 100;
+}
+.d9-logo { display: flex; align-items: center; gap: 10px; }
+.d9-logo-mark {
+  width: 36px; height: 36px; border-radius: 10px;
+  background: #111; display: flex; align-items: center; justify-content: center;
+  font-size: 1.1rem; box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+}
+.d9-logo-name { font-size: 1rem; font-weight: 900; color: #111; }
+.d9-badge {
+  background: #FFFDE7; border: 1px solid #FFE082;
+  color: #F57F17; font-size: 0.65rem; font-weight: 900;
+  padding: 4px 10px; border-radius: 6px;
+}
+.d9-body { padding: 30px 24px; }
+.d9-section { margin-bottom: 28px; }
+.d9-section-header {
+  font-size: 0.68rem; font-weight: 900; color: #9ca3af;
+  text-transform: uppercase; letter-spacing: 1.5px;
+  margin-bottom: 14px; padding-bottom: 10px;
+  border-bottom: 1px solid #f0f0f0;
+}
+.d9-input {
+  width: 100%; border: 1px solid #e5e7eb;
+  border-radius: 10px; padding: 12px 14px;
+  font-family: 'Cairo', sans-serif; font-size: 0.95rem; font-weight: 700;
+  color: #111; background: #fff; margin-bottom: 10px; outline: none; transition: 0.2s;
+}
+.d9-input:focus { border-color: #FFC107; box-shadow: 0 0 0 3px rgba(255,193,7,0.1); }
+.d9-btn {
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+  width: 100%; padding: 13px;
+  background: #111; color: #FFC107;
+  border: none; border-radius: 10px;
+  font-family: 'Cairo', sans-serif; font-size: 0.95rem; font-weight: 900;
+  cursor: pointer; transition: 0.2s;
+}
+.d9-btn:hover { background: #FFC107; color: #111; }
+.d9-metric-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.d9-metric {
+  background: #fff; border: 1px solid #f0f0f0;
+  border-radius: 14px; padding: 18px 16px;
+  position: relative; overflow: hidden;
+}
+.d9-metric::before {
+  content: '';
+  position: absolute; top: 0; left: 0; right: 0; height: 2px;
+  background: linear-gradient(90deg, #FFC107, #FFD54F);
+}
+.d9-metric-v { font-size: 1.5rem; font-weight: 900; color: #111; }
+.d9-metric-l { font-size: 0.62rem; font-weight: 800; color: #9ca3af; margin-top: 4px; }
+.d9-metric-trend { 
+  position: absolute; top: 14px; left: 14px;
+  font-size: 0.65rem; font-weight: 900; color: #10b981;
+  background: rgba(16,185,129,0.08); padding: 2px 6px; border-radius: 4px;
+}
+/* active order card */
+.d1-order { background:#fff;border:1.5px solid #FFE082;border-radius:20px;padding:18px;margin-bottom:12px;box-shadow:0 4px 16px rgba(255,193,7,0.1);position:relative;overflow:hidden; }
+.d1-order::before { content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,#FFC107,#FF8F00); }
+.d1-order-top { display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px; }
+.d1-order-id { font-size:.7rem;font-weight:900;color:#9ca3af; }
+.d1-order-price { font-size:1.5rem;font-weight:900;color:#22c55e;letter-spacing:-0.5px; }
+.d1-step-row { display:flex;align-items:center;gap:0;margin:12px 0; }
+.d1-step { display:flex;flex-direction:column;align-items:center;flex:1;position:relative; }
+.d1-step:not(:last-child)::after { content:'';position:absolute;top:11px;right:50%;left:-50%;height:2px;background:#e5e7eb; }
+.d1-step.done:not(:last-child)::after { background:#22c55e; }
+.d1-step.active:not(:last-child)::after { background:linear-gradient(90deg,#FFC107,#e5e7eb); }
+.d1-dot { width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.55rem;font-weight:900;position:relative;z-index:1;border:2px solid #e5e7eb;background:#fff; }
+.d1-step.done .d1-dot { background:#22c55e;border-color:#22c55e;color:#fff; }
+.d1-step.active .d1-dot { background:#FFC107;border-color:#FFC107;color:#111;box-shadow:0 0 10px rgba(255,193,7,0.5); }
+.d1-step-lbl { font-size:.52rem;font-weight:800;color:#9ca3af;margin-top:4px;text-align:center; }
+.d1-step.active .d1-step-lbl,.d1-step.done .d1-step-lbl { color:#374151; }
+.d1-order-actions { display:flex;gap:8px;margin-top:12px; }
+.d1-action { flex:1;padding:9px 6px;border-radius:12px;border:none;font-family:'Cairo',sans-serif;font-size:.72rem;font-weight:800;cursor:pointer;text-align:center; }
+.d1-a-call { background:#eff6ff;color:#3b82f6; }
+.d1-a-map { background:#fff7ed;color:#f97316; }
+.d1-a-cta { background:linear-gradient(135deg,#FFC107,#FF8F00);color:#111;flex:2;box-shadow:0 4px 12px rgba(255,193,7,0.25); }
+
+/* ════════════════════════════════════════════════════
+   DESIGN 10 — TOYOTA / CORPORATE BOLD
+   ════════════════════════════════════════════════════ */
+.d10 {
+  background: #fff;
+  min-height: 100vh;
+  font-family: 'Cairo', sans-serif;
+}
+.d10-hero {
+  background: #fff;
+  border-bottom: 4px solid #FFC107;
+  padding: 0 24px 0;
+  position: relative;
+}
+.d10-hero-inner {
+  display: flex; align-items: stretch;
+  min-height: 280px;
+}
+.d10-hero-text {
+  flex: 1; padding: 50px 0 30px;
+  display: flex; flex-direction: column; justify-content: center;
+}
+.d10-hero-text .eyebrow {
+  font-size: 0.65rem; font-weight: 900; color: #FFC107;
+  text-transform: uppercase; letter-spacing: 3px; margin-bottom: 12px;
+}
+.d10-hero-text h2 { font-size: 2.5rem; font-weight: 900; color: #111; line-height: 1.1; }
+.d10-hero-text p { font-size: 0.85rem; color: #6b7280; font-weight: 700; margin-top: 12px; }
+.d10-hero-img {
+  width: 120px; display: flex; align-items: center; justify-content: center;
+  font-size: 6rem; opacity: 0.15;
+}
+.d10-yellow-band {
+  background: #FFC107; padding: 18px 24px;
+  display: flex; gap: 24px; overflow-x: auto;
+}
+.d10-band-stat { text-align: center; min-width: 80px; }
+.d10-band-val { font-size: 1.6rem; font-weight: 900; color: #111; }
+.d10-band-lbl { font-size: 0.6rem; font-weight: 800; color: rgba(0,0,0,0.6); margin-top: 2px; }
+.d10-body { padding: 30px 24px; }
+.d10-form-title {
+  font-size: 0.7rem; font-weight: 900; color: #9ca3af;
+  text-transform: uppercase; letter-spacing: 2px; margin-bottom: 16px;
+}
+.d10-input {
+  width: 100%; border: 2px solid #111;
+  border-radius: 0; padding: 14px 16px;
+  font-family: 'Cairo', sans-serif; font-size: 1rem; font-weight: 700;
+  color: #111; background: #fff; margin-bottom: 14px; outline: none; transition: 0.2s;
+}
+.d10-input:focus { border-color: #FFC107; background: #FFFDE7; }
+.d10-btn {
+  display: flex; align-items: center; justify-content: space-between;
+  width: 100%; padding: 18px 24px;
+  background: #111; color: #FFC107;
+  border: none; border-radius: 0;
+  font-family: 'Cairo', sans-serif; font-size: 1.05rem; font-weight: 900;
+  cursor: pointer; transition: 0.2s;
+  border-right: 6px solid #FFC107;
+}
+.d10-btn:hover { background: #FFC107; color: #111; border-right-color: #111; }
+.d10-features { display: grid; grid-template-columns: 1fr 1fr; gap: 2px; margin-top: 20px; background: #f0f0f0; }
+.d10-feature {
+  background: #fff; padding: 20px 16px;
+  border-right: 3px solid transparent; transition: 0.2s;
+}
+.d10-feature:hover { border-right-color: #FFC107; background: #FFFDE7; }
+.d10-feature-icon { font-size: 1.5rem; margin-bottom: 8px; }
+.d10-feature-title { font-size: 0.78rem; font-weight: 900; color: #111; margin-bottom: 4px; }
+.d10-feature-desc { font-size: 0.65rem; color: #9ca3af; font-weight: 700; line-height: 1.5; }
+/* ════════════════════════════════════════
+   ██ DESIGN 2 — UBER BRUTALIST
+   ════════════════════════════════════════ */
+.d2 { background:#fff; font-family:'Cairo',sans-serif; }
+.d2-login-hero { background:#111;padding:50px 24px 40px;text-align:right; }
+.d2-login-hero h1 { font-size:2.8rem;font-weight:900;color:#FFC107;line-height:1;margin-bottom:6px; }
+.d2-login-hero p { color:rgba(255,255,255,0.45);font-size:.8rem;font-weight:700; }
+.d2-login-body { padding:28px 24px; }
+.d2-flbl { font-size:.6rem;font-weight:900;color:#9ca3af;text-transform:uppercase;letter-spacing:1.5px;margin-bottom:8px; }
+.d2-finp { width:100%;border:none;border-bottom:2px solid #111;padding:12px 0;font-family:'Cairo',sans-serif;font-size:1.05rem;font-weight:700;color:#111;background:transparent;outline:none;transition:.2s;margin-bottom:20px; }
+.d2-finp:focus { border-color:#FFC107; }
+.d2-btn { width:100%;padding:17px;background:#FFC107;color:#111;border:none;border-radius:4px;font-family:'Cairo',sans-serif;font-size:1.05rem;font-weight:900;cursor:pointer;transition:.2s; }
+.d2-btn:hover { background:#FFAA00; }
+/* dash */
+.d2-dash { background:#fff; }
+.d2-dash-top { background:#111;padding:28px 24px 24px; }
+.d2-dash-name { color:rgba(255,255,255,.5);font-size:.7rem;font-weight:800;text-transform:uppercase;letter-spacing:1px;margin-bottom:4px; }
+.d2-dash-earn { font-size:2.8rem;font-weight:900;color:#FFC107;letter-spacing:-1px;line-height:1; }
+.d2-dash-unit { font-size:1rem;color:rgba(255,193,7,.5); }
+.d2-dash-stats { display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:#333;margin-top:20px; }
+.d2-ds { background:#1a1a1a;padding:14px 8px;text-align:center; }
+.d2-ds-v { font-size:1.3rem;font-weight:900;color:#FFC107; }
+.d2-ds-l { font-size:.58rem;font-weight:800;color:rgba(255,255,255,.3);margin-top:3px; }
+/* radar */
+.d2-body { padding:20px 24px 30px; }
+.d2-radar { background:#111;border-radius:4px;padding:24px;margin-bottom:14px;text-align:center;position:relative;overflow:hidden; }
+.d2-radar::before { content:'🐝';position:absolute;right:-20px;bottom:-30px;font-size:8rem;opacity:.06; }
+.d2-radar-rings { width:100px;height:100px;margin:0 auto 14px;position:relative;display:flex;align-items:center;justify-content:center; }
+.d2-ring { position:absolute;inset:0;border-radius:50%;border:2px solid #FFC107;animation:pulse-ring 2.5s ease-out infinite; }
+.d2-ring:nth-child(2){animation-delay:.8s}.d2-ring:nth-child(3){animation-delay:1.6s}
+.d2-core { width:64px;height:64px;border-radius:50%;background:#222;border:2px solid #FFC107;display:flex;align-items:center;justify-content:center;font-size:1.6rem;position:relative;z-index:2;box-shadow:0 0 20px rgba(255,193,7,.3); }
+.d2-radar-title { color:#FFC107;font-size:.95rem;font-weight:900;margin-bottom:3px; }
+.d2-radar-desc { color:rgba(255,255,255,.4);font-size:.72rem;font-weight:700; }
+.d2-toggle-row { display:flex;align-items:center;gap:12px;margin-top:14px;justify-content:center; }
+.d2-tbtn { padding:10px 28px;border:2px solid #FFC107;background:transparent;color:#FFC107;border-radius:4px;font-family:'Cairo',sans-serif;font-size:.85rem;font-weight:900;cursor:pointer;transition:.2s; }
+.d2-tbtn.on { background:#FFC107;color:#111; }
+/* new order */
+.d2-alert { border:2px solid #FFC107;border-radius:4px;padding:18px;margin-bottom:12px;animation:cardIn .4s; }
+.d2-alert-top { display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;padding-bottom:12px;border-bottom:2px solid #FFC107; }
+.d2-alert-label { font-size:.6rem;font-weight:900;color:#FFC107;text-transform:uppercase;letter-spacing:1.5px; }
+.d2-alert-timer { font-size:1.6rem;font-weight:900;color:#FFC107; }
+.d2-arow { display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #f0f0f0; }
+.d2-arow:last-of-type { border-bottom:none; }
+.d2-albl { font-size:.68rem;font-weight:700;color:#9ca3af; }
+.d2-aval { font-size:.9rem;font-weight:900;color:#111; }
+.d2-aval.p { color:#16a34a;font-size:1.2rem; }
+.d2-accept { width:100%;padding:14px;background:#FFC107;color:#111;border:none;border-radius:4px;font-family:'Cairo',sans-serif;font-size:1rem;font-weight:900;cursor:pointer;margin-top:12px; }
+/* active order */
+.d2-order { border-right:4px solid #FFC107;background:#fff;padding:16px 18px;margin-bottom:10px;box-shadow:0 2px 8px rgba(0,0,0,.06); }
+.d2-order-top { display:flex;justify-content:space-between;margin-bottom:10px; }
+.d2-order-id { font-size:.7rem;font-weight:900;color:#9ca3af; }
+.d2-order-price { font-size:1.4rem;font-weight:900;color:#16a34a; }
+.d2-step-bar { display:flex;gap:4px;margin:10px 0; }
+.d2-step-seg { flex:1;height:6px;border-radius:2px;background:#f0f0f0; }
+.d2-step-seg.done { background:#22c55e; }
+.d2-step-seg.active { background:#FFC107; }
+.d2-route { margin:10px 0; }
+.d2-rp { display:flex;align-items:flex-start;gap:10px;margin-bottom:8px; }
+.d2-rp-dot { width:10px;height:10px;border-radius:50%;flex-shrink:0;margin-top:4px; }
+.d2-rp-dot.pick { background:#FFC107; }
+.d2-rp-dot.drop { background:#22c55e; }
+.d2-rp-name { font-size:.85rem;font-weight:900;color:#111; }
+.d2-rp-lbl { font-size:.6rem;font-weight:700;color:#9ca3af; }
+.d2-cta-btn { width:100%;padding:13px;background:#FFC107;color:#111;border:none;border-radius:4px;font-family:'Cairo',sans-serif;font-size:.95rem;font-weight:900;cursor:pointer;margin-top:12px; }
+
+/* ─── RESPONSIVE PHONE FRAME ─── */
+.phone-frame-wrap {
+  display: flex;
+  justify-content: center;
+  padding: 40px 20px;
+  background: #f8f9fa;
+  gap: 30px;
+  flex-wrap: wrap;
+}
+.phone-frame {
+  width: 380px;
+  border-radius: 40px;
+  overflow: hidden;
+  box-shadow:
+    0 0 0 1px rgba(0,0,0,0.1),
+    0 30px 80px rgba(0,0,0,0.2),
+    inset 0 0 0 1px rgba(255,255,255,0.5);
+  flex-shrink: 0;
+  position: relative;
+}
+.phone-notch {
+  position: absolute; top: 0; left: 50%; transform: translateX(-50%);
+  width: 120px; height: 30px;
+  background: #111; border-radius: 0 0 20px 20px;
+  z-index: 100;
+}
+.phone-content {
+  overflow: hidden;
+  max-height: 700px;
+  overflow-y: auto;
+}
+.phone-content::-webkit-scrollbar { display: none; }
+/* ════════════════════════════════════════
+   ██ DESIGN 3 — STRIPE GRADIENT
+   ════════════════════════════════════════ */
+.d3 { background:linear-gradient(180deg,#FFFDE7,#fff); font-family:'Cairo',sans-serif; }
+.d3-header { background:linear-gradient(135deg,#FF8F00,#FFC107,#FFD54F);padding:50px 24px 90px;text-align:center;clip-path:ellipse(120% 100% at 50% 0%); }
+.d3-logo { font-size:3.5rem;margin-bottom:8px; }
+.d3-header h2 { font-size:2rem;font-weight:900;color:#fff;text-shadow:0 2px 10px rgba(0,0,0,.2);margin-bottom:4px; }
+.d3-header p { color:rgba(255,255,255,.8);font-size:.8rem;font-weight:700; }
+.d3-card { background:#fff;border-radius:28px;padding:28px 24px;margin:-50px 16px 16px;box-shadow:0 20px 60px rgba(255,143,0,.15),0 4px 20px rgba(0,0,0,.07);position:relative;z-index:10; }
+.d3-inp { width:100%;border:2px solid #f3f4f6;border-radius:16px;padding:13px 16px;font-family:'Cairo',sans-serif;font-size:.95rem;font-weight:700;color:#111;background:#fafafa;margin-bottom:12px;outline:none;transition:.2s; }
+.d3-inp:focus { border-color:#FFC107;background:#FFFDE7; }
+.d3-btn { width:100%;padding:15px;background:linear-gradient(135deg,#FF8F00,#FFC107);color:#fff;border:none;border-radius:16px;font-family:'Cairo',sans-serif;font-size:1rem;font-weight:900;cursor:pointer;box-shadow:0 8px 24px rgba(255,143,0,.3);transition:.2s; }
+/* dash */
+.d3-dash-header { background:linear-gradient(135deg,#FF8F00,#FFC107);padding:28px 24px; }
+.d3-dash-title { color:rgba(255,255,255,.8);font-size:.7rem;font-weight:800;text-transform:uppercase;letter-spacing:.5px; }
+.d3-dash-earn { font-size:2.6rem;font-weight:900;color:#fff;letter-spacing:-1px; }
+.d3-dash-stats { display:flex;gap:10px;margin-top:16px; }
+.d3-ds { flex:1;background:rgba(255,255,255,.15);border-radius:14px;padding:12px 8px;text-align:center;backdrop-filter:blur(10px); }
+.d3-ds-v { font-size:1.2rem;font-weight:900;color:#fff; }
+.d3-ds-l { font-size:.58rem;font-weight:800;color:rgba(255,255,255,.7);margin-top:3px; }
+.d3-body { padding:16px; }
+/* radar */
+.d3-radar { background:#fff;border:2px solid #FFE082;border-radius:24px;padding:24px;margin-bottom:14px;text-align:center;box-shadow:0 8px 30px rgba(255,193,7,.12); }
+.d3-radar-wrap { width:100px;height:100px;margin:0 auto 14px;position:relative;display:flex;align-items:center;justify-content:center; }
+.d3-ring { position:absolute;inset:0;border-radius:50%;border:2px solid #FFC107;animation:pulse-ring 2.5s ease-out infinite; }
+.d3-ring:nth-child(2){animation-delay:.8s}.d3-ring:nth-child(3){animation-delay:1.6s}
+.d3-core2 { width:64px;height:64px;border-radius:50%;background:linear-gradient(135deg,#FFFDE7,#FFF9C4);border:2px solid #FFE082;display:flex;align-items:center;justify-content:center;font-size:1.7rem;position:relative;z-index:2; }
+.d3-radar-t { font-size:.95rem;font-weight:900;color:#111;margin-bottom:4px; }
+.d3-radar-d { font-size:.72rem;color:#9ca3af;font-weight:700; }
+.d3-tog-btn { margin:14px auto 0;display:flex;align-items:center;justify-content:center;gap:10px; }
+.d3-tog-pill { padding:10px 24px;background:linear-gradient(135deg,#FF8F00,#FFC107);color:#fff;border:none;border-radius:99px;font-family:'Cairo',sans-serif;font-size:.85rem;font-weight:900;cursor:pointer;box-shadow:0 6px 18px rgba(255,143,0,.3); }
+/* alert */
+.d3-alert { background:linear-gradient(135deg,#fff,#FFFDE7);border:2px solid #FFE082;border-radius:24px;padding:20px;margin-bottom:12px;animation:cardIn .4s; }
+.d3-alert-top { display:flex;justify-content:space-between;align-items:center;margin-bottom:12px; }
+.d3-alert-title { font-size:1.05rem;font-weight:900;color:#111;display:flex;align-items:center;gap:8px; }
+.d3-timer-wrap { width:50px;height:50px;position:relative;display:flex;align-items:center;justify-content:center;flex-shrink:0; }
+.d3-timer-svg { position:absolute;inset:0;transform:rotate(-90deg); }
+.d3-timer-num { font-size:1rem;font-weight:900;color:#FF8F00;position:relative;z-index:1; }
+.d3-arow { display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid rgba(255,193,7,.2); }
+.d3-arow:last-of-type { border-bottom:none; }
+.d3-albl { font-size:.68rem;font-weight:700;color:#9ca3af; }
+.d3-aval { font-size:.9rem;font-weight:900;color:#111; }
+.d3-aval.pr { color:#FF8F00;font-size:1.2rem; }
+.d3-accept { width:100%;padding:14px;background:linear-gradient(135deg,#22c55e,#16a34a);color:#fff;border:none;border-radius:16px;font-family:'Cairo',sans-serif;font-size:1rem;font-weight:900;cursor:pointer;margin-top:12px;box-shadow:0 6px 20px rgba(34,197,94,.3); }
+/* active order */
+.d3-order { background:#fff;border:2px solid #FFE082;border-radius:20px;padding:18px;margin-bottom:12px;box-shadow:0 4px 16px rgba(255,193,7,.1);position:relative;overflow:hidden; }
+.d3-order-stripe { position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,#FF8F00,#FFC107); }
+.d3-order-top { display:flex;justify-content:space-between;margin-bottom:12px; }
+.d3-order-id { font-size:.68rem;font-weight:900;color:#9ca3af; }
+.d3-order-price { font-size:1.4rem;font-weight:900;color:#22c55e; }
+.d3-order-route { background:#FFFDE7;border-radius:14px;padding:14px;margin:10px 0; }
+.d3-rp { margin-bottom:10px; }
+.d3-rp:last-child { margin-bottom:0; }
+.d3-rp-t { font-size:.6rem;font-weight:800;color:#9ca3af;margin-bottom:2px; }
+.d3-rp-n { font-size:.9rem;font-weight:900;color:#111; }
+.d3-cta { width:100%;padding:13px;background:linear-gradient(135deg,#FF8F00,#FFC107);color:#fff;border:none;border-radius:14px;font-family:'Cairo',sans-serif;font-size:.95rem;font-weight:900;cursor:pointer;margin-top:10px; }
+
+/* ─── DESIGN TITLE CARD ─── */
+.design-title-card {
+  text-align: center;
+  padding: 30px 20px 10px;
+}
+.design-title-card h3 { font-size: 1.4rem; font-weight: 900; color: #111; }
+.design-title-card p { font-size: 0.8rem; color: #6b7280; font-weight: 700; margin-top: 4px; }
+.design-num {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 36px; height: 36px; border-radius: 50%;
+  background: #FFC107; color: #111;
+  font-size: 0.9rem; font-weight: 900;
+  margin-bottom: 10px;
+}
+/* ════════════════════════════════════════
+   ██ DESIGN 4 — AIRBNB WARM
+   ════════════════════════════════════════ */
+.d4 { background:#FFFAF0; font-family:'Cairo',sans-serif; }
+.d4-topbar { background:#fff;padding:18px 20px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #f0ebe0;box-shadow:0 2px 10px rgba(255,193,7,.07); }
+.d4-brand { display:flex;align-items:center;gap:10px; }
+.d4-brand-logo { width:38px;height:38px;border-radius:12px;background:linear-gradient(135deg,#FFC107,#FF8F00);display:flex;align-items:center;justify-content:center;font-size:1.2rem; }
+.d4-brand-name { font-size:1.1rem;font-weight:900;color:#111; }
+.d4-topbar-badge { background:#FFF9C4;color:#F57F17;font-size:.65rem;font-weight:900;padding:4px 10px;border-radius:99px;border:1px solid #FFE082; }
+.d4-hero-card { background:linear-gradient(135deg,#FFF3CD,#FFF8E1);border:2px solid #FFE082;border-radius:24px;padding:20px;margin:16px;text-align:center; }
+.d4-hero-bee { font-size:3.5rem;animation:bounce2 3s ease-in-out infinite;margin-bottom:10px; }
+.d4-earn-lbl { font-size:.68rem;font-weight:800;color:#b45309;text-transform:uppercase;letter-spacing:.5px; }
+.d4-earn-num { font-size:2.4rem;font-weight:900;color:#92400e;letter-spacing:-1px; }
+.d4-stats-row { display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:14px; }
+.d4-stat { background:rgba(255,255,255,.7);border:1px solid #FFE082;border-radius:14px;padding:12px 6px;text-align:center; }
+.d4-stat-v { font-size:1.2rem;font-weight:900;color:#FFC107; }
+.d4-stat-l { font-size:.56rem;font-weight:800;color:#9ca3af;margin-top:3px; }
+.d4-body { padding:0 16px 24px; }
+/* login */
+.d4-login { padding:24px 16px; }
+.d4-inp { width:100%;border:2px solid #e5d3a3;border-radius:18px;padding:14px 18px;font-family:'Cairo',sans-serif;font-size:.95rem;font-weight:700;color:#111;background:#fff;margin-bottom:12px;outline:none;transition:.2s; }
+.d4-inp:focus { border-color:#FFC107;box-shadow:0 0 0 4px rgba(255,193,7,.1); }
+.d4-btn { width:100%;padding:16px;background:#FFC107;color:#111;border:none;border-radius:18px;font-family:'Cairo',sans-serif;font-size:1rem;font-weight:900;cursor:pointer;box-shadow:0 6px 20px rgba(255,193,7,.28);transition:.2s; }
+.d4-btn:hover { background:#FFCA28; }
+/* radar */
+.d4-radar { background:#fff;border:2px solid #FFE082;border-radius:24px;padding:22px;margin-bottom:14px;text-align:center;box-shadow:0 4px 16px rgba(255,193,7,.1); }
+.d4-radar-wrap { width:100px;height:100px;margin:0 auto 14px;position:relative;display:flex;align-items:center;justify-content:center; }
+.d4-ring { position:absolute;inset:0;border-radius:50%;border:2px solid #FFC107;animation:pulse-ring 2.5s ease-out infinite; }
+.d4-ring:nth-child(2){animation-delay:.8s}.d4-ring:nth-child(3){animation-delay:1.6s}
+.d4-core { width:64px;height:64px;border-radius:50%;background:#FFFDE7;border:2px solid #FFE082;display:flex;align-items:center;justify-content:center;font-size:1.7rem;position:relative;z-index:2;box-shadow:0 0 20px rgba(255,193,7,.2); }
+.d4-radar-t { font-size:.9rem;font-weight:900;color:#92400e; }
+.d4-radar-d { font-size:.72rem;color:#b45309;font-weight:700;margin-top:3px; }
+.d4-tog { display:flex;align-items:center;gap:10px;justify-content:center;margin-top:14px; }
+.d4-tog-btn { padding:10px 28px;background:linear-gradient(135deg,#FFC107,#FF8F00);color:#111;border:none;border-radius:99px;font-family:'Cairo',sans-serif;font-size:.85rem;font-weight:900;cursor:pointer;box-shadow:0 4px 14px rgba(255,193,7,.25); }
+/* alert */
+.d4-alert { background:#fff;border:2px solid #FFE082;border-radius:22px;padding:18px;margin-bottom:12px;box-shadow:0 8px 30px rgba(255,193,7,.15);animation:cardIn .4s; }
+.d4-alert-top { display:flex;justify-content:space-between;align-items:center;margin-bottom:12px; }
+.d4-alert-title { font-size:1.05rem;font-weight:900;color:#111;display:flex;align-items:center;gap:8px; }
+.d4-countdown { width:50px;height:50px;background:linear-gradient(135deg,#FFC107,#FF8F00);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:1.2rem;font-weight:900;color:#111;box-shadow:0 4px 14px rgba(255,193,7,.35);animation:glow 1.5s ease-in-out infinite; }
+.d4-arow { display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #f0ebe0; }
+.d4-arow:last-of-type { border-bottom:none; }
+.d4-albl { font-size:.68rem;color:#9ca3af;font-weight:700; }
+.d4-aval { font-size:.92rem;font-weight:900;color:#111; }
+.d4-aval.pr { color:#FF8F00;font-size:1.2rem; }
+.d4-accept { width:100%;padding:14px;background:linear-gradient(135deg,#22c55e,#16a34a);color:#fff;border:none;border-radius:18px;font-family:'Cairo',sans-serif;font-size:1rem;font-weight:900;cursor:pointer;margin-top:12px;box-shadow:0 6px 20px rgba(34,197,94,.25); }
+/* active order */
+.d4-order { background:#fff;border:2px solid #FFE082;border-radius:22px;padding:18px;margin-bottom:12px;box-shadow:0 4px 14px rgba(255,193,7,.08); }
+.d4-order-top { display:flex;justify-content:space-between;margin-bottom:12px; }
+.d4-order-id { font-size:.68rem;font-weight:900;color:#9ca3af; }
+.d4-order-price { font-size:1.4rem;font-weight:900;color:#22c55e; }
+.d4-tags { display:flex;gap:6px;margin-bottom:12px; }
+.d4-tag { padding:3px 10px;border-radius:99px;font-size:.6rem;font-weight:900;background:#FFF9C4;color:#F57F17;border:1px solid #FFE082; }
+.d4-route { background:#FFFAF0;border-radius:16px;padding:14px; }
+.d4-rp { display:flex;align-items:flex-start;gap:10px;margin-bottom:8px; }
+.d4-rp:last-child { margin-bottom:0; }
+.d4-rp-dot { width:10px;height:10px;border-radius:50%;flex-shrink:0;margin-top:4px; }
+.d4-rp-dot.pick { background:#FFC107; }
+.d4-rp-dot.drop { background:#22c55e; }
+.d4-rp-name { font-size:.85rem;font-weight:900;color:#111; }
+.d4-rp-lbl { font-size:.58rem;font-weight:700;color:#9ca3af; }
+.d4-cta { width:100%;padding:13px;background:linear-gradient(135deg,#FFC107,#FF8F00);color:#111;border:none;border-radius:16px;font-family:'Cairo',sans-serif;font-size:.95rem;font-weight:900;cursor:pointer;margin-top:12px; }
+
+/* ─── FULL SHOWCASE ─── */
+.showcase-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(360px, 1fr));
+  gap: 40px;
+  padding: 40px;
+  max-width: 1600px;
+  margin: 0 auto;
+}
+.showcase-item {}
+.showcase-label {
+  display: flex; align-items: center; gap: 12px;
+  margin-bottom: 16px;
+}
+.showcase-num {
+  width: 40px; height: 40px; border-radius: 14px;
+  background: #111; color: #FFC107;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1rem; font-weight: 900; flex-shrink: 0;
+}
+.showcase-info h3 { font-size: 1rem; font-weight: 900; color: #111; }
+.showcase-info p { font-size: 0.72rem; color: #9ca3af; font-weight: 700; margin-top: 2px; }
+.showcase-card {
+  border-radius: 28px;
+  overflow: hidden;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.12);
+  border: 1px solid rgba(0,0,0,0.06);
+  max-height: 600px;
+  overflow-y: auto;
+}
+.showcase-card::-webkit-scrollbar { display: none; }
+/* ════════════════════════════════════════
+   ██ DESIGN 5 — NOTION EDITORIAL
+   ════════════════════════════════════════ */
+.d5 { background:#fff; font-family:'Cairo',sans-serif; }
+.d5-topbar { padding:16px 24px;border-bottom:1px solid #f0f0f0;display:flex;align-items:center;justify-content:space-between; }
+.d5-logo { display:flex;align-items:center;gap:8px; }
+.d5-logo-mark { font-size:1.4rem; }
+.d5-logo-name { font-size:1rem;font-weight:900;color:#111; }
+.d5-tag { background:#FFF9C4;border:1px solid #FFE082;color:#F57F17;border-radius:6px;padding:4px 10px;font-size:.65rem;font-weight:800; }
+/* login */
+.d5-login { padding:32px 24px; }
+.d5-login h1 { font-size:2.5rem;font-weight:900;color:#111;line-height:1.1;margin-bottom:8px; }
+.d5-login h1 em { font-style:normal;color:#FFC107; }
+.d5-divider { height:3px;background:linear-gradient(90deg,#FFC107,#FFE082,transparent);border-radius:99px;margin:20px 0; }
+.d5-flbl { font-size:.65rem;font-weight:900;color:#9ca3af;text-transform:uppercase;letter-spacing:1px;margin-bottom:7px; }
+.d5-inp { width:100%;border:1.5px solid #e5e7eb;border-radius:10px;padding:13px 16px;font-family:'Cairo',sans-serif;font-size:.95rem;font-weight:700;color:#111;background:#fafafa;margin-bottom:12px;outline:none;transition:.2s; }
+.d5-inp:focus { border-color:#FFC107;background:#FFFDE7;box-shadow:0 0 0 3px rgba(255,193,7,.1); }
+.d5-btn { display:inline-flex;align-items:center;gap:8px;padding:13px 24px;background:#111;color:#FFC107;border:none;border-radius:10px;font-family:'Cairo',sans-serif;font-size:.95rem;font-weight:900;cursor:pointer;transition:.2s; }
+.d5-btn:hover { background:#FFC107;color:#111; }
+/* dash */
+.d5-dash { padding:24px; }
+.d5-earn-block { background:#111;border-radius:16px;padding:22px;margin-bottom:18px;display:flex;justify-content:space-between;align-items:center; }
+.d5-earn-l { font-size:.65rem;font-weight:900;color:rgba(255,255,255,.4);text-transform:uppercase;letter-spacing:.5px; }
+.d5-earn-n { font-size:2.2rem;font-weight:900;color:#FFC107;letter-spacing:-1px; }
+.d5-earn-unit { font-size:.9rem;color:rgba(255,193,7,.5);margin-right:4px; }
+.d5-cards-grid { display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px; }
+.d5-card { border:1.5px solid #f0f0f0;border-radius:14px;padding:16px;transition:.2s; }
+.d5-card:hover { border-color:#FFC107;background:#FFFDE7; }
+.d5-card-ico { font-size:1.4rem;margin-bottom:6px; }
+.d5-card-t { font-size:.72rem;font-weight:900;color:#6b7280; }
+.d5-card-v { font-size:1.3rem;font-weight:900;color:#111;margin-top:3px; }
+/* radar */
+.d5-radar { border:1.5px solid #f0f0f0;border-radius:16px;padding:20px;text-align:center;margin-bottom:14px; }
+.d5-radar-wrap { width:90px;height:90px;margin:0 auto 12px;position:relative;display:flex;align-items:center;justify-content:center; }
+.d5-ring { position:absolute;inset:0;border-radius:50%;border:2px solid #FFC107;animation:pulse-ring 2.5s ease-out infinite; }
+.d5-ring:nth-child(2){animation-delay:.8s}.d5-ring:nth-child(3){animation-delay:1.6s}
+.d5-core { width:58px;height:58px;border-radius:50%;background:#FFFDE7;border:1.5px solid #FFE082;display:flex;align-items:center;justify-content:center;font-size:1.5rem;position:relative;z-index:2; }
+.d5-radar-t { font-size:.9rem;font-weight:900;color:#111; }
+.d5-radar-d { font-size:.72rem;color:#9ca3af;font-weight:700;margin-top:3px; }
+.d5-tog { display:flex;align-items:center;gap:8px;justify-content:center;margin-top:12px; }
+.d5-tog-btn { padding:9px 22px;background:#111;color:#FFC107;border:none;border-radius:10px;font-family:'Cairo',sans-serif;font-size:.82rem;font-weight:900;cursor:pointer;transition:.2s; }
+.d5-tog-btn:hover { background:#FFC107;color:#111; }
+/* alert */
+.d5-alert { border:1.5px solid #FFE082;border-radius:16px;padding:18px;margin-bottom:12px;background:#FFFDE7;animation:cardIn .4s; }
+.d5-alert-header { display:flex;justify-content:space-between;align-items:center;padding-bottom:12px;border-bottom:1px solid #FFE082;margin-bottom:12px; }
+.d5-alert-title { font-size:1.05rem;font-weight:900;color:#111; }
+.d5-timer-box { background:#111;color:#FFC107;padding:6px 14px;border-radius:8px;font-size:.95rem;font-weight:900; }
+.d5-arow { display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px dashed #FFE082; }
+.d5-arow:last-of-type { border-bottom:none; }
+.d5-albl { font-size:.68rem;color:#9ca3af;font-weight:700; }
+.d5-aval { font-size:.9rem;font-weight:900;color:#111; }
+.d5-aval.p { color:#16a34a;font-size:1.2rem; }
+.d5-accept { display:flex;align-items:center;justify-content:center;gap:8px;width:100%;padding:13px;background:linear-gradient(90deg,#22c55e,#16a34a);color:#fff;border:none;border-radius:10px;font-family:'Cairo',sans-serif;font-size:.95rem;font-weight:900;cursor:pointer;margin-top:12px; }
+/* active order */
+.d5-order { border:1.5px solid #f0f0f0;border-radius:14px;padding:16px;margin-bottom:10px;transition:.2s;position:relative;overflow:hidden; }
+.d5-order::before { content:'';position:absolute;right:0;top:0;bottom:0;width:4px;background:linear-gradient(180deg,#FFC107,#FFE082); }
+.d5-order-top { display:flex;justify-content:space-between;margin-bottom:10px; }
+.d5-order-id { font-size:.68rem;font-weight:900;color:#9ca3af; }
+.d5-order-price { font-size:1.3rem;font-weight:900;color:#16a34a; }
+.d5-steps { display:flex;gap:6px;margin:8px 0; }
+.d5-step-item { flex:1;text-align:center; }
+.d5-step-dot { width:20px;height:20px;border-radius:50%;border:2px solid #e5e7eb;background:#fff;margin:0 auto 4px;display:flex;align-items:center;justify-content:center;font-size:.5rem;font-weight:900; }
+.d5-step-dot.done { background:#22c55e;border-color:#22c55e;color:#fff; }
+.d5-step-dot.active { background:#FFC107;border-color:#FFC107;color:#111; }
+.d5-step-lbl { font-size:.52rem;font-weight:800;color:#9ca3af; }
+.d5-step-item.active .d5-step-lbl { color:#111; }
+.d5-cta-btn { width:100%;padding:12px;background:#111;color:#FFC107;border:none;border-radius:10px;font-family:'Cairo',sans-serif;font-size:.9rem;font-weight:900;cursor:pointer;margin-top:10px; }
+.d5-cta-btn:hover { background:#FFC107;color:#111; }
+
+/* ─── OVERALL CARD WRAPPER FIX ─── */
+.d1-login, .d2, .d3, .d4, .d5-main, .d6-body, .d7-body, .d8, .d9-body, .d10-body {
+  min-height: unset !important;
+}
+.d1-login { padding: 30px 20px !important; }
+.d5-main { padding: 30px !important; max-width: 100% !important; }
+/* ════════════════════════════════════════
+   ██ DESIGN 6 — REVOLUT GLASS
+   ════════════════════════════════════════ */
+.d6 { background:linear-gradient(135deg,#FFF8E1,#FFFDE7,#f8f9fa);font-family:'Cairo',sans-serif;position:relative;overflow:hidden; }
+.d6::before { content:'';position:absolute;width:350px;height:350px;background:radial-gradient(circle,rgba(255,193,7,.2),transparent 70%);top:-80px;right:-80px;border-radius:50%;pointer-events:none; }
+.d6::after { content:'';position:absolute;width:250px;height:250px;background:radial-gradient(circle,rgba(255,152,0,.12),transparent 70%);bottom:60px;left:-40px;border-radius:50%;pointer-events:none; }
+.d6-body { padding:28px 20px;position:relative;z-index:1; }
+.d6-logo-row { display:flex;align-items:center;gap:12px;margin-bottom:24px; }
+.d6-logo-ico { width:46px;height:46px;border-radius:16px;background:linear-gradient(135deg,#FFC107,#FF8F00);display:flex;align-items:center;justify-content:center;font-size:1.4rem;box-shadow:0 8px 24px rgba(255,193,7,.32); }
+.d6-logo-text h3 { font-size:1.1rem;font-weight:900;color:#111; }
+.d6-logo-text p { font-size:.68rem;color:#9ca3af;font-weight:700; }
+/* login */
+.d6-glass { background:rgba(255,255,255,.75);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border:1px solid rgba(255,193,7,.25);border-radius:26px;padding:26px;box-shadow:0 16px 50px rgba(255,193,7,.1),0 4px 16px rgba(0,0,0,.05);margin-bottom:16px; }
+.d6-inp { width:100%;border:1.5px solid rgba(255,193,7,.3);border-radius:14px;padding:13px 16px;font-family:'Cairo',sans-serif;font-size:.95rem;font-weight:700;color:#111;background:rgba(255,255,255,.8);margin-bottom:12px;outline:none;transition:.2s; }
+.d6-inp:focus { border-color:#FFC107;background:rgba(255,253,231,.9); }
+.d6-btn { width:100%;padding:15px;background:linear-gradient(135deg,#FFC107,#FF8F00);color:#fff;border:none;border-radius:14px;font-family:'Cairo',sans-serif;font-size:1rem;font-weight:900;cursor:pointer;box-shadow:0 8px 24px rgba(255,193,7,.3); }
+/* earn card */
+.d6-earn { background:linear-gradient(135deg,#FF8F00,#FFC107);border-radius:22px;padding:24px;margin-bottom:16px;position:relative;overflow:hidden; }
+.d6-earn::after { content:'🐝';position:absolute;left:-10px;bottom:-20px;font-size:8rem;opacity:.08; }
+.d6-earn-l { font-size:.65rem;font-weight:800;color:rgba(255,255,255,.7);text-transform:uppercase;letter-spacing:.5px; }
+.d6-earn-n { font-size:2.4rem;font-weight:900;color:#fff;letter-spacing:-1px; }
+.d6-earn-row { display:flex;gap:12px;margin-top:14px; }
+.d6-earn-stat { flex:1;background:rgba(255,255,255,.15);border-radius:12px;padding:10px;text-align:center;backdrop-filter:blur(10px); }
+.d6-earn-sv { font-size:1.1rem;font-weight:900;color:#fff; }
+.d6-earn-sl { font-size:.56rem;font-weight:800;color:rgba(255,255,255,.7);margin-top:2px; }
+/* radar */
+.d6-radar { background:rgba(255,255,255,.75);backdrop-filter:blur(20px);border:1px solid rgba(255,193,7,.25);border-radius:22px;padding:22px;text-align:center;margin-bottom:14px; }
+.d6-radar-wrap { width:100px;height:100px;margin:0 auto 14px;position:relative;display:flex;align-items:center;justify-content:center; }
+.d6-ring { position:absolute;inset:0;border-radius:50%;border:2px solid #FFC107;animation:pulse-ring 2.5s ease-out infinite; }
+.d6-ring:nth-child(2){animation-delay:.8s}.d6-ring:nth-child(3){animation-delay:1.6s}
+.d6-core { width:64px;height:64px;border-radius:50%;background:rgba(255,255,255,.9);border:2px solid rgba(255,193,7,.4);display:flex;align-items:center;justify-content:center;font-size:1.7rem;position:relative;z-index:2;box-shadow:0 0 20px rgba(255,193,7,.2); }
+.d6-radar-t { font-size:.9rem;font-weight:900;color:#111; }
+.d6-radar-d { font-size:.72rem;color:#9ca3af;font-weight:700;margin-top:3px; }
+.d6-tog { display:flex;align-items:center;gap:10px;justify-content:center;margin-top:14px; }
+.d6-tog-btn { padding:10px 28px;background:linear-gradient(135deg,#FFC107,#FF8F00);color:#fff;border:none;border-radius:99px;font-family:'Cairo',sans-serif;font-size:.85rem;font-weight:900;cursor:pointer;box-shadow:0 6px 18px rgba(255,193,7,.25); }
+/* alert */
+.d6-alert { background:rgba(255,255,255,.85);backdrop-filter:blur(20px);border:1.5px solid rgba(255,193,7,.3);border-radius:22px;padding:18px;margin-bottom:12px;animation:cardIn .4s;box-shadow:0 10px 30px rgba(255,193,7,.12); }
+.d6-alert-top { display:flex;justify-content:space-between;align-items:center;margin-bottom:12px; }
+.d6-alert-title { font-size:1.05rem;font-weight:900;color:#111;display:flex;align-items:center;gap:8px; }
+.d6-countdown { width:50px;height:50px;background:linear-gradient(135deg,#FFC107,#FF8F00);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:1.2rem;font-weight:900;color:#fff;box-shadow:0 4px 14px rgba(255,193,7,.4); }
+.d6-arow { display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid rgba(255,193,7,.15); }
+.d6-arow:last-of-type { border-bottom:none; }
+.d6-albl { font-size:.68rem;color:#9ca3af;font-weight:700; }
+.d6-aval { font-size:.9rem;font-weight:900;color:#111; }
+.d6-aval.pr { color:#FF8F00;font-size:1.2rem; }
+.d6-accept { width:100%;padding:14px;background:linear-gradient(135deg,#22c55e,#16a34a);color:#fff;border:none;border-radius:14px;font-family:'Cairo',sans-serif;font-size:1rem;font-weight:900;cursor:pointer;margin-top:12px;box-shadow:0 6px 20px rgba(34,197,94,.2); }
+/* active order */
+.d6-order { background:rgba(255,255,255,.8);backdrop-filter:blur(16px);border:1.5px solid rgba(255,193,7,.25);border-radius:20px;padding:18px;margin-bottom:12px;box-shadow:0 8px 24px rgba(255,193,7,.08); }
+.d6-order-top { display:flex;justify-content:space-between;margin-bottom:12px; }
+.d6-order-id { font-size:.68rem;font-weight:900;color:#9ca3af; }
+.d6-order-price { font-size:1.4rem;font-weight:900;color:#16a34a; }
+.d6-prog-bar { height:5px;background:rgba(255,193,7,.15);border-radius:99px;overflow:hidden;margin:10px 0; }
+.d6-prog-fill { height:100%;width:60%;background:linear-gradient(90deg,#FFC107,#FF8F00);border-radius:99px; }
+.d6-route { background:rgba(255,255,255,.6);border-radius:14px;padding:12px; }
+.d6-rp { margin-bottom:8px; }
+.d6-rp:last-child { margin-bottom:0; }
+.d6-rp-t { font-size:.6rem;font-weight:800;color:#9ca3af;margin-bottom:2px; }
+.d6-rp-n { font-size:.88rem;font-weight:900;color:#111; }
+.d6-cta { width:100%;padding:13px;background:linear-gradient(135deg,#FFC107,#FF8F00);color:#fff;border:none;border-radius:14px;font-family:'Cairo',sans-serif;font-size:.95rem;font-weight:900;cursor:pointer;margin-top:12px;box-shadow:0 6px 18px rgba(255,193,7,.25); }
+/* ════════════════════════════════════════
+   ██ DESIGN 7 — CAREEM PROFESSIONAL
+   ════════════════════════════════════════ */
+.d7 { background:#f8f9fa;font-family:'Cairo',sans-serif; }
+.d7-header { background:#1C1B1F;padding:40px 24px 50px;text-align:center;position:relative;overflow:hidden; }
+.d7-header::before { content:'';position:absolute;bottom:0;left:0;right:0;height:50px;background:#f8f9fa;border-radius:30px 30px 0 0; }
+.d7-logo { width:64px;height:64px;border-radius:22px;background:#FFC107;display:flex;align-items:center;justify-content:center;font-size:1.8rem;margin:0 auto 14px;box-shadow:0 10px 30px rgba(255,193,7,.4); }
+.d7-header h2 { font-size:1.7rem;font-weight:900;color:#fff;margin-bottom:4px; }
+.d7-header p { font-size:.75rem;color:rgba(255,255,255,.4);font-weight:700; }
+.d7-body { padding:10px 20px 30px; }
+.d7-card { background:#fff;border-radius:22px;border:1px solid #f0f0f0;box-shadow:0 4px 20px rgba(0,0,0,.05);padding:24px;margin-bottom:14px; }
+.d7-card-title { font-size:.6rem;font-weight:900;color:#9ca3af;text-transform:uppercase;letter-spacing:1.5px;margin-bottom:14px;display:flex;align-items:center;gap:8px; }
+.d7-card-title::after { content:'';flex:1;height:1px;background:#f0f0f0; }
+/* login */
+.d7-inp { width:100%;border:1.5px solid #f0f0f0;border-radius:12px;padding:13px 16px;font-family:'Cairo',sans-serif;font-size:.95rem;font-weight:700;color:#111;background:#fafafa;margin-bottom:12px;outline:none;transition:.2s; }
+.d7-inp:focus { border-color:#FFC107;background:#FFFDE7; }
+.d7-btn { width:100%;padding:15px;background:#1C1B1F;color:#FFC107;border:none;border-radius:12px;font-family:'Cairo',sans-serif;font-size:1rem;font-weight:900;cursor:pointer;transition:.2s; }
+.d7-btn:hover { background:#FFC107;color:#111; }
+/* earn */
+.d7-earn-card { background:linear-gradient(135deg,#1C1B1F,#2d2c30);border-radius:20px;padding:22px;margin-bottom:14px; }
+.d7-earn-l { font-size:.65rem;font-weight:800;color:rgba(255,255,255,.4);text-transform:uppercase;letter-spacing:.5px; }
+.d7-earn-n { font-size:2.2rem;font-weight:900;color:#FFC107;letter-spacing:-1px; }
+.d7-earn-stats { display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:14px; }
+.d7-es { text-align:center;background:rgba(255,255,255,.06);border-radius:12px;padding:12px 6px; }
+.d7-es-v { font-size:1.1rem;font-weight:900;color:#FFC107; }
+.d7-es-l { font-size:.56rem;font-weight:800;color:rgba(255,255,255,.35);margin-top:3px; }
+/* radar */
+.d7-radar { text-align:center; }
+.d7-radar-wrap { width:90px;height:90px;margin:0 auto 12px;position:relative;display:flex;align-items:center;justify-content:center; }
+.d7-ring { position:absolute;inset:0;border-radius:50%;border:2px solid #FFC107;animation:pulse-ring 2.5s ease-out infinite; }
+.d7-ring:nth-child(2){animation-delay:.8s}.d7-ring:nth-child(3){animation-delay:1.6s}
+.d7-core { width:60px;height:60px;border-radius:50%;background:#fafafa;border:2px solid #FFC107;display:flex;align-items:center;justify-content:center;font-size:1.5rem;position:relative;z-index:2;box-shadow:0 0 16px rgba(255,193,7,.2); }
+.d7-radar-t { font-size:.88rem;font-weight:900;color:#111; }
+.d7-radar-d { font-size:.7rem;color:#9ca3af;font-weight:700;margin-top:3px; }
+.d7-tog { margin-top:12px;text-align:center; }
+.d7-tog-btn { padding:10px 24px;background:#FFC107;color:#111;border:none;border-radius:12px;font-family:'Cairo',sans-serif;font-size:.85rem;font-weight:900;cursor:pointer; }
+/* alert */
+.d7-alert { background:#fff;border:1.5px solid #FFE082;border-radius:20px;padding:18px;margin-bottom:12px;animation:cardIn .4s;box-shadow:0 4px 20px rgba(255,193,7,.12); }
+.d7-alert-top { display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;padding-bottom:12px;border-bottom:1px solid #f0f0f0; }
+.d7-alert-title { font-size:1rem;font-weight:900;color:#111;display:flex;align-items:center;gap:8px; }
+.d7-countdown { background:#FFC107;color:#111;width:46px;height:46px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:1.1rem;font-weight:900;box-shadow:0 4px 12px rgba(255,193,7,.35); }
+.d7-arow { display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #f0f0f0; }
+.d7-arow:last-of-type { border-bottom:none; }
+.d7-albl { font-size:.68rem;color:#9ca3af;font-weight:700; }
+.d7-aval { font-size:.9rem;font-weight:900;color:#111; }
+.d7-aval.pr { color:#FF8F00;font-size:1.2rem; }
+.d7-accept { width:100%;padding:14px;background:#22c55e;color:#fff;border:none;border-radius:12px;font-family:'Cairo',sans-serif;font-size:1rem;font-weight:900;cursor:pointer;margin-top:12px; }
+/* active order */
+.d7-order { background:#fff;border:1px solid #f0f0f0;border-radius:20px;padding:18px;margin-bottom:12px;box-shadow:0 2px 12px rgba(0,0,0,.04);position:relative;overflow:hidden; }
+.d7-order-accent { position:absolute;right:0;top:0;bottom:0;width:4px;background:linear-gradient(180deg,#FFC107,#FF8F00); }
+.d7-order-top { display:flex;justify-content:space-between;margin-bottom:12px; }
+.d7-order-id { font-size:.68rem;font-weight:900;color:#9ca3af; }
+.d7-order-price { font-size:1.4rem;font-weight:900;color:#22c55e; }
+.d7-status-badge { display:inline-flex;align-items:center;gap:5px;padding:4px 10px;border-radius:99px;background:#FFF9C4;border:1px solid #FFE082;color:#F57F17;font-size:.62rem;font-weight:900;margin-bottom:12px; }
+.d7-route-card { background:#fafafa;border-radius:14px;padding:14px; }
+.d7-rp { display:flex;align-items:flex-start;gap:10px;margin-bottom:8px; }
+.d7-rp:last-child { margin-bottom:0; }
+.d7-rp-dot { width:10px;height:10px;border-radius:50%;flex-shrink:0;margin-top:4px; }
+.d7-rp-dot.pk { background:#FFC107; }
+.d7-rp-dot.dr { background:#22c55e; }
+.d7-rp-name { font-size:.85rem;font-weight:900;color:#111; }
+.d7-rp-lbl { font-size:.58rem;font-weight:700;color:#9ca3af; }
+.d7-cta { width:100%;padding:13px;background:#1C1B1F;color:#FFC107;border:none;border-radius:12px;font-family:'Cairo',sans-serif;font-size:.95rem;font-weight:900;cursor:pointer;margin-top:12px;transition:.2s; }
+.d7-cta:hover { background:#FFC107;color:#111; }
+/* ════════════════════════════════════════
+   ██ DESIGN 8 — DUOLINGO PLAYFUL
+   ════════════════════════════════════════ */
+.d8 { background:#FFFDE7;font-family:'Cairo',sans-serif; }
+.d8-header { padding:30px 20px 20px;text-align:center; }
+.d8-bee-circle { width:90px;height:90px;border-radius:50%;background:#FFC107;display:flex;align-items:center;justify-content:center;font-size:2.5rem;margin:0 auto 14px;box-shadow:0 6px 0 #E65100,0 10px 24px rgba(255,193,7,.3);animation:bounce2 2s ease-in-out infinite; }
+.d8-header h2 { font-size:2rem;font-weight:900;color:#111; }
+.d8-header p { font-size:.75rem;color:#9ca3af;font-weight:700;margin-top:4px; }
+.d8-card { background:#fff;border-radius:22px;border:2px solid #FFE082;box-shadow:0 5px 0 #FFE082;padding:24px;margin:0 16px 16px; }
+.d8-inp { width:100%;border:2px solid #FFE082;border-radius:14px;padding:13px 16px;font-family:'Cairo',sans-serif;font-size:.95rem;font-weight:700;color:#111;background:#FFFDE7;margin-bottom:12px;outline:none;transition:.2s; }
+.d8-inp:focus { border-color:#FFC107;background:#fff; }
+.d8-btn { width:100%;padding:15px;background:#FFC107;color:#111;border:none;border-radius:14px;font-family:'Cairo',sans-serif;font-size:1rem;font-weight:900;cursor:pointer;box-shadow:0 5px 0 #E65100;transition:.1s;position:relative;top:0; }
+.d8-btn:hover { top:3px;box-shadow:0 2px 0 #E65100; }
+/* earn */
+.d8-earn-card { background:#fff;border:2px solid #FFE082;border-radius:22px;box-shadow:0 5px 0 #FFE082;padding:20px 16px;margin:0 16px 14px;text-align:center; }
+.d8-earn-lbl { font-size:.68rem;font-weight:800;color:#9ca3af;text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px; }
+.d8-earn-num { font-size:2.2rem;font-weight:900;color:#111;letter-spacing:-1px; }
+.d8-earn-num span { color:#FFC107; }
+.d8-stats { display:flex;gap:8px;margin:0 16px 14px; }
+.d8-stat { flex:1;background:#fff;border:2px solid #FFE082;border-radius:16px;box-shadow:0 3px 0 #FFE082;padding:14px 6px;text-align:center; }
+.d8-stat-v { font-size:1.2rem;font-weight:900;color:#111; }
+.d8-stat-v.y { color:#FFC107; }
+.d8-stat-l { font-size:.56rem;font-weight:800;color:#9ca3af;margin-top:3px; }
+/* radar */
+.d8-radar { background:#fff;border:2px solid #FFE082;border-radius:22px;box-shadow:0 5px 0 #FFE082;padding:22px 16px;margin:0 16px 14px;text-align:center; }
+.d8-radar-wrap { width:90px;height:90px;margin:0 auto 12px;position:relative;display:flex;align-items:center;justify-content:center; }
+.d8-ring { position:absolute;inset:0;border-radius:50%;border:2px solid #FFC107;animation:pulse-ring 2.5s ease-out infinite; }
+.d8-ring:nth-child(2){animation-delay:.8s}.d8-ring:nth-child(3){animation-delay:1.6s}
+.d8-core { width:60px;height:60px;border-radius:50%;background:#FFFDE7;border:2px solid #FFE082;display:flex;align-items:center;justify-content:center;font-size:1.6rem;position:relative;z-index:2; }
+.d8-radar-t { font-size:.9rem;font-weight:900;color:#111; }
+.d8-radar-d { font-size:.72rem;color:#9ca3af;font-weight:700;margin-top:3px; }
+.d8-tog { margin-top:12px; }
+.d8-tog-btn { padding:12px 30px;background:#FFC107;color:#111;border:none;border-radius:14px;font-family:'Cairo',sans-serif;font-size:.9rem;font-weight:900;cursor:pointer;box-shadow:0 5px 0 #E65100;position:relative;top:0;transition:.1s; }
+.d8-tog-btn:hover { top:3px;box-shadow:0 2px 0 #E65100; }
+/* alert */
+.d8-alert { background:#fff;border:2px solid #FFE082;border-radius:20px;box-shadow:0 5px 0 #FFE082;padding:18px;margin:0 16px 12px;animation:cardIn .4s; }
+.d8-alert-top { display:flex;justify-content:space-between;align-items:center;margin-bottom:12px; }
+.d8-alert-title { font-size:1.05rem;font-weight:900;color:#111;display:flex;align-items:center;gap:8px; }
+.d8-countdown { width:52px;height:52px;background:#FFC107;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:1.3rem;font-weight:900;color:#111;box-shadow:0 4px 0 #E65100;animation:bounce2 1s ease-in-out infinite; }
+.d8-arow { display:flex;justify-content:space-between;padding:8px 0;border-bottom:2px dashed #FFE082; }
+.d8-arow:last-of-type { border-bottom:none; }
+.d8-albl { font-size:.68rem;color:#9ca3af;font-weight:700; }
+.d8-aval { font-size:.9rem;font-weight:900;color:#111; }
+.d8-aval.p { color:#16a34a;font-size:1.2rem; }
+.d8-accept { width:100%;padding:14px;background:#22c55e;color:#fff;border:none;border-radius:14px;font-family:'Cairo',sans-serif;font-size:1rem;font-weight:900;cursor:pointer;margin-top:12px;box-shadow:0 5px 0 #15803d; }
+/* active order */
+.d8-order { background:#fff;border:2px solid #FFE082;border-radius:20px;box-shadow:0 4px 0 #FFE082;padding:16px;margin:0 16px 12px;animation:cardIn .4s; }
+.d8-order-top { display:flex;justify-content:space-between;margin-bottom:10px; }
+.d8-order-id { font-size:.68rem;font-weight:900;color:#9ca3af; }
+.d8-order-price { font-size:1.3rem;font-weight:900;color:#22c55e; }
+.d8-step-bar { display:flex;gap:4px;margin:10px 0; }
+.d8-step-s { flex:1;height:8px;border-radius:4px;background:#FFFDE7;border:2px solid #FFE082; }
+.d8-step-s.d { background:#22c55e;border-color:#22c55e; }
+.d8-step-s.a { background:#FFC107;border-color:#FFC107; }
+.d8-rp { display:flex;align-items:center;gap:10px;margin-bottom:8px; }
+.d8-rp-dot { width:10px;height:10px;border-radius:50%;flex-shrink:0; }
+.d8-rp-dot.pk { background:#FFC107; }
+.d8-rp-dot.dr { background:#22c55e; }
+.d8-rp-name { font-size:.85rem;font-weight:900;color:#111; }
+.d8-cta { width:100%;padding:13px;background:#FFC107;color:#111;border:none;border-radius:14px;font-family:'Cairo',sans-serif;font-size:.9rem;font-weight:900;cursor:pointer;margin-top:10px;box-shadow:0 4px 0 #E65100; }
+/* ════════════════════════════════════════
+   ██ DESIGN 9 — LINEAR TECH
+   ════════════════════════════════════════ */
+.d9 { background:#FAFAF9;font-family:'Cairo',sans-serif; }
+.d9-topbar { padding:16px 20px;background:rgba(255,255,255,.85);backdrop-filter:blur(10px);border-bottom:1px solid #e5e7eb;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100; }
+.d9-logo { display:flex;align-items:center;gap:8px; }
+.d9-logo-mark { width:32px;height:32px;border-radius:9px;background:#111;display:flex;align-items:center;justify-content:center;font-size:1rem; }
+.d9-logo-name { font-size:.95rem;font-weight:900;color:#111; }
+.d9-badge { background:#FFFDE7;border:1px solid #FFE082;color:#F57F17;font-size:.6rem;font-weight:900;padding:3px 8px;border-radius:6px; }
+.d9-body { padding:20px; }
+.d9-section { margin-bottom:20px; }
+.d9-section-title { font-size:.6rem;font-weight:900;color:#9ca3af;text-transform:uppercase;letter-spacing:1.5px;margin-bottom:12px;padding-bottom:8px;border-bottom:1px solid #f0f0f0; }
+/* login */
+.d9-inp { width:100%;border:1px solid #e5e7eb;border-radius:10px;padding:12px 14px;font-family:'Cairo',sans-serif;font-size:.95rem;font-weight:700;color:#111;background:#fff;margin-bottom:10px;outline:none;transition:.2s; }
+.d9-inp:focus { border-color:#FFC107;box-shadow:0 0 0 3px rgba(255,193,7,.1); }
+.d9-btn { width:100%;padding:13px;background:#111;color:#FFC107;border:none;border-radius:10px;font-family:'Cairo',sans-serif;font-size:.95rem;font-weight:900;cursor:pointer;transition:.2s; }
+.d9-btn:hover { background:#FFC107;color:#111; }
+/* metrics */
+.d9-metric-grid { display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px; }
+.d9-metric { background:#fff;border:1px solid #f0f0f0;border-radius:14px;padding:16px;position:relative;overflow:hidden; }
+.d9-metric::before { content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,#FFC107,#FFD54F); }
+.d9-metric-v { font-size:1.5rem;font-weight:900;color:#111; }
+.d9-metric-l { font-size:.6rem;font-weight:800;color:#9ca3af;margin-top:3px; }
+.d9-metric-trend { position:absolute;top:10px;left:10px;font-size:.6rem;font-weight:900;color:#22c55e;background:rgba(34,197,94,.08);padding:2px 6px;border-radius:4px; }
+/* radar */
+.d9-radar { background:#fff;border:1px solid #f0f0f0;border-radius:14px;padding:20px;text-align:center;margin-bottom:14px;position:relative;overflow:hidden; }
+.d9-radar::before { content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,#FFC107,#FFD54F); }
+.d9-radar-wrap { width:90px;height:90px;margin:0 auto 12px;position:relative;display:flex;align-items:center;justify-content:center; }
+.d9-ring { position:absolute;inset:0;border-radius:50%;border:2px solid #FFC107;animation:pulse-ring 2.5s ease-out infinite; }
+.d9-ring:nth-child(2){animation-delay:.8s}.d9-ring:nth-child(3){animation-delay:1.6s}
+.d9-core { width:58px;height:58px;border-radius:50%;background:#fafafa;border:1px solid #e5e7eb;display:flex;align-items:center;justify-content:center;font-size:1.5rem;position:relative;z-index:2; }
+.d9-radar-t { font-size:.88rem;font-weight:900;color:#111; }
+.d9-radar-d { font-size:.7rem;color:#9ca3af;font-weight:700;margin-top:3px; }
+.d9-tog { display:flex;gap:8px;justify-content:center;margin-top:12px; }
+.d9-tog-btn { padding:9px 20px;background:#111;color:#FFC107;border:none;border-radius:10px;font-family:'Cairo',sans-serif;font-size:.82rem;font-weight:900;cursor:pointer;transition:.2s; }
+.d9-tog-btn:hover { background:#FFC107;color:#111; }
+/* alert */
+.d9-alert { background:#fff;border:1px solid #FFE082;border-radius:14px;padding:16px;margin-bottom:12px;animation:cardIn .4s;position:relative;overflow:hidden; }
+.d9-alert::before { content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,#FFC107,#FFD54F); }
+.d9-alert-top { display:flex;justify-content:space-between;align-items:center;margin-bottom:12px; }
+.d9-alert-title { font-size:1rem;font-weight:900;color:#111;display:flex;align-items:center;gap:8px; }
+.d9-timer-box { background:#111;color:#FFC107;padding:5px 12px;border-radius:8px;font-size:.9rem;font-weight:900;font-variant-numeric:tabular-nums; }
+.d9-arow { display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px solid #f0f0f0; }
+.d9-arow:last-of-type { border-bottom:none; }
+.d9-albl { font-size:.68rem;color:#9ca3af;font-weight:700; }
+.d9-aval { font-size:.9rem;font-weight:900;color:#111; }
+.d9-aval.pr { color:#FF8F00;font-size:1.2rem; }
+.d9-accept { width:100%;padding:13px;background:#22c55e;color:#fff;border:none;border-radius:10px;font-family:'Cairo',sans-serif;font-size:.95rem;font-weight:900;cursor:pointer;margin-top:12px; }
+/* active order */
+.d9-order { background:#fff;border:1px solid #f0f0f0;border-radius:14px;padding:16px;margin-bottom:10px;position:relative;overflow:hidden; }
+.d9-order::before { content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,#FFC107,#FFD54F); }
+.d9-order-top { display:flex;justify-content:space-between;margin-bottom:10px; }
+.d9-order-id { font-size:.68rem;font-weight:900;color:#9ca3af; }
+.d9-order-price { font-size:1.3rem;font-weight:900;color:#22c55e; }
+.d9-steps { display:flex;gap:4px;margin:8px 0; }
+.d9-step-seg { flex:1;height:4px;border-radius:2px;background:#f0f0f0; }
+.d9-step-seg.d { background:#22c55e; }
+.d9-step-seg.a { background:#FFC107; }
+.d9-route { background:#fafafa;border-radius:10px;padding:12px; }
+.d9-rp { display:flex;gap:8px;align-items:flex-start;margin-bottom:6px; }
+.d9-rp:last-child { margin-bottom:0; }
+.d9-rp-dot { width:8px;height:8px;border-radius:50%;flex-shrink:0;margin-top:5px; }
+.d9-rp-dot.pk { background:#FFC107; }
+.d9-rp-dot.dr { background:#22c55e; }
+.d9-rp-name { font-size:.82rem;font-weight:900;color:#111; }
+.d9-rp-lbl { font-size:.56rem;color:#9ca3af;font-weight:700; }
+.d9-cta { width:100%;padding:12px;background:#111;color:#FFC107;border:none;border-radius:10px;font-family:'Cairo',sans-serif;font-size:.9rem;font-weight:900;cursor:pointer;margin-top:10px; }
+/* ════════════════════════════════════════
+   ██ DESIGN 10 — TOYOTA CORPORATE
+   ════════════════════════════════════════ */
+.d10 { background:#fff;font-family:'Cairo',sans-serif; }
+.d10-hero { background:#fff;border-bottom:4px solid #FFC107;padding:0 24px; }
+.d10-hero-inner { display:flex;align-items:center;justify-content:space-between;padding:40px 0 30px; }
+.d10-hero-text .eyebrow { font-size:.6rem;font-weight:900;color:#FFC107;text-transform:uppercase;letter-spacing:3px;margin-bottom:10px; }
+.d10-hero-text h2 { font-size:2.4rem;font-weight:900;color:#111;line-height:1.05; }
+.d10-hero-text p { font-size:.75rem;color:#6b7280;font-weight:700;margin-top:10px; }
+.d10-hero-bee { font-size:5rem;opacity:.12; }
+.d10-yellow-band { background:#FFC107;padding:16px 24px;display:flex;gap:0;overflow-x:auto; }
+.d10-band-stat { text-align:center;flex:1;border-left:1px solid rgba(0,0,0,.1);padding:0 10px; }
+.d10-band-stat:last-child { border-left:none; }
+.d10-band-v { font-size:1.5rem;font-weight:900;color:#111; }
+.d10-band-l { font-size:.56rem;font-weight:800;color:rgba(0,0,0,.55);margin-top:2px; }
+.d10-body { padding:24px; }
+.d10-section-title { font-size:.6rem;font-weight:900;color:#9ca3af;text-transform:uppercase;letter-spacing:2px;margin-bottom:14px;display:flex;align-items:center;gap:10px; }
+.d10-section-title::after { content:'';flex:1;height:1px;background:#f0f0f0; }
+/* login */
+.d10-inp { width:100%;border:2px solid #111;border-radius:0;padding:14px 16px;font-family:'Cairo',sans-serif;font-size:1rem;font-weight:700;color:#111;background:#fff;margin-bottom:12px;outline:none;transition:.2s; }
+.d10-inp:focus { border-color:#FFC107;background:#FFFDE7; }
+.d10-btn { display:flex;align-items:center;justify-content:space-between;width:100%;padding:16px 20px;background:#111;color:#FFC107;border:none;border-radius:0;font-family:'Cairo',sans-serif;font-size:1rem;font-weight:900;cursor:pointer;transition:.2s;border-right:5px solid #FFC107; }
+.d10-btn:hover { background:#FFC107;color:#111;border-right-color:#111; }
+/* radar */
+.d10-radar { background:#fafafa;border:2px solid #111;padding:22px;margin-bottom:14px;text-align:center;position:relative;overflow:hidden; }
+.d10-radar::before { content:'';position:absolute;top:0;right:0;width:5px;height:100%;background:#FFC107; }
+.d10-radar-wrap { width:90px;height:90px;margin:0 auto 12px;position:relative;display:flex;align-items:center;justify-content:center; }
+.d10-ring { position:absolute;inset:0;border-radius:50%;border:2px solid #FFC107;animation:pulse-ring 2.5s ease-out infinite; }
+.d10-ring:nth-child(2){animation-delay:.8s}.d10-ring:nth-child(3){animation-delay:1.6s}
+.d10-core { width:58px;height:58px;border-radius:50%;background:#fff;border:2px solid #111;display:flex;align-items:center;justify-content:center;font-size:1.5rem;position:relative;z-index:2; }
+.d10-radar-t { font-size:.9rem;font-weight:900;color:#111; }
+.d10-radar-d { font-size:.7rem;color:#9ca3af;font-weight:700;margin-top:3px; }
+.d10-tog { margin-top:14px; }
+.d10-tog-btn { display:flex;align-items:center;justify-content:space-between;width:100%;padding:13px 18px;background:#FFC107;color:#111;border:none;border-radius:0;font-family:'Cairo',sans-serif;font-size:.88rem;font-weight:900;cursor:pointer;border-right:4px solid #111; }
+/* alert */
+.d10-alert { background:#fff;border:2px solid #FFC107;border-right:5px solid #FFC107;padding:18px;margin-bottom:12px;animation:cardIn .4s; }
+.d10-alert-top { display:flex;justify-content:space-between;align-items:center;padding-bottom:12px;border-bottom:2px solid #FFC107;margin-bottom:12px; }
+.d10-alert-title { font-size:1rem;font-weight:900;color:#111;display:flex;align-items:center;gap:8px; }
+.d10-countdown { background:#FFC107;color:#111;padding:6px 14px;font-size:1.2rem;font-weight:900; }
+.d10-arow { display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #f0f0f0; }
+.d10-arow:last-of-type { border-bottom:none; }
+.d10-albl { font-size:.68rem;color:#9ca3af;font-weight:700; }
+.d10-aval { font-size:.9rem;font-weight:900;color:#111; }
+.d10-aval.pr { color:#FF8F00;font-size:1.2rem; }
+.d10-accept { display:flex;align-items:center;justify-content:space-between;width:100%;padding:14px 20px;background:#22c55e;color:#fff;border:none;border-right:4px solid #15803d;font-family:'Cairo',sans-serif;font-size:1rem;font-weight:900;cursor:pointer;margin-top:12px; }
+/* active order */
+.d10-order { background:#fff;border:2px solid #f0f0f0;border-right:4px solid #FFC107;padding:18px;margin-bottom:10px;position:relative; }
+.d10-order-top { display:flex;justify-content:space-between;margin-bottom:12px; }
+.d10-order-id { font-size:.68rem;font-weight:900;color:#9ca3af; }
+.d10-order-price { font-size:1.4rem;font-weight:900;color:#22c55e; }
+.d10-progress { display:flex;gap:2px;margin:10px 0; }
+.d10-prog-step { flex:1;height:6px;background:#f0f0f0; }
+.d10-prog-step.d { background:#22c55e; }
+.d10-prog-step.a { background:#FFC107; }
+.d10-route { background:#fafafa;padding:12px; }
+.d10-rp { display:flex;gap:10px;align-items:flex-start;margin-bottom:8px; }
+.d10-rp:last-child { margin-bottom:0; }
+.d10-rp-dot { width:10px;height:10px;border-radius:50%;flex-shrink:0;margin-top:4px; }
+.d10-rp-dot.pk { background:#FFC107; }
+.d10-rp-dot.dr { background:#22c55e; }
+.d10-rp-name { font-size:.85rem;font-weight:900;color:#111; }
+.d10-rp-lbl { font-size:.58rem;color:#9ca3af;font-weight:700; }
+.d10-cta { display:flex;align-items:center;justify-content:space-between;width:100%;padding:13px 18px;background:#111;color:#FFC107;border:none;font-family:'Cairo',sans-serif;font-size:.9rem;font-weight:900;cursor:pointer;margin-top:12px;border-right:4px solid #FFC107; }
+/* ─── FOOTER ─── */
+footer { text-align:center;padding:40px 20px;background:#111;color:rgba(255,255,255,.3);font-size:.78rem;font-weight:700; }
+footer span { color:#FFC107; }
+</style>
+</head>
+<body>
+<!-- ════════════ GALLERY HEADER ════════════ -->
+<!-- HEADER -->
+<div class="gallery-header">
+  <h1>🐝 <span>شركة نحلة</span> — معرض التصاميم</h1>
+  <p>10 تصاميم احترافية بثيم أبيض وأصفر | مستوحاة من كبرى الشركات العالمية</p>
+  <div class="gallery-tag">🐝 &nbsp; كباتن نحلة — Beast Edition V89</div>
+  <h1>🐝 <span>نحلة</span> — معرض التصاميم العالمية</h1>
+  <p>10 تصاميم احترافية بثيم أبيض وأصفر · لوجين + داشبورد + رادار + طلب جديد + طلبات نشطة</p>
+</div>
+<!-- ════════════ NAVIGATION ════════════ -->
+<!-- NAV -->
+<div class="design-nav">
+  <button class="nav-btn active" onclick="scrollToDesign(1)">1 · Apple</button>
+  <button class="nav-btn" onclick="scrollToDesign(2)">2 · Uber</button>
+  <button class="nav-btn" onclick="scrollToDesign(3)">3 · Stripe</button>
+  <button class="nav-btn" onclick="scrollToDesign(4)">4 · Airbnb</button>
+  <button class="nav-btn" onclick="scrollToDesign(5)">5 · Notion</button>
+  <button class="nav-btn" onclick="scrollToDesign(6)">6 · Revolut</button>
+  <button class="nav-btn" onclick="scrollToDesign(7)">7 · Careem</button>
+  <button class="nav-btn" onclick="scrollToDesign(8)">8 · Duolingo</button>
+  <button class="nav-btn" onclick="scrollToDesign(9)">9 · Linear</button>
+  <button class="nav-btn" onclick="scrollToDesign(10)">10 · Toyota</button>
+  <button class="nav-btn active" onclick="scrollTo(1)">1 · Apple</button>
+  <button class="nav-btn" onclick="scrollTo(2)">2 · Uber</button>
+  <button class="nav-btn" onclick="scrollTo(3)">3 · Stripe</button>
+  <button class="nav-btn" onclick="scrollTo(4)">4 · Airbnb</button>
+  <button class="nav-btn" onclick="scrollTo(5)">5 · Notion</button>
+  <button class="nav-btn" onclick="scrollTo(6)">6 · Revolut</button>
+  <button class="nav-btn" onclick="scrollTo(7)">7 · Careem</button>
+  <button class="nav-btn" onclick="scrollTo(8)">8 · Duolingo</button>
+  <button class="nav-btn" onclick="scrollTo(9)">9 · Linear</button>
+  <button class="nav-btn" onclick="scrollTo(10)">10 · Toyota</button>
+</div>
+<!-- ════════════ SHOWCASE GRID ════════════ -->
+<!-- SHOWCASE GRID -->
+<div class="showcase-grid">
+  <!-- ═══ DESIGN 1 ═══ -->
+  <div class="showcase-item" id="design-1">
+    <div class="showcase-label">
+      <div class="showcase-num">1</div>
+      <div class="showcase-info">
+        <h3>Apple Minimal Luxury</h3>
+        <p>نظيف · فاخر · ظلال ناعمة · مساحة بيضاء وفيرة</p>
+<!-- ═══════════════ D1 ═══════════════ -->
+<div class="showcase-item" id="design-1">
+  <div class="showcase-label">
+    <div class="showcase-num">1</div>
+    <div class="showcase-info"><h3>Apple Minimal Luxury</h3><p>نظيف · فاخر · ظلال ناعمة · ذهبي أصفر</p></div>
+  </div>
+  <div class="showcase-card">
+    <div class="d1">
+      <!-- login -->
+      <div class="d1-login">
+        <div class="d1-logo">🐝</div>
+        <div class="d1-title">شركة نحلة</div>
+        <div class="d1-sub">منصة الكباتن الرسمية · Beast Edition</div>
+        <div class="d1-card">
+          <div class="d1-lbl">رقم الهاتف</div>
+          <input class="d1-inp" placeholder="07XXXXXXXXX" readonly>
+          <div class="d1-lbl">كلمة المرور</div>
+          <input class="d1-inp" type="password" placeholder="••••••••" readonly>
+          <button class="d1-btn">تسجيل الدخول</button>
+        </div>
+      </div>
+    </div>
+    <div class="showcase-card">
+      <div class="d1">
+        <div class="d1-login">
+          <div class="d1-logo-wrap">🐝</div>
+          <h2>شركة نحلة</h2>
+          <p class="sub">منصة الكباتن الرسمية · Beast Edition</p>
+          <div class="d1-card">
+            <div class="d1-label">رقم الهاتف</div>
+            <input class="d1-input" placeholder="07XXXXXXXXX" readonly>
+            <div class="d1-label">كلمة المرور</div>
+            <input class="d1-input" type="password" placeholder="••••••••" readonly>
+            <button class="d1-btn">تسجيل الدخول</button>
+      <!-- dashboard -->
+      <div class="d1-dash">
+        <div class="d1-dash-header">
+          <div class="d1-dash-row">
+            <div>
+              <div class="d1-dash-name">كابتن أحمد محمد <span class="d1-dash-lvl">🥇 ذهبي</span></div>
+            </div>
+            <div style="font-size:.75rem;font-weight:800;color:#22c55e;display:flex;align-items:center;gap:5px;">
+              <span style="width:8px;height:8px;background:#22c55e;border-radius:50%;display:inline-block;"></span>متاح
+            </div>
+          </div>
+          <div class="d1-stats">
+            <div class="d1-stat"><div class="d1-stat-val">12</div><div class="d1-stat-lbl">طلبات منجزة</div></div>
+            <div class="d1-stat"><div class="d1-stat-val">0</div><div class="d1-stat-lbl">عمولة الشركة</div></div>
+            <div class="d1-stat"><div class="d1-stat-val">95%</div><div class="d1-stat-lbl">معدل القبول</div></div>
+          <div class="d1-earn-lbl">إجمالي محصّلات اليوم</div>
+          <div class="d1-earn-num">45,000 <span style="font-size:1rem;color:#9ca3af;">د.ع</span></div>
+          <div class="d1-stats-row">
+            <div class="d1-stat"><div class="d1-stat-v">12</div><div class="d1-stat-l">طلبات منجزة</div></div>
+            <div class="d1-stat"><div class="d1-stat-v" style="color:#ef4444;">2K</div><div class="d1-stat-l">عمولة الشركة</div></div>
+            <div class="d1-stat"><div class="d1-stat-v">95%</div><div class="d1-stat-l">معدل القبول</div></div>
+          </div>
+        </div>
+        <div class="d1-body">
+          <!-- radar -->
+          <div class="d1-radar">
+            <div class="d1-radar-rings">
+              <div class="d1-ring"></div><div class="d1-ring"></div><div class="d1-ring"></div>
+              <div class="d1-core">🐝</div>
+            </div>
+            <div class="d1-radar-title">الرادار نشط — أنت متاح</div>
+            <div class="d1-radar-desc">تستقبل الطلبات الآن</div>
+            <div class="d1-toggle-row">
+              <label class="d1-toggle"><input type="checkbox" checked><span class="d1-slider"></span></label>
+              <span class="d1-toggle-lbl">متاح للطلبات</span>
+            </div>
+          </div>
+          <!-- new order -->
+          <div class="d1-alert">
+            <div class="d1-alert-top">
+              <div class="d1-alert-title">🐝 طلب جديد!</div>
+              <div class="d1-countdown">45</div>
+            </div>
+            <div class="d1-alert-row"><span class="d1-albl">المطعم</span><span class="d1-aval">مطعم الأصدقاء</span></div>
+            <div class="d1-alert-row"><span class="d1-albl">المنطقة</span><span class="d1-aval" style="color:#3b82f6;">الرشيد</span></div>
+            <div class="d1-alert-row"><span class="d1-albl">قيمة الفاتورة</span><span class="d1-aval price">18,500 <small style="font-size:.75rem;color:#9ca3af;">د.ع</small></span></div>
+            <button class="d1-accept">✓ قبول الطلب</button>
+          </div>
+          <!-- active orders -->
+          <div class="d1-order">
+            <div class="d1-order-top">
+              <div><div class="d1-order-id">#NHL-2024-089</div><div style="font-size:.75rem;font-weight:800;color:#9ca3af;margin-top:2px;">مطعم السلام</div></div>
+              <div class="d1-order-price">12,000 <small style="font-size:.75rem;color:#9ca3af;">د.ع</small></div>
+            </div>
+            <div class="d1-step-row">
+              <div class="d1-step done"><div class="d1-dot">✓</div><div class="d1-step-lbl">استلام</div></div>
+              <div class="d1-step active"><div class="d1-dot">•</div><div class="d1-step-lbl">في الطريق</div></div>
+              <div class="d1-step"><div class="d1-dot"></div><div class="d1-step-lbl">تسليم</div></div>
+            </div>
+            <div class="d1-order-actions">
+              <button class="d1-action d1-a-call">📞 اتصال</button>
+              <button class="d1-action d1-a-map">🗺️ خريطة</button>
+              <button class="d1-action d1-a-cta">✓ تم التسليم</button>
+            </div>
+          </div>
+          <div class="d1-order">
+            <div class="d1-order-top">
+              <div><div class="d1-order-id">#NHL-2024-088</div><div style="font-size:.75rem;font-weight:800;color:#9ca3af;margin-top:2px;">برجر هاوس</div></div>
+              <div class="d1-order-price">8,000 <small style="font-size:.75rem;color:#9ca3af;">د.ع</small></div>
+            </div>
+            <div class="d1-step-row">
+              <div class="d1-step active"><div class="d1-dot">•</div><div class="d1-step-lbl">توجه للمطعم</div></div>
+              <div class="d1-step"><div class="d1-dot"></div><div class="d1-step-lbl">استلام</div></div>
+              <div class="d1-step"><div class="d1-dot"></div><div class="d1-step-lbl">تسليم</div></div>
+            </div>
+            <div class="d1-order-actions">
+              <button class="d1-action d1-a-call">📞 اتصال</button>
+              <button class="d1-action d1-a-map">🗺️ خريطة</button>
+              <button class="d1-action d1-a-cta">✓ وصلت للمطعم</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+  <!-- ═══ DESIGN 2 ═══ -->
+  <div class="showcase-item" id="design-2">
+    <div class="showcase-label">
+      <div class="showcase-num">2</div>
+      <div class="showcase-info">
+        <h3>Uber Brutalist Clean</h3>
+        <p>قوي · جريء · أسود وأصفر · خطوط تحت</p>
+<!-- ═══════════════ D2 ═══════════════ -->
+<div class="showcase-item" id="design-2">
+  <div class="showcase-label">
+    <div class="showcase-num">2</div>
+    <div class="showcase-info"><h3>Uber Brutalist Clean</h3><p>أسود وأصفر جريء · حواف بسيطة</p></div>
+  </div>
+  <div class="showcase-card">
+    <div class="d2">
+      <div class="d2-login-hero"><h1>كباتن<br>نحلة 🐝</h1><p>Beast Edition V89 — كركوك</p></div>
+      <div class="d2-login-body">
+        <div class="d2-flbl">رقم الهاتف</div>
+        <input class="d2-finp" placeholder="07XXXXXXXXX" readonly>
+        <div class="d2-flbl">كلمة المرور</div>
+        <input class="d2-finp" type="password" placeholder="••••••••" readonly>
+        <button class="d2-btn">دخول النظام ←</button>
+      </div>
+    </div>
+    <div class="showcase-card">
+      <div class="d2">
+        <div class="d2-hero">
+          <h1>كباتن<br>نحلة 🐝</h1>
+          <p>منصة الكباتن — Beast Edition V89</p>
+      <div class="d2-dash-top">
+        <div class="d2-dash-name">كابتن — أحمد محمد</div>
+        <div class="d2-dash-earn">45,000 <span class="d2-dash-unit">د.ع</span></div>
+        <div class="d2-dash-stats">
+          <div class="d2-ds"><div class="d2-ds-v">12</div><div class="d2-ds-l">طلبات</div></div>
+          <div class="d2-ds"><div class="d2-ds-v">95%</div><div class="d2-ds-l">قبول</div></div>
+          <div class="d2-ds"><div class="d2-ds-v">🥇</div><div class="d2-ds-l">ذهبي</div></div>
+        </div>
+        <div class="d2-body">
+          <div class="d2-field">
+            <div class="d2-flabel">رقم الهاتف</div>
+            <input class="d2-finput" placeholder="07XXXXXXXXX" readonly>
+      </div>
+      <div class="d2-body">
+        <div class="d2-radar">
+          <div class="d2-radar-rings">
+            <div class="d2-ring"></div><div class="d2-ring"></div><div class="d2-ring"></div>
+            <div class="d2-core">🐝</div>
+          </div>
+          <div class="d2-field">
+            <div class="d2-flabel">كلمة المرور</div>
+            <input class="d2-finput" type="password" placeholder="••••••••" readonly>
+          <div class="d2-radar-title">RADAR ACTIVE</div>
+          <div class="d2-radar-desc">تستقبل الطلبات الآن</div>
+          <div class="d2-toggle-row">
+            <button class="d2-tbtn on">🟡 متاح</button>
+            <button class="d2-tbtn">استراحة</button>
+          </div>
+          <button class="d2-btn">دخول الآن ←</button>
+          <div class="d2-dashboard" style="margin-top:20px;">
+            <div class="d2-earn">إجمالي اليوم</div>
+            <div class="d2-earn-num">45,000 <span style="font-size:1rem;color:rgba(255,193,7,0.6);">د.ع</span></div>
+            <div class="d2-grid">
+              <div class="d2-stat"><div class="d2-stat-v">12</div><div class="d2-stat-l">طلبات منجزة</div></div>
+              <div class="d2-stat"><div class="d2-stat-v">95%</div><div class="d2-stat-l">معدل القبول</div></div>
+            </div>
+        </div>
+        <div class="d2-alert">
+          <div class="d2-alert-top">
+            <div class="d2-alert-label">⚡ طلب جديد</div>
+            <div class="d2-alert-timer">:45</div>
+          </div>
+          <div class="d2-arow"><span class="d2-albl">المطعم</span><span class="d2-aval">مطعم الأصدقاء</span></div>
+          <div class="d2-arow"><span class="d2-albl">المنطقة</span><span class="d2-aval" style="color:#3b82f6;">الرشيد</span></div>
+          <div class="d2-arow"><span class="d2-albl">الفاتورة</span><span class="d2-aval p">18,500 د.ع</span></div>
+          <button class="d2-accept">← قبول الطلب</button>
+        </div>
+        <div class="d2-order">
+          <div class="d2-order-top">
+            <div><div class="d2-order-id">#NHL-089</div><div style="font-size:.7rem;color:#9ca3af;font-weight:700;margin-top:2px;">مطعم السلام</div></div>
+            <div class="d2-order-price">12,000 د.ع</div>
+          </div>
+          <div class="d2-step-bar">
+            <div class="d2-step-seg done"></div>
+            <div class="d2-step-seg active"></div>
+            <div class="d2-step-seg"></div>
+          </div>
+          <div class="d2-route">
+            <div class="d2-rp"><div class="d2-rp-dot pick"></div><div><div class="d2-rp-lbl">نقطة الاستلام</div><div class="d2-rp-name">مطعم السلام — شارع اتاتورك</div></div></div>
+            <div class="d2-rp"><div class="d2-rp-dot drop"></div><div><div class="d2-rp-lbl">نقطة التسليم</div><div class="d2-rp-name">حي الرشيد — قرب المدرسة</div></div></div>
+          </div>
+          <button class="d2-cta-btn">✓ تم التسليم ←</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+  <!-- ═══ DESIGN 3 ═══ -->
+  <div class="showcase-item" id="design-3">
+    <div class="showcase-label">
+      <div class="showcase-num">3</div>
+      <div class="showcase-info">
+        <h3>Stripe Premium Gradient</h3>
+        <p>تدرجات دافئة · شكل بيضاوي · بطاقة عائمة</p>
+<!-- ═══════════════ D3 ═══════════════ -->
+<div class="showcase-item" id="design-3">
+  <div class="showcase-label">
+    <div class="showcase-num">3</div>
+    <div class="showcase-info"><h3>Stripe Premium Gradient</h3><p>تدرجات ذهبية دافئة · بطاقة عائمة</p></div>
+  </div>
+  <div class="showcase-card">
+    <div class="d3">
+      <div class="d3-header">
+        <div class="d3-logo">🐝</div>
+        <h2>شركة نحلة</h2>
+        <p>منصة الكباتن — Beast Edition</p>
+      </div>
+    </div>
+    <div class="showcase-card">
+      <div class="d3">
+        <div class="d3-header">
+          <div class="d3-logo">🐝</div>
+          <h2>شركة نحلة</h2>
+          <p>منصة الكباتن الرسمية</p>
+      <div class="d3-card">
+        <input class="d3-inp" placeholder="07XXXXXXXXX" readonly>
+        <input class="d3-inp" type="password" placeholder="••••••••" readonly>
+        <button class="d3-btn">تسجيل الدخول 🐝</button>
+      </div>
+      <div class="d3-dash-header">
+        <div class="d3-dash-title">إجمالي محصّلات اليوم</div>
+        <div class="d3-dash-earn">45,000 <span style="font-size:1rem;color:rgba(255,255,255,.6);">د.ع</span></div>
+        <div class="d3-dash-stats">
+          <div class="d3-ds"><div class="d3-ds-v">12</div><div class="d3-ds-l">طلبات</div></div>
+          <div class="d3-ds"><div class="d3-ds-v">95%</div><div class="d3-ds-l">قبول</div></div>
+          <div class="d3-ds"><div class="d3-ds-v">🥇</div><div class="d3-ds-l">ذهبي</div></div>
+        </div>
+        <div style="padding: 0 20px 30px;">
+          <div class="d3-card">
+            <div class="d1-label" style="color:#9ca3af;">رقم الهاتف</div>
+            <input class="d3-input" placeholder="07XXXXXXXXX" readonly>
+            <div class="d1-label" style="color:#9ca3af;">كلمة المرور</div>
+            <input class="d3-input" type="password" placeholder="••••••••" readonly>
+            <button class="d3-btn">تسجيل الدخول 🐝</button>
+            <div class="d3-stats" style="margin-top:20px;">
+              <div class="d3-stat"><div class="d3-stat-v">12</div><div class="d3-stat-l">طلبات</div></div>
+              <div class="d3-stat"><div class="d3-stat-v">45K</div><div class="d3-stat-l">د.ع</div></div>
+              <div class="d3-stat"><div class="d3-stat-v">95%</div><div class="d3-stat-l">قبول</div></div>
+      </div>
+      <div class="d3-body">
+        <div class="d3-radar">
+          <div class="d3-radar-wrap">
+            <div class="d3-ring"></div><div class="d3-ring"></div><div class="d3-ring"></div>
+            <div class="d3-core2">🐝</div>
+          </div>
+          <div class="d3-radar-t">الرادار نشط</div>
+          <div class="d3-radar-d">تستقبل الطلبات الآن</div>
+          <div class="d3-tog-btn"><button class="d3-tog-pill">🔴 إيقاف الرادار</button></div>
+        </div>
+        <div class="d3-alert">
+          <div class="d3-alert-top">
+            <div class="d3-alert-title">🐝 طلب جديد!</div>
+            <div class="d3-timer-wrap">
+              <svg class="d3-timer-svg" viewBox="0 0 56 56"><circle fill="none" stroke="#FFE082" stroke-width="4" cx="28" cy="28" r="24"/><circle fill="none" stroke="#FF8F00" stroke-width="4" cx="28" cy="28" r="24" stroke-dasharray="150" stroke-dashoffset="55" stroke-linecap="round"/></svg>
+              <div class="d3-timer-num">45</div>
+            </div>
+          </div>
+          <div class="d3-arow"><span class="d3-albl">المطعم</span><span class="d3-aval">مطعم الأصدقاء</span></div>
+          <div class="d3-arow"><span class="d3-albl">المنطقة</span><span class="d3-aval" style="color:#3b82f6;">الرشيد</span></div>
+          <div class="d3-arow"><span class="d3-albl">الفاتورة</span><span class="d3-aval pr">18,500 <small style="font-size:.72rem;color:#9ca3af;">د.ع</small></span></div>
+          <button class="d3-accept">✓ قبول الطلب</button>
+        </div>
+        <div class="d3-order">
+          <div class="d3-order-stripe"></div>
+          <div class="d3-order-top">
+            <div><div class="d1-order-id">#NHL-089</div></div>
+            <div class="d3-order-price">12,000 د.ع</div>
+          </div>
+          <div class="d3-order-route">
+            <div class="d3-rp"><div class="d3-rp-t">📍 نقطة الاستلام</div><div class="d3-rp-n">مطعم السلام</div></div>
+            <div class="d3-rp"><div class="d3-rp-t">🏁 نقطة التسليم</div><div class="d3-rp-n">حي الرشيد</div></div>
+          </div>
+          <button class="d3-cta">✓ تم التسليم</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+  <!-- ═══ DESIGN 4 ═══ -->
+  <div class="showcase-item" id="design-4">
+    <div class="showcase-label">
+      <div class="showcase-num">4</div>
+      <div class="showcase-info">
+        <h3>Airbnb Rounded Warmth</h3>
+        <p>دافئ · مدور · ودود · ألوان عسلية</p>
+<!-- ═══════════════ D4 ═══════════════ -->
+<div class="showcase-item" id="design-4">
+  <div class="showcase-label">
+    <div class="showcase-num">4</div>
+    <div class="showcase-info"><h3>Airbnb Rounded Warmth</h3><p>ألوان عسلية · زوايا مدورة · ودود</p></div>
+  </div>
+  <div class="showcase-card">
+    <div class="d4">
+      <div class="d4-topbar">
+        <div class="d4-brand"><div class="d4-brand-logo">🐝</div><div class="d4-brand-name">شركة نحلة</div></div>
+        <div class="d4-topbar-badge">كابتن نشط ✓</div>
+      </div>
+    </div>
+    <div class="showcase-card">
+      <div class="d4">
+        <div class="d4-topbar">
+          <div class="d4-brand">
+            <div class="d4-bee-logo">🐝</div>
+            <div class="d4-brand-name">شركة نحلة</div>
+      <div class="d4-hero-card">
+        <div class="d4-hero-bee">🐝</div>
+        <div class="d4-earn-lbl">إجمالي اليوم</div>
+        <div class="d4-earn-num">45,000 <span style="font-size:1rem;color:#b45309;">د.ع</span></div>
+        <div class="d4-stats-row">
+          <div class="d4-stat"><div class="d4-stat-v">12</div><div class="d4-stat-l">طلبات</div></div>
+          <div class="d4-stat"><div class="d4-stat-v">2K</div><div class="d4-stat-l">عمولة</div></div>
+          <div class="d4-stat"><div class="d4-stat-v">95%</div><div class="d4-stat-l">قبول</div></div>
+        </div>
+      </div>
+      <div class="d4-login" style="padding:16px;">
+        <input class="d4-inp" placeholder="07XXXXXXXXX" readonly>
+        <input class="d4-inp" type="password" placeholder="••••••••" readonly>
+        <button class="d4-btn">تسجيل الدخول</button>
+      </div>
+      <div style="padding:0 16px 24px;">
+        <div class="d4-radar">
+          <div class="d4-radar-wrap">
+            <div class="d4-ring"></div><div class="d4-ring"></div><div class="d4-ring"></div>
+            <div class="d4-core">🐝</div>
+          </div>
+          <div style="font-size:0.7rem;font-weight:800;color:#FFC107;background:#FFF9C4;padding:4px 10px;border-radius:99px;">كابتن نشط ✓</div>
+          <div class="d4-radar-t">الرادار نشط 🟢</div>
+          <div class="d4-radar-d">تستقبل الطلبات الآن</div>
+          <div class="d4-tog"><button class="d4-tog-btn">إيقاف الرادار</button></div>
+        </div>
+        <div class="d4-body">
+          <div class="d4-hero">
+            <div class="d4-hero-bee">🐝</div>
+            <h2>أهلاً بك كابتن!</h2>
+            <p>منصة نحلة للتوصيل — Beast Edition</p>
+        <div class="d4-alert">
+          <div class="d4-alert-top">
+            <div class="d4-alert-title">🐝 طلب جديد!</div>
+            <div class="d4-countdown">45</div>
+          </div>
+          <input class="d4-input" placeholder="07XXXXXXXXX" readonly>
+          <input class="d4-input" type="password" placeholder="كلمة المرور" readonly>
+          <button class="d4-btn">تسجيل الدخول</button>
+          <div class="d4-stats">
+            <div class="d4-stat"><div class="d4-stat-v">12</div><div class="d4-stat-l">طلبات منجزة</div></div>
+            <div class="d4-stat"><div class="d4-stat-v">45,000</div><div class="d4-stat-l">إجمالي د.ع</div></div>
+          <div class="d4-arow"><span class="d4-albl">المطعم</span><span class="d4-aval">مطعم الأصدقاء</span></div>
+          <div class="d4-arow"><span class="d4-albl">المنطقة</span><span class="d4-aval" style="color:#3b82f6;">الرشيد</span></div>
+          <div class="d4-arow"><span class="d4-albl">الفاتورة</span><span class="d4-aval pr">18,500 <small style="font-size:.72rem;color:#9ca3af;">د.ع</small></span></div>
+          <button class="d4-accept">✓ قبول الطلب</button>
+        </div>
+        <div class="d4-order">
+          <div class="d4-order-top">
+            <div><div class="d1-order-id">#NHL-089</div></div>
+            <div class="d4-order-price">12,000 د.ع</div>
+          </div>
+          <div class="d4-tags"><span class="d4-tag">طلب مزدوج</span><span class="d4-tag">⏱️ 12 دقيقة</span></div>
+          <div class="d4-route">
+            <div class="d4-rp"><div class="d4-rp-dot pick"></div><div><div class="d4-rp-lbl">نقطة الاستلام</div><div class="d4-rp-name">مطعم السلام</div></div></div>
+            <div class="d4-rp"><div class="d4-rp-dot drop"></div><div><div class="d4-rp-lbl">نقطة التسليم</div><div class="d4-rp-name">حي الرشيد</div></div></div>
+          </div>
+          <button class="d4-cta">✓ تم التسليم</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+  <!-- ═══ DESIGN 5 ═══ -->
+  <div class="showcase-item" id="design-5">
+    <div class="showcase-label">
+      <div class="showcase-num">5</div>
+      <div class="showcase-info">
+        <h3>Notion Editorial Minimal</h3>
+        <p>تحريري · مسطح · نصي قوي · هندسة واضحة</p>
+<!-- ═══════════════ D5 ═══════════════ -->
+<div class="showcase-item" id="design-5">
+  <div class="showcase-label">
+    <div class="showcase-num">5</div>
+    <div class="showcase-info"><h3>Notion Editorial</h3><p>تحريري · نصي قوي · هندسة نظيفة</p></div>
+  </div>
+  <div class="showcase-card">
+    <div class="d5">
+      <div class="d5-topbar">
+        <div class="d5-logo"><span class="d5-logo-mark">🐝</span><span class="d5-logo-name">شركة نحلة</span></div>
+        <span class="d5-tag">Beast V89</span>
+      </div>
+    </div>
+    <div class="showcase-card">
+      <div class="d5">
+        <div class="d5-main">
+          <div class="d5-tag">
+            <span>🐝</span>
+            شركة نحلة — منصة الكباتن
+      <div class="d5-login">
+        <h1>دخول<br>الكابتن <em>السريع</em></h1>
+        <div class="d5-divider"></div>
+        <div class="d5-flbl">رقم الهاتف</div>
+        <input class="d5-inp" placeholder="07XXXXXXXXX" readonly>
+        <div class="d5-flbl">كلمة المرور</div>
+        <input class="d5-inp" type="password" placeholder="••••••••" readonly>
+        <button class="d5-btn">دخول المنصة →</button>
+      </div>
+      <div class="d5-dash">
+        <div class="d5-earn-block">
+          <div><div class="d5-earn-l">إجمالي اليوم</div><div class="d5-earn-n"><span class="d5-earn-unit">د.ع </span>45,000</div></div>
+          <div style="font-size:1.8rem;">🥇</div>
+        </div>
+        <div class="d5-cards-grid">
+          <div class="d5-card"><div class="d5-card-ico">📦</div><div class="d5-card-t">طلبات منجزة</div><div class="d5-card-v">12</div></div>
+          <div class="d5-card"><div class="d5-card-ico">⚡</div><div class="d5-card-t">معدل القبول</div><div class="d5-card-v">95%</div></div>
+        </div>
+        <div class="d5-radar">
+          <div class="d5-radar-wrap">
+            <div class="d5-ring"></div><div class="d5-ring"></div><div class="d5-ring"></div>
+            <div class="d5-core">🐝</div>
+          </div>
+          <h1>دخول<br>الكابتن <em>السريع</em></h1>
+          <div class="d5-divider"></div>
+          <div class="d5-field-label">رقم الهاتف</div>
+          <input class="d5-input" placeholder="07XXXXXXXXX" readonly>
+          <div class="d5-field-label">كلمة المرور</div>
+          <input class="d5-input" type="password" placeholder="••••••••" readonly>
+          <button class="d5-btn">دخول المنصة →</button>
+          <div class="d5-cards" style="margin-top:24px;">
+            <div class="d5-card">
+              <div class="d5-card-icon">📦</div>
+              <div class="d5-card-title">طلبات اليوم</div>
+              <div class="d5-card-val">12</div>
+            </div>
+            <div class="d5-card">
+              <div class="d5-card-icon">💰</div>
+              <div class="d5-card-title">إجمالي اليوم</div>
+              <div class="d5-card-val">45K</div>
+            </div>
+            <div class="d5-card">
+              <div class="d5-card-icon">⚡</div>
+              <div class="d5-card-title">معدل القبول</div>
+              <div class="d5-card-val">95%</div>
+            </div>
+            <div class="d5-card">
+              <div class="d5-card-icon">🎯</div>
+              <div class="d5-card-title">الهدف اليومي</div>
+              <div class="d5-card-val">10/12</div>
+            </div>
+          <div class="d5-radar-t">الرادار نشط</div>
+          <div class="d5-radar-d">تستقبل الطلبات الآن</div>
+          <div class="d5-tog"><button class="d5-tog-btn">إيقاف الرادار →</button></div>
+        </div>
+        <div class="d5-alert">
+          <div class="d5-alert-header">
+            <div class="d5-alert-title">🐝 طلب جديد!</div>
+            <div class="d5-timer-box">:45</div>
+          </div>
+          <div class="d5-arow"><span class="d5-albl">المطعم</span><span class="d5-aval">مطعم الأصدقاء</span></div>
+          <div class="d5-arow"><span class="d5-albl">المنطقة</span><span class="d5-aval" style="color:#3b82f6;">الرشيد</span></div>
+          <div class="d5-arow"><span class="d5-albl">الفاتورة</span><span class="d5-aval p">18,500 د.ع</span></div>
+          <button class="d5-accept">✓ قبول الطلب</button>
+        </div>
+        <div class="d5-order">
+          <div class="d5-order-top">
+            <div class="d1-order-id">#NHL-089 · مطعم السلام</div>
+            <div class="d5-order-price">12,000 د.ع</div>
+          </div>
+          <div class="d5-steps">
+            <div class="d5-step-item"><div class="d5-step-dot done">✓</div><div class="d5-step-lbl">استلام</div></div>
+            <div class="d5-step-item active"><div class="d5-step-dot active">•</div><div class="d5-step-lbl">في الطريق</div></div>
+            <div class="d5-step-item"><div class="d5-step-dot"></div><div class="d5-step-lbl">تسليم</div></div>
+          </div>
+          <button class="d5-cta-btn">تم التسليم →</button>
+        </div>
+        <div class="d5-order">
+          <div class="d5-order-top">
+            <div class="d1-order-id">#NHL-088 · برجر هاوس</div>
+            <div class="d5-order-price">8,000 د.ع</div>
+          </div>
+          <div class="d5-steps">
+            <div class="d5-step-item active"><div class="d5-step-dot active">•</div><div class="d5-step-lbl">توجه للمطعم</div></div>
+            <div class="d5-step-item"><div class="d5-step-dot"></div><div class="d5-step-lbl">استلام</div></div>
+            <div class="d5-step-item"><div class="d5-step-dot"></div><div class="d5-step-lbl">تسليم</div></div>
+          </div>
+          <button class="d5-cta-btn">وصلت للمطعم →</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+  <!-- ═══ DESIGN 6 ═══ -->
+  <div class="showcase-item" id="design-6">
+    <div class="showcase-label">
+      <div class="showcase-num">6</div>
+      <div class="showcase-info">
+        <h3>Revolut Glassmorphism Light</h3>
+        <p>زجاجي · شفاف · تدرجات ذهبية · ضباب</p>
+      </div>
+    </div>
+    <div class="showcase-card">
+      <div class="d6">
+        <div class="d6-body">
+          <div class="d6-logo-row">
+            <div class="d6-logo-icon">🐝</div>
+            <div class="d6-logo-text">
+              <h3>شركة نحلة</h3>
+              <p>Beast Edition V89.0</p>
+            </div>
+<!-- ═══════════════ D6 ═══════════════ -->
+<div class="showcase-item" id="design-6">
+  <div class="showcase-label">
+    <div class="showcase-num">6</div>
+    <div class="showcase-info"><h3>Revolut Glassmorphism</h3><p>زجاجي شفاف · ضباب · تدرجات ذهبية</p></div>
+  </div>
+  <div class="showcase-card">
+    <div class="d6">
+      <div class="d6-body">
+        <div class="d6-logo-row">
+          <div class="d6-logo-ico">🐝</div>
+          <div class="d6-logo-text"><h3>شركة نحلة</h3><p>Beast Edition V89.0</p></div>
+        </div>
+        <div class="d6-glass">
+          <input class="d6-inp" placeholder="07XXXXXXXXX" readonly>
+          <input class="d6-inp" type="password" placeholder="••••••••" readonly>
+          <button class="d6-btn">دخول المنصة 🐝</button>
+        </div>
+        <div class="d6-earn">
+          <div class="d6-earn-l">إجمالي محصّلات اليوم</div>
+          <div class="d6-earn-n">45,000 <span style="font-size:1rem;color:rgba(255,255,255,.6);">د.ع</span></div>
+          <div class="d6-earn-row">
+            <div class="d6-earn-stat"><div class="d6-earn-sv">12</div><div class="d6-earn-sl">طلبات</div></div>
+            <div class="d6-earn-stat"><div class="d6-earn-sv">95%</div><div class="d6-earn-sl">قبول</div></div>
+            <div class="d6-earn-stat"><div class="d6-earn-sv">🥇</div><div class="d6-earn-sl">ذهبي</div></div>
+          </div>
+          <div class="d6-earn-card" style="margin-bottom:16px;">
+            <div class="d6-earn-lbl">إجمالي محصلات اليوم</div>
+            <div class="d6-earn-num">45,000 <span class="d6-earn-unit">د.ع</span></div>
+        </div>
+        <div class="d6-radar">
+          <div class="d6-radar-wrap">
+            <div class="d6-ring"></div><div class="d6-ring"></div><div class="d6-ring"></div>
+            <div class="d6-core">🐝</div>
+          </div>
+          <div class="d6-glass-card">
+            <div class="d1-label" style="color:#9ca3af;">رقم الهاتف</div>
+            <input class="d6-input" placeholder="07XXXXXXXXX" readonly>
+            <div class="d1-label" style="color:#9ca3af;">كلمة المرور</div>
+            <input class="d6-input" type="password" placeholder="••••••••" readonly>
+            <button class="d6-btn">دخول المنصة 🐝</button>
+          <div class="d6-radar-t">الرادار نشط</div>
+          <div class="d6-radar-d">تستقبل الطلبات الآن</div>
+          <div class="d6-tog"><button class="d6-tog-btn">إيقاف الرادار</button></div>
+        </div>
+        <div class="d6-alert">
+          <div class="d6-alert-top">
+            <div class="d6-alert-title">🐝 طلب جديد!</div>
+            <div class="d6-countdown">45</div>
+          </div>
+          <div class="d6-arow"><span class="d6-albl">المطعم</span><span class="d6-aval">مطعم الأصدقاء</span></div>
+          <div class="d6-arow"><span class="d6-albl">المنطقة</span><span class="d6-aval" style="color:#3b82f6;">الرشيد</span></div>
+          <div class="d6-arow"><span class="d6-albl">الفاتورة</span><span class="d6-aval pr">18,500 <small style="font-size:.72rem;color:#9ca3af;">د.ع</small></span></div>
+          <button class="d6-accept">✓ قبول الطلب</button>
+        </div>
+        <div class="d6-order">
+          <div class="d6-order-top">
+            <div><div class="d1-order-id">#NHL-089</div><div style="font-size:.72rem;color:#9ca3af;font-weight:700;margin-top:2px;">مطعم السلام</div></div>
+            <div class="d6-order-price">12,000 د.ع</div>
+          </div>
+          <div class="d6-prog-bar"><div class="d6-prog-fill"></div></div>
+          <div class="d6-route">
+            <div class="d6-rp"><div class="d6-rp-t">📍 نقطة الاستلام</div><div class="d6-rp-n">مطعم السلام</div></div>
+            <div class="d6-rp"><div class="d6-rp-t">🏁 نقطة التسليم</div><div class="d6-rp-n">حي الرشيد</div></div>
+          </div>
+          <button class="d6-cta">✓ تم التسليم</button>
+        </div>
+        <div class="d6-order">
+          <div class="d6-order-top">
+            <div><div class="d1-order-id">#NHL-088</div><div style="font-size:.72rem;color:#9ca3af;font-weight:700;margin-top:2px;">برجر هاوس</div></div>
+            <div class="d6-order-price">8,000 د.ع</div>
+          </div>
+          <div class="d6-prog-bar"><div class="d6-prog-fill" style="width:25%;"></div></div>
+          <div class="d6-route">
+            <div class="d6-rp"><div class="d6-rp-t">📍 نقطة الاستلام</div><div class="d6-rp-n">برجر هاوس</div></div>
+            <div class="d6-rp"><div class="d6-rp-t">🏁 نقطة التسليم</div><div class="d6-rp-n">شارع نيسان</div></div>
+          </div>
+          <button class="d6-cta">✓ وصلت للمطعم</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+  <!-- ═══ DESIGN 7 ═══ -->
+  <div class="showcase-item" id="design-7">
+    <div class="showcase-label">
+      <div class="showcase-num">7</div>
+      <div class="showcase-info">
+        <h3>Careem Professional</h3>
+        <p>احترافي · رأس داكن · جسم أبيض · متوازن</p>
+<!-- ═══════════════ D7 ═══════════════ -->
+<div class="showcase-item" id="design-7">
+  <div class="showcase-label">
+    <div class="showcase-num">7</div>
+    <div class="showcase-info"><h3>Careem Professional</h3><p>رأس داكن · جسم أبيض · متوازن</p></div>
+  </div>
+  <div class="showcase-card">
+    <div class="d7">
+      <div class="d7-header">
+        <div class="d7-logo">🐝</div>
+        <h2>شركة نحلة</h2>
+        <p>منصة الكباتن الرسمية</p>
+      </div>
+    </div>
+    <div class="showcase-card">
+      <div class="d7">
+        <div class="d7-header">
+          <div class="d7-logo">🐝</div>
+          <h2>شركة نحلة</h2>
+          <p>منصة الكباتن الرسمية</p>
+      <div class="d7-body">
+        <div class="d7-earn-card">
+          <div class="d7-earn-l">إجمالي محصّلات اليوم</div>
+          <div class="d7-earn-n">45,000 <span style="font-size:.9rem;color:rgba(255,193,7,.5);">د.ع</span></div>
+          <div class="d7-earn-stats">
+            <div class="d7-es"><div class="d7-es-v">12</div><div class="d7-es-l">طلبات</div></div>
+            <div class="d7-es"><div class="d7-es-v">95%</div><div class="d7-es-l">قبول</div></div>
+            <div class="d7-es"><div class="d7-es-v">🥇</div><div class="d7-es-l">ذهبي</div></div>
+          </div>
+        </div>
+        <div class="d7-body">
+          <div class="d7-card">
+            <div class="d7-section-title">بيانات الدخول</div>
+            <input class="d7-input" placeholder="07XXXXXXXXX" readonly>
+            <input class="d7-input" type="password" placeholder="••••••••" readonly>
+            <button class="d7-btn">دخول المنصة</button>
+        <div class="d7-card">
+          <div class="d7-card-title">بيانات الدخول</div>
+          <input class="d7-inp" placeholder="07XXXXXXXXX" readonly>
+          <input class="d7-inp" type="password" placeholder="••••••••" readonly>
+          <button class="d7-btn">دخول المنصة</button>
+        </div>
+        <div class="d7-card">
+          <div class="d7-card-title">الرادار</div>
+          <div class="d7-radar">
+            <div class="d7-radar-wrap">
+              <div class="d7-ring"></div><div class="d7-ring"></div><div class="d7-ring"></div>
+              <div class="d7-core">🐝</div>
+            </div>
+            <div class="d7-radar-t">الرادار نشط</div>
+            <div class="d7-radar-d">تستقبل الطلبات الآن</div>
+            <div class="d7-tog"><button class="d7-tog-btn">إيقاف الرادار</button></div>
+          </div>
+          <div class="d7-card">
+            <div class="d7-section-title">إحصائيات اليوم</div>
+            <div class="d7-stats">
+              <div class="d7-stat"><div class="d7-stat-v">12</div><div class="d7-stat-l">طلبات</div></div>
+              <div class="d7-stat"><div class="d7-stat-v accent">45K</div><div class="d7-stat-l">د.ع</div></div>
+              <div class="d7-stat"><div class="d7-stat-v accent">95%</div><div class="d7-stat-l">قبول</div></div>
+        </div>
+        <div class="d7-card">
+          <div class="d7-card-title">طلب جديد</div>
+          <div class="d7-alert">
+            <div class="d7-alert-top">
+              <div class="d7-alert-title">🐝 طلب جديد!</div>
+              <div class="d7-countdown">45</div>
+            </div>
+            <div class="d7-arow"><span class="d7-albl">المطعم</span><span class="d7-aval">مطعم الأصدقاء</span></div>
+            <div class="d7-arow"><span class="d7-albl">المنطقة</span><span class="d7-aval" style="color:#3b82f6;">الرشيد</span></div>
+            <div class="d7-arow"><span class="d7-albl">الفاتورة</span><span class="d7-aval pr">18,500 <small style="font-size:.72rem;color:#9ca3af;">د.ع</small></span></div>
+            <button class="d7-accept">✓ قبول الطلب</button>
+          </div>
+        </div>
+        <div class="d7-card">
+          <div class="d7-card-title">طلبات نشطة</div>
+          <div class="d7-order">
+            <div class="d7-order-accent"></div>
+            <div class="d7-order-top">
+              <div><div class="d1-order-id">#NHL-089</div></div>
+              <div class="d7-order-price">12,000 د.ع</div>
+            </div>
+            <div class="d7-status-badge">⚡ في الطريق للتسليم</div>
+            <div class="d7-route-card">
+              <div class="d7-rp"><div class="d7-rp-dot pk"></div><div><div class="d7-rp-lbl">الاستلام</div><div class="d7-rp-name">مطعم السلام</div></div></div>
+              <div class="d7-rp"><div class="d7-rp-dot dr"></div><div><div class="d7-rp-lbl">التسليم</div><div class="d7-rp-name">حي الرشيد</div></div></div>
+            </div>
+            <button class="d7-cta">✓ تم التسليم</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+  <!-- ═══ DESIGN 8 ═══ -->
+  <div class="showcase-item" id="design-8">
+    <div class="showcase-label">
+      <div class="showcase-num">8</div>
+      <div class="showcase-info">
+        <h3>Duolingo Playful Bold</h3>
+        <p>مرح · ظلال سميكة · ارتداد · ألوان ناعمة</p>
+<!-- ═══════════════ D8 ═══════════════ -->
+<div class="showcase-item" id="design-8">
+  <div class="showcase-label">
+    <div class="showcase-num">8</div>
+    <div class="showcase-info"><h3>Duolingo Playful Bold</h3><p>مرح · ظلال سميكة · ارتداد عند الضغط</p></div>
+  </div>
+  <div class="showcase-card">
+    <div class="d8">
+      <div class="d8-header">
+        <div class="d8-bee-circle">🐝</div>
+        <h2>شركة نحلة!</h2>
+        <p>منصة الكباتن — Beast Edition</p>
+      </div>
+    </div>
+    <div class="showcase-card">
+      <div class="d8">
+        <div class="d8-header">
+          <div class="d8-bee-circle">🐝</div>
+          <h2>شركة نحلة!</h2>
+          <p>منصة الكباتن — Beast Edition</p>
+      <div class="d8-card">
+        <input class="d8-inp" placeholder="07XXXXXXXXX" readonly>
+        <input class="d8-inp" type="password" placeholder="••••••••" readonly>
+        <button class="d8-btn">ابدأ الشفت! 🚀</button>
+      </div>
+      <div class="d8-earn-card">
+        <div class="d8-earn-lbl">إجمالي اليوم</div>
+        <div class="d8-earn-num"><span>45,000</span> د.ع</div>
+      </div>
+      <div class="d8-stats">
+        <div class="d8-stat"><div class="d8-stat-v y">12</div><div class="d8-stat-l">طلبات</div></div>
+        <div class="d8-stat"><div class="d8-stat-v">95%</div><div class="d8-stat-l">قبول</div></div>
+        <div class="d8-stat"><div class="d8-stat-v y">🥇</div><div class="d8-stat-l">ذهبي</div></div>
+      </div>
+      <div class="d8-radar">
+        <div class="d8-radar-wrap">
+          <div class="d8-ring"></div><div class="d8-ring"></div><div class="d8-ring"></div>
+          <div class="d8-core">🐝</div>
+        </div>
+        <div class="d8-progress">
+          <div class="d8-prog-label">
+            <span>الهدف اليومي</span>
+            <span style="color:#FFC107;">5/10 طلبات</span>
+          </div>
+          <div class="d8-prog-bar"><div class="d8-prog-fill"></div></div>
+        <div class="d8-radar-t">الرادار نشط! 🟢</div>
+        <div class="d8-radar-d">تستقبل الطلبات الآن</div>
+        <div class="d8-tog"><button class="d8-tog-btn">🔴 إيقاف الرادار</button></div>
+      </div>
+      <div class="d8-alert">
+        <div class="d8-alert-top">
+          <div class="d8-alert-title">🐝 طلب جديد!</div>
+          <div class="d8-countdown">45</div>
+        </div>
+        <div class="d8-card">
+          <input class="d8-input" placeholder="07XXXXXXXXX" readonly>
+          <input class="d8-input" type="password" placeholder="كلمة المرور" readonly>
+          <button class="d8-btn">ابدأ الشفت! 🚀</button>
+        <div class="d8-arow"><span class="d8-albl">المطعم</span><span class="d8-aval">مطعم الأصدقاء</span></div>
+        <div class="d8-arow"><span class="d8-albl">المنطقة</span><span class="d8-aval" style="color:#3b82f6;">الرشيد</span></div>
+        <div class="d8-arow"><span class="d8-albl">الفاتورة</span><span class="d8-aval p">18,500 د.ع</span></div>
+        <button class="d8-accept">✓ قبول الطلب!</button>
+      </div>
+      <div class="d8-order">
+        <div class="d8-order-top">
+          <div><div class="d1-order-id">#NHL-089</div><div style="font-size:.7rem;color:#9ca3af;font-weight:700;margin-top:2px;">مطعم السلام</div></div>
+          <div class="d8-order-price">12,000 د.ع</div>
+        </div>
+        <div class="d8-stats" style="margin-top:16px;">
+          <div class="d8-stat"><div class="d8-stat-v yellow">12</div><div class="d8-stat-l">طلبات</div></div>
+          <div class="d8-stat"><div class="d8-stat-v">45K</div><div class="d8-stat-l">د.ع</div></div>
+          <div class="d8-stat"><div class="d8-stat-v yellow">95%</div><div class="d8-stat-l">قبول</div></div>
+        <div class="d8-step-bar">
+          <div class="d8-step-s d"></div>
+          <div class="d8-step-s a"></div>
+          <div class="d8-step-s"></div>
+        </div>
+        <div class="d8-rp"><div class="d8-rp-dot pk"></div><div><div style="font-size:.58rem;color:#9ca3af;font-weight:700;">الاستلام</div><div class="d8-rp-name">مطعم السلام</div></div></div>
+        <div class="d8-rp"><div class="d8-rp-dot dr"></div><div><div style="font-size:.58rem;color:#9ca3af;font-weight:700;">التسليم</div><div class="d8-rp-name">حي الرشيد</div></div></div>
+        <button class="d8-cta">✓ تم التسليم!</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+  <!-- ═══ DESIGN 9 ═══ -->
+  <div class="showcase-item" id="design-9">
+    <div class="showcase-label">
+      <div class="showcase-num">9</div>
+      <div class="showcase-info">
+        <h3>Linear Tech Precision</h3>
+        <p>تقني · دقيق · مؤشرات · قضبان علوية</p>
+<!-- ═══════════════ D9 ═══════════════ -->
+<div class="showcase-item" id="design-9">
+  <div class="showcase-label">
+    <div class="showcase-num">9</div>
+    <div class="showcase-info"><h3>Linear Tech Precision</h3><p>تقني · دقيق · مؤشرات أداء</p></div>
+  </div>
+  <div class="showcase-card">
+    <div class="d9">
+      <div class="d9-topbar">
+        <div class="d9-logo"><div class="d9-logo-mark">🐝</div><span class="d9-logo-name">شركة نحلة</span></div>
+        <div class="d9-badge">Beast V89</div>
+      </div>
+    </div>
+    <div class="showcase-card">
+      <div class="d9">
+        <div class="d9-topbar">
+          <div class="d9-logo">
+            <div class="d9-logo-mark">🐝</div>
+            <div class="d9-logo-name">شركة نحلة</div>
+      <div class="d9-body">
+        <div class="d9-section">
+          <div class="d9-section-title">المصادقة</div>
+          <input class="d9-inp" placeholder="07XXXXXXXXX" readonly>
+          <input class="d9-inp" type="password" placeholder="••••••••" readonly>
+          <button class="d9-btn">دخول المنصة →</button>
+        </div>
+        <div class="d9-section">
+          <div class="d9-section-title">مؤشرات الأداء</div>
+          <div class="d9-metric-grid">
+            <div class="d9-metric"><div class="d9-metric-trend">+3</div><div class="d9-metric-v">12</div><div class="d9-metric-l">طلبات منجزة</div></div>
+            <div class="d9-metric"><div class="d9-metric-v">45K</div><div class="d9-metric-l">د.ع إجمالي</div></div>
+            <div class="d9-metric"><div class="d9-metric-v">95%</div><div class="d9-metric-l">معدل القبول</div></div>
+            <div class="d9-metric"><div class="d9-metric-v">🥇</div><div class="d9-metric-l">مستوى ذهبي</div></div>
+          </div>
+          <div class="d9-badge">Beast V89</div>
+        </div>
+        <div class="d9-body">
+          <div class="d9-section">
+            <div class="d9-section-header">المصادقة</div>
+            <input class="d9-input" placeholder="07XXXXXXXXX" readonly>
+            <input class="d9-input" type="password" placeholder="كلمة المرور" readonly>
+            <button class="d9-btn">دخول المنصة →</button>
+        <div class="d9-section">
+          <div class="d9-section-title">الرادار</div>
+          <div class="d9-radar">
+            <div class="d9-radar-wrap">
+              <div class="d9-ring"></div><div class="d9-ring"></div><div class="d9-ring"></div>
+              <div class="d9-core">🐝</div>
+            </div>
+            <div class="d9-radar-t">الرادار نشط</div>
+            <div class="d9-radar-d">تستقبل الطلبات الآن</div>
+            <div class="d9-tog"><button class="d9-tog-btn">إيقاف →</button><button class="d9-tog-btn" style="background:#fafafa;color:#111;border:1px solid #e5e7eb;">استراحة</button></div>
+          </div>
+          <div class="d9-section">
+            <div class="d9-section-header">مؤشرات الأداء</div>
+            <div class="d9-metric-grid">
+              <div class="d9-metric">
+                <div class="d9-metric-trend">+3</div>
+                <div class="d9-metric-v">12</div>
+                <div class="d9-metric-l">طلبات منجزة</div>
+              </div>
+              <div class="d9-metric">
+                <div class="d9-metric-v">45K</div>
+                <div class="d9-metric-l">د.ع إجمالي</div>
+              </div>
+              <div class="d9-metric">
+                <div class="d9-metric-v">95%</div>
+                <div class="d9-metric-l">معدل القبول</div>
+              </div>
+              <div class="d9-metric">
+                <div class="d9-metric-v">🏆</div>
+                <div class="d9-metric-l">مستوى ذهبي</div>
+              </div>
+        </div>
+        <div class="d9-section">
+          <div class="d9-section-title">طلب جديد</div>
+          <div class="d9-alert">
+            <div class="d9-alert-top">
+              <div class="d9-alert-title">🐝 طلب جديد!</div>
+              <div class="d9-timer-box">0:45</div>
+            </div>
+            <div class="d9-arow"><span class="d9-albl">المطعم</span><span class="d9-aval">مطعم الأصدقاء</span></div>
+            <div class="d9-arow"><span class="d9-albl">المنطقة</span><span class="d9-aval" style="color:#3b82f6;">الرشيد</span></div>
+            <div class="d9-arow"><span class="d9-albl">الفاتورة</span><span class="d9-aval pr">18,500 <small style="font-size:.7rem;color:#9ca3af;">د.ع</small></span></div>
+            <button class="d9-accept">✓ قبول الطلب</button>
+          </div>
+        </div>
+        <div class="d9-section">
+          <div class="d9-section-title">طلبات نشطة</div>
+          <div class="d9-order">
+            <div class="d9-order-top">
+              <div><div class="d1-order-id">#NHL-089</div><div style="font-size:.68rem;color:#9ca3af;font-weight:700;margin-top:2px;">مطعم السلام</div></div>
+              <div class="d9-order-price">12,000 د.ع</div>
+            </div>
+            <div class="d9-steps">
+              <div class="d9-step-seg d"></div>
+              <div class="d9-step-seg a"></div>
+              <div class="d9-step-seg"></div>
+            </div>
+            <div class="d9-route">
+              <div class="d9-rp"><div class="d9-rp-dot pk"></div><div><div class="d9-rp-lbl">الاستلام</div><div class="d9-rp-name">مطعم السلام</div></div></div>
+              <div class="d9-rp"><div class="d9-rp-dot dr"></div><div><div class="d9-rp-lbl">التسليم</div><div class="d9-rp-name">حي الرشيد</div></div></div>
+            </div>
+            <button class="d9-cta">تم التسليم →</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+  <!-- ═══ DESIGN 10 ═══ -->
+  <div class="showcase-item" id="design-10">
+    <div class="showcase-label">
+      <div class="showcase-num">10</div>
+      <div class="showcase-info">
+        <h3>Toyota Corporate Bold</h3>
+        <p>مؤسسي · حواف حادة · شريط أصفر · موثوق</p>
+<!-- ═══════════════ D10 ═══════════════ -->
+<div class="showcase-item" id="design-10">
+  <div class="showcase-label">
+    <div class="showcase-num">10</div>
+    <div class="showcase-info"><h3>Toyota Corporate Bold</h3><p>مؤسسي · حواف حادة · شريط أصفر · موثوق</p></div>
+  </div>
+  <div class="showcase-card">
+    <div class="d10">
+      <div class="d10-hero">
+        <div class="d10-hero-inner">
+          <div class="d10-hero-text">
+            <div class="eyebrow">منصة الكباتن</div>
+            <h2>شركة<br>نحلة</h2>
+            <p>Beast Edition V89.0 — كركوك</p>
+          </div>
+          <div class="d10-hero-bee">🐝</div>
+        </div>
+      </div>
+    </div>
+    <div class="showcase-card">
+      <div class="d10">
+        <div class="d10-hero">
+          <div class="d10-hero-inner">
+            <div class="d10-hero-text">
+              <div class="eyebrow">منصة الكباتن</div>
+              <h2>شركة<br>نحلة 🐝</h2>
+              <p>Beast Edition V89.0 — كباتن نحلة كركوك</p>
+      <div class="d10-yellow-band">
+        <div class="d10-band-stat"><div class="d10-band-v">12</div><div class="d10-band-l">طلبات</div></div>
+        <div class="d10-band-stat"><div class="d10-band-v">45K</div><div class="d10-band-l">د.ع</div></div>
+        <div class="d10-band-stat"><div class="d10-band-v">95%</div><div class="d10-band-l">قبول</div></div>
+        <div class="d10-band-stat"><div class="d10-band-v">🥇</div><div class="d10-band-l">ذهبي</div></div>
+      </div>
+      <div class="d10-body">
+        <div class="d10-section-title">بيانات الدخول</div>
+        <input class="d10-inp" placeholder="07XXXXXXXXX" readonly>
+        <input class="d10-inp" type="password" placeholder="••••••••" readonly>
+        <button class="d10-btn"><span>دخول المنصة</span><span>←</span></button>
+        <div style="margin-top:20px;">
+          <div class="d10-section-title">الرادار</div>
+          <div class="d10-radar">
+            <div class="d10-radar-wrap">
+              <div class="d10-ring"></div><div class="d10-ring"></div><div class="d10-ring"></div>
+              <div class="d10-core">🐝</div>
+            </div>
+            <div class="d10-hero-img">🐝</div>
+            <div class="d10-radar-t">الرادار نشط</div>
+            <div class="d10-radar-d">تستقبل الطلبات الآن</div>
+            <div class="d10-tog"><button class="d10-tog-btn"><span>إيقاف الرادار</span><span>■</span></button></div>
+          </div>
+        </div>
+        <div class="d10-yellow-band">
+          <div class="d10-band-stat"><div class="d10-band-val">12</div><div class="d10-band-lbl">طلبات منجزة</div></div>
+          <div class="d10-band-stat"><div class="d10-band-val">45K</div><div class="d10-band-lbl">د.ع إجمالي</div></div>
+          <div class="d10-band-stat"><div class="d10-band-val">95%</div><div class="d10-band-lbl">معدل القبول</div></div>
+          <div class="d10-band-stat"><div class="d10-band-val">🏆</div><div class="d10-band-lbl">ذهبي</div></div>
+        <div style="margin-top:16px;">
+          <div class="d10-section-title">طلب جديد</div>
+          <div class="d10-alert">
+            <div class="d10-alert-top">
+              <div class="d10-alert-title">⚡ طلب جديد!</div>
+              <div class="d10-countdown">:45</div>
+            </div>
+            <div class="d10-arow"><span class="d10-albl">المطعم</span><span class="d10-aval">مطعم الأصدقاء</span></div>
+            <div class="d10-arow"><span class="d10-albl">المنطقة</span><span class="d10-aval" style="color:#3b82f6;">الرشيد</span></div>
+            <div class="d10-arow"><span class="d10-albl">الفاتورة</span><span class="d10-aval pr">18,500 <small style="font-size:.72rem;color:#9ca3af;">د.ع</small></span></div>
+            <button class="d10-accept"><span>✓ قبول الطلب</span><span>←</span></button>
+          </div>
+        </div>
+        <div class="d10-body">
+          <div class="d10-form-title">بيانات تسجيل الدخول</div>
+          <input class="d10-input" placeholder="07XXXXXXXXX" readonly>
+          <input class="d10-input" type="password" placeholder="••••••••" readonly>
+          <button class="d10-btn">
+            <span>دخول المنصة</span>
+            <span style="font-size:1.2rem;">←</span>
+          </button>
+          <div class="d10-features">
+            <div class="d10-feature">
+              <div class="d10-feature-icon">🎯</div>
+              <div class="d10-feature-title">الهدف اليومي</div>
+              <div class="d10-feature-desc">10 طلبات يومياً</div>
+        <div style="margin-top:16px;">
+          <div class="d10-section-title">طلبات نشطة</div>
+          <div class="d10-order">
+            <div class="d10-order-top">
+              <div><div class="d1-order-id">#NHL-089</div><div style="font-size:.68rem;color:#9ca3af;font-weight:700;margin-top:2px;">مطعم السلام</div></div>
+              <div class="d10-order-price">12,000 د.ع</div>
+            </div>
+            <div class="d10-feature">
+              <div class="d10-feature-icon">📍</div>
+              <div class="d10-feature-title">رادار ذكي</div>
+              <div class="d10-feature-desc">استقبال الطلبات تلقائي</div>
+            <div class="d10-progress">
+              <div class="d10-prog-step d"></div>
+              <div class="d10-prog-step a"></div>
+              <div class="d10-prog-step"></div>
+            </div>
+            <div class="d10-feature">
+              <div class="d10-feature-icon">💰</div>
+              <div class="d10-feature-title">محصّلات فورية</div>
+              <div class="d10-feature-desc">تتبع أرباحك لحظة بلحظة</div>
+            <div class="d10-route">
+              <div class="d10-rp"><div class="d10-rp-dot pk"></div><div><div class="d10-rp-lbl">الاستلام</div><div class="d10-rp-name">مطعم السلام</div></div></div>
+              <div class="d10-rp"><div class="d10-rp-dot dr"></div><div><div class="d10-rp-lbl">التسليم</div><div class="d10-rp-name">حي الرشيد</div></div></div>
+            </div>
+            <div class="d10-feature">
+              <div class="d10-feature-icon">🏆</div>
+              <div class="d10-feature-title">نظام المستويات</div>
+              <div class="d10-feature-desc">برونزي · فضي · ذهبي · ألماس</div>
+            <button class="d10-cta"><span>✓ تم التسليم</span><span>←</span></button>
+          </div>
+          <div class="d10-order">
+            <div class="d10-order-top">
+              <div><div class="d1-order-id">#NHL-088</div><div style="font-size:.68rem;color:#9ca3af;font-weight:700;margin-top:2px;">برجر هاوس</div></div>
+              <div class="d10-order-price">8,000 د.ع</div>
+            </div>
+            <div class="d10-progress">
+              <div class="d10-prog-step a"></div>
+              <div class="d10-prog-step"></div>
+              <div class="d10-prog-step"></div>
+            </div>
+            <div class="d10-route">
+              <div class="d10-rp"><div class="d10-rp-dot pk"></div><div><div class="d10-rp-lbl">الاستلام</div><div class="d10-rp-name">برجر هاوس</div></div></div>
+              <div class="d10-rp"><div class="d10-rp-dot dr"></div><div><div class="d10-rp-lbl">التسليم</div><div class="d10-rp-name">شارع نيسان</div></div></div>
+            </div>
+            <button class="d10-cta"><span>✓ وصلت للمطعم</span><span>←</span></button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+</div><!-- /showcase-grid -->
+<!-- ════════════ FOOTER ════════════ -->
+<div style="text-align:center; padding: 40px 20px; background: #111; color: rgba(255,255,255,0.4); font-size: 0.8rem; font-weight: 700;">
+  🐝 شركة نحلة — كباتن كركوك | Beast Edition V89.0 | جميع التصاميم بالثيم الأبيض والأصفر
+</div>
+<footer>
+  🐝 <span>شركة نحلة</span> — كباتن كركوك | Beast Edition V89.0 | 10 تصاميم عالمية بالثيم الأبيض والأصفر
+</footer>
+<script>
+function scrollToDesign(n) {
+  document.getElementById('design-' + n).scrollIntoView({ behavior: 'smooth', block: 'center' });
+function scrollTo(n) {
+  document.getElementById('design-' + n).scrollIntoView({ behavior: 'smooth', block: 'start' });
+  document.querySelectorAll('.nav-btn').forEach((b,i) => b.classList.toggle('active', i === n-1));
+}
+// Intersection Observer for active nav
+const observer = new IntersectionObserver(entries => {
+const obs = new IntersectionObserver(entries => {
+  entries.forEach(e => {
+    if (e.isIntersecting) {
+      const n = e.target.id.split('-')[1];
+      document.querySelectorAll('.nav-btn').forEach((b,i) => b.classList.toggle('active', i === +n-1));
+    }
+  });
+}, { threshold: 0.3 });
+document.querySelectorAll('.showcase-item').forEach(el => observer.observe(el));
+}, { threshold: 0.2 });
+document.querySelectorAll('.showcase-item').forEach(el => obs.observe(el));
+</script>
+</body>
+</html>
