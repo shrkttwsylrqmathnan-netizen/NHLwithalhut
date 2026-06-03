@@ -297,7 +297,7 @@
         .toggle-btn {
             flex: 1; text-align: center; padding: 10px; font-weight: 700; color: #64748b;
             border-radius: 12px; cursor: pointer; transition: 0.3s ease;
-            display: flex; align-items: center; justify-content: center; gap: 8px; font-size: 0.9rem;
+            display: flex; align-items: center; justify-content: center; gap: 4px; font-size: 0.85rem;
         }
         .toggle-btn.active { background: white; color: var(--primary-blue-dark); box-shadow: 0 2px 10px rgba(0,0,0,0.05); }
 
@@ -400,12 +400,15 @@
         .success-toast { background: var(--primary-blue-dark); color: white; border-radius: 20px; padding: 20px; margin-top: 10px; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; gap: 8px; animation: slideUp 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
         
         /* -------------------------------------
-           شاشة المصادقة (Auth Screen)
+           شاشة المصادقة والانتظار
            ------------------------------------- */
         .login-wrapper { min-height: 100vh; display: flex; flex-direction: column; background: var(--primary-blue-dark); position: relative; overflow: hidden; justify-content: space-between;}
         .login-header { padding: 40px 20px; text-align: center; color: white; margin-top: 5vh; }
         .login-header i { width: 60px; height: 60px; color: var(--nahla-yellow); margin-bottom: 15px; }
         .login-card { background: white; border-top-left-radius: 24px; border-top-right-radius: 24px; padding: 30px 25px max(30px, env(safe-area-inset-bottom)); width: 100%; box-shadow: var(--bottom-sheet-shadow); margin: 0; max-width: 100%; border: none;}
+        
+        .btn-refresh-waiting { background: #f1f5f9; color: var(--text-muted); border: 1px solid var(--border-light); font-weight: 700; border-radius: 12px; padding: 12px 20px; transition: 0.2s; border: none; }
+        .btn-edit-registration { background: transparent; color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.3); font-weight: 700; border-radius: 12px; padding: 10px; transition: 0.2s; font-size: 0.9rem; }
         
         @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
         @keyframes slideDown { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
@@ -522,7 +525,13 @@
         <div id="waitingBox" class="hidden-section text-center py-4">
             <div class="spinner-border mb-3" style="color: var(--nahla-yellow); width: 3rem; height: 3rem;" role="status"></div>
             <h5 class="fw-black mb-1 text-dark">يتم تهيئة النظام...</h5>
-            <p class="text-muted fw-bold mb-0" style="font-size: 0.8rem;" id="waitingStatusText">جاري الاتصال بقاعدة البيانات</p>
+            <p class="text-muted fw-bold mb-3" style="font-size: 0.8rem;" id="waitingStatusText">في انتظار موافقة الإدارة...</p>
+            <button class="btn-refresh-waiting mt-2 w-100" onclick="window.checkWaitingStatus()">
+                تحديث يدوي <i data-lucide="refresh-cw" size="14" class="ms-1"></i>
+            </button>
+            <button class="btn-edit-registration w-100 mt-2" onclick="window.exitWaitingRoom()">
+                تعديل معلومات التسجيل
+            </button>
         </div>
     </div>
 </div>
@@ -590,20 +599,23 @@
                         <div class="toggle-btn active" id="tabManual" onclick="switchTab('manual')">
                             إدخال يدوي
                         </div>
+                        <div class="toggle-btn" id="tabQuick" onclick="switchTab('quick')">
+                            إرسال سريع ⚡
+                        </div>
                         <div class="toggle-btn" id="tabPhoto" onclick="switchTab('photo')">
                             مسح ذكي <i data-lucide="sparkles" size="14" style="color: var(--nahla-yellow);"></i>
                         </div>
                     </div>
                     
                     <form id="orderForm">
-                        <div id="manualOnlyFields">
-                            
-                            <div class="smart-paste-btn" onclick="openPasteModal()">
+                        
+                        <div id="sharedAreaField">
+                            <div class="smart-paste-btn" id="pasteBtnSection" onclick="openPasteModal()">
                                 <i data-lucide="clipboard-paste" size="16"></i> الصق رسالة الواتساب هنا للتعبئة السريعة
                             </div>
 
                             <div class="mb-3" id="areaContainer">
-                                <label class="form-label">منطقة الزبون</label>
+                                <label class="form-label">منطقة الزبون <span id="quickHint" class="hidden-section text-danger">(فقط المنطقة مطلوبة)</span></label>
                                 <div class="smart-dropdown-wrapper" id="smartDropdownWrap">
                                     <i data-lucide="map-pin" class="search-icon-inside" size="16"></i>
                                     <input type="text" id="areaDisplayInput" class="custom-input" style="padding-left: 35px; cursor: pointer;" placeholder="ابحث عن منطقة..." autocomplete="off" onfocus="openDropdown()" oninput="filterDropdown()">
@@ -624,7 +636,9 @@
                                     </div>
                                 </div>
                             </div>
+                        </div>
 
+                        <div id="manualOnlyFields">
                             <div class="row g-3 mb-3">
                                 <div class="col-6">
                                     <label class="form-label">المبلغ (د.ع)</label>
@@ -663,7 +677,7 @@
                         </div>
 
                         <button type="submit" id="submitOrderBtn" class="magical-submit-btn">
-                            إرسال الطلب الآن <i data-lucide="arrow-left" size="18"></i>
+                            إرسال الطلب للرادار <i data-lucide="arrow-left" size="18"></i>
                         </button>
                     </form>
 
@@ -718,12 +732,11 @@
 
     if (typeof lucide !== 'undefined') lucide.createIcons();
 
-    // روابط شركة نحلة
+    // ⚡ رابط الـ API الجديد
     const API_URL   = "https://script.google.com/macros/s/AKfycbyiFprfbDKMwOG75eZl-V5_M7XmqLkmK49YBQjhHKr_Gka77Gmdgt6uU6K5KeXilMViDw/exec";
     const API_TOKEN = "NAHLA_SECURE_TOKEN_2026";
     const IMGBB_KEY = "1a0e61277eabce5db06f677dfe8d66ee"; 
 
-    // مفاتيح الذكاء الاصطناعي المجزأة (يجب عدم المساس بها)
     const SECRET_PARTS = ["AIzaSyB", "KMRsl", "Ko5hg5m", "11gHy4Z", "dM7_efk", "tiDwxU"];
 
     async function fetchGeminiWithRetry(payload, timeoutMs = 25000) {
@@ -788,7 +801,6 @@
     let currentOrderMode = 'manual';
     let base64Receipt    = null; 
     let myCustomPriceList= {};
-    let waitingPollingTimer = null; 
     let globalDriversInfo   = []; 
     
     let pickerMap;
@@ -1277,27 +1289,41 @@
         document.getElementById('loadingOverlay').style.display = s ? 'flex' : 'none';
     };
 
+    // ⚡ التبويبات والذاكرة الذكية للمطعم
     window.switchTab = function(mode, triggerSave = true) {
         currentOrderMode = mode;
         document.getElementById('tabManual').classList.remove('active');
+        document.getElementById('tabQuick').classList.remove('active');
         document.getElementById('tabPhoto').classList.remove('active');
-        document.getElementById('tabLiveOrders').style.background = 'transparent';
-        document.getElementById('tabLiveOrders').style.borderColor = 'transparent';
-        document.getElementById('tabTodayArchive').style.background = 'transparent';
-        document.getElementById('tabTodayArchive').style.borderColor = 'transparent';
         
+        const sharedArea = document.getElementById('sharedAreaField');
         const manualFields = document.getElementById('manualOnlyFields');
         const photoSection = document.getElementById('photoSection');
+        const pasteBtn = document.getElementById('pasteBtnSection');
+        const quickHint = document.getElementById('quickHint');
         
         if (mode === 'manual') {
             document.getElementById('tabManual').classList.add('active');
+            sharedArea.classList.remove('hidden-section');
             manualFields.classList.remove('hidden-section');
             photoSection.classList.add('hidden-section');
+            pasteBtn.classList.remove('hidden-section');
+            quickHint.classList.add('hidden-section');
+        } else if (mode === 'quick') {
+            document.getElementById('tabQuick').classList.add('active');
+            sharedArea.classList.remove('hidden-section');
+            manualFields.classList.add('hidden-section');
+            photoSection.classList.add('hidden-section');
+            pasteBtn.classList.add('hidden-section');
+            quickHint.classList.remove('hidden-section');
         } else {
             document.getElementById('tabPhoto').classList.add('active');
+            sharedArea.classList.add('hidden-section');
             manualFields.classList.add('hidden-section'); 
             photoSection.classList.remove('hidden-section');
         }
+
+        localStorage.setItem('hut_res_preferred_mode', mode);
         if (triggerSave) window.saveDraft();
     };
 
@@ -1413,17 +1439,31 @@
         }).catch(() => { window.showLoading(false); alert("حدث خطأ أثناء الإرسال."); });
     }
 
+    // ⚡ إيقاف الاستعلام التلقائي في غرفة الانتظار
     function showWaitingRoom() {
         document.getElementById('authBox').classList.add('hidden-section');
         document.getElementById('waitingBox').classList.remove('hidden-section');
-        if (waitingPollingTimer) clearInterval(waitingPollingTimer);
-        waitingPollingTimer = setInterval(() => window.checkWaitingStatus(false), 15000);
+        document.getElementById('waitingStatusText').innerText = "في انتظار موافقة الإدارة...";
     }
 
-    window.checkWaitingStatus = function(isManual = false) {
+    window.exitWaitingRoom = function() {
+        localStorage.removeItem('hut_res_pending');
+        localStorage.removeItem('hut_res_pending_pass');
+        document.getElementById('waitingBox').classList.add('hidden-section');
+        document.getElementById('authBox').classList.remove('hidden-section');
+        document.getElementById('checkPhone').disabled = false;
+        isRegistering = true;
+        document.getElementById('loginPassContainer').classList.add('hidden-section');
+        document.getElementById('registerFields').classList.remove('hidden-section');
+        const btn = document.getElementById('mainAuthBtn');
+        btn.innerHTML = `إرسال طلب الانضمام لنحلة <i data-lucide="send" size="16"></i>`;
+        if (typeof lucide !== 'undefined') lucide.createIcons();
+        setTimeout(window.initPickerMap, 300);
+    };
+
+    window.checkWaitingStatus = function() {
         let rawPhone = document.getElementById('checkPhone').value.trim() || localStorage.getItem('hut_res_pending');
         if (!rawPhone) return;
-        
         let phone = rawPhone.replace(/[^\d]/g, ''); 
         if(phone.startsWith('0')) phone = phone.substring(1);
         
@@ -1433,11 +1473,19 @@
             if (savedPass) pass = atob(savedPass);
         }
 
+        const btn = document.querySelector('.btn-refresh-waiting');
+        const origHtml = btn.innerHTML;
+        btn.innerHTML = `<div class="spinner-border spinner-border-sm me-2"></div> جاري التحقق...`;
+        btn.disabled = true;
+        document.getElementById('waitingStatusText').innerText = "جاري الاتصال بالخادم...";
+
         fetch(`${API_URL}?action=checkRes&phone=${phone}&password=${encodeURIComponent(pass)}&token=${API_TOKEN}`)
             .then(r => r.json())
             .then(data => {
+                btn.innerHTML = origHtml;
+                btn.disabled = false;
+                
                 if (data.status === "active" || data.status === "inactive") {
-                    clearInterval(waitingPollingTimer);
                     localStorage.removeItem('hut_res_pending');
                     localStorage.removeItem('hut_res_pending_pass');
                     currentResName = data.name;
@@ -1447,9 +1495,7 @@
                     const commRaw = data.comm || '0';
                     localStorage.setItem('hut_res_session', JSON.stringify({
                         phone, name: data.name, payType: data.payType || 'المطعم يدفع',
-                        comm: commRaw, 
-                        timestamp: Date.now(),
-                        password: btoa(pass)
+                        comm: commRaw, timestamp: Date.now(), password: btoa(pass)
                     }));
                     
                     const wAudio = document.getElementById('welcomeSound');
@@ -1457,13 +1503,15 @@
                     document.getElementById('waitingBox').classList.add('hidden-section');
                     enterDashboard();
                 } else if (data.status === "banned") {
-                    clearInterval(waitingPollingTimer); localStorage.removeItem('hut_res_pending'); localStorage.removeItem('hut_res_pending_pass');
+                    localStorage.removeItem('hut_res_pending'); localStorage.removeItem('hut_res_pending_pass');
                     alert("⚠️ حساب محظور."); location.reload();
-                } else if (data.status === "wrong_password" || data.status === "rate_limited") {
-                    clearInterval(waitingPollingTimer); localStorage.removeItem('hut_res_pending'); localStorage.removeItem('hut_res_pending_pass');
-                    alert("كلمة المرور تغيرت أو تم حظر الحساب مؤقتاً."); location.reload();
+                } else {
+                    document.getElementById('waitingStatusText').innerText = "حسابك لا يزال قيد المراجعة.";
                 }
-            }).catch(() => {});
+            }).catch(() => { 
+                btn.innerHTML = origHtml; btn.disabled = false;
+                document.getElementById('waitingStatusText').innerText = "خطأ في الاتصال بالخادم."; 
+            });
     };
 
     function handleLogin(data, phone, passAttempt) {
@@ -1515,6 +1563,10 @@
         document.getElementById('resTitle').innerText = currentResName;
         
         if (typeof lucide !== 'undefined') lucide.createIcons();
+
+        // ⚡ استرجاع الميزة المفضلة
+        const prefMode = localStorage.getItem('hut_res_preferred_mode') || 'manual';
+        window.switchTab(prefMode, false);
 
         const hasCached = loadPriceListFromCache();
         if (hasCached) { window.buildCustomAreaDropdown(); restoreDraft(); }
@@ -1790,13 +1842,14 @@
         }
     }
 
+    // ⚡ تعديل دالة الإرسال لتدعم الإرسال السريع
     document.getElementById('orderForm').onsubmit = function(e) {
         e.preventDefault();
 
         const btn = document.getElementById('submitOrderBtn'); 
         const originalBtnHtml = btn.innerHTML;
 
-        if (currentOrderMode === 'manual') {
+        if (currentOrderMode === 'manual' || currentOrderMode === 'quick') {
             let finalArea = document.getElementById('customerArea').value; 
             let areaWithHint = finalArea;
 
@@ -1807,20 +1860,38 @@
             }
 
             if (finalArea === "أخرى" || !finalArea) {
-                const cName  = document.getElementById('customAreaName').value.trim(); const cPrice = document.getElementById('customAreaPrice').value.trim();
-                if (!cName || !cPrice) return alert("يرجى تحديد المنطقة بدقة.");
-                areaWithHint = `${cName} (توصيل: ${cPrice})`; finalArea = "أخرى"; 
-            } else if (myCustomPriceList[finalArea]) { areaWithHint = `${finalArea} (توصيل: ${myCustomPriceList[finalArea]})`; }
+                const cName  = document.getElementById('customAreaName').value.trim(); 
+                const cPrice = document.getElementById('customAreaPrice').value.trim();
+                if (!cName) return alert("يرجى تحديد المنطقة بدقة.");
+                areaWithHint = cPrice ? `${cName} (توصيل: ${cPrice})` : cName; 
+                finalArea = "أخرى"; 
+            } else if (myCustomPriceList[finalArea]) { 
+                areaWithHint = `${finalArea} (توصيل: ${myCustomPriceList[finalArea]})`; 
+            }
 
-            const finalPrice = parseFloat(document.getElementById('orderPrice').value) || 0;
-            if (finalPrice === 0) return alert("الرجاء إدخال السعر الكلي.");
-            const rawCustPhone = document.getElementById('customerPhone').value.trim();
-            const { clean: cleanPhone } = window.normalizeCustomerPhone(rawCustPhone);
-            const custPhone = cleanPhone || rawCustPhone;
-            if (!custPhone) return alert("يرجى كتابة رقم الزبون المستلم.");
-            document.getElementById('customerPhone').value = custPhone;
-            const extra = document.getElementById('customerDetails').value.trim();
-            const finalDetails = `الهاتف: ${custPhone} | ${extra}`;
+            let finalPrice = 0;
+            let finalDetails = "";
+
+            if (currentOrderMode === 'manual') {
+                finalPrice = parseFloat(document.getElementById('orderPrice').value) || 0;
+                if (finalPrice === 0) return alert("الرجاء إدخال السعر الكلي.");
+                const rawCustPhone = document.getElementById('customerPhone').value.trim();
+                const { clean: cleanPhone } = window.normalizeCustomerPhone(rawCustPhone);
+                const custPhone = cleanPhone || rawCustPhone;
+                if (!custPhone) return alert("يرجى كتابة رقم الزبون المستلم.");
+                document.getElementById('customerPhone').value = custPhone;
+                const extra = document.getElementById('customerDetails').value.trim();
+                finalDetails = `الهاتف: ${custPhone} | ${extra}`;
+            } else {
+                // ⚡ وضع الإرسال السريع: لا يحتاج سعر أو تفاصيل
+                // نستخرج السعر إذا كتبه يدوياً في خيار (أخرى)، أو نجلبه من القائمة
+                if (finalArea === "أخرى") {
+                    finalPrice = parseFloat(document.getElementById('customAreaPrice').value.trim()) || 0;
+                } else {
+                    finalPrice = myCustomPriceList[finalArea] || 0; 
+                }
+                finalDetails = "⚡ طلب سريع (التفاصيل والفاتورة مع المطعم)";
+            }
             
             btn.innerHTML = `<div class="spinner-border spinner-border-sm me-1"></div> إرسال إلى الرادار...`; 
             btn.disabled  = true;
@@ -1828,12 +1899,9 @@
             
         } else {
             if (!base64Receipt) return alert("يرجى التقاط صورة للوصل أولاً باستخدام الكاميرا.");
-            
             const base64Content = base64Receipt.split(',')[1];
             const currentRes = currentResName; 
-            
             showSuccessMessage(`<div style="background: var(--success); width: 48px; height: 48px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-bottom: 8px; box-shadow: 0 4px 15px rgba(16,185,129,0.3);"><i data-lucide="check" size="24" color="white"></i></div><div class="fw-black" style="font-size: 1rem;">تم استلام الصورة! 🚀</div><div style="font-size: 0.75rem; opacity: 0.8; font-weight: 500; margin-top:4px;">يقوم الذكاء الاصطناعي بتحليلها حالياً وتوجيهها للمندوبين.</div>`);
-            
             processPhotoOrderBackgroundSafe(base64Content, currentRes);
         }
     };
@@ -1939,4 +2007,3 @@
 </script>
 </body>
 </html>
-​
