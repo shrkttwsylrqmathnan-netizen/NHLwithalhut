@@ -400,12 +400,32 @@
         .success-toast { background: var(--primary-blue-dark); color: white; border-radius: 20px; padding: 20px; margin-top: 10px; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; gap: 8px; animation: slideUp 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
         
         /* -------------------------------------
-           شاشة المصادقة والانتظار
+           شاشة المصادقة والانتظار (تم تطبيق التعديلات)
            ------------------------------------- */
-        .login-wrapper { min-height: 100vh; display: flex; flex-direction: column; background: var(--primary-blue-dark); position: relative; overflow: hidden; justify-content: space-between;}
+        .login-wrapper { 
+            min-height: 100dvh; 
+            display: flex; 
+            flex-direction: column; 
+            background: var(--primary-blue-dark); 
+            position: relative; 
+            overflow-y: auto; 
+            justify-content: space-between;
+        }
         .login-header { padding: 40px 20px; text-align: center; color: white; margin-top: 5vh; }
         .login-header i { width: 60px; height: 60px; color: var(--nahla-yellow); margin-bottom: 15px; }
-        .login-card { background: white; border-top-left-radius: 24px; border-top-right-radius: 24px; padding: 30px 25px max(30px, env(safe-area-inset-bottom)); width: 100%; box-shadow: var(--bottom-sheet-shadow); margin: 0; max-width: 100%; border: none;}
+        
+        .login-card { 
+            background: white; 
+            border-top-left-radius: 24px; 
+            border-top-right-radius: 24px; 
+            padding: 30px 25px; 
+            padding-bottom: calc(30px + env(safe-area-inset-bottom)); 
+            width: 100%; 
+            box-shadow: 0 -5px 25px rgba(0,0,0,0.1); 
+            margin: 0; 
+            max-width: 100%; 
+            border: none;
+        }
         
         .btn-refresh-waiting { background: #f1f5f9; color: var(--text-muted); border: 1px solid var(--border-light); font-weight: 700; border-radius: 12px; padding: 12px 20px; transition: 0.2s; border: none; }
         .btn-edit-registration { background: transparent; color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.3); font-weight: 700; border-radius: 12px; padding: 10px; transition: 0.2s; font-size: 0.9rem; }
@@ -449,7 +469,7 @@
         <h4 class="fw-black mb-4 text-center">تسجيل دخول المنشأة</h4>
         
         <div class="mb-3">
-            <input type="tel" id="checkPhone" class="custom-input phone-format py-3" placeholder="رقم الهاتف (07XXXXXXXXX)" dir="ltr" autocomplete="off" readonly onfocus="this.removeAttribute('readonly');">
+            <input type="tel" id="checkPhone" class="custom-input phone-format py-3" placeholder="رقم الهاتف (07XXXXXXXXX)" dir="ltr" autocomplete="off">
         </div>
         <div class="mb-4" id="loginPassContainer">
             <input type="password" id="checkPassword" class="custom-input py-3 text-center" placeholder="كلمة المرور" autocomplete="off">
@@ -521,18 +541,16 @@
         <button class="magical-submit-btn mt-2" id="mainAuthBtn" onclick="authAction()">
             دخول المنصة <i data-lucide="arrow-left" size="18"></i>
         </button>
-        
-        <div id="waitingBox" class="hidden-section text-center py-4">
-            <div class="spinner-border mb-3" style="color: var(--nahla-yellow); width: 3rem; height: 3rem;" role="status"></div>
-            <h5 class="fw-black mb-1 text-dark">يتم تهيئة النظام...</h5>
-            <p class="text-muted fw-bold mb-3" style="font-size: 0.8rem;" id="waitingStatusText">في انتظار موافقة الإدارة...</p>
-            <button class="btn-refresh-waiting mt-2 w-100" onclick="window.checkWaitingStatus()">
-                تحديث يدوي <i data-lucide="refresh-cw" size="14" class="ms-1"></i>
-            </button>
-            <button class="btn-edit-registration w-100 mt-2" onclick="window.exitWaitingRoom()">
-                تعديل معلومات التسجيل
-            </button>
-        </div>
+    </div> <div id="waitingBox" class="login-card hidden-section text-center py-4">
+        <div class="spinner-border mb-3" style="color: var(--nahla-yellow); width: 3rem; height: 3rem;" role="status"></div>
+        <h5 class="fw-black mb-1 text-dark">يتم تهيئة النظام...</h5>
+        <p class="text-muted fw-bold mb-3" style="font-size: 0.8rem;" id="waitingStatusText">في انتظار موافقة الإدارة...</p>
+        <button class="btn-refresh-waiting mt-2 w-100" onclick="window.checkWaitingStatus()">
+            تحديث يدوي <i data-lucide="refresh-cw" size="14" class="ms-1"></i>
+        </button>
+        <button class="btn-edit-registration w-100 mt-2" onclick="window.exitWaitingRoom()">
+            تعديل معلومات التسجيل
+        </button>
     </div>
 </div>
 
