@@ -1,0 +1,1318 @@
+// ═══════════════════════════════════════════════════════════════════════════
+// 🐝 نظام نحلة كركوك السحابي — Google Apps Script
+//   الإصدار المؤسسي V93.0 (Nahla Fortress Edition — نظام الموظفين + إدارة الموظفين من الدشبورد)
+//
+//   الترقية الأمنية الكبرى — نقل المصادقة من "المفتاح السري" المكشوف إلى:
+//     ① OAuth 2.0 (Bearer Token) للسيرفر بدل Database Secret القديم.
+//     ② توكنات هوية (Custom Tokens) للكباتن/المطاعم/الإدارة بأدوار (Roles) لعزل قاعدة البيانات.
+//     ③ تعقيم المدخلات (Sanitization) لمنع حقن الصيغ في الشيت وكسر JSON.
+//     ④ نظام رصد بريدي للأعطال (Stack Trace) + سجل أخطاء صامت + كنّاس تنظيف أسبوعي.
+//
+//   🧠 محرك التوزيع (نظام الزونات) والرقيب انتقلا إلى Cloud Functions للتشغيل اللحظي في أوروبا.
+//      مهام هذا السكربت: تسجيل الدخول/التسجيل، توكنات الهوية، التقارير والأرشفة، ونظام الموظفين/الليدرز (STAFF_*).
+// ═══════════════════════════════════════════════════════════════════════════
+
+
+// ───────────────────────────────────────────────────────────────────────────
+//  القسم 1 — الإعداد والثوابت
+// ───────────────────────────────────────────────────────────────────────────
+
+function setupSecureProperties() {
+  const props = PropertiesService.getScriptProperties();
+  props.setProperties({
+    // قيم غير سرية (يمكن إبقاؤها):
+    "SPREADSHEET_ID"  : "1iytLhJmlgYL8iiSlt8_42hJOZ8qGjJxVPQRVs-e2u2k",
+    "FIREBASE_DB_URL" : "https://nahla-delivery-6b06f-default-rtdb.europe-west1.firebasedatabase.app",
+
+    // المفاتيح الحقيقية للنظام:
+    "API_TOKEN"       : "NAHLA_SECURE_TOKEN_2026",
+    "FIREBASE_SECRET" : "AtbPz6seoN418MCTAgtFljxn4NhsaGR3j8VqHiGq",
+
+    // مفاتيح حساب الخدمة لتوليد التوكنات (OAuth & Custom Tokens):
+    "FIREBASE_CLIENT_EMAIL" : "firebase-adminsdk-fbsvc@nahla-delivery-6b06f.iam.gserviceaccount.com",
+    "FIREBASE_PRIVATE_KEY"  : "-----BEGIN PRIVATE KEY-----\nMIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQC4svaH+8/mac1k\nknun89Igng5WEH/cowQgCi8sQjxDBbDrn/JRcJxIYNXeWDboooC8KwHM+AdtFqUz\nSg3fHNkPBWgFXPBSYLlTAKn4JkJ30rflwc9c1vqtfEJDW9Qz8Kv+pP4rtqmRZeXl\nvsX73csoosD12+VBett4Ulos2Y+GjnxWVyUtk/Q+ITzscTlXS/XVeWdwpBNl0EGy\nFim99FnGY7+w6xprgGukU+24cj3ONLWKubJVKydWaK4+Gn0lopwLNyGDt6g9di36\nzd7ThvGBnNYyAuS5iQQBsWOncVGZbyoq1znbCmaIFpen07GfqAHblxWX4AkFdz+T\nKg5XWNxBAgMBAAECggEABOFWbRTX1yuVcahi0d75/tpzSDYR1VL1vOmc+go+3rHc\nxSiP++O1/u33V7NwsbpZvMMVhlCZTGIzU7LjsYEI+ZYJ096zE0emzO8PBqlu4xzx\nVs3ldmtgIrduViqb9YKA7mrGVCIMqmTBB55QG5feZmKwxtxIWy/ZgsUZCK9n1Nkl\naUPaz1HzuOUXi9pCC00M5G83CGW8l+CKTb88Zy8u++4Wcv3TZ3tAJZ2WYsP+vgDY\nmOHJS7OWY/K/nY+Zt1MCxrUevuFPqvSXdw9SjsZfRp3wuHZfmt8qFBk98uU//fEf\neAd5LNzde73x81CNSwE7cckPcW5wqFUlsgqCngvYIQKBgQDbJ/ozfJADZhgzEHA6\n2glIZmz+YlfTY28Lszwnkx4jv/QJqplyVMTWYV5ra/SnoWh6ocHjOArP4jZ/qdZ/\nNAURTuZHcoOzsq9ZVQiXLqXRUoAxdrTDSALqUrKP61Ul5xNlA3OUCndBcpl1qQkM\nbrzoAMIuilWZGHB7d6HuPaQfYQKBgQDXwAZUSSCA81ag4HQ6gaBIu4FMK3XJ3N/e\nret0NgNkM8iSxKKCnjEUTeMlFSYBwyzCz5gxf//PEgy+EoIWirPKSCHwg9mgGRJI\n3YR5QGOyysc8tidt7QTYGlKcQfuGY3BiHTFJ7nyrPhbj21al3c7eCMoMkA4ZYied\nGhxaZQZI4QKBgACJ05qGxs/LU2nks3HhkT5FSiVB1pdlWiN8ODycpulNkmrnqWLX\nhHhGWvYGmN5Ejj4m4ZQOUjB6jMm5gBZl6VFGkVhBlsM9QCMHC3NboPqnqjr04LLO\nHXu34kpqOJZUP/7yiDkn4W0eu/PHC4elSf+D6PY2TsmGftg+zf4I1rthAoGADj6g\nbFozqi/mzVJkeiRq18KBg+zupvhNU596Bz81tBzzJjWTYTpelS+bSqx9yOoA/4/D\nRalk02AmtTn1mtVnj3h5vS6HZNmi6mqtv2+v5XMb+ncwXUKj6jy6rZRxrerM1b2F\nrpLvakL8MekebG8bpG9CH9g3BhgD84xwyMsYwiECgYEA0+rtYMxhuMGrPAocejJo\njneVLPDBLxBEfgGmlZl32zHRYDMijLiEfApAEEPxLQ7FxwSaeGO6hYh/hTEUX9Ep\n9muaKVBFDqC7ZopKgkm/XO/OrSguStReg/R8AhHBIpLh/rXZswDqKYzdm8axKvJn\nV8mhjgQkbpmVpVO5USh4pLQ=\n-----END PRIVATE KEY-----\n",
+
+    "ADMIN_EMAIL"     : "shrkttwsylrqmathnan@gmail.com",
+    "PARTNER_EMAIL"   : "", 
+
+    "SETUP_DONE"      : "true"
+  });
+  Logger.log("✅ تم حفظ مفاتيح نحلة بنجاح مع حساب الخدمة الجديد.");
+}
+
+function getConfig() {
+  const props = PropertiesService.getScriptProperties();
+  const cfg = {
+    SPREADSHEET_ID        : props.getProperty("SPREADSHEET_ID"),
+    API_TOKEN             : props.getProperty("API_TOKEN"),
+    FIREBASE_DB_URL       : props.getProperty("FIREBASE_DB_URL"),
+    FIREBASE_SECRET       : props.getProperty("FIREBASE_SECRET"),
+    ADMIN_EMAIL           : props.getProperty("ADMIN_EMAIL") || "",
+    PARTNER_EMAIL         : props.getProperty("PARTNER_EMAIL") || "",
+    FIREBASE_CLIENT_EMAIL : props.getProperty("FIREBASE_CLIENT_EMAIL"),
+    FIREBASE_PRIVATE_KEY  : props.getProperty("FIREBASE_PRIVATE_KEY")
+  };
+  if (!cfg.SPREADSHEET_ID) throw new Error("🔴 FATAL: مفاتيح الإعداد غير موجودة. شغّل setupSecureProperties أولاً.");
+  return cfg;
+}
+
+function getSS() { return SpreadsheetApp.openById(getConfig().SPREADSHEET_ID); }
+
+const CACHE_TIME    = 21600;
+const RES_CACHE_KEY = "HUT_RESTAURANTS_V3";
+
+const CFG = {
+  // ── سياسات التوزيع (عقل نحلة كما هو) ──
+  OFFER_PENALTY_MINS    : 4,  DRIVER_OFFLINE_MINS   : 7,  MAX_LOAD_NORMAL       : 2,  MAX_LOAD_CRISIS       : 3,
+  CRISIS_RATIO          : 1.0, CRISIS_MIN_ORDERS    : 10, RADIUS_FRESH_KM       : 6,  RADIUS_NORMAL_KM      : 12,
+  RADIUS_OLD_KM         : 25, STALLED_ACCEPTED_MINS : 25, STALLED_ARRIVED_MINS  : 20, EXPIRE_ORDER_HOURS    : 24,
+  ENGINE_LOCK_MS        : 25000, WATCHDOG_LOCK_MS    : 30000, ARCHIVE_LOCK_MS     : 300000,
+  QUOTA_DAILY_WARN      : 1500,
+
+  // ── سياسات الأمان (طبقة سفيان) ──
+  BF_MAX_ATTEMPTS       : 5,  BF_WINDOW_SECS        : 900,
+  CB_FAIL_THRESHOLD     : 3,  CB_OPEN_SECS          : 300,
+  EMAIL_THROTTLE_SECS   : 1800,
+  FB_RETRY_MAX          : 2,  FB_RETRY_DELAY_MS     : 600,
+  ENTITY_SESSION_SECS   : 43200
+};
+
+
+// ───────────────────────────────────────────────────────────────────────────
+//  القسم 2 — أدوات التنسيق والتعقيم
+// ───────────────────────────────────────────────────────────────────────────
+
+function normalizePhone(phone) {
+  if (!phone) return ""; let p = String(phone).trim();
+  const ar = ['٠','١','٢','٣','٤','٥','٦','٧','٨','٩'];
+  for (let i = 0; i < 10; i++) p = p.replace(new RegExp(ar[i], 'g'), String(i));
+  let clean = p.replace(/\D/g, '');
+  if (clean.startsWith('0')) clean = clean.substring(1);
+  return clean;
+}
+
+function cleanNumber(val) {
+  if (!val) return 0;
+  const num = Number(String(val).replace(/[^\d.-]/g, ''));
+  return isNaN(num) ? 0 : num;
+}
+
+// ✅ يمنع حقن الصيغ (=,+,-,@) في خلايا الشيت + يزيل المحارف الخطيرة
+function sanitizeForSheet(val) {
+  if (val === null || val === undefined) return "";
+  let s = String(val);
+  if (/^[=+\-@\t\r]/.test(s)) s = "'" + s;
+  return s.replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F]/g, "");
+}
+
+function sanitizeInput(val, maxLen) {
+  if (val === null || val === undefined) return "";
+  let s = String(val).replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F]/g, "").trim();
+  if (maxLen && s.length > maxLen) s = s.substring(0, maxLen);
+  return s;
+}
+
+function escapeHtml(val) {
+  if (val === null || val === undefined) return "";
+  return String(val).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#39;");
+}
+
+function createResponse(data, callback) {
+  const output = JSON.stringify(data);
+  if (callback) {
+    if (!/^[a-zA-Z_$][a-zA-Z0-9_$]*$/.test(callback)) return ContentService.createTextOutput(JSON.stringify({ success: false, msg: "callback invalid" })).setMimeType(ContentService.MimeType.JSON);
+    return ContentService.createTextOutput(callback + "(" + output + ")").setMimeType(ContentService.MimeType.JAVASCRIPT);
+  }
+  return ContentService.createTextOutput(output).setMimeType(ContentService.MimeType.JSON);
+}
+
+function invalidateResCache() { CacheService.getScriptCache().remove(RES_CACHE_KEY); }
+function validateOrderId(id) { return id && /^[a-zA-Z0-9_\-]{3,60}$/.test(String(id).trim()); }
+function validatePhone(phone) { const n = normalizePhone(phone); return n.length >= 7 && n.length <= 15; }
+function validateLatLng(lat, lng) { const la = Number(lat), lo = Number(lng); return !isNaN(la) && !isNaN(lo) && la >= -90 && la <= 90 && lo >= -180 && lo <= 180; }
+function validatePrice(price) { const p = cleanNumber(price); return p >= 0 && p < 10000000; }
+
+
+// ───────────────────────────────────────────────────────────────────────────
+//  القسم 3 — منطق العمولة  (نظام الزونات انتقل إلى Cloud Functions)
+// ───────────────────────────────────────────────────────────────────────────
+
+function parseCommissionRule(commStr, payTypeStr) {
+  const str = String(commStr).toLowerCase().trim();
+  const pType = String(payTypeStr || "").trim();
+  let baseDrv = 0, baseRes = 0, isMonthly = false;
+
+  if (str.includes("شهري") || str === "monthly") {
+    isMonthly = true;
+  } else if (str.includes("/") || str.includes("-") || str.includes("\\")) {
+    const parts = str.split(/[\/\-\\]/);
+    baseDrv = cleanNumber(parts[0]);
+    baseRes = cleanNumber(parts[1]);
+    return { drv: baseDrv, res: baseRes, isMonthly: false };
+  } else {
+    const val = cleanNumber(str);
+    if (pType.includes("مناصفة")) { baseDrv = val / 2; baseRes = val / 2; }
+    else { baseDrv = 0; baseRes = val; }
+  }
+  return { drv: baseDrv, res: baseRes, isMonthly: isMonthly };
+}
+
+// ───────────────────────────────────────────────────────────────────────────
+//  القسم 4 — الرصد البريدي + السجل الصامت + قاطع الدائرة + الحماية من التخمين
+// ───────────────────────────────────────────────────────────────────────────
+
+// ✅ إيميل طوارئ مفصّل بالـ Stack Trace (مع كبح للتكرار)
+function reportEmergency(context, error, suggestion) {
+  let msg = (error && error.stack) ? error.stack : (error && error.toString ? error.toString() : String(error));
+  Logger.log("🚨 [" + context + "] " + msg);
+  try {
+    const cache = CacheService.getScriptCache();
+    const throttleKey = "EMERG_" + context.replace(/[^a-zA-Z0-9]/g, "_").substring(0, 30);
+    if (cache.get(throttleKey)) return;
+    cache.put(throttleKey, "1", CFG.EMAIL_THROTTLE_SECS);
+
+    const email = getConfig().ADMIN_EMAIL;
+    if (!email || email.indexOf("@") < 0) return;
+
+    const html =
+      "<div dir='rtl' style='font-family:Tahoma,Arial,sans-serif;background:#fff5f5;padding:30px;border-radius:16px;border:2px solid #feb2b2;color:#2d3748;line-height:1.8;'>" +
+        "<h2 style='color:#e53e3e;border-bottom:2px solid #feb2b2;padding-bottom:10px;margin-top:0;'>🚨 تقرير فني دقيق — نظام نحلة كركوك</h2>" +
+        "<p style='font-size:15px;'><b>موقع الخلل:</b> <span style='background:#fed7d7;padding:4px 10px;border-radius:8px;font-weight:bold;color:#c53030;'>" + escapeHtml(context) + "</span></p>" +
+        "<p style='font-size:15px;margin-bottom:4px;'><b>التقرير البرمجي (Stack Trace):</b></p>" +
+        "<pre style='background:#1a202c;color:#f7fafc;padding:16px;border-radius:10px;overflow-x:auto;font-family:Courier,monospace;font-size:13px;line-height:1.5;direction:ltr;text-align:left;'>" + escapeHtml(msg) + "</pre>" +
+        (suggestion ? "<p style='font-size:15px;'><b>الإجراء المقترح:</b> <span style='color:#2f855a;font-weight:bold;'>" + escapeHtml(suggestion) + "</span></p>" : "") +
+        "<div style='border-top:1px dashed #cbd5e0;margin-top:20px;padding-top:10px;font-size:12px;color:#718096;'>⏳ " + new Date().toLocaleString("ar-EG") + " | الرقابة الذاتية لنظام نحلة</div>" +
+      "</div>";
+    const mailOptions = { to: email, subject: "🚨 إنذار تقني من خادم نحلة — " + context, htmlBody: html };
+    if (getConfig().PARTNER_EMAIL) mailOptions.cc = getConfig().PARTNER_EMAIL;
+    MailApp.sendEmail(mailOptions);
+  } catch (e) { Logger.log("فشل إرسال الطوارئ: " + e.toString()); }
+}
+
+// ✅ سجل أخطاء صامت (لا يوقف النظام) — يستخدم fetch خام لتجنب التكرار اللانهائي
+function logSilentError(context, errObj) {
+  try {
+    const msg = (errObj && errObj.stack) ? errObj.stack : String(errObj);
+    Logger.log("🤫 [SILENT] " + context + ": " + msg);
+    const config = getConfig();
+    const token = getGoogleAccessToken();
+    let url = config.FIREBASE_DB_URL + "/system_logs/silent_errors.json";
+    const opts = {
+      method: "post", contentType: "application/json",
+      payload: JSON.stringify({ context: context, msg: msg, ts: new Date().toISOString() }),
+      muteHttpExceptions: true
+    };
+    if (token) { opts.headers = { Authorization: "Bearer " + token }; }
+    else { url += "?auth=" + config.FIREBASE_SECRET; }
+    UrlFetchApp.fetch(url, opts);
+  } catch (e) {}
+}
+
+// سجل أحداث على الشيت (متوافق مع نحلة القديمة)
+function logEvent(action, message, level) {
+  level = level || "INFO";
+  try {
+    const ss = getSS();
+    let sheet = ss.getSheetByName("SystemLogs");
+    if (!sheet) {
+      sheet = ss.insertSheet("SystemLogs");
+      sheet.appendRow(["Timestamp", "Level", "Action", "Message"]);
+      sheet.getRange(1, 1, 1, 4).setFontWeight("bold");
+    }
+    sheet.appendRow([new Date().toISOString(), level, action, String(message).substring(0, 500)]);
+  } catch (e) {}
+}
+
+// قاطع الدائرة (Circuit Breaker) لكل خدمة على حدة
+function cbKey(name) { return "CB_" + name; }
+function cbFailKey(name) { return "CBFAIL_" + name; }
+function isCircuitOpen(name) { return CacheService.getScriptCache().get(cbKey(name)) === "OPEN"; }
+function cbRecordSuccess(name) { CacheService.getScriptCache().remove(cbFailKey(name)); CacheService.getScriptCache().remove(cbKey(name)); }
+function cbRecordFailure(name) {
+  const c = CacheService.getScriptCache();
+  const fails = (parseInt(c.get(cbFailKey(name))) || 0) + 1;
+  c.put(cbFailKey(name), String(fails), CFG.CB_OPEN_SECS);
+  if (fails >= CFG.CB_FAIL_THRESHOLD) { c.put(cbKey(name), "OPEN", CFG.CB_OPEN_SECS); reportEmergency("CircuitBreaker:" + name, "تم تعليق الخدمة 5 دقائق بعد " + fails + " إخفاقات.", "تحقق من اتصال Firebase."); }
+}
+
+// الحماية من تخمين كلمات المرور (Brute Force)
+function bfKey(id) { return "BF_" + String(id).replace(/[^a-zA-Z0-9]/g, '_'); }
+function bfIsBlocked(id) { return (parseInt(CacheService.getScriptCache().get(bfKey(id))) || 0) >= CFG.BF_MAX_ATTEMPTS; }
+function bfRecordFail(id) {
+  const c = CacheService.getScriptCache();
+  const attempts = (parseInt(c.get(bfKey(id))) || 0) + 1;
+  c.put(bfKey(id), String(attempts), CFG.BF_WINDOW_SECS);
+  if (attempts >= CFG.BF_MAX_ATTEMPTS) logEvent("BruteForce", "حظر مؤقت: " + id, "WARN");
+}
+function bfReset(id) { CacheService.getScriptCache().remove(bfKey(id)); }
+
+
+// ───────────────────────────────────────────────────────────────────────────
+//  القسم 5 — المصادقة الحديثة (OAuth 2.0 + توكنات الهوية)
+// ───────────────────────────────────────────────────────────────────────────
+
+// ✅ توكن هوية للعميل (كابتن/مطعم/مدير) يحمل الدور — يُوقّع محلياً بمفتاح حساب الخدمة
+function createFirebaseCustomToken(uid, role) {
+  try {
+    const config = getConfig();
+    if (!config.FIREBASE_PRIVATE_KEY || !config.FIREBASE_CLIENT_EMAIL) return null;
+    const header = { alg: "RS256", typ: "JWT" };
+    const now = Math.floor(Date.now() / 1000);
+    const payload = {
+      iss: config.FIREBASE_CLIENT_EMAIL,
+      sub: config.FIREBASE_CLIENT_EMAIL,
+      aud: "https://identitytoolkit.googleapis.com/google.identity.identitytoolkit.v1.IdentityToolkit",
+      iat: now, exp: now + 3600,
+      uid: uid,
+      claims: { role: role }
+    };
+    const encodedHeader  = Utilities.base64EncodeWebSafe(JSON.stringify(header));
+    const encodedPayload = Utilities.base64EncodeWebSafe(JSON.stringify(payload));
+    const toSign = encodedHeader + "." + encodedPayload;
+    let privateKey = config.FIREBASE_PRIVATE_KEY.toString().trim().replace(/\\n/g, '\n');
+    const signature = Utilities.computeRsaSha256Signature(toSign, privateKey);
+    return toSign + "." + Utilities.base64EncodeWebSafe(signature);
+  } catch (e) { Logger.log("خطأ في توليد توكن الهوية: " + e.toString()); return null; }
+}
+
+// ✅ مفتاح وصول OAuth 2.0 للسيرفر (البديل المستديم للمفتاح السري) — صلاحية مدير على القاعدة
+function getGoogleAccessToken() {
+  const cache = CacheService.getScriptCache();
+  const cached = cache.get("G_OAUTH_TOKEN");
+  if (cached) return cached;
+  try {
+    const config = getConfig();
+    if (!config.FIREBASE_PRIVATE_KEY || !config.FIREBASE_CLIENT_EMAIL) return null;
+    const header = { alg: "RS256", typ: "JWT" };
+    const now = Math.floor(Date.now() / 1000);
+    const payload = {
+      iss: config.FIREBASE_CLIENT_EMAIL,
+      scope: "https://www.googleapis.com/auth/firebase.database https://www.googleapis.com/auth/userinfo.email",
+      aud: "https://oauth2.googleapis.com/token",
+      exp: now + 3600, iat: now
+    };
+    const toSign = Utilities.base64EncodeWebSafe(JSON.stringify(header)) + "." + Utilities.base64EncodeWebSafe(JSON.stringify(payload));
+    let pk = config.FIREBASE_PRIVATE_KEY.toString().trim().replace(/\\n/g, '\n');
+    const signature = Utilities.computeRsaSha256Signature(toSign, pk);
+    const jwt = toSign + "." + Utilities.base64EncodeWebSafe(signature);
+    const res = UrlFetchApp.fetch("https://oauth2.googleapis.com/token", {
+      method: "post",
+      payload: { grant_type: "urn:ietf:params:oauth:grant-type:jwt-bearer", assertion: jwt },
+      muteHttpExceptions: true
+    });
+    const data = JSON.parse(res.getContentText());
+    if (data.access_token) { cache.put("G_OAUTH_TOKEN", data.access_token, 3000); return data.access_token; }
+    Logger.log("لا يوجد access_token: " + res.getContentText().substring(0, 300));
+  } catch (e) { Logger.log("خطأ في توليد توكن الوصول: " + e.toString()); }
+  return null;
+}
+
+function createEntitySession(phone, role) {
+  const token = Utilities.getUuid();
+  CacheService.getScriptCache().put("ENT_SESS_" + token, JSON.stringify({ phone: phone, role: role, ts: Date.now() }), CFG.ENTITY_SESSION_SECS);
+  return token;
+}
+
+
+// ───────────────────────────────────────────────────────────────────────────
+//  القسم 6 — طبقة فايربيس (Bearer Token + إعادة محاولة + احتياط بالسر القديم)
+// ───────────────────────────────────────────────────────────────────────────
+
+function fbFetchRaw(path, method, payload, maxRetries) {
+  const config = getConfig();
+  const retries = (maxRetries === undefined) ? CFG.FB_RETRY_MAX : maxRetries;
+  const opts = { method: method || "get", muteHttpExceptions: true };
+  if (payload !== undefined) { opts.contentType = "application/json"; opts.payload = JSON.stringify(payload); }
+
+  const token = getGoogleAccessToken();
+  let url = config.FIREBASE_DB_URL + "/" + path;
+  if (token) { opts.headers = { Authorization: "Bearer " + token }; }
+  else { url += (path.indexOf("?") > -1 ? "&" : "?") + "auth=" + config.FIREBASE_SECRET; }
+
+  let lastErr = null;
+  for (let attempt = 0; attempt <= retries; attempt++) {
+    try {
+      const res = UrlFetchApp.fetch(url, opts);
+      const code = res.getResponseCode();
+      if (code >= 200 && code < 300) return res;
+      if (code < 500) return res; // أخطاء العميل لا تُعاد محاولتها
+      lastErr = "HTTP " + code;
+    } catch (e) { lastErr = e.toString(); }
+    if (attempt < retries) Utilities.sleep(CFG.FB_RETRY_DELAY_MS * (attempt + 1));
+  }
+  logSilentError("fbFetchRaw Failed", lastErr);
+  throw new Error("Firebase Request Failed: " + lastErr);
+}
+
+function fbFetch(path, method, payload) { return fbFetchRaw(path, method, payload); }
+function fbPatch(path, data) { return fbFetchRaw(path, "patch", data); }
+function fbPut(path, data)   { return fbFetchRaw(path, "put",   data); }
+function fbDelete(path)      { return fbFetchRaw(path, "delete");      }
+
+function fbGet(path) {
+  try {
+    const res = fbFetchRaw(path, "get");
+    if (res.getResponseCode() < 200 || res.getResponseCode() >= 300) return null;
+    return JSON.parse(res.getContentText());
+  } catch (e) { logSilentError("fbGet", e); return null; }
+}
+
+function fbGetFiltered(path, queryStr) {
+  const res = fbFetchRaw(path + queryStr, "get");
+  if (res.getResponseCode() < 200 || res.getResponseCode() >= 300) throw new Error("Firebase GET Filtered failed");
+  return JSON.parse(res.getContentText());
+}
+
+function updateFirebaseOrder(orderId, updateData) {
+  const safeId = sanitizeInput(orderId, 60);
+  if (!safeId) return false;
+  try { if (updateData === null) fbDelete("active_orders/" + safeId + ".json"); else fbPatch("active_orders/" + safeId + ".json", updateData); return true; }
+  catch (e) { logSilentError("updateFirebaseOrder", e); return false; }
+}
+function pushBanStatusToFirebase(driverPhone, isBanned) { const clean = normalizePhone(driverPhone); if (clean) { try { fbPut("drivers_locations/" + clean + "/account_status.json", isBanned ? "banned" : "active"); } catch (e) { logSilentError("pushBanStatusToFirebase", e); } } }
+function pushEmergencyAlert(orderId, message) { try { fbPut("system_alerts/emergency_" + sanitizeInput(orderId, 60) + "_" + Date.now() + ".json", { orderId: orderId, message: message, ts: new Date().toISOString(), read: false }); } catch (e) { logSilentError("pushEmergencyAlert", e); } }
+
+
+// ───────────────────────────────────────────────────────────────────────────
+//  القسم 7 — بوابة الـ API (doGet & doPost)
+// ───────────────────────────────────────────────────────────────────────────
+
+function doGet(e) {
+  try {
+    const config = getConfig();
+    if (!e || !e.parameter || !e.parameter.token) return ContentService.createTextOutput("🐝 سيرفر نحلة V90.0 يعمل بأمان حديث (OAuth).");
+    if (e.parameter.token !== config.API_TOKEN) return createResponse({ success: false, msg: "مرفوض." }, e.parameter.callback);
+
+    const action = sanitizeInput(e.parameter.action, 40);
+    if (action.indexOf("STAFF_") === 0) return createResponse(routeStaffAction(e.parameter), e.parameter.callback);
+    let result;
+
+    switch (action) {
+      case "getGlobalData": result = getGlobalData(); break;
+      case "checkRes":      result = handleEntityCheck("Restaurants", e.parameter.phone, e.parameter.password); break;
+      case "checkDriver":   result = handleEntityCheck("Drivers", e.parameter.phone, e.parameter.password); break;
+      case "DRIVER_UPDATE": result = (validatePhone(e.parameter.phone) && validateLatLng(e.parameter.lat, e.parameter.lng)) ? syncDriverData(e.parameter) : { success: false }; break;
+      case "START_SHIFT":   result = handleStartShift(e.parameter.phone); break;
+      case "DECLINE_ORDER": result = handleDeclineOrder(e.parameter.orderId, e.parameter.driverPhone); break;
+      default: result = { success: false, msg: "إجراء غير معروف." };
+    }
+    return createResponse(result, e.parameter.callback);
+  } catch (err) {
+    reportEmergency("doGet Gateway", err, "عطل أثناء معالجة طلب GET.");
+    return createResponse({ success: false, msg: "ضغط حالياً." }, e && e.parameter ? e.parameter.callback : null);
+  }
+}
+
+function doPost(e) {
+  let lock = null;
+  try {
+    if (!e || !e.postData || !e.postData.contents) return createResponse({ success: false, msg: "لا بيانات." });
+    let data;
+    try { data = JSON.parse(e.postData.contents); } catch (err) { return createResponse({ success: false, msg: "JSON غير صالح." }); }
+    if (!data || data.token !== getConfig().API_TOKEN) return createResponse({ success: false, msg: "مرفوض." });
+
+    const action = sanitizeInput(data.action, 40);
+    lock = LockService.getScriptLock();
+    let res = { success: false, msg: "إجراء غير معروف." };
+
+    const ADMIN_ACTIONS = ["RESET_DEBT","ASSIGN_DRIVER","TOGGLE_SHIFTS","ADMIN_UPDATE_STATUS","VERIFY_MASTER_PASS","RUN_NIGHTLY_CLEANER","updateEntityInfo","LIST_EMPLOYEES","MANAGE_EMPLOYEE"];
+
+    if (ADMIN_ACTIONS.indexOf(action) > -1) {
+      const realPass = getSS().getSheetByName("Settings").getRange("B2").getValue().toString().trim();
+      const incoming = (data.pass || "").toString().trim();
+      if (bfIsBlocked("ADMIN_PASS")) return createResponse({ success: false, msg: "محظور مؤقتاً." });
+      if (incoming !== realPass) { bfRecordFail("ADMIN_PASS"); return createResponse({ success: false, msg: "كلمة مرور الإدارة خاطئة." }); }
+      bfReset("ADMIN_PASS");
+
+      switch (action) {
+        // ✅ يصدر توكن هوية للمدير ليتمكن تطبيق الإدارة من الكتابة وفق القواعد
+        case "VERIFY_MASTER_PASS": res = { success: true, firebase_token: createFirebaseCustomToken("admin", "admin") }; break;
+        case "TOGGLE_SHIFTS": fbPut("system_settings/shifts_enabled.json", data.state === true || data.state === "true"); res = { success: true }; break;
+        case "ADMIN_UPDATE_STATUS": res = adminUpdateStatus(data.type, data.id, data.status); break;
+        case "RESET_DEBT": res = resetDebtForEntity(data.type, data.id); break;
+        case "ASSIGN_DRIVER": res = manualAssignDriver(data.orderId, data.driverPhone); break;
+        case "RUN_NIGHTLY_CLEANER": res = nightlySummaryAndCleaner(); break;
+        case "LIST_EMPLOYEES": res = handleListEmployees(); break;
+        case "MANAGE_EMPLOYEE": res = handleManageEmployee(data.sub, data.payload); break;
+        case "updateEntityInfo":
+          if (!lock.tryLock(15000)) return createResponse({ success: false, msg: "النظام مشغول، أعد المحاولة." });
+          res = updateEntityRecord(data.type, data.phone, data.updates || {});
+          break;
+      }
+      return createResponse(res);
+    }
+
+    switch (action) {
+      case "RESTAURANT_REG":
+        if (!lock.tryLock(15000)) return createResponse({ success: false, msg: "مشغول." });
+        res = handleRestaurantReg(data); break;
+      case "DRIVER_REG":
+        if (!lock.tryLock(15000)) return createResponse({ success: false, msg: "مشغول." });
+        res = handleDriverReg(data); break;
+      case "DECLINE_ORDER": res = handleDeclineOrder(data.orderId, data.driverPhone); break;
+      case "DRIVER_UPDATE": res = syncDriverData(data); break;
+      case "NEW_ORDER":     res = { success: true }; break;
+    }
+    return createResponse(res);
+  } catch (err) {
+    reportEmergency("doPost Gateway", err, "خطأ هيكلي في استقبال حزمة POST.");
+    return createResponse({ success: false, msg: "خطأ مؤقت." });
+  } finally {
+    if (lock) { try { lock.releaseLock(); } catch (e2) { logSilentError("ReleaseLock", e2); } }
+  }
+}
+
+
+// ───────────────────────────────────────────────────────────────────────────
+//  القسم 8 — معالجات الإجراءات (مع تعقيم المدخلات وإصدار التوكنات)
+// ───────────────────────────────────────────────────────────────────────────
+
+function getGlobalData() {
+  const ss = getSS();
+  const cache = CacheService.getScriptCache();
+  let resData;
+  const resDataStr = cache.get(RES_CACHE_KEY);
+  if (resDataStr) { try { resData = JSON.parse(resDataStr); } catch (e) {} }
+  if (!resData) { resData = ss.getSheetByName("Restaurants").getDataRange().getValues(); try { cache.put(RES_CACHE_KEY, JSON.stringify(resData), CACHE_TIME); } catch (e) {} }
+
+  const driversData = ss.getSheetByName("Drivers").getDataRange().getValues();
+  for (let i = 1; i < driversData.length; i++) {
+    const locStr = cache.get("LOC_" + driversData[i][2].toString().trim());
+    if (locStr) { const loc = JSON.parse(locStr); driversData[i][5]=loc.lat; driversData[i][6]=loc.lng; driversData[i][9]=loc.ts; }
+  }
+
+  let mappedOrders = [["ID","Restaurant","Area","Details","Price","Status","DriverPhone","Timestamp","PhotoUrl","IsSovereign"]];
+  try {
+    const activeOrders = fbGetFiltered("active_orders.json", "?orderBy=%22$key%22&limitToLast=300") || {};
+    Object.keys(activeOrders).forEach(k => { const o = activeOrders[k]; mappedOrders.push([o.id||k, o.restaurant||"", o.area||"", String(o.details||""), o.price||0, o.status||"", o.driverPhone||"", o.timestamp||"", o.photoUrl||"", o.is_sovereign||false]); });
+  } catch (e) { logSilentError("getGlobalData", e); }
+  return { orders: mappedOrders, restaurants: resData, drivers: driversData };
+}
+
+// ✅ غلاف تسجيل الدخول: حماية تخمين + إصدار توكن الهوية (Firebase) عند النجاح
+function handleEntityCheck(sheetName, phoneRaw, passwordRaw) {
+  if (!validatePhone(phoneRaw)) return { status: "invalid_input" };
+  const phone = normalizePhone(phoneRaw);
+  if (bfIsBlocked("LOGIN_" + phone)) return { status: "rate_limited" };
+
+  const result = checkEntityStatus(sheetName, phone, passwordRaw);
+  if (result.status === "wrong_password") {
+    bfRecordFail("LOGIN_" + phone);
+    if (bfIsBlocked("LOGIN_" + phone)) return { status: "rate_limited" };
+  } else if (result.status === "active" || result.status === "inactive") {
+    bfReset("LOGIN_" + phone);
+    const role = (sheetName === "Restaurants") ? "restaurant" : "driver";
+    result.session_token  = createEntitySession(phone, role);
+    result.firebase_token = createFirebaseCustomToken(phone, role); // ← العميل يستخدمه مع signInWithCustomToken
+    if (!result.firebase_token) reportEmergency("createFirebaseCustomToken", "توكن فايربيس فارغ — تحقق من المفاتيح.", "لا تُغلق قواعد الأمان قبل الإصلاح.");
+  }
+  return result;
+}
+
+function checkEntityStatus(sheetName, phone, passwordAttempt) {
+  const normPhone = normalizePhone(phone);
+  const data = getSS().getSheetByName(sheetName).getDataRange().getValues();
+  for (let i = 0; i < data.length; i++) {
+    if (normalizePhone(data[i][2]) !== normPhone) continue;
+    const pwCol = (sheetName === "Drivers") ? 12 : 13;
+    const storedPassword = (data[i][pwCol] || "").toString().trim();
+    if (passwordAttempt !== undefined && storedPassword !== "" && storedPassword !== passwordAttempt.toString().trim()) {
+      return { status: "wrong_password" };
+    }
+    if (sheetName === "Restaurants") {
+      return { status: data[i][4].toString().trim(), name: data[i][1], comm: data[i][5] || 0, payType: data[i][8] || "", priceList: data[i][12] || "" };
+    } else {
+      return { status: data[i][4].toString().trim(), name: data[i][1], shift: data[i][13] || "", area: data[i][3] || "", idUrl: data[i][14] || "" };
+    }
+  }
+  return { status: "not_found" };
+}
+
+function handleStartShift(phoneRaw) {
+  if (!validatePhone(phoneRaw)) return { success: false };
+  const pPhone = normalizePhone(phoneRaw);
+  const now = new Date();
+  const todayDate = now.toISOString().split('T')[0];
+
+  // جلب بيانات الكابتن وحالة نظام الشفتات العام
+  const drvFb = fbGet("drivers_locations/" + pPhone + ".json");
+  const shiftsEnabled = fbGet("system_settings/shifts_enabled.json");
+  
+  // ✅ التحديث الجديد: التحقق من وجود شفت مفتوح ومحاولة استئنافه
+  if (drvFb && drvFb.last_shift_date === todayDate) {
+    // السماح للكابتن بالدخول في حالتين:
+    // 1. الإدارة قامت بتعطيل نظام الشفتات
+    // 2. أو نظام الشفتات مفعل ولكن وقت الكابتن لم ينتهِ بعد
+    if (shiftsEnabled === false || (drvFb.shift_end && new Date(drvFb.shift_end) > now)) {
+      fbPatch("drivers_locations/" + pPhone + ".json", { status: "active", last_update: now.toISOString() });
+      return { success: true, shift_end: drvFb.shift_end };
+    } else {
+      return { success: false, msg: "لقد انتهى وقت شفتك لهذا اليوم." };
+    }
+  }
+
+  // 🆕 بدء شفت جديد (أول دخول في اليوم)
+  const drvData = getSS().getSheetByName("Drivers").getDataRange().getValues();
+  let savedShiftHours = 10;
+  for (let i = 1; i < drvData.length; i++) { 
+    if (normalizePhone(drvData[i][2]) === pPhone) { 
+      savedShiftHours = cleanNumber(drvData[i][13]) || 10; 
+      break; 
+    } 
+  }
+  const endTime = new Date(Date.now() + savedShiftHours * 3600000).toISOString();
+  
+  fbPatch("drivers_locations/" + pPhone + ".json", { 
+    status: "active", 
+    shift_end: endTime, 
+    last_update: now.toISOString(), 
+    last_shift_date: todayDate 
+  });
+  
+  return { success: true, shift_end: endTime };
+}
+
+function handleRestaurantReg(data) {
+  const name = sanitizeInput(data.name, 100);
+  if (!name || !validatePhone(data.phone)) return { success: false, msg: "بيانات غير مكتملة." };
+  const row = [
+    new Date().toISOString(), sanitizeForSheet(name), sanitizeForSheet(normalizePhone(data.phone)),
+    sanitizeForSheet(sanitizeInput(data.area, 80)), "pending", sanitizeForSheet(sanitizeInput(data.comm, 40) || "0"),
+    Number(data.lat)||0, Number(data.lng)||0, sanitizeForSheet(sanitizeInput(data.pay, 40)), 0, "", "",
+    sanitizeForSheet(sanitizeInput(data.priceList, 5000)), sanitizeForSheet(sanitizeInput(data.password, 100))
+  ];
+  const out = registerEntity("Restaurants", row);
+  invalidateResCache();
+  return out;
+}
+
+function handleDriverReg(data) {
+  const name = sanitizeInput(data.name, 100);
+  if (!name || !validatePhone(data.phone)) return { success: false, msg: "بيانات غير مكتملة." };
+  const row = [
+    new Date().toISOString(), sanitizeForSheet(name), sanitizeForSheet(normalizePhone(data.phone)), "", "pending",
+    0, 0, 0, new Date().toISOString(), new Date().toISOString(), 0, "FALSE",
+    sanitizeForSheet(sanitizeInput(data.password, 100)), sanitizeForSheet(sanitizeInput(data.shift, 40)), sanitizeForSheet(sanitizeInput(data.idUrl, 500))
+  ];
+  return registerEntity("Drivers", row);
+}
+
+function registerEntity(sheetName, rowData) {
+  const sheet = getSS().getSheetByName(sheetName);
+  const existing = sheet.getDataRange().getValues();
+  const newPhone = normalizePhone(rowData[2]);
+  for (let i = 1; i < existing.length; i++) { if (normalizePhone(existing[i][2]) === newPhone) return { success: false, msg: "الرقم مسجل مسبقاً." }; }
+  sheet.appendRow(rowData);
+  return { success: true };
+}
+
+function updateEntityRecord(type, phoneRaw, updatesObj) {
+  const sheet = getSS().getSheetByName(type === "DRIVER" ? "Drivers" : "Restaurants");
+  const data = sheet.getDataRange().getValues();
+  const normPhone = normalizePhone(phoneRaw);
+  for (let i = 1; i < data.length; i++) {
+    if (normalizePhone(data[i][2]) !== normPhone) continue;
+    const rowNum = i + 1;
+    if (type === "RESTAURANT") {
+      if (updatesObj.name) sheet.getRange(rowNum, 2).setValue(sanitizeForSheet(sanitizeInput(updatesObj.name, 100)));
+      if (updatesObj.comm != null) sheet.getRange(rowNum, 6).setValue(sanitizeForSheet(updatesObj.comm.toString()));
+      if (updatesObj.lat != null && updatesObj.lng != null && validateLatLng(updatesObj.lat, updatesObj.lng)) { sheet.getRange(rowNum, 7).setValue(Number(updatesObj.lat)); sheet.getRange(rowNum, 8).setValue(Number(updatesObj.lng)); }
+      if (updatesObj.priceList) sheet.getRange(rowNum, 13).setValue(sanitizeForSheet(sanitizeInput(updatesObj.priceList, 5000)));
+      if (updatesObj.password) sheet.getRange(rowNum, 14).setValue(sanitizeForSheet(updatesObj.password));
+      invalidateResCache();
+    } else {
+      if (updatesObj.name) sheet.getRange(rowNum, 2).setValue(sanitizeForSheet(sanitizeInput(updatesObj.name, 100)));
+      if (updatesObj.status) { sheet.getRange(rowNum, 5).setValue(sanitizeForSheet(updatesObj.status)); pushBanStatusToFirebase(normPhone, updatesObj.status === "banned"); }
+      if (updatesObj.shift) sheet.getRange(rowNum, 14).setValue(sanitizeForSheet(updatesObj.shift));
+      if (updatesObj.password) sheet.getRange(rowNum, 13).setValue(sanitizeForSheet(updatesObj.password));
+    }
+    return { success: true };
+  }
+  return { success: false };
+}
+
+function adminUpdateStatus(type, id, newStatus) {
+  const safeType = sanitizeInput(type, 20);
+  const safeStatus = sanitizeInput(newStatus, 30);
+  const safeId = sanitizeInput(id, 60);
+  if (safeType === "ORDER") return { success: updateFirebaseOrder(safeId, { status: safeStatus }) };
+  const ss = getSS();
+  const sheet = ss.getSheetByName(safeType === "DRIVER" ? "Drivers" : "Restaurants");
+  if (!sheet) return { success: false };
+  const data = sheet.getDataRange().getValues();
+  const normId = normalizePhone(safeId);
+  for (let i = 1; i < data.length; i++) {
+    if (normalizePhone(data[i][2]) !== normId) continue;
+    sheet.getRange(i + 1, 5).setValue(sanitizeForSheet(safeStatus));
+    if (safeType === "DRIVER") pushBanStatusToFirebase(safeId, safeStatus === "banned");
+    if (safeType === "RESTAURANT") invalidateResCache();
+    return { success: true };
+  }
+  return { success: false };
+}
+
+function manualAssignDriver(orderId, driverPhone) {
+  const safeOrder = sanitizeInput(orderId, 60);
+  if (!safeOrder || !validatePhone(driverPhone)) return { success: false };
+  const now = new Date().toISOString();
+  const cleanDriver = normalizePhone(driverPhone);
+  try { fbPatch("active_orders/" + safeOrder + ".json", { status: "manual_pending", driverPhone: cleanDriver, last_update: now, is_sovereign: true, sovereign_ts: now }); return { success: true }; }
+  catch (e) { logSilentError("manualAssignDriver", e); return { success: false }; }
+}
+
+function resetDebtForEntity(type, id) {
+  const safeType = sanitizeInput(type, 20).toUpperCase();
+  if (!validatePhone(id)) return { success: false, msg: "رقم غير صالح." };
+  const lock = LockService.getScriptLock();
+  if (!lock.tryLock(15000)) return { success: false, msg: "النظام مشغول حالياً." };
+  try {
+    const fbUp = {};
+    const cleanId = normalizePhone(id);
+    const nowIso = new Date().toISOString();
+    if (safeType === "DRIVER") {
+      fbUp["ledgers/drivers/" + cleanId] = { debt: 0, completed_orders: 0 };
+      fbUp["drivers_locations/" + cleanId + "/daily_count"] = 0;
+      fbUp["ledgers/reset_events/DRIVER/" + cleanId] = nowIso;
+    }
+    if (safeType === "RESTAURANT") {
+      fbUp["ledgers/restaurants/" + cleanId] = { debt: 0, completed_orders: 0 };
+      fbUp["ledgers/reset_events/RESTAURANT/" + cleanId] = nowIso;
+    }
+    if (Object.keys(fbUp).length > 0) fbPatch(".json", fbUp);
+    return { success: true, msg: "✅ تم التصفير بنجاح." };
+  } catch (e) { reportEmergency("resetDebt", e, "انهيار في تصفير الذمم للرقم: " + id); return { success: false, msg: "حدث خطأ، تم إبلاغ المشرف." }; }
+  finally { lock.releaseLock(); }
+}
+
+function handleDeclineOrder(orderId, driverPhone) {
+  const safeOrder = sanitizeInput(orderId, 60);
+  if (!safeOrder || !validatePhone(driverPhone)) return { success: false };
+  const now = new Date().toISOString(); const todayDate = now.split('T')[0];
+  const cleanDriver = normalizePhone(driverPhone);
+  const updates = {
+    ["active_orders/" + safeOrder + "/status"]: "pending_driver",
+    ["active_orders/" + safeOrder + "/driverPhone"]: "system_routing",
+    ["active_orders/" + safeOrder + "/last_update"]: now,
+    ["active_orders/" + safeOrder + "/last_offered_to"]: cleanDriver,
+    ["active_orders/" + safeOrder + "/last_offered_time"]: now,
+    ["active_orders/" + safeOrder + "/is_sovereign"]: false
+  };
+  try {
+    const cur = Number(fbGet("daily_metrics/" + cleanDriver + "/" + todayDate + "/rejected_orders.json")) || 0;
+    updates["daily_metrics/" + cleanDriver + "/" + todayDate + "/rejected_orders"] = cur + 1;
+    const curDaily = Number(fbGet("drivers_locations/" + cleanDriver + "/daily_count.json")) || 0;
+    if (curDaily > 0) updates["drivers_locations/" + cleanDriver + "/daily_count"] = curDaily - 1;
+    fbPatch(".json", updates);
+  } catch (e) { try { fbPatch(".json", updates); } catch (e2) { logSilentError("handleDeclineOrder", e2); } }
+  return { success: true };
+}
+
+function syncDriverData(p) {
+  if (!p || !validatePhone(p.phone) || !validateLatLng(p.lat, p.lng)) return { success: false };
+  const phone = normalizePhone(p.phone);
+  const cache = CacheService.getScriptCache();
+  const nowStr = new Date().toISOString();
+  cache.put("LOC_" + phone, JSON.stringify({ lat: Number(p.lat), lng: Number(p.lng), ts: nowStr }), 7200);
+  try { fbPatch("drivers_locations/" + phone + ".json", { lat: Number(p.lat), lng: Number(p.lng), status: "active", last_update: nowStr }); } catch (e) { logSilentError("syncDriverData", e); }
+  const lastSyncStr = cache.get("SYNC_" + phone);
+  if ((lastSyncStr ? (new Date() - new Date(lastSyncStr)) / 60000 : 999) > 15) {
+    try {
+      const sheet = getSS().getSheetByName("Drivers");
+      const rows = sheet.getDataRange().getValues();
+      for (let i = 1; i < rows.length; i++) {
+        if (normalizePhone(rows[i][2]) === phone) { sheet.getRange(i + 1, 6, 1, 2).setValues([[Number(p.lat), Number(p.lng)]]); sheet.getRange(i + 1, 10).setValue(nowStr); cache.put("SYNC_" + phone, nowStr, 7200); break; }
+      }
+    } catch (e) { logSilentError("syncDriverData_Sheet", e); }
+  }
+  return { success: true };
+}
+
+
+// ───────────────────────────────────────────────────────────────────────────
+//  القسم 11 — المحاسب الليلي والأرشفة والاستعادة (عقل نحلة — الفوترة والحماية)
+// ───────────────────────────────────────────────────────────────────────────
+
+function nightlySummaryAndCleaner() {
+  const lock = LockService.getScriptLock();
+  if (!lock.tryLock(CFG.ARCHIVE_LOCK_MS)) return { success: false, msg: "Worker is busy." };
+  try {
+    const ordersData = fbGet("active_orders.json") || {};
+    const now = new Date();
+    const fallbackDate = new Date(now.getTime() - 4 * 3600000).toISOString().split('T')[0];
+    const yesterdayDate = new Date(now.getTime() - 28 * 3600000).toISOString().split('T')[0];
+
+    const completedToday = fbGet("completed_orders/" + fallbackDate + ".json") || {};
+    const completedYesterday = fbGet("completed_orders/" + yesterdayDate + ".json") || {};
+
+    const resDataCache = getGlobalData().restaurants || [];
+
+    const dailyStats = {}; const drvDailyStats = {};
+    let sysCompleted = 0, sysCancelled = 0, sysExpired = 0, sysSales = 0, sysComm = 0;
+    const fbUpdates = {};
+    const idsToDelete = {};
+
+    Object.keys(ordersData).forEach(key => {
+      try {
+        if (completedToday[key] || completedYesterday[key]) { idsToDelete[key] = null; return; }
+
+        const o = ordersData[key];
+        const isCompleted = ["completed", "مكتمل"].includes(o.status);
+        const isCancelled = o.status === "deleted";
+        const isExpired   = ((now - new Date(o.timestamp || now)) / 3600000 > CFG.EXPIRE_ORDER_HOURS);
+
+        if (!isCompleted && !isCancelled && !isExpired) return;
+
+        const orderBusinessDate = o.timestamp ? o.timestamp.split('T')[0] : fallbackDate;
+        fbUpdates["completed_orders/" + orderBusinessDate + "/" + key] = o;
+        idsToDelete[key] = null;
+
+        const rPhone = normalizePhone(o.resPhone) || "Unknown";
+        if (!dailyStats[rPhone]) dailyStats[rPhone] = { name: o.restaurant || "غير محدد", completed: 0, cancelled: 0, expired: 0, sales: 0, comm: 0, isMonthly: false };
+
+        if (isExpired && !isCompleted && !isCancelled) { sysExpired++; dailyStats[rPhone].expired++; }
+
+        if (isCompleted) {
+          sysCompleted++; dailyStats[rPhone].completed++;
+          const price = cleanNumber(o.price); sysSales += price; dailyStats[rPhone].sales += price;
+
+          let resRawCommStr = o.comm;
+          let orderPayType = o.payType;
+          if (!resRawCommStr || !orderPayType) {
+            const rest = resDataCache.find(r => r[2] && normalizePhone(r[2]) === rPhone);
+            if (rest) {
+                if (!resRawCommStr && rest[5] != null) resRawCommStr = rest[5];
+                if (!orderPayType && rest[8] != null) orderPayType = rest[8];
+            }
+          }
+          const commRule = parseCommissionRule(resRawCommStr, orderPayType);
+          sysComm += commRule.res; dailyStats[rPhone].comm += commRule.res;
+          if (commRule.isMonthly) dailyStats[rPhone].isMonthly = true;
+
+          if (o.driverPhone && o.driverPhone !== "system_routing" && o.driverPhone !== "pending_driver") {
+             const dp = normalizePhone(o.driverPhone);
+             if (!drvDailyStats[dp]) drvDailyStats[dp] = { completed: 0, comm: 0 };
+             drvDailyStats[dp].completed++;
+             drvDailyStats[dp].comm += commRule.drv;
+          }
+        }
+        if (isCancelled) { sysCancelled++; dailyStats[rPhone].cancelled++; }
+      } catch (loopErr) { logSilentError("nightlySummary_Loop", loopErr); }
+    });
+
+    if (Object.keys(idsToDelete).length === 0) return { success: true };
+
+    const ss = getSS();
+    const resLedgers = fbGet("ledgers/restaurants.json") || {};
+    const driversLedgers = fbGet("ledgers/drivers.json") || {};
+
+    Object.keys(dailyStats).forEach(phone => {
+      const st = dailyStats[phone];
+      if (st.completed > 0 || st.cancelled > 0 || st.expired > 0) {
+        fbUpdates["ledgers/restaurants/" + phone + "/completed_orders"] = ((resLedgers[phone] && resLedgers[phone].completed_orders) || 0) + st.completed;
+        fbUpdates["ledgers/restaurants/" + phone + "/debt"] = ((resLedgers[phone] && resLedgers[phone].debt) || 0) + st.comm;
+      }
+    });
+
+    Object.keys(drvDailyStats).forEach(dPhone => {
+      const dData = drvDailyStats[dPhone];
+      
+      // ✅ إضافة عمولة التشغيل اليومي (1000 دينار) للكابتن الذي عمل وأنجز طلبات
+      dData.comm += 1000; 
+
+      fbUpdates["ledgers/drivers/" + dPhone + "/completed_orders"] = ((driversLedgers[dPhone] && driversLedgers[dPhone].completed_orders) || 0) + dData.completed;
+      fbUpdates["ledgers/drivers/" + dPhone + "/debt"] = ((driversLedgers[dPhone] && driversLedgers[dPhone].debt) || 0) + dData.comm;
+      fbUpdates["drivers_locations/" + dPhone + "/daily_count"] = 0;
+      fbUpdates["drivers_locations/" + dPhone + "/last_shift_date"] = null;
+    });
+
+    if (sysCompleted > 0 || sysCancelled > 0 || sysExpired > 0) {
+      let sheet = ss.getSheetByName("Daily_Reports");
+      if (!sheet) { sheet = ss.insertSheet("Daily_Reports"); sheet.appendRow(["التاريخ","المطعم","الهاتف","منجزة","ملغية","ميتة (Expired)","مبيعات","عمولات"]); }
+
+      const existingData = sheet.getDataRange().getValues();
+      let rowExists = false;
+      for (let i = existingData.length - 1; i >= 0 && i > Math.max(0, existingData.length - 200); i--) {
+        if (String(existingData[i][0]).includes(fallbackDate) && String(existingData[i][1]).includes("الإجمالي الكلي")) { rowExists = true; break; }
+      }
+
+      if (!rowExists) {
+        let rowsToWrite = [];
+        Object.keys(dailyStats).forEach(phone => {
+          const st = dailyStats[phone];
+          if (st.completed > 0 || st.cancelled > 0 || st.expired > 0) {
+            const displayComm = st.isMonthly && st.comm === 0 ? "اشتراك شهري" : st.comm;
+            rowsToWrite.push([fallbackDate, sanitizeForSheet(st.name), sanitizeForSheet(phone), st.completed, st.cancelled, st.expired, st.sales, displayComm]);
+          }
+        });
+        rowsToWrite.push([fallbackDate, "📊 الإجمالي الكلي", "---", sysCompleted, sysCancelled, sysExpired, sysSales, sysComm]);
+        if (rowsToWrite.length > 1) sheet.getRange(sheet.getLastRow() + 1, 1, rowsToWrite.length, 8).setValues(rowsToWrite);
+
+        const driversData = ss.getSheetByName("Drivers").getDataRange().getValues();
+        let dSheet = ss.getSheetByName("Drivers_Daily");
+        if (!dSheet) { dSheet = ss.insertSheet("Drivers_Daily"); dSheet.appendRow(["التاريخ", "الكابتن", "الهاتف", "منجزة", "ديون عمولة"]); }
+        let driverRows = [];
+        Object.keys(drvDailyStats).forEach(dPhone => {
+          const dData = drvDailyStats[dPhone];
+          let dName = "غير معروف"; for (let i=1; i<driversData.length; i++) { if (normalizePhone(driversData[i][2]) === dPhone) { dName = driversData[i][1]; break; } }
+          driverRows.push([fallbackDate, sanitizeForSheet(dName), sanitizeForSheet(dPhone), dData.completed, dData.comm]);
+        });
+        if (driverRows.length > 0) dSheet.getRange(dSheet.getLastRow() + 1, 1, driverRows.length, 5).setValues(driverRows);
+      }
+    }
+
+    const activeDriversList = fbGetFiltered("drivers_locations.json", "?orderBy=%22$key%22&limitToLast=200") || {};
+    Object.keys(activeDriversList).forEach(d => { if (!drvDailyStats[d]) fbUpdates["drivers_locations/" + d + "/last_shift_date"] = null; });
+
+    const dMetrics = fbGet("daily_metrics.json") || {}; Object.keys(dMetrics).forEach(p => { if(dMetrics[p][yesterdayDate]) fbUpdates["daily_metrics/" + p + "/" + yesterdayDate] = null; });
+    const dLedgers = fbGet("daily_ledgers.json") || {}; Object.keys(dLedgers).forEach(p => { if(dLedgers[p][yesterdayDate]) fbUpdates["daily_ledgers/" + p + "/" + yesterdayDate] = null; });
+
+    if (Object.keys(idsToDelete).length > 0) fbPatch("active_orders.json", idsToDelete);
+    if (Object.keys(fbUpdates).length > 0) fbPatch(".json", fbUpdates);
+
+    return { success: true };
+  } catch (e) { reportEmergency("nightlySummaryAndCleaner", e, "فشل المحاسب الليلي."); return { success: false, msg: e.toString() }; } finally { lock.releaseLock(); }
+}
+
+function restoreLedgersFromArchive() {
+  const ss = getSS(); const fbUpdates = {};
+  const resetEvents = fbGet("ledgers/reset_events.json") || { DRIVER: {}, RESTAURANT: {} };
+
+  const driversSheet = ss.getSheetByName("Drivers_Daily");
+  if (driversSheet && driversSheet.getLastRow() > 1) {
+    const dData = driversSheet.getDataRange().getValues(); const driversMap = {};
+    for (let i = 1; i < dData.length; i++) {
+      const rowDate = new Date(dData[i][0]).getTime();
+      const phone = normalizePhone(dData[i][2]); if (!phone) continue;
+      const resetTimeStr = (resetEvents.DRIVER && resetEvents.DRIVER[phone]) ? resetEvents.DRIVER[phone] : null;
+      if (resetTimeStr && rowDate < new Date(resetTimeStr).getTime()) continue;
+      if (!driversMap[phone]) driversMap[phone] = { orders: 0, debt: 0 };
+      driversMap[phone].orders += Number(dData[i][3]) || 0; driversMap[phone].debt += Number(dData[i][4]) || 0;
+    }
+    Object.keys(driversMap).forEach(phone => { fbUpdates["ledgers/drivers/" + phone + "/completed_orders"] = driversMap[phone].orders; fbUpdates["ledgers/drivers/" + phone + "/debt"] = driversMap[phone].debt; });
+  }
+
+  const resSheet = ss.getSheetByName("Daily_Reports");
+  if (resSheet && resSheet.getLastRow() > 1) {
+    const rData = resSheet.getDataRange().getValues(); const resMap = {};
+    for (let i = 1; i < rData.length; i++) {
+      const rowDate = new Date(rData[i][0]).getTime();
+      const phone = normalizePhone(rData[i][2]);
+      if (!phone || phone === "---" || String(rData[i][1]).includes("الإجمالي الكلي")) continue;
+      const resetTimeStr = (resetEvents.RESTAURANT && resetEvents.RESTAURANT[phone]) ? resetEvents.RESTAURANT[phone] : null;
+      if (resetTimeStr && rowDate < new Date(resetTimeStr).getTime()) continue;
+      if (!resMap[phone]) resMap[phone] = { orders: 0, debt: 0 };
+      resMap[phone].orders += Number(rData[i][3]) || 0; resMap[phone].debt += Number(rData[i][7]) || 0;
+    }
+    Object.keys(resMap).forEach(phone => { fbUpdates["ledgers/restaurants/" + phone + "/completed_orders"] = resMap[phone].orders; fbUpdates["ledgers/restaurants/" + phone + "/debt"] = resMap[phone].debt; });
+  }
+
+  if (Object.keys(fbUpdates).length > 0) { fbPatch(".json", fbUpdates); Logger.log("✅ تمت الاستعادة بذكاء يحترم التصفير!"); }
+  else { Logger.log("⚠️ لا توجد بيانات جديدة للاستعادة بعد التصفير."); }
+}
+
+
+// ───────────────────────────────────────────────────────────────────────────
+//  القسم 12 — الأرشفة الشهرية + الفحص الصحي + الكنّاس الآلي
+// ───────────────────────────────────────────────────────────────────────────
+
+function monthlyArchiver() {
+  const lock = LockService.getScriptLock();
+  if (!lock.tryLock(300000)) return;
+  try {
+    const ss         = getSS();
+    const now        = new Date();
+    const monthNames = ["يناير","فبراير","مارس","أبريل","مايو","يونيو","يوليو","أغسطس","سبتمبر","أكتوبر","نوفمبر","ديسمبر"];
+    const prev       = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+    const archName   = "أرشيف_نحلة_" + monthNames[prev.getMonth()] + "_" + prev.getFullYear();
+
+    const sheetsToArchive = ["Daily_Reports","SystemLogs", "Drivers_Daily"];
+    let needsArchive = false;
+    sheetsToArchive.forEach(n => { const s = ss.getSheetByName(n); if (s && s.getLastRow() > 1) needsArchive = true; });
+    if (!needsArchive) return;
+
+    const archSS = SpreadsheetApp.create(archName);
+
+    const currentLedgers = fbGet("ledgers.json") || {};
+    const ledgerSheet = archSS.insertSheet("أرصدة_نهاية_الشهر");
+    ledgerSheet.appendRow(["النوع", "الرقم", "الطلبات التراكمية", "الديون المتراكمة"]);
+    if(currentLedgers.restaurants) { Object.keys(currentLedgers.restaurants).forEach(p => ledgerSheet.appendRow(["مطعم", p, currentLedgers.restaurants[p].completed_orders||0, currentLedgers.restaurants[p].debt||0])); }
+    if(currentLedgers.drivers) { Object.keys(currentLedgers.drivers).forEach(p => ledgerSheet.appendRow(["كابتن", p, currentLedgers.drivers[p].completed_orders||0, currentLedgers.drivers[p].debt||0])); }
+
+    sheetsToArchive.forEach(n => {
+      const sheet = ss.getSheetByName(n);
+      if (sheet && sheet.getLastRow() > 1) {
+        const data  = sheet.getDataRange().getValues();
+        const nSht  = archSS.insertSheet(n);
+        nSht.getRange(1, 1, data.length, data[0].length).setValues(data);
+        if (sheet.getLastRow() > 1) sheet.deleteRows(2, sheet.getLastRow() - 1);
+      }
+    });
+
+    const resSheet = ss.getSheetByName("Restaurants");
+    if (resSheet) {
+      const resData = resSheet.getDataRange().getValues();
+      const monthlySubs = [];
+      let totalMonthlyRevenue = 0;
+      for (let i = 1; i < resData.length; i++) {
+        const commStr = String(resData[i][5] || "").trim();
+        if (commStr.includes("شهري") || commStr.includes("monthly")) {
+           const amountMatch = commStr.match(/\d+/);
+           const amount = amountMatch ? Number(amountMatch[0]) : 0;
+           if (amount > 0) { monthlySubs.push([resData[i][1], resData[i][2], amount]); totalMonthlyRevenue += amount; }
+        }
+      }
+      if (monthlySubs.length > 0) {
+        const subSheet = archSS.insertSheet("الاشتراكات_الشهرية");
+        subSheet.appendRow(["اسم المطعم", "رقم الهاتف", "قيمة الاشتراك الثابت"]);
+        subSheet.getRange(1, 1, 1, 3).setFontWeight("bold").setBackground("#dcfce3");
+        subSheet.getRange(2, 1, monthlySubs.length, 3).setValues(monthlySubs);
+        subSheet.appendRow(["الإجمالي الكلي للاشتراكات", "---", totalMonthlyRevenue + " دينار"]);
+        subSheet.getRange(subSheet.getLastRow(), 1, 1, 3).setFontWeight("bold").setBackground("#fef08a");
+      }
+    }
+
+    const defSheet = archSS.getSheetByName("Sheet1") || archSS.getSheetByName("ورقة1");
+    if (defSheet) archSS.deleteSheet(defSheet);
+
+    const archUrl = archSS.getUrl();
+    logEvent("MonthlyArchiver", "تم الأرشفة بنجاح مع لقطة الأرصدة: " + archUrl);
+    sendAdminReport("🗄️ أرشفة شهرية جاهزة", "تم أرشفة بيانات " + monthNames[prev.getMonth()] + " " + prev.getFullYear() + ".\n\nالرابط: " + archUrl);
+  } catch (e) { reportEmergency("monthlyArchiver", e, "فشل الأرشفة الشهرية."); } finally { lock.releaseLock(); }
+}
+
+function sendAdminReport(subject, body) {
+  try {
+    const config = getConfig();
+    if (!config.ADMIN_EMAIL || config.ADMIN_EMAIL.indexOf("@") < 0) return;
+    const mailOptions = { to: config.ADMIN_EMAIL, subject: "🐝 نحلة كركوك: " + subject, body: body || subject };
+    if (config.PARTNER_EMAIL) mailOptions.cc = config.PARTNER_EMAIL;
+    MailApp.sendEmail(mailOptions);
+  } catch (e) { logSilentError("sendAdminReport", e); }
+}
+
+function dailyHealthCheck() {
+  const issues = [];
+  try { fbPut("system_settings/health_check.json", new Date().toISOString()); } catch (e) { issues.push("❌ Firebase غير متاح: " + e.message); }
+  try { getSS().getName(); } catch (e) { issues.push("❌ Spreadsheet غير متاح: " + e.message); }
+
+  const cfg = getConfig();
+  if (!cfg.FIREBASE_CLIENT_EMAIL || !cfg.FIREBASE_PRIVATE_KEY) issues.push("⚠️ مفاتيح OAuth (حساب الخدمة) مفقودة — النظام يعمل بالسر القديم فقط.");
+  else if (!getGoogleAccessToken()) issues.push("⚠️ تعذّر توليد توكن OAuth — تحقق من صلاحيات حساب الخدمة على قاعدة البيانات.");
+  if (!createFirebaseCustomToken("test_uid", "driver")) issues.push("⚠️ فشل إصدار توكن الهوية — لا تُغلق قواعد الأمان قبل الإصلاح.");
+
+  try {
+    const cache = CacheService.getScriptCache(); const today = new Date().toISOString().split('T')[0];
+    const runs = Number(cache.get("HC_RUNS_" + today) || 0);
+    if (runs > CFG.QUOTA_DAILY_WARN) issues.push("⚠️ المحرك نفّذ " + runs + " مرة اليوم (حد التحذير: " + CFG.QUOTA_DAILY_WARN + "). راقب الكوتا.");
+  } catch (e) {}
+
+  if (issues.length > 0) { logEvent("dailyHealthCheck", issues.join("\n"), "WARN"); reportEmergency("dailyHealthCheck", issues.join("\n"), "راجع تقرير الصحة اليومي."); }
+  else { logEvent("dailyHealthCheck", "✅ جميع الفحوصات نجحت (بما فيها OAuth والتوكنات).", "INFO"); }
+}
+
+// ✅ كنّاس آلي أسبوعي لتنظيف الأخطاء الصامتة الأقدم من 7 أيام (حماية للمساحة والأداء)
+function cleanupSilentLogs() {
+  const lock = LockService.getScriptLock();
+  if (!lock.tryLock(30000)) return;
+  try {
+    const logs = fbGet("system_logs/silent_errors.json");
+    if (!logs) return;
+    const now = Date.now();
+    const SEVEN_DAYS_MS = 7 * 24 * 60 * 60 * 1000;
+    const updates = {}; let deletedCount = 0;
+    Object.keys(logs).forEach(key => {
+      const logEntry = logs[key];
+      if (logEntry && logEntry.ts) {
+        if (now - new Date(logEntry.ts).getTime() > SEVEN_DAYS_MS) { updates[key] = null; deletedCount++; }
+      } else { updates[key] = null; deletedCount++; }
+    });
+    if (deletedCount > 0) { fbPatch("system_logs/silent_errors.json", updates); Logger.log("🧹 تم تنظيف " + deletedCount + " سجل خطأ صامت."); }
+  } catch (e) { logSilentError("cleanupSilentLogs", e); } finally { lock.releaseLock(); }
+}
+
+
+// ───────────────────────────────────────────────────────────────────────────
+//  القسم 13 — المشغّلات الزمنية والإصلاح الذاتي
+// ───────────────────────────────────────────────────────────────────────────
+
+function checkAndHealTriggers() {
+  const expectedTriggers = {
+    // ⛔ حُذف masterDispatchEngine و watchdogForStalledOrders — انتقلا إلى Cloud Functions
+    "nightlySummaryAndCleaner": { type: "days",  val: 1, hour: 3 },
+    "monthlyArchiver"         : { type: "month", val: 1, hour: 3 },
+    "dailyHealthCheck"        : { type: "days",  val: 1, hour: 6 },
+    "cleanupSilentLogs"       : { type: "week",  day: ScriptApp.WeekDay.FRIDAY, hour: 2 },
+    "checkAndHealTriggers"    : { type: "days",  val: 1, hour: 4 }
+  };
+  const existing = ScriptApp.getProjectTriggers().map(t => t.getHandlerFunction()); let recreated = 0;
+  for (const funcName of Object.keys(expectedTriggers)) {
+    if (existing.includes(funcName)) continue;
+    const config = expectedTriggers[funcName];
+    const trigger = ScriptApp.newTrigger(funcName).timeBased();
+    if (config.type === "days")  trigger.everyDays(config.val).atHour(config.hour);
+    if (config.type === "month") trigger.onMonthDay(config.val).atHour(config.hour);
+    if (config.type === "week")  trigger.onWeekDay(config.day).atHour(config.hour);
+    trigger.create(); recreated++; logEvent("Self_Healing", "إعادة بناء المشغل المفقود: " + funcName, "WARN");
+  }
+  if (recreated > 0) reportEmergency("Self-Healing", "تمت إعادة بناء " + recreated + " مشغّل(ات) مفقودة.", "راجع سبب اختفاء المشغلات.");
+}
+
+function setupAllTriggers() {
+  ScriptApp.getProjectTriggers().forEach(t => ScriptApp.deleteTrigger(t));
+  // ⛔ التوزيع والرقيب انتقلا إلى Cloud Functions — لا تُنشئهما هنا إطلاقاً
+  ScriptApp.newTrigger("nightlySummaryAndCleaner").timeBased().everyDays(1).atHour(3).create();
+  ScriptApp.newTrigger("monthlyArchiver").timeBased().onMonthDay(1).atHour(3).create();
+  ScriptApp.newTrigger("dailyHealthCheck").timeBased().everyDays(1).atHour(6).create();
+  ScriptApp.newTrigger("cleanupSilentLogs").timeBased().onWeekDay(ScriptApp.WeekDay.FRIDAY).atHour(2).create();
+  ScriptApp.newTrigger("checkAndHealTriggers").timeBased().everyDays(1).atHour(4).create();
+  Logger.log("✅ مشغّلات نحلة V91: التقارير والأرشفة فقط. التوزيع في Cloud Functions.");
+}
+
+// ── دوال اختبار سريعة ──
+function TEST_OAUTH_TOKEN()   { Logger.log(getGoogleAccessToken() ? "✅ OAuth يعمل." : "❌ فشل OAuth — راجع المفاتيح والصلاحيات."); }
+function TEST_CUSTOM_TOKEN()  { Logger.log(createFirebaseCustomToken("9999999999", "driver") ? "✅ توكن الهوية يُصدَر." : "❌ فشل إصدار التوكن."); }
+function TEST_EMERGENCY_MAIL(){ reportEmergency("TEST", "هذا اختبار لنظام الرصد البريدي.", "لا إجراء مطلوب — اختبار فقط."); Logger.log("📧 تم إرسال إيميل الاختبار (إن كان الإيميل مضبوطاً)."); }
+
+
+// ═══════════════════════════════════════════════════════════════════════════
+//  نظام الموظفين/الليدرز (مدموج) — يشغّل لوحة الليدرز nahla-leaders-panel.html
+//  ✅ سطر التوجيه مضاف في doGet أعلاه. بعد لصق هذا الملف، شغّل setupStaffSheet() مرة واحدة.
+// ═══════════════════════════════════════════════════════════════════════════
+
+const STAFF_SESSION_SECS = 6 * 3600;   // صلاحية جلسة الموظف (٦ ساعات، مع تجديد تلقائي من اللوحة)
+
+// إنشاء ورقة الموظفين + صفّ ليدر افتراضي (غيّر كلمة المرور فوراً)
+function setupStaffSheet() {
+  const ss = getSS();
+  let sheet = ss.getSheetByName("Staff");
+  if (!sheet) {
+    sheet = ss.insertSheet("Staff");
+    sheet.appendRow(["الاسم", "الهاتف", "كلمة المرور", "الدور", "الحالة"]);
+    sheet.getRange(1, 1, 1, 5).setFontWeight("bold").setBackground("#111827").setFontColor("#FFC107");
+    sheet.appendRow(["الليدر الأول", "7700000000", "غيّر_كلمة_المرور", "leader", "active"]);
+    sheet.setColumnWidths(1, 5, 150);
+  }
+  Logger.log("✅ ورقة Staff جاهزة. أضف الليدرز: [الاسم، الهاتف، كلمة المرور، الدور(leader/admin)، الحالة(active)]");
+}
+
+// ═══ جلسات الموظفين ═══
+function createStaffSession(phone, name, role) {
+  const token = Utilities.getUuid();
+  CacheService.getScriptCache().put("STAFF_SESS_" + token,
+    JSON.stringify({ phone: phone, name: name, role: role, ts: Date.now() }), STAFF_SESSION_SECS);
+  return token;
+}
+function validateStaffSession(stoken) {
+  if (!stoken) return null;
+  const v = CacheService.getScriptCache().get("STAFF_SESS_" + stoken);
+  return v ? JSON.parse(v) : null;
+}
+function destroyStaffSession(stoken) {
+  if (stoken) CacheService.getScriptCache().remove("STAFF_SESS_" + stoken);
+}
+
+// ═══ سجلّ التدقيق (admin_audit_trail) ═══
+function logAudit(phone, name, action, details) {
+  try {
+    const now = new Date().toISOString();
+    const entry = {
+      staffPhone: phone || "", staffName: name || "", staff: name || "",
+      action: action || "", details: String(details || "").substring(0, 300),
+      timestamp: now, ts: now
+    };
+    fbFetchRaw("staff_activity_log.json", "post", entry);   // يقرؤه دشبورد الإدارة
+    fbFetchRaw("admin_audit_trail.json", "post", entry);    // سجلّ التدقيق
+  } catch (e) { /* صامت */ }
+}
+
+// ═══ الموجّه الرئيسي لكل إجراءات STAFF_ ═══
+function routeStaffAction(p) {
+  try {
+    const action = sanitizeInput(p.action, 40);
+
+    // الدخول لا يحتاج جلسة سابقة
+    if (action === "STAFF_LOGIN") return handleStaffLogin(p.phone, p.password);
+
+    // بقية الإجراءات تتطلب جلسة صالحة
+    const session = validateStaffSession(p.stoken);
+    if (!session) return { success: false, msg: "انتهت الجلسة، جارِ إعادة الدخول…" };
+
+    switch (action) {
+      case "STAFF_LOGOUT":   destroyStaffSession(p.stoken); logAudit(session.phone, session.name, "LOGOUT", ""); return { success: true };
+      case "STAFF_DRIVERS":  return handleStaffDrivers();
+      case "STAFF_ASSIGN":   return handleStaffAssign(session, p.orderId, p.driverPhone);
+      case "STAFF_WITHDRAW": return handleStaffWithdraw(session, p.orderId, p.driverPhone);
+      case "STAFF_COMPLETE": return handleStaffComplete(session, p.orderId, p.comm, p.payType);
+      case "STAFF_DELETE":   return handleStaffDelete(session, p.orderId);
+      case "STAFF_MESSAGE":  return handleStaffMessage(session, p.driverPhone, p.msg);
+      default: return { success: false, msg: "إجراء غير معروف." };
+    }
+  } catch (err) {
+    logSilentError("routeStaffAction", err);
+    return { success: false, msg: "خطأ مؤقت." };
+  }
+}
+
+// ═══ الدخول ═══
+function handleStaffLogin(phoneRaw, passwordRaw) {
+  const clean = normalizePhone(phoneRaw);
+  if (!clean) return { success: false, msg: "بيانات غير مكتملة." };
+  if (bfIsBlocked("STAFF_" + clean)) return { success: false, msg: "محظور مؤقتاً، انتظر قليلاً." };
+
+  const sheet = getSS().getSheetByName("Staff");
+  if (!sheet) return { success: false, msg: "نظام الموظفين غير مُهيّأ." };
+  const data = sheet.getDataRange().getValues();
+
+  for (let i = 1; i < data.length; i++) {
+    if (normalizePhone(data[i][1]) !== clean) continue;
+    const pass = (data[i][2] || "").toString().trim();
+    const role = (data[i][3] || "leader").toString().trim();
+    const active = (data[i][4] || "").toString().trim();
+    if (active !== "active") return { success: false, msg: "الحساب موقوف." };
+    if (pass !== (passwordRaw || "").toString().trim()) {
+      bfRecordFail("STAFF_" + clean);
+      return { success: false, msg: "كلمة المرور غير صحيحة." };
+    }
+    bfReset("STAFF_" + clean);
+    const name = data[i][0] || "ليدر";
+    const stoken = createStaffSession(clean, name, role);
+    const firebase_token = createFirebaseCustomToken(clean, "staff");
+    logAudit(clean, name, "LOGIN", "");
+    return { success: true, token: stoken, name: name, phone: clean, role: role, firebase_token: firebase_token };
+  }
+  bfRecordFail("STAFF_" + clean);
+  return { success: false, msg: "الرقم غير مسجّل كموظف." };
+}
+
+// ═══ قائمة الكباتن (من ورقة Drivers) ═══
+function handleStaffDrivers() {
+  const sheet = getSS().getSheetByName("Drivers");
+  if (!sheet) return { success: true, drivers: [] };
+  const data = sheet.getDataRange().getValues();
+  const drivers = [];
+  for (let i = 1; i < data.length; i++) {
+    const phone = normalizePhone(data[i][2]);
+    if (!phone) continue;
+    drivers.push({ phone: phone, name: data[i][1] || "كابتن", status: (data[i][4] || "").toString().trim() });
+  }
+  return { success: true, drivers: drivers };
+}
+
+// ═══ إسناد يدوي لكابتن (سيادي — يتجاوز المحرّك) ═══
+function handleStaffAssign(session, orderId, driverPhone) {
+  const safeId = sanitizeInput(orderId, 60);
+  const clean = normalizePhone(driverPhone);
+  if (!safeId || !clean) return { success: false, msg: "بيانات ناقصة." };
+  const now = new Date().toISOString();
+  try {
+    fbPatch("active_orders/" + safeId + ".json", {
+      status: "manual_pending", driverPhone: clean, is_sovereign: true, sovereign_ts: now, last_update: now
+    });
+    logAudit(session.phone, session.name, "ASSIGN", safeId + " → " + clean);
+    return { success: true };
+  } catch (e) { logSilentError("handleStaffAssign", e); return { success: false, msg: "فشل الإسناد." }; }
+}
+
+// ═══ سحب طلب من كابتن (إعادته للتوزيع) ═══
+function handleStaffWithdraw(session, orderId, driverPhone) {
+  const safeId = sanitizeInput(orderId, 60);
+  const clean = normalizePhone(driverPhone);
+  if (!safeId) return { success: false, msg: "بيانات ناقصة." };
+  const now = new Date().toISOString();
+  try {
+    fbPatch("active_orders/" + safeId + ".json", {
+      status: "pending_driver", driverPhone: "system_routing", is_sovereign: false,
+      last_update: now, last_offered_to: clean || "", last_offered_time: now
+    });
+    logAudit(session.phone, session.name, "WITHDRAW", safeId + (clean ? " من " + clean : ""));
+    return { success: true };
+  } catch (e) { logSilentError("handleStaffWithdraw", e); return { success: false, msg: "فشل السحب." }; }
+}
+
+// ═══ إنجاز إجباري (يُحاسَب في المحاسب الليلي) ═══
+function handleStaffComplete(session, orderId, comm, payType) {
+  const safeId = sanitizeInput(orderId, 60);
+  if (!safeId) return { success: false, msg: "بيانات ناقصة." };
+  const now = new Date().toISOString();
+  try {
+    const patch = { status: "completed", status_ar: "مكتمل", completed_by: session.name, completed_at: now };
+    if (comm !== undefined && comm !== null && comm !== "") patch.comm = sanitizeInput(comm, 40);
+    if (payType !== undefined && payType !== null && payType !== "") patch.payType = sanitizeInput(payType, 40);
+    fbPatch("active_orders/" + safeId + ".json", patch);
+    logAudit(session.phone, session.name, "COMPLETE", safeId);
+    return { success: true };
+  } catch (e) { logSilentError("handleStaffComplete", e); return { success: false, msg: "فشل الإنجاز." }; }
+}
+
+// ═══ حذف/إلغاء طلب ═══
+function handleStaffDelete(session, orderId) {
+  const safeId = sanitizeInput(orderId, 60);
+  if (!safeId) return { success: false, msg: "بيانات ناقصة." };
+  const now = new Date().toISOString();
+  try {
+    fbPatch("active_orders/" + safeId + ".json", { status: "deleted", deleted_by: session.name, deleted_at: now });
+    logAudit(session.phone, session.name, "DELETE", safeId);
+    return { success: true };
+  } catch (e) { logSilentError("handleStaffDelete", e); return { success: false, msg: "فشل الحذف." }; }
+}
+
+// ═══ رسالة خاصة لكابتن ═══
+function handleStaffMessage(session, driverPhone, msg) {
+  const clean = normalizePhone(driverPhone);
+  const text = sanitizeInput(msg, 500);
+  if (!clean || !text) return { success: false, msg: "بيانات ناقصة." };
+  try {
+    fbPut("driver_messages/" + clean + ".json", { msg: text, from: session.name || "الإدارة", ts: new Date().toISOString() });
+    logAudit(session.phone, session.name, "MESSAGE", clean + ": " + text);
+    return { success: true };
+  } catch (e) { logSilentError("handleStaffMessage", e); return { success: false, msg: "فشل الإرسال." }; }
+}
+
+
+// ═══════════════════════════════════════════════════════════════════════════
+//  إدارة الموظفين من دشبورد الإدارة (LIST_EMPLOYEES / MANAGE_EMPLOYEE)
+// ═══════════════════════════════════════════════════════════════════════════
+function handleListEmployees() {
+  const sheet = getSS().getSheetByName("Staff");
+  if (!sheet) { setupStaffSheet(); return { success: true, employees: [] }; }
+  const data = sheet.getDataRange().getValues();
+  const employees = [];
+  for (let i = 1; i < data.length; i++) {
+    const phone = normalizePhone(data[i][1]);
+    if (!phone) continue;
+    employees.push({
+      name: data[i][0] || "", phone: phone,
+      role: (data[i][3] || "leader").toString().trim(),
+      active: (data[i][4] || "").toString().trim(), status: (data[i][4] || "").toString().trim()
+    });
+  }
+  return { success: true, employees: employees };
+}
+
+function handleManageEmployee(sub, payload) {
+  sub = sanitizeInput(sub, 20);
+  payload = payload || {};
+  let sheet = getSS().getSheetByName("Staff");
+  if (!sheet) { setupStaffSheet(); sheet = getSS().getSheetByName("Staff"); }
+  const phone = normalizePhone(payload.phone);
+  if (!phone) return { success: false, msg: "رقم غير صالح." };
+
+  const data = sheet.getDataRange().getValues();
+  let rowIdx = -1;
+  for (let i = 1; i < data.length; i++) { if (normalizePhone(data[i][1]) === phone) { rowIdx = i + 1; break; } }
+
+  if (sub === "ADD") {
+    if (rowIdx > -1) return { success: false, msg: "الرقم مسجّل مسبقاً." };
+    sheet.appendRow([
+      sanitizeForSheet(sanitizeInput(payload.name, 100)), sanitizeForSheet(phone),
+      sanitizeForSheet(sanitizeInput(payload.password, 100)),
+      sanitizeForSheet(sanitizeInput(payload.role, 20) || "leader"), "active"
+    ]);
+    return { success: true };
+  }
+  if (rowIdx === -1) return { success: false, msg: "الموظف غير موجود." };
+  if (sub === "RESET_PASS") { sheet.getRange(rowIdx, 3).setValue(sanitizeForSheet(sanitizeInput(payload.password, 100))); return { success: true }; }
+  if (sub === "SET_STATUS") { sheet.getRange(rowIdx, 5).setValue(payload.status === "active" ? "active" : "inactive"); return { success: true }; }
+  if (sub === "DELETE")     { sheet.deleteRow(rowIdx); return { success: true }; }
+  return { success: false, msg: "أمر غير معروف." };
+}
