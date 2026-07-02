@@ -1,1 +1,481 @@
+// ═══════════════════════════════════════════════════════════════════════════
+// 🐝 نظام نحلة كركوك — Cloud Functions (Node.js) — الإصدار NCF-2.0
+//
+//    نقل "عقل نحلة" الكامل إلى معالجات أوروبا (europe-west1) لتأخير شبه صفري:
+//      ① محرك التوزيع بنظام الزونات السبعة + الجدار الصلب (Zero-Trust) — كما هو حرفياً.
+//      ② 🛑 تعديلاتك محفوظة: حظر المسافة مُعطّل + لا سحب تلقائي (لا Watchdog هنا).
+//      ③ درع مكافحة الاختطاف الحدثي (Anti-Hijack).
+//      ④ صائد الأشباح (تعطيل الكابتن المنقطع).
+//      ⑤ إشعار FCM فوري للكابتن لحظة إسناد الطلب.
+//
+//    ملاحظة معمارية: الأرشفة الليلية والتقارير تبقى في Apps Script (V90) لأنها
+//    تكتب مباشرة على Google Sheets. هذا الملف يتكفّل بالجزء اللحظي فقط.
+// ═══════════════════════════════════════════════════════════════════════════
 
+const { onSchedule }    = require("firebase-functions/v2/scheduler");
+const { onValueWritten } = require("firebase-functions/v2/database");
+const admin = require("firebase-admin");
+
+// 🚀 ربط قاعدة بيانات نحلة صراحةً بسيرفر أوروبا
+admin.initializeApp({
+  databaseURL: "https://nahla-delivery-6b06f-default-rtdb.europe-west1.firebasedatabase.app"
+});
+
+const db = () => admin.database();
+
+// اسم نسخة قاعدة البيانات (يُستخدم في الدوال الحدثية)
+const DB_INSTANCE = "nahla-delivery-6b06f-default-rtdb";
+const REGION = "europe-west1";
+
+// ───────────────────────────── ثوابت نحلة (مطابقة لـ V90) ─────────────────────────────
+const OFFER_PENALTY_MINS  = 4;
+const DRIVER_OFFLINE_MINS  = 7;
+const MAX_LOAD_NORMAL      = 2;
+const MAX_LOAD_CRISIS      = 3;
+const CRISIS_RATIO         = 1.0;
+const CRISIS_MIN_ORDERS    = 10;
+const RADIUS_FRESH_KM      = 6;   // مرجعي فقط — حظر المسافة مُعطّل
+const RADIUS_NORMAL_KM     = 12;  // مرجعي فقط
+const RADIUS_OLD_KM        = 25;  // مرجعي فقط
+const EMERGENCY_ALERT_MINS = 8;
+const GHOST_MINS           = 15;
+
+const ROUTING_PLACEHOLDERS = ["system_routing", "pending_driver", "manual_pending", ""];
+function isRealDriver(phone) { return phone && ROUTING_PLACEHOLDERS.indexOf(String(phone)) === -1; }
+
+// ───────────────────────────── نظام الزونات (عقل نحلة — بدون تغيير) ─────────────────────────────
+const FLEXIBLE_AREAS = ["طريق بغداد", "شارع القدس", "حي المعلمين", "غرناطة", "عقبة بن نافع"];
+
+const ZONES = {
+  1: ["المحافظة", "المحافظة القديمة", "الحديديين", "اوف كركوك", "مستشفى الاطفال", "راس الجسر", "الكورنيش", "شارع الجمهورية", "شارع الاطباء", "خان التمر", "مستشفى الجمهوري", "مستشفى الشفاء", "مستشفى دار الحكمة"],
+  2: ["الواسطي", "الخضراء", "حي حزيران", "حي عدن", "تسعين", "ساحة الاحتفالات", "حي البعث", "مجمع مدينتي", "حي بدر"],
+  3: ["الاسرى والمفقودين", "الحي العسكري", "حي النصر", "القادسية", "العروبة", "شارع الحسابات"],
+  4: ["دوميز", "راس دوميز", "واحد اذار", "كوباني", "منطقة 55", "حي الزوراء", "شركة طارق", "الصيادة", "مودرن ستي", "مجمع الامل"],
+  5: ["عرفة", "رحيم اوا", "تبة", "الالماس", "القورية", "شوراو", "سيكانيان", "سرجنار", "الفيلق", "كيوان", "الفين دار", "درمان", "باجوان", "حمزلي"],
+  6: ["الحرية", "روناكي", "حي الوحدة", "المصلى", "قصب خانة", "الممدودة", "الشورجة", "بنجا علي", "ازادي", "باروتخانة", "دروازة"],
+  7: ["كركوك ستي", "نور ستي", "كاردن ستي", "اجوان ستي", "جيهان ستي", "مجمعات الحولي", "كلية القلم"]
+};
+
+function normalizeAreaStr(str) {
+  return String(str).replace(/[أإآ]/g, "ا").replace(/ة/g, "ه").replace(/ى/g, "ي").replace(/\s+/g, "").trim();
+}
+
+function getLevenshteinDistance(a, b) {
+  if (a.length === 0) return b.length;
+  if (b.length === 0) return a.length;
+  const matrix = [];
+  for (let i = 0; i <= b.length; i++) matrix[i] = [i];
+  for (let j = 0; j <= a.length; j++) matrix[0][j] = j;
+  for (let i = 1; i <= b.length; i++) {
+    for (let j = 1; j <= a.length; j++) {
+      if (b.charAt(i - 1) === a.charAt(j - 1)) matrix[i][j] = matrix[i - 1][j - 1];
+      else matrix[i][j] = Math.min(matrix[i - 1][j - 1] + 1, Math.min(matrix[i][j - 1] + 1, matrix[i - 1][j] + 1));
+    }
+  }
+  return matrix[b.length][a.length];
+}
+
+function getAreaZone(areaName) {
+  if (!areaName) return 0;
+  const a = normalizeAreaStr(areaName);
+  for (const f of FLEXIBLE_AREAS) { if (a.includes(normalizeAreaStr(f))) return "FLEX"; }
+  for (const z in ZONES) { for (const loc of ZONES[z]) { if (a.includes(normalizeAreaStr(loc))) return parseInt(z); } }
+  let bestMatchZone = 0;
+  let minDistance = 3;
+  for (const f of FLEXIBLE_AREAS) {
+    const dist = getLevenshteinDistance(a, normalizeAreaStr(f));
+    if (dist < minDistance) { minDistance = dist; bestMatchZone = "FLEX"; }
+  }
+  for (const z in ZONES) {
+    for (const loc of ZONES[z]) {
+      const dist = getLevenshteinDistance(a, normalizeAreaStr(loc));
+      if (dist < minDistance) { minDistance = dist; bestMatchZone = parseInt(z); }
+    }
+  }
+  return bestMatchZone;
+}
+
+function normalizePhone(phone) {
+  if (!phone) return "";
+  let p = String(phone).trim();
+  const ar = ['٠','١','٢','٣','٤','٥','٦','٧','٨','٩'];
+  for (let i = 0; i < 10; i++) p = p.replace(new RegExp(ar[i], 'g'), String(i));
+  let clean = p.replace(/\D/g, '');
+  if (clean.startsWith('0')) clean = clean.substring(1);
+  return clean;
+}
+
+function calculateDistanceMeters(lat1, lon1, lat2, lon2) {
+  const n1 = Number(lat1), o1 = Number(lon1), n2 = Number(lat2), o2 = Number(lon2);
+  if (isNaN(n1) || isNaN(o1) || isNaN(n2) || isNaN(o2) || n1 === 0 || o1 === 0 || n2 === 0 || o2 === 0) return 9999000;
+  const R = 6371e3, p1 = n1 * Math.PI / 180, p2 = n2 * Math.PI / 180, dp = (n2 - n1) * Math.PI / 180, dl = (o2 - o1) * Math.PI / 180;
+  const a = Math.sin(dp / 2) ** 2 + Math.cos(p1) * Math.cos(p2) * Math.sin(dl / 2) ** 2;
+  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+}
+
+
+// ═══════════════════════════════════════════════════════════════════════════
+//  ① محرك التوزيع الذكي — عقل نحلة (نظام الزونات) منقولاً لأوروبا
+// ═══════════════════════════════════════════════════════════════════════════
+exports.masterDispatchEngine = onSchedule(
+  { schedule: "every 1 minutes", region: REGION },
+  async (event) => {
+    const database = db();
+    const now = new Date();
+    const nowMs = now.getTime();
+    const today = now.toISOString().split("T")[0];
+
+    const [ordersSnap, driversSnap, metricsSnap, settingsSnap] = await Promise.all([
+      database.ref("active_orders").once("value"),
+      database.ref("drivers_locations").once("value"),
+      database.ref("daily_metrics").once("value"),
+      database.ref("system_settings").once("value")
+    ]);
+
+    const ordersData   = ordersSnap.val() || {};
+    const driversData  = driversSnap.val() || {};
+    const dailyMetrics = metricsSnap.val() || {};
+    const sysSettings  = settingsSnap.val() || {};
+    const shiftsEnabled = sysSettings.shifts_enabled !== false;
+
+    const directUpdates = {};
+    let activeDriversCount = 0;
+
+    // 1) إنهاء الشفتات المنتهية + عدّ الكباتن الفعّالين
+    Object.keys(driversData).forEach(phone => {
+      const d = driversData[phone];
+      if (shiftsEnabled && d.shift_end && new Date(d.shift_end) < now) {
+        if (d.status === "active") directUpdates["drivers_locations/" + phone + "/status"] = "inactive";
+        return;
+      }
+      const idle = d.last_update ? (nowMs - new Date(d.last_update).getTime()) / 60000 : 999;
+      if (d.status === "active" && d.account_status !== "banned" && idle <= DRIVER_OFFLINE_MINS) activeDriversCount++;
+    });
+
+    // 2) حساب أحمال الكباتن الحالية
+    const driverLoads = {};
+    Object.values(ordersData).forEach(o => {
+      if (["accepted", "heading", "arrived_at_res", "picked_up"].includes(o.status)) {
+        const dp = normalizePhone(o.driverPhone);
+        if (!driverLoads[dp]) driverLoads[dp] = { count: 0, areas: new Set(), restaurants: new Set(), hasPickedUp: false };
+        driverLoads[dp].count++;
+        if (o.area) driverLoads[dp].areas.add(o.area);
+        if (o.restaurant) driverLoads[dp].restaurants.add(o.restaurant);
+        if (o.status === "picked_up") driverLoads[dp].hasPickedUp = true;
+      }
+    });
+
+    // عدّاد الطلبات اليومي محلياً (للموازنة داخل نفس الجولة)
+    const localDailyCount = {};
+    Object.keys(driversData).forEach(p => { localDailyCount[p] = Number(driversData[p].daily_count || 0); });
+
+    // 3) الطلبات المعلّقة (بوابات الوقت كما في نحلة)
+    const pendingOrders = Object.keys(ordersData)
+      .map(k => Object.assign({ _key: k }, ordersData[k]))
+      .filter(o => {
+        if (o.status !== "pending_driver" || o.is_sovereign === true || o.status === "manual_pending") return false;
+        const mins = o.last_update ? (nowMs - new Date(o.last_update).getTime()) / 60000 : 999;
+        return (o.driverPhone === "system_routing" || !o.driverPhone || o.driverPhone === "pending_driver") ? mins >= 0.0 : mins >= 1.5;
+      })
+      .sort((a, b) => new Date(a.timestamp || 0) - new Date(b.timestamp || 0));
+
+    if (pendingOrders.length === 0) {
+      if (Object.keys(directUpdates).length > 0) await database.ref().update(directUpdates);
+      return;
+    }
+
+    const isCrisis = (pendingOrders.length / (activeDriversCount || 1) >= CRISIS_RATIO) || (pendingOrders.length >= CRISIS_MIN_ORDERS);
+    const MAX_LOAD = isCrisis ? MAX_LOAD_CRISIS : MAX_LOAD_NORMAL;
+
+    const txPromises = [];
+
+    pendingOrders.forEach(order => {
+      const orderKey = order._key;
+      const orderAgeMins = order.timestamp ? (nowMs - new Date(order.timestamp).getTime()) / 60000 : 0;
+      const MAX_RADIUS = orderAgeMins < 2 ? RADIUS_FRESH_KM : (orderAgeMins < 5 ? RADIUS_NORMAL_KM : RADIUS_OLD_KM);
+      let bestDriver = null, highestScore = -Infinity;
+
+      Object.keys(driversData).forEach(driverPhone => {
+        const driver = driversData[driverPhone];
+        if (driver.status !== "active" || driver.account_status === "banned") return;
+        if (shiftsEnabled && driver.shift_end && new Date(driver.shift_end) < now) return;
+        const idleMins = driver.last_update ? (nowMs - new Date(driver.last_update).getTime()) / 60000 : 999;
+        if (idleMins > DRIVER_OFFLINE_MINS) return;
+
+        const load = driverLoads[driverPhone] || { count: 0, areas: new Set(), restaurants: new Set(), hasPickedUp: false };
+        if (load.count >= MAX_LOAD) return;
+        if (normalizePhone(order.last_offered_to) === driverPhone &&
+            (order.last_offered_time ? (nowMs - new Date(order.last_offered_time).getTime()) / 60000 : 999) < OFFER_PENALTY_MINS) return;
+
+        const distKm = calculateDistanceMeters(Number(order.resLat) || 0, Number(order.resLng) || 0, Number(driver.lat) || 0, Number(driver.lng) || 0) / 1000;
+        const hasCoords = distKm < 9000;
+
+        // 🛑 تعديلك المخصص: حظر المسافة مُعطّل ليصل الطلب للكباتن البعيدين
+        // if (hasCoords && distKm > MAX_RADIUS) return;
+
+        let score = 100 - (hasCoords ? distKm * 5 : 20) + (idleMins * 1.5);
+        const completedToday = localDailyCount[driverPhone] || 0;
+        score -= (completedToday * 3);
+
+        if (load.count > 0) {
+          // حصار الكابتن الذي استلم الطعام (picked_up)
+          if (load.hasPickedUp) {
+            const exactSameRes = load.restaurants.has(order.restaurant) && load.restaurants.size === 1;
+            const exactSameArea = load.areas.has(order.area || "");
+            if (!(isCrisis && exactSameRes && exactSameArea)) return;
+          }
+
+          // 🧱 الجدار الصلب للزونات (Zero-Trust)
+          const newZone = getAreaZone(order.area);
+          let lockedZone = null;
+          let hasUnknown = false;
+          for (const a of load.areas) {
+            const ez = getAreaZone(a);
+            if (ez !== "FLEX" && ez !== 0) lockedZone = ez;
+            if (ez === 0) hasUnknown = true;
+          }
+          if (hasUnknown && lockedZone === null) {
+            if (!(load.restaurants.has(order.restaurant) && load.areas.has(order.area))) return;
+          }
+          if (lockedZone !== null) {
+            if (newZone !== "FLEX" && newZone !== lockedZone) return;
+          }
+
+          const sameRes = load.restaurants.has(order.restaurant);
+          if (!sameRes) { if (!isCrisis) return; score -= 80; }
+          else { score += 30; }
+
+          if (load.areas.has(order.area || "")) score += 50;
+          else score -= 15;
+        } else {
+          score += 50;
+        }
+
+        if (score > highestScore) { highestScore = score; bestDriver = driverPhone; }
+      });
+
+      if (bestDriver) {
+        const ts = now.toISOString();
+        const capturedDriver = bestDriver;
+        const prevDriver = normalizePhone(order.driverPhone);
+
+        // تحديث الحالة المحلية لتؤثر على الطلبات التالية في نفس الجولة
+        if (!driverLoads[capturedDriver]) driverLoads[capturedDriver] = { count: 0, areas: new Set(), restaurants: new Set(), hasPickedUp: false };
+        driverLoads[capturedDriver].count++;
+        if (order.area) driverLoads[capturedDriver].areas.add(order.area);
+        driverLoads[capturedDriver].restaurants.add(order.restaurant);
+        localDailyCount[capturedDriver] = (localDailyCount[capturedDriver] || 0) + 1;
+        const newDailyCount = localDailyCount[capturedDriver];
+
+        // ✅ إسناد ذرّي بمعاملة (Transaction) يمنع الإسناد المزدوج/الكتابة فوق طلب قُبِل للتو
+        const p = database.ref("active_orders/" + orderKey).transaction(cur => {
+          if (cur && cur.status !== "pending_driver") return; // تغيّرت الحالة → لا تلمسه
+          if (cur) {
+            cur.status = "pending_driver";
+            cur.driverPhone = capturedDriver;
+            cur.last_update = ts;
+            cur.last_offered_to = capturedDriver;
+            cur.last_offered_time = ts;
+            cur.is_sovereign = false;
+          }
+          return cur;
+        }).then(r => ({ committed: r.committed, driver: capturedDriver, prevDriver, newDailyCount, ts }))
+          .catch(() => ({ committed: false }));
+
+        txPromises.push(p);
+      } else {
+        const currentDriver = normalizePhone(order.driverPhone);
+        if (currentDriver && currentDriver !== "system_routing" && currentDriver !== "pending_driver") {
+          directUpdates["active_orders/" + orderKey + "/status"] = "pending_driver";
+          directUpdates["active_orders/" + orderKey + "/driverPhone"] = "system_routing";
+          directUpdates["active_orders/" + orderKey + "/last_update"] = now.toISOString();
+        } else if (orderAgeMins >= EMERGENCY_ALERT_MINS) {
+          const bucket = Math.floor(nowMs / 600000);
+          directUpdates["system_alerts/emergency_" + orderKey + "_" + bucket] = {
+            orderId: orderKey,
+            message: "⚠️ طلب ينتظر كابتن منذ " + Math.round(orderAgeMins) + " دقيقة!",
+            ts: now.toISOString(),
+            read: false
+          };
+        }
+      }
+    });
+
+    // تجميع نتائج المعاملات وكتابة العدّادات فقط للإسنادات التي نجحت فعلاً
+    const results = await Promise.all(txPromises);
+    const postUpdates = {};
+    results.forEach(r => {
+      if (!r || !r.committed) return;
+      postUpdates["drivers_locations/" + r.driver + "/daily_count"] = r.newDailyCount;
+      if (r.prevDriver && r.prevDriver !== "system_routing" && r.prevDriver !== "pending_driver" && r.prevDriver !== r.driver) {
+        const cur = Number((dailyMetrics[r.prevDriver] && dailyMetrics[r.prevDriver][today] && dailyMetrics[r.prevDriver][today].rejected_orders) || 0) + 1;
+        postUpdates["daily_metrics/" + r.prevDriver + "/" + today + "/rejected_orders"] = cur;
+      }
+    });
+
+    const finalUpdates = Object.assign({}, directUpdates, postUpdates);
+    if (Object.keys(finalUpdates).length > 0) await database.ref().update(finalUpdates);
+  }
+);
+
+
+// ═══════════════════════════════════════════════════════════════════════════
+//  ② درع مكافحة الاختطاف (Anti-Hijack Guard) — طبقة دفاع ثانية بعد قواعد الأمان
+// ═══════════════════════════════════════════════════════════════════════════
+exports.antiHijackGuard = onValueWritten(
+  { ref: "/active_orders/{orderId}", region: REGION, instance: DB_INSTANCE },
+  async (event) => {
+    const before = event.data.before.val();
+    const after  = event.data.after.val();
+    if (!before || !after) return null;
+
+    // إن حاول كابتن قبول طلب لم يُعرَض عليه أصلاً → إرجاع الحالة فوراً
+    if (before.status === "pending_driver" && after.status === "accepted") {
+      const tryingToAccept   = after.driverPhone;
+      const rightfullyOffered = before.last_offered_to;
+      if (tryingToAccept && rightfullyOffered && tryingToAccept !== rightfullyOffered && tryingToAccept !== "system_routing") {
+        return event.data.after.ref.update({
+          status: before.status,
+          driverPhone: before.driverPhone
+        });
+      }
+    }
+    return null;
+  }
+);
+
+
+// ═══════════════════════════════════════════════════════════════════════════
+//  ③ صائد الأشباح — تعطيل الكابتن الذي انقطع تحديثه طويلاً
+// ═══════════════════════════════════════════════════════════════════════════
+exports.ghostDriverSweeper = onSchedule(
+  { schedule: "every 10 minutes", region: REGION },
+  async (event) => {
+    const database = db();
+    const now = new Date();
+    const snap = await database.ref("drivers_locations").orderByChild("status").equalTo("active").once("value");
+    const drivers = snap.val() || {};
+    const updates = {};
+    Object.keys(drivers).forEach(phone => {
+      const d = drivers[phone];
+      const mins = d.last_update ? (now.getTime() - new Date(d.last_update).getTime()) / 60000 : 999;
+      if (mins > GHOST_MINS) updates["drivers_locations/" + phone + "/status"] = "inactive";
+    });
+    if (Object.keys(updates).length > 0) await database.ref().update(updates);
+  }
+);
+
+
+// ═══════════════════════════════════════════════════════════════════════════
+//  ④ إشعار FCM فوري للكابتن لحظة إسناد الطلب
+//     يتطلب أن يشترك تطبيق الكابتن في الموضوع:  driver_<رقم_الهاتف_المُطبّع>
+// ═══════════════════════════════════════════════════════════════════════════
+exports.notifyDriverOnAssignment = onValueWritten(
+  { ref: "/active_orders/{orderId}/driverPhone", region: REGION, instance: DB_INSTANCE },
+  async (event) => {
+    const before = event.data.before.val();
+    const after  = event.data.after.val();
+    if (after === before) return null;
+    if (!isRealDriver(after)) return null;
+
+    const driverPhone = normalizePhone(after);
+    if (!driverPhone) return null;
+
+    const orderId = event.params.orderId;
+    let order = {};
+    try { const snap = await db().ref("active_orders/" + orderId).once("value"); order = snap.val() || {}; } catch (e) {}
+
+    const DONE_STATUSES = ["completed", "مكتمل", "settled", "delivered", "done", "تم التسليم", "تم", "finished", "complete", "deleted"];
+    if (order && DONE_STATUSES.includes(String(order.status || "").toLowerCase().trim())) return null;
+
+    const message = {
+      topic: "driver_" + driverPhone,
+      data: {
+        type: "new_order",
+        order_id: String(orderId),
+        restaurant: String(order.restaurant || "طلب جديد"),
+        area: String(order.area || ""),
+        price: String(order.price || "")
+      },
+      android: { priority: "high", ttl: 60 * 1000 }
+    };
+
+    try { await admin.messaging().send(message); } catch (e) {}
+    return null;
+  }
+);
+
+
+
+// ═══════════════════════════════════════════════════════════════════════════
+//  ⑤ إشعارات الخلفية: جاهز / إلغاء / رسالة الليدر — توقظ هاتف الكابتن
+//     رسائل data فقط عبر قناة driver_<phone>؛ طبقة التطبيق Native تعرضها وتبقيها.
+// ═══════════════════════════════════════════════════════════════════════════
+
+// (أ) جهوزية الطلب — عند تحوّل ready_for_pickup إلى true (يضبطه تطبيق المطاعم)
+exports.notifyDriverReady = onValueWritten(
+  { ref: "/active_orders/{orderId}/ready_for_pickup", region: REGION, instance: DB_INSTANCE },
+  async (event) => {
+    const before = event.data.before.val();
+    const after  = event.data.after.val();
+    if (after !== true || before === true) return null; // فقط عند الانتقال إلى جاهز
+    const orderId = event.params.orderId;
+    let order = {};
+    try { const snap = await db().ref("active_orders/" + orderId).once("value"); order = snap.val() || {}; } catch (e) {}
+    if (!isRealDriver(order.driverPhone)) return null;
+    await pushToDriver(order.driverPhone, {
+      type: "ready", order_id: String(orderId), restaurant: String(order.restaurant || ""),
+      body: order.restaurant ? ("طلبيتك جاهزة في " + order.restaurant + " — توجّه للاستلام") : "طلبيتك جاهزة — توجّه للاستلام"
+    }, 60 * 60 * 1000);
+    return null;
+  }
+);
+
+// (ب) إلغاء الطلب — عند تحوّل status إلى "deleted"
+//     نراقب status (لا حذف العقدة) عمداً: الأرشفة الليلية تحذف العقد (status→null)، فلا إشعارات وهمية.
+exports.notifyDriverCancelled = onValueWritten(
+  { ref: "/active_orders/{orderId}/status", region: REGION, instance: DB_INSTANCE },
+  async (event) => {
+    const afterSt  = String(event.data.after.val()  || "").toLowerCase().trim();
+    const beforeSt = String(event.data.before.val() || "").toLowerCase().trim();
+    if (afterSt !== "deleted" || beforeSt === "deleted") return null;
+    const orderId = event.params.orderId;
+    let order = {};
+    try { const snap = await db().ref("active_orders/" + orderId).once("value"); order = snap.val() || {}; } catch (e) {}
+    if (!isRealDriver(order.driverPhone)) return null;
+    await pushToDriver(order.driverPhone, {
+      type: "cancelled", order_id: String(orderId), restaurant: String(order.restaurant || ""),
+      body: "تم إلغاء الطلب" + (order.restaurant ? (" من " + order.restaurant) : "")
+    }, 2 * 60 * 60 * 1000);
+    return null;
+  }
+);
+
+// (ج) رسائل الليدر/الإدارة — عند كتابة driver_messages/{phone} (نفس مسار STAFF_MESSAGE في V92)
+//     هذه هي الحلقة التي توقظ هاتف الكابتن المقفل عند رسالة الليدر.
+exports.notifyDriverMessage = onValueWritten(
+  { ref: "/driver_messages/{phone}", region: REGION, instance: DB_INSTANCE },
+  async (event) => {
+    const after = event.data.after.val();
+    if (!after || !after.msg) return null;
+    const before = event.data.before.val();
+    if (before && before.ts === after.ts && before.msg === after.msg) return null; // تجاهل التكرار
+    await pushToDriver(event.params.phone, {
+      type: "leader_message", msg: String(after.msg), from: String(after.from || "الإدارة")
+    }, 6 * 60 * 60 * 1000);
+    return null;
+  }
+);
+
+// ───────────────────────────── مُرسِل FCM موحّد لقناة الكابتن ─────────────────────────────
+// رسالة data فقط (لا notification) لتتحكّم طبقة التطبيق Native بشكل الإشعار وإبقائه حتى الضغط.
+async function pushToDriver(driverPhoneRaw, dataPayload, ttlMs) {
+  const driverPhone = normalizePhone(driverPhoneRaw);
+  if (!driverPhone) return;
+  const message = {
+    topic: "driver_" + driverPhone,
+    data: dataPayload,
+    android: { priority: "high", ttl: ttlMs || (6 * 60 * 60 * 1000) }
+  };
+  try { await admin.messaging().send(message); } catch (e) {}
+}
