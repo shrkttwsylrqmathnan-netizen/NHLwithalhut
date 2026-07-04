@@ -3,7 +3,7 @@
 <head>
     <script>
         // --- إصدار 38.1 (نسخة Google Play المحصّنة - كاميرا مباشرة + موثوقية وصل مطلقة + جسر أندرويد) ---
-        const CURRENT_APP_VERSION = "38.1.Nahla-Fortress";
+        const CURRENT_APP_VERSION = "38.2.Nahla-Fortress";
         const RES_VERSION_KEY = 'hut_res_app_version';
         try {
             if (localStorage.getItem(RES_VERSION_KEY) !== CURRENT_APP_VERSION) {
@@ -963,7 +963,19 @@
         if (!Array.isArray(outbox)) outbox = [];
     }
     function persistOutbox() {
-        try { localStorage.setItem(OUTBOX_KEY, JSON.stringify(outbox)); } catch (e) {}
+        // [V38.2] كشف امتلاء التخزين: إن فشلت الكتابة (مثلاً صورة كبيرة)، ننظّف أي
+        // بقايا صور من الطابور ونحاول ثانيةً، وإن استمر الفشل ننبّه بدل الضياع الصامت.
+        try {
+            localStorage.setItem(OUTBOX_KEY, JSON.stringify(outbox));
+        } catch (e) {
+            try {
+                outbox.forEach(o => { if (o.order) { delete o.order._localImage; delete o.order._image; } });
+                localStorage.setItem(OUTBOX_KEY, JSON.stringify(outbox));
+            } catch (e2) {
+                console.error('فشل حفظ الطابور — التخزين ممتلئ:', e2);
+                try { showSync('⚠️ الذاكرة ممتلئة — أرسل الطلب الآن'); } catch (_) {}
+            }
+        }
         try { if (window.AndroidBridge && window.AndroidBridge.setPendingCount) window.AndroidBridge.setPendingCount(outbox.length); } catch (e) {}
     }
 
@@ -2315,6 +2327,9 @@
         if (normResPhone.startsWith('964')) normResPhone = normResPhone.slice(3);
         normResPhone = normResPhone.replace(/^0+/, '');
 
+        // ⚠️ [V38.2] لا نخزّن الصورة (base64) داخل الطلب إطلاقاً — كانت تملأ localStorage
+        // (~5MB) فتفشل الكتابة بصمت ويضيع الطلب. نحجز نصّاً صغيراً فقط، والصورة تُرفع
+        // لـ Storage في الخلفية ويُحدَّث photoUrl بالرابط لاحقاً عبر patchReserved.
         const orderObj = {
             id: uniqueId, restaurant: currentResName, area: "⏳ جاري تحليل الوصل...",
             details: "📸 وصل مصوّر — قيد المعالجة", status: "pending_driver",
@@ -2322,7 +2337,7 @@
             last_update: tsIso, resPhone: normResPhone || "غير متوفر",
             resLat: regLat || 0, resLng: regLng || 0, comm: safeComm, payType: safePayType,
             is_sovereign: false, last_offered_to: null, ready_for_pickup: false,
-            _localImage: base64Img || null, _photoPending: true
+            _photoPending: true
         };
         const apiNotify = { action: 'NEW_ORDER', token: API_TOKEN, frontendId: uniqueId, restaurantName: currentResName, area: orderObj.area, price: 0, details: orderObj.details, image: "" };
         enqueueOrder(orderObj, apiNotify);
@@ -2368,7 +2383,6 @@
             if (item) {
                 Object.assign(item.order, fields);
                 delete item.order._photoPending;
-                delete item.order._localImage;
                 if (item.apiNotify) {
                     if (fields.price != null) item.apiNotify.price = fields.price;
                     if (fields.area != null) item.apiNotify.area = fields.area;
