@@ -3,7 +3,7 @@
 <head>
     <script>
         // --- إصدار 38.1 (نسخة Google Play المحصّنة - كاميرا مباشرة + موثوقية وصل مطلقة + جسر أندرويد) ---
-        const CURRENT_APP_VERSION = "38.2.Nahla-Fortress";
+        const CURRENT_APP_VERSION = "38.3.Nahla-Fortress";
         const RES_VERSION_KEY = 'hut_res_app_version';
         try {
             if (localStorage.getItem(RES_VERSION_KEY) !== CURRENT_APP_VERSION) {
@@ -2302,49 +2302,16 @@
             if (!base64Receipt) return alert("يرجى التقاط صورة للوصل أولاً باستخدام الكاميرا.");
             const base64Content = base64Receipt.split(',')[1];
             const currentRes = currentResName;
-            // 🛡️ [V38.1] موثوقية مطلقة: احجز الطلب في الطابور الدائم فوراً (كاليدوي)،
-            // ثم عالج الصورة/الرفع/الـAI بالخلفية وحدّث نفس الطلب المحجوز.
-            const reservedId = enqueuePhotoPlaceholder(base64Receipt);
+            // 🛡️ [V38.3] نهج سفيان المباشر المُجرّب: لا حجز مسبق ولا سباق زمني.
+            // نُظهر شارة معالجة مؤقتة، ثم نرفع الصورة + AI، ثم نكتب الطلب كتابةً
+            // واحدة مباشرة بعد اكتمال كل شيء. الطابور يُستخدم كشبكة أمان فقط
+            // إن فشلت الكتابة المباشرة.
             showSuccessMessage(`<div style="background: var(--success); width: 48px; height: 48px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-bottom: 8px; box-shadow: 0 4px 15px rgba(16,185,129,0.3);"><i data-lucide="check" size="24" color="white"></i></div><div class="fw-black" style="font-size: 1rem;">تم استلام الصورة! 🚀</div><div style="font-size: 0.75rem; opacity: 0.8; font-weight: 500; margin-top:4px;">تتم المعالجة بالخلفية وسيتم توجيهها للسائقين قريباً.</div>`);
-            flushOutbox('photo-reserved');
-            processPhotoOrderBackgroundSafe(base64Content, currentRes, reservedId);
+            processPhotoOrderBackgroundSafe(base64Content, currentRes);
         }
     };
 
-    // 🛡️ [V38.1] يحجز طلب الوصل فوراً في الطابور الدائم (قبل أي رفع/AI) فلا يضيع أبداً
-    function enqueuePhotoPlaceholder(base64Img) {
-        const uniqueId = "HUT-" + Math.floor(Date.now() / 1000) + "-" + Math.floor(Math.random()*900+100);
-        const tsIso = new Date().toISOString();
-        let safeResPhone = regPhone, safeComm = '0', safePayType = 'المطعم يدفع';
-        const sessionStr = localStorage.getItem('hut_res_session');
-        if (sessionStr) {
-            const sData = JSON.parse(sessionStr);
-            if (!safeResPhone) safeResPhone = sData.phone;
-            safeComm = sData.comm || '0';
-            safePayType = sData.payType || 'المطعم يدفع';
-        }
-        let normResPhone = String(safeResPhone || "").replace(/[^\d]/g, '');
-        if (normResPhone.startsWith('964')) normResPhone = normResPhone.slice(3);
-        normResPhone = normResPhone.replace(/^0+/, '');
-
-        // ⚠️ [V38.2] لا نخزّن الصورة (base64) داخل الطلب إطلاقاً — كانت تملأ localStorage
-        // (~5MB) فتفشل الكتابة بصمت ويضيع الطلب. نحجز نصّاً صغيراً فقط، والصورة تُرفع
-        // لـ Storage في الخلفية ويُحدَّث photoUrl بالرابط لاحقاً عبر patchReserved.
-        const orderObj = {
-            id: uniqueId, restaurant: currentResName, area: "⏳ جاري تحليل الوصل...",
-            details: "📸 وصل مصوّر — قيد المعالجة", status: "pending_driver",
-            driverPhone: "system_routing", price: 0, timestamp: tsIso, photoUrl: "",
-            last_update: tsIso, resPhone: normResPhone || "غير متوفر",
-            resLat: regLat || 0, resLng: regLng || 0, comm: safeComm, payType: safePayType,
-            is_sovereign: false, last_offered_to: null, ready_for_pickup: false,
-            _photoPending: true
-        };
-        const apiNotify = { action: 'NEW_ORDER', token: API_TOKEN, frontendId: uniqueId, restaurantName: currentResName, area: orderObj.area, price: 0, details: orderObj.details, image: "" };
-        enqueueOrder(orderObj, apiNotify);
-        return uniqueId;
-    }
-
-    // يبني كائن الطلب الكامل ويضعه في الطابور الدائم (نمط الإدخال اليدوي/السريع والمصوّر)
+    // 🛡️ يبني كائن الطلب الكامل ويضعه في الطابور الدائم (نمط الإدخال اليدوي/السريع)
     function buildAndEnqueueOrder(details, imageUrl, price, area) {
         const uniqueId    = "HUT-" + Math.floor(Date.now() / 1000) + "-" + Math.floor(Math.random()*900+100);
         const tsIso       = new Date().toISOString();
@@ -2376,28 +2343,10 @@
         enqueueOrder(orderObj, apiNotify);
     }
 
-    async function processPhotoOrderBackgroundSafe(base64Content, resName, reservedId) {
-        // helper: يحدّث الطلب المحجوز في الطابور + في السحابة إن كان قد أُرسل
-        async function patchReserved(fields) {
-            const item = outbox.find(o => String(o.id) === String(reservedId));
-            if (item) {
-                Object.assign(item.order, fields);
-                delete item.order._photoPending;
-                if (item.apiNotify) {
-                    if (fields.price != null) item.apiNotify.price = fields.price;
-                    if (fields.area != null) item.apiNotify.area = fields.area;
-                    if (fields.details != null) item.apiNotify.details = fields.details;
-                    if (fields.photoUrl != null) item.apiNotify.image = fields.photoUrl;
-                }
-                item.fbDone = false;   // أعد الكتابة بالبيانات المحدّثة
-                item.apiDone = false;
-                persistOutbox();
-            } else {
-                // الطلب أُرسل وأُزيل من الطابور بالفعل → حدّثه مباشرة في السحابة
-                try { await update(ref(db, 'active_orders/' + reservedId), fields); } catch (e) {}
-            }
-        }
-
+    async function processPhotoOrderBackgroundSafe(base64Content, resName) {
+        // 🛡️ [V38.3] نهج سفيان المباشر: رفع + AI، ثم كتابة الطلب مرة واحدة كاملة.
+        // لا حجز مسبق ولا سباق زمني. إن فشلت الكتابة المباشرة، نضعه في الطابور
+        // كشبكة أمان ليُعاد إرساله تلقائياً.
         let finalPrice = 0, finalArea = "تحديد ذكي (انظر الوصل)", finalDetails = "مسح ذكي - وصل مصور", imageUrl = "";
 
         try {
@@ -2434,9 +2383,39 @@
             finalDetails = "⚠️ خطأ بالمعالجة | " + finalDetails;
         }
 
-        // مهما حدث أعلاه، الطلب محجوز — نحدّثه الآن ببياناته النهائية
-        await patchReserved({ price: finalPrice, area: finalArea, details: finalDetails, photoUrl: imageUrl });
-        flushOutbox('photo-final');
+        // ⚡ الكتابة المباشرة (نهج سفيان): طلب واحد كامل بعد انتهاء كل شيء
+        const uniqueId   = "HUT-" + Math.floor(Date.now() / 1000) + "-" + Math.floor(Math.random()*900+100);
+        const tsIso      = new Date().toISOString();
+        let safeResPhone = regPhone, safeComm = '0', safePayType = 'المطعم يدفع';
+        const sessionStr = localStorage.getItem('hut_res_session');
+        if (sessionStr) {
+            const sData = JSON.parse(sessionStr);
+            if (!safeResPhone) safeResPhone = sData.phone;
+            safeComm = sData.comm || '0';
+            safePayType = sData.payType || 'المطعم يدفع';
+        }
+        let normResPhone = String(safeResPhone || "").replace(/[^\d]/g, '');
+        if (normResPhone.startsWith('964')) normResPhone = normResPhone.slice(3);
+        normResPhone = normResPhone.replace(/^0+/, '');
+
+        const orderObj = {
+            id: uniqueId, restaurant: resName, area: finalArea, details: finalDetails, status: "pending_driver",
+            driverPhone: "system_routing", price: finalPrice, timestamp: tsIso, photoUrl: imageUrl,
+            last_update: tsIso, resPhone: normResPhone || "غير متوفر", resLat: regLat || 0, resLng: regLng || 0,
+            comm: safeComm, payType: safePayType, is_sovereign: false, last_offered_to: null, ready_for_pickup: false
+        };
+        const apiNotify = { action: 'NEW_ORDER', token: API_TOKEN, frontendId: uniqueId, restaurantName: resName, area: finalArea, price: finalPrice, details: finalDetails, image: imageUrl };
+
+        try {
+            // كتابة مباشرة واحدة (تماماً كسفيان)
+            await set(ref(db, 'active_orders/' + uniqueId), orderObj);
+            fetch(API_URL, { method: 'POST', body: JSON.stringify(apiNotify) }).catch(() => {});
+        } catch (e) {
+            // فشلت الكتابة المباشرة (اتصال/مصادقة) → شبكة الأمان: ضعه بالطابور ليُعاد تلقائياً
+            console.error("Direct write failed, queueing as fallback:", e);
+            enqueueOrder(orderObj, apiNotify);
+            flushOutbox('photo-fallback');
+        }
     }
 
     function showSuccessMessage(customHTML) {
