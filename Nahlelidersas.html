@@ -3,8 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no,viewport-fit=cover">
-<title>نحلة — لوحة الليدرز</title>
-<meta name="theme-color" content="#000000">
+<title>نحلة — قيادة الخلية 🐝</title>
+<meta name="theme-color" content="#1a1408">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <!-- مكتبات فايربيس -->
 <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
@@ -20,20 +20,22 @@
    🎨 ثيم لوحة إدارة Uber — أسود / أبيض / أخضر
 ═══════════════════════════════════════════ */
 :root{
-  --black:#000000;--ink:#0f0f0f;--ink2:#2b2b2b;--ink3:#6b6b6b;--ink4:#9b9b9b;
-  --bg:#f3f3f3;--surface:#ffffff;--surface2:#fafafa;--surface3:#f6f6f6;
-  --line:#ececec;--line2:#f1f1f1;
-  --green:#05c167;--green-d:#048a48;--green-l:#e7f9ef;
+  /* 🐝 ثيم الخلية — الأسود العسلي الداكن + العسل الذهبي (هوية تطبيق الكباتن) */
+  --black:#1a1408;--ink:#1a1408;--ink2:#3d3216;--ink3:#7a6a3f;--ink4:#a89968;
+  --bg:#fdf6e3;--surface:#ffffff;--surface2:#fffdf7;--surface3:#fdf6e3;
+  --line:#f0e6cc;--line2:#f6efdb;
+  /* العسل هو اللون الحيوي الرئيسي (بدل الأخضر) */
+  --green:#FFB300;--green-d:#E08600;--green-l:#fff6df;
   --red:#e11900;--red-d:#bf1500;--red-l:#fdecea;
-  --amber:#ff8a00;--amber-d:#e07700;--amber-l:#fff3e0;
-  --blue:#111827;--blue-d:#000000;--blue-l:#fff8e1;
-  --violet:#7356bf;--violet-l:#f0ecfa;
-  --gold:#FFC107;--silver:#9aa3ad;--bronze:#cd7f32;
+  --amber:#FF8F00;--amber-d:#E07700;--amber-l:#fff3e0;
+  --blue:#B8860B;--blue-d:#8a6508;--blue-l:#fff8e1;
+  --violet:#a06a1f;--violet-l:#f7eeda;
+  --gold:#FFC107;--silver:#c9b98f;--bronze:#cd7f32;
   --r:8px;--r2:12px;--r3:16px;--r4:14px;--rf:999px;
-  --sh-xs:0 1px 2px rgba(0,0,0,.06);
-  --sh-sm:0 2px 8px rgba(0,0,0,.07);
-  --sh-md:0 6px 22px rgba(0,0,0,.10);
-  --sh-lg:0 16px 48px rgba(0,0,0,.16);
+  --sh-xs:0 1px 2px rgba(80,60,10,.06);
+  --sh-sm:0 2px 8px rgba(80,60,10,.09);
+  --sh-md:0 6px 22px rgba(80,60,10,.12);
+  --sh-lg:0 16px 48px rgba(80,60,10,.20);
   --ease:cubic-bezier(.2,.8,.2,1);
 }
 *,::before,::after{box-sizing:border-box;margin:0;padding:0;}
@@ -45,7 +47,7 @@ button,input,select,textarea{font-family:'Cairo',sans-serif;}
 /* ── Toasts ── */
 #toasts{position:fixed;top:max(16px,env(safe-area-inset-top));left:50%;transform:translateX(-50%);
   z-index:99999;display:flex;flex-direction:column;gap:8px;width:min(94%,360px);pointer-events:none;}
-.ti{background:var(--black);color:#fff;border-radius:14px;padding:13px 16px;
+.ti{background:linear-gradient(135deg,#2a2109,#1a1408);color:#fff;border-radius:14px;padding:13px 16px;
   box-shadow:var(--sh-lg);display:flex;align-items:center;gap:10px;font-weight:700;font-size:.84rem;
   animation:tin .32s var(--ease);pointer-events:auto;}
 .ti-ico{width:28px;height:28px;border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:14px;}
@@ -53,36 +55,43 @@ button,input,select,textarea{font-family:'Cairo',sans-serif;}
 @keyframes tin{from{opacity:0;transform:translateY(-12px) scale(.96)}to{opacity:1;transform:none}}
 
 /* ── AUTH ── */
-#auth{position:fixed;inset:0;z-index:60000;background:var(--black);
+#auth{position:fixed;inset:0;z-index:60000;
+  background:linear-gradient(160deg,#231a09 0%,#1a1408 55%,#0f0c05 100%);
   display:flex;align-items:center;justify-content:center;padding:20px;}
 #auth::before{content:'';position:absolute;inset:0;
-  background:radial-gradient(circle at 30% 20%,rgba(5,193,103,.12),transparent 45%),
-             radial-gradient(circle at 80% 80%,rgba(39,110,241,.10),transparent 45%);}
+  background:radial-gradient(circle at 30% 18%,rgba(255,193,7,.16),transparent 46%),
+             radial-gradient(circle at 82% 82%,rgba(255,143,0,.12),transparent 46%);}
 .auth-box{position:relative;width:100%;max-width:380px;background:var(--surface);
   border-radius:24px;box-shadow:var(--sh-lg);padding:44px 32px 36px;text-align:center;
   animation:popIn .5s var(--ease);}
-.auth-mark{width:72px;height:72px;border-radius:20px;background:var(--black);
+.auth-mark{width:72px;height:72px;border-radius:20px;
+  background:linear-gradient(145deg,#FFC107,#FF8F00);
   display:inline-flex;align-items:center;justify-content:center;margin-bottom:18px;font-size:32px;
-  box-shadow:0 8px 24px rgba(0,0,0,.25);}
+  box-shadow:0 10px 26px rgba(255,143,0,.45);}
 .auth-h{font-size:1.45rem;font-weight:900;margin-bottom:3px;letter-spacing:-.3px;}
 .auth-s{font-size:.76rem;font-weight:700;color:var(--ink4);margin-bottom:26px;}
 .auth-in{width:100%;background:var(--surface3);border:2px solid transparent;border-radius:14px;
   padding:14px 16px;font-size:.95rem;font-weight:700;text-align:center;outline:none;
   transition:all .2s;margin-bottom:11px;color:var(--ink);}
 .auth-in:focus{background:#fff;border-color:var(--black);}
-.auth-btn{width:100%;padding:15px;background:var(--black);color:#fff;
-  border:none;border-radius:14px;font-size:.95rem;font-weight:900;cursor:pointer;transition:all .2s;}
+.auth-btn{width:100%;padding:15px;background:linear-gradient(145deg,#FFC107,#FF8F00);color:#1a1408;
+  border:none;border-radius:14px;font-size:.95rem;font-weight:900;cursor:pointer;transition:all .2s;
+  box-shadow:0 6px 18px rgba(255,143,0,.35);}
 .auth-btn:active{transform:scale(.97);}
-.auth-btn:hover{background:var(--ink2);}
+.auth-btn:hover{filter:brightness(1.05);}
 
 /* ── HEADER (Uber black bar) ── */
-.s-hdr{position:sticky;top:0;z-index:50;background:var(--black);
+.s-hdr{position:sticky;top:0;z-index:50;
+  background:linear-gradient(120deg,#231a09,#1a1408);
+  border-bottom:2px solid rgba(255,193,7,.35);
   padding:14px 16px;padding-top:max(14px,env(safe-area-inset-top));
   display:flex;align-items:center;justify-content:space-between;gap:10px;
-  box-shadow:0 2px 14px rgba(0,0,0,.18);}
+  box-shadow:0 4px 18px rgba(80,60,10,.28);}
 .s-hl{display:flex;align-items:center;gap:12px;}
-.s-logo{width:42px;height:42px;border-radius:12px;background:#fff;
-  display:flex;align-items:center;justify-content:center;font-size:22px;}
+.s-logo{width:42px;height:42px;border-radius:12px;
+  background:linear-gradient(145deg,#FFC107,#FF8F00);
+  display:flex;align-items:center;justify-content:center;font-size:22px;
+  box-shadow:0 4px 12px rgba(255,143,0,.4);}
 .s-nm{font-size:1.05rem;font-weight:900;color:#fff;letter-spacing:-.2px;}
 .s-role{font-size:.68rem;font-weight:700;color:var(--green);margin-top:2px;}
 .s-hr{display:flex;align-items:center;gap:8px;}
@@ -105,8 +114,8 @@ button,input,select,textarea{font-family:'Cairo',sans-serif;}
 .reveal{animation:fadeUp .5s var(--ease) both;}
 
 /* ═══ 🏆 لوحة الشرف ═══ */
-.hof{background:var(--black);border-radius:20px;padding:16px 16px 18px;margin-bottom:16px;
-  position:relative;overflow:hidden;box-shadow:var(--sh-md);}
+.hof{background:linear-gradient(150deg,#231a09,#1a1408);border-radius:20px;padding:16px 16px 18px;margin-bottom:16px;
+  position:relative;overflow:hidden;box-shadow:var(--sh-md);border:1px solid rgba(255,193,7,.18);}
 .hof-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;}
 .hof-ttl{font-size:1rem;font-weight:900;color:#fff;display:flex;align-items:center;gap:8px;}
 .hof-live{font-size:.62rem;font-weight:800;color:var(--green);background:rgba(5,193,103,.15);
@@ -116,8 +125,8 @@ button,input,select,textarea{font-family:'Cairo',sans-serif;}
 .hof-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;}
 @media(max-width:560px){.hof-grid{grid-template-columns:1fr;}}
 /* لا أنيميشن دخول على الكروت — يمنع الوميض عند تحديث الأرقام */
-.hof-card{background:#171717;border-radius:16px;padding:14px;position:relative;overflow:hidden;
-  border:1px solid #262626;transition:transform .25s;}
+.hof-card{background:#2a2109;border-radius:16px;padding:14px;position:relative;overflow:hidden;
+  border:1px solid #3d3216;transition:transform .25s;}
 .hof-card:hover{transform:translateY(-2px);}
 .hof-card.c1{border-color:rgba(246,177,0,.4);}
 .hof-card.c1::before{content:'';position:absolute;top:0;left:-60%;width:50%;height:100%;
@@ -138,9 +147,9 @@ button,input,select,textarea{font-family:'Cairo',sans-serif;}
 .hof-cong{margin-top:10px;width:100%;background:#fff;color:#000;border:none;border-radius:10px;
   padding:8px;font-size:.72rem;font-weight:900;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:5px;transition:.15s;}
 .hof-cong:active{transform:scale(.96);}
-.hof-cong:hover{background:var(--gold);}
-.hof-empty{background:#171717;border:1px dashed #2c2c2c;border-radius:14px;padding:18px;
-  text-align:center;color:var(--ink4);font-size:.78rem;font-weight:700;}
+.hof-cong:hover{background:var(--gold);color:#1a1408;}
+.hof-empty{background:#2a2109;border:1px dashed #4a3d1a;border-radius:14px;padding:18px;
+  text-align:center;color:#a89968;font-size:.78rem;font-weight:700;}
 
 /* ═══ 🐌 الرادار العكسي ═══ */
 .watch{background:var(--surface);border:1.5px solid var(--amber-l);border-radius:18px;
@@ -270,7 +279,7 @@ button,input,select,textarea{font-family:'Cairo',sans-serif;}
 .es-ic{width:64px;height:64px;border-radius:20px;background:var(--surface3);display:inline-flex;
   align-items:center;justify-content:center;margin-bottom:12px;color:var(--ink3);font-size:28px;}
 .es-t{font-size:.88rem;font-weight:800;color:var(--ink3);}
-#fbSt{position:fixed;bottom:14px;left:14px;background:var(--black);border-radius:var(--rf);padding:7px 13px;
+#fbSt{position:fixed;bottom:14px;left:14px;background:linear-gradient(135deg,#2a2109,#1a1408);border-radius:var(--rf);padding:7px 13px;
   box-shadow:var(--sh-md);display:flex;align-items:center;gap:6px;font-weight:700;font-size:.72rem;z-index:800;color:#fff;}
 .fb-dot{width:8px;height:8px;border-radius:50%;background:var(--green);}.fb-dot.off{background:var(--red);}
 .loading{color:transparent!important;pointer-events:none;position:relative;}
@@ -380,13 +389,13 @@ button,input,select,textarea{font-family:'Cairo',sans-serif;}
   <div class="sheet" onclick="event.stopPropagation()">
     <div class="sheet-handle"></div>
     <div class="sheet-title">📨 رسالة مباشرة</div>
-    <div class="sheet-sub">للكابتن: <span id="msgCapName">—</span> · تصله داخل التطبيق فوراً كإشعار</div>
+    <div class="sheet-sub">للنحلة: <span id="msgCapName">—</span> · تصله داخل التطبيق فوراً كإشعار</div>
     <div class="msg-chips">
       <button class="msg-chip" onclick="fillMsg(0)">🛵 توجّه للمطعم</button>
       <button class="msg-chip" onclick="fillMsg(1)">⏱️ اطمئنان</button>
       <button class="msg-chip" onclick="fillMsg(2)">✅ سلّم وحدّث</button>
     </div>
-    <textarea id="msgText" class="msg-text" rows="3" placeholder="اكتب رسالة مخصّصة للكابتن..."></textarea>
+    <textarea id="msgText" class="msg-text" rows="3" placeholder="اكتب رسالة مخصّصة للنحلة..."></textarea>
     <button class="msg-send" id="msgSendBtn" onclick="doSendMsg()">📨 إرسال داخل التطبيق</button>
     <button class="sheet-cancel" onclick="clSheet('msgModal')">إلغاء</button>
   </div>
@@ -406,9 +415,9 @@ button,input,select,textarea{font-family:'Cairo',sans-serif;}
 <!-- AUTH -->
 <div id="auth">
   <div class="auth-box">
-    <div class="auth-mark">🧑‍💼</div>
-    <div class="auth-h">لوحة الليدرز</div>
-    <div class="auth-s">نحلة — مراقبة الرادار</div>
+    <div class="auth-mark">🐝</div>
+    <div class="auth-h">قيادة الخلية</div>
+    <div class="auth-s">مملكة نحلة — رادار الخلية</div>
     <input type="tel" id="sPhone" class="auth-in" placeholder="رقم الهاتف" autocomplete="off">
     <input type="password" id="sPass" class="auth-in" placeholder="كلمة المرور" autocomplete="off" onkeypress="if(event.key==='Enter')doLogin()">
     <button class="auth-btn" id="loginBtn" onclick="doLogin()">دخول</button>
@@ -421,8 +430,8 @@ button,input,select,textarea{font-family:'Cairo',sans-serif;}
     <div class="s-hl">
       <div class="s-logo">👑</div>
       <div>
-         <div class="s-nm">مدير <span id="empName" style="color:var(--green)">موظف</span></div>
-         <div class="s-role">هؤلاء الكباتن في أمانتك، شكراً لك 🤍</div>
+         <div class="s-nm">ملكة الخلية <span id="empName" style="color:var(--gold)">النحّالة</span></div>
+         <div class="s-role">نحل خليتك في أمانتك، ارعَهم 🐝</div>
       </div>
     </div>
     <div class="s-hr">
@@ -436,7 +445,7 @@ button,input,select,textarea{font-family:'Cairo',sans-serif;}
     <!-- 🏆 لوحة الشرف -->
     <div class="hof reveal" id="hofBox" style="animation-delay:.02s">
       <div class="hof-head">
-        <div class="hof-ttl">🏆 لوحة شرف الأسطول</div>
+        <div class="hof-ttl">🏆 خلية الشرف</div>
         <div class="hof-live"><i></i> يُحدّث كل دقيقة</div>
       </div>
       <div id="hofGrid" class="hof-grid"></div>
@@ -444,18 +453,18 @@ button,input,select,textarea{font-family:'Cairo',sans-serif;}
 
     <!-- 🐌 الرادار العكسي -->
     <div class="watch reveal" id="watchBox" style="animation-delay:.06s">
-      <div class="watch-head">🐌 كباتن تحت المراقبة</div>
+      <div class="watch-head">🐌 نحل تحت المراقبة</div>
       <div id="watchList" class="watch-list"></div>
     </div>
 
     <div class="kpi-row reveal" style="animation-delay:.1s">
       <div class="kc kb"><div class="kc-ic">📦</div><div><div class="kc-v" id="vOrd">0</div><div class="kc-l">طلبات نشطة</div></div></div>
-      <div class="kc kg"><div class="kc-ic">🛵</div><div><div class="kc-v" id="vDrv">0</div><div class="kc-l">كباتن بالميدان</div></div></div>
-      <div class="kc ko"><div class="kc-ic">🔴</div><div><div class="kc-v" id="vPend">0</div><div class="kc-l">بانتظار كابتن</div></div></div>
+      <div class="kc kg"><div class="kc-ic">🛵</div><div><div class="kc-v" id="vDrv">0</div><div class="kc-l">نحل في الحقل</div></div></div>
+      <div class="kc ko"><div class="kc-ic">🔴</div><div><div class="kc-v" id="vPend">0</div><div class="kc-l">بانتظار نحلة</div></div></div>
     </div>
 
     <div class="rt reveal" style="animation-delay:.14s">
-        <div class="rt-title"><div class="rt-dot"></div> الرادار الميداني</div>
+        <div class="rt-title"><div class="rt-dot"></div> رادار الحقل</div>
         <button class="map-btn" onclick="toggleMap()">🗺️ الخريطة</button>
     </div>
 
@@ -464,7 +473,7 @@ button,input,select,textarea{font-family:'Cairo',sans-serif;}
         <div class="map-tools-row">
           <div class="srch-w">
               <span class="si">🔍</span>
-              <input type="text" id="mapDriverSearch" class="srch" style="box-shadow: var(--sh-sm);" placeholder="ابحث عن كابتن بالميدان..." oninput="searchMapDriver()" autocomplete="off">
+              <input type="text" id="mapDriverSearch" class="srch" style="box-shadow: var(--sh-sm);" placeholder="ابحث عن نحلة في الحقل..." oninput="searchMapDriver()" autocomplete="off">
           </div>
           <button class="map-filter-btn" id="busyFilterBtn" onclick="toggleBusyFilter(this)">🛵 عرض الكل</button>
         </div>
@@ -476,7 +485,7 @@ button,input,select,textarea{font-family:'Cairo',sans-serif;}
 
     <div class="fbar reveal" id="fbar" style="animation-delay:.18s">
       <button class="fp on" onclick="doFilt('all',this)">الكل <span class="fc" id="cA">0</span></button>
-      <button class="fp fr" onclick="doFilt('pending',this)">بانتظار كابتن <span class="fc" id="cP">0</span></button>
+      <button class="fp fr" onclick="doFilt('pending',this)">بانتظار نحلة <span class="fc" id="cP">0</span></button>
       <button class="fp fg" onclick="doFilt('active',this)">قيد التوصيل <span class="fc" id="cAc">0</span></button>
       <button class="fp fo" onclick="doFilt('dlyr',this)">🕐 متأخر بالمطعم <span class="fc" id="cDR">0</span></button>
       <button class="fp fa" onclick="doFilt('dlyd',this)">🛵 متأخر بالطريق <span class="fc" id="cDD">0</span></button>
@@ -493,17 +502,17 @@ const API="https://script.google.com/macros/s/AKfycbyiFprfbDKMwOG75eZl-V5_M7XmqL
 const TOK="NAHLA_SECURE_TOKEN_2026";
 
 const MSG_LIST = [
-    "سعداء بعودتك يا بطل. تذكر أن هؤلاء الكباتن في الميدان هم عصب الشركة، عاملهم كأبنائك وكن لهم سنداً. 🤍",
-    "أهلاً بك! إدارتك الحكيمة وتوجيهك الهادئ للكباتن يصنع الفارق في يومهم.. نتمنى لك شفت عمل موفق! 🚀",
-    "صباح/مساء الخير يا مدير. الكباتن يواجهون زحام الشوارع، وابتسامتك ودعمك لهم من هنا يسهل عليهم الكثير. ✨",
-    "مرحباً بك مجدداً. تذكر أن نجاحنا يبدأ من رضا شركائنا في الميدان.. دعنا نجعل هذا اليوم رائعاً للجميع! 🛵"
+    "أهلاً بعودتك يا ملكة الخلية. تذكّري أن نحل الحقل هم عسل هذه المملكة، ارعَيهم كأبنائكِ وكوني لهم سنداً. 🐝",
+    "مرحباً بكِ! إدارتكِ الحكيمة وتوجيهكِ الهادئ لنحل الخلية يصنع الفارق في يومهم.. نتمنى لكِ شفت عمل موفق! 🍯",
+    "صباح/مساء الخير يا ملكة. نحل الخلية يواجهون زحام الحقل، وابتسامتكِ ودعمكِ من هنا يسهّل عليهم الكثير. ✨",
+    "مرحباً بكِ مجدداً. تذكّري أن مجد المملكة يبدأ من رضا نحلها في الحقل.. لنجعل هذا اليوم عسلاً للجميع! 🐝"
 ];
 
 /* قوالب الرسائل المباشرة السريعة */
 const MSG_TEMPLATES = [
-  "السلام عليكم، يرجى التوجه للمطعم فوراً، الطلب جاهز للاستلام. 🛵",
-  "كابتن، يبدو أنك متأخر قليلاً في الطريق، هل تواجه مشكلة؟ نحن معك. 🤝",
-  "الرجاء تسليم الطلب للزبون وتحديث حالة الطلب في التطبيق. شكراً لك. ✅"
+  "السلام عليكم يا نحلة، يرجى التوجه للمطعم فوراً، الطلب جاهز للاستلام. 🐝",
+  "يا نحلة الخلية، يبدو أنك متأخر قليلاً في الحقل، هل تواجه مشكلة؟ نحن معك. 🤝",
+  "الرجاء تسليم الطلب للزبون وتحديث حالة الطلب في التطبيق. شكراً لك. 🍯"
 ];
 
 /* ════ STATE ════ */
@@ -700,9 +709,9 @@ window.toggleMap = function() {
 window.toggleBusyFilter = function(btn){
     hideBusyOnMap = !hideBusyOnMap;
     btn.classList.toggle("on", hideBusyOnMap);
-    btn.textContent = hideBusyOnMap ? "🟢 المتاحون فقط" : "🛵 عرض الكل";
+    btn.textContent = hideBusyOnMap ? "🟢 المتاحون فقط" : "🐝 عرض الكل";
     updateMap();
-    toast(hideBusyOnMap ? "إخفاء الكباتن المشغولين" : "عرض جميع الكباتن");
+    toast(hideBusyOnMap ? "إخفاء النحل المشغول" : "عرض جميع النحل");
 };
 
 function initMap() {
@@ -800,7 +809,7 @@ window.trackDriver = function(dPhone, rNm) {
     if(!mapInstance) toggleMap();
     let dLat, dLng;
     if(drvLocs[dPhone] && drvLocs[dPhone].lat) { dLat = parseFloat(drvLocs[dPhone].lat); dLng = parseFloat(drvLocs[dPhone].lng); }
-    if(!dLat || isNaN(dLat) || isNaN(dLng)) return toast("📍 لا يوجد موقع حي للكابتن حالياً", "e");
+    if(!dLat || isNaN(dLat) || isNaN(dLng)) return toast("📍 لا يوجد موقع حي للنحلة حالياً", "e");
     Object.keys(mapMarkers).forEach(k => mapMarkers[k].setOpacity(0.3));
     if(mapMarkers[dPhone]) { mapMarkers[dPhone].setOpacity(1); mapMarkers[dPhone].openPopup(); }
     mapInstance.flyTo([dLat, dLng], 17, {duration: 1.2});
@@ -826,7 +835,7 @@ window.searchMapDriver = function() {
         });
         resBox.innerHTML = html; resBox.style.display = "block";
     } else {
-        resBox.innerHTML = `<div style="padding:12px; text-align:center; color:#e11900; font-size:0.8rem; font-weight:700;">لا يوجد كابتن متصل بهذا الاسم</div>`;
+        resBox.innerHTML = `<div style="padding:12px; text-align:center; color:#e11900; font-size:0.8rem; font-weight:700;">لا توجد نحلة متصلة بهذا الاسم</div>`;
         resBox.style.display = "block";
     }
 };
@@ -838,7 +847,7 @@ window.jumpToDriver = function(phone, lat, lng) {
     Object.keys(mapMarkers).forEach(k => mapMarkers[k].setOpacity(0.3));
     if(mapMarkers[phone]) { mapMarkers[phone].setOpacity(1); mapMarkers[phone].openPopup(); }
     mapInstance.flyTo([lat, lng], 17, {duration: 1.2});
-    toast("📍 تم تحديد موقع الكابتن");
+    toast("📍 تم تحديد موقع النحلة");
 };
 
 document.addEventListener("click", (e) => {
@@ -949,7 +958,7 @@ function renderHallOfFame(){
   const hasAny=(top1&&(top1.completed>0||top1.ledgerTotal>0));
   let html;
   if(!hasAny){
-    html=`<div class="hof-empty" style="grid-column:1/-1">🌙 لم تُسجّل إنجازات اليوم بعد — تظهر لوحة الشرف تلقائياً مع أول طلب مُنجز.</div>`;
+    html=`<div class="hof-empty" style="grid-column:1/-1">🌙 لم تُسجّل إنجازات اليوم بعد — تُزهر خلية الشرف تلقائياً مع أول طلب مُنجز.</div>`;
   }else{
     const congBtn=(c)=>c&&c.phone?`<button class="hof-cong" onclick="congratsCaptain('${ej(c.phone)}','${ej(c.name)}')">🎉 تهنئة</button>`:"";
 
@@ -1000,7 +1009,7 @@ function renderHallOfFame(){
 }
 
 window.congratsCaptain=function(phone,name){
-  msgCaptain(phone,name,`🏆 أنت بطل هذا الشفت يا ${name}! إنجازك اليوم رائع ويستحق الإشادة، استمر بهذا التألق 🚀🤍`);
+  msgCaptain(phone,name,`🏆 أنت نحلة هذا الشفت الذهبية يا ${name}! إنجازك اليوم عسلٌ خالص ويستحق الإشادة، استمر بتألقك 🐝🍯`);
 };
 
 function renderWatchList(){
@@ -1010,7 +1019,7 @@ function renderWatchList(){
                     .sort((a,b)=>b.rejected-a.rejected);
   let html;
   if(!flagged.length){
-    html=`<div class="watch-ok">✅ كل الكباتن المتصلين بأداء جيد حالياً</div>`;
+    html=`<div class="watch-ok">✅ كل نحل الخلية المتصل بأداء جيد حالياً</div>`;
   }else{
     html="";
     flagged.forEach(c=>{
@@ -1032,7 +1041,7 @@ function renderWatchList(){
   if(_watchHtml!==html){box.innerHTML=html;_watchHtml=html;}
 }
 window.checkInCaptain=function(phone,name){
-  msgCaptain(phone,name,`مرحباً كابتن ${name}، هل تواجه مشكلة في الدراجة أو الطلبات؟ نحن هنا لمساعدتك 🤝`);
+  msgCaptain(phone,name,`مرحباً يا نحلة ${name}، هل تواجه مشكلة في الدراجة أو الطلبات؟ خليتك هنا لمساعدتك 🐝`);
 };
 
 /* تحديث لوحة الشرف والرادار العكسي كل دقيقة (الحُرّاس يمنعون أي رسم بلا تغيير) */
@@ -1054,11 +1063,11 @@ window.fillMsg=function(i){document.getElementById("msgText").value=MSG_TEMPLATE
 window.doSendMsg=async function(){
   const text=document.getElementById("msgText").value.trim();
   if(!text)return toast("اكتب رسالة أولاً","e");
-  if(!_msgPhone)return toast("لا يوجد كابتن محدد","e");
+  if(!_msgPhone)return toast("لا توجد نحلة محددة","e");
   const btn=document.getElementById("msgSendBtn");btn.disabled=true;btn.classList.add("loading");
   try{
     const d=await staffAction({action:"STAFF_MESSAGE",driverPhone:_msgPhone,msg:text});
-    if(d&&d.success){toast("📨 أُرسلت الرسالة للكابتن");clSheet("msgModal");}
+    if(d&&d.success){toast("📨 أُرسلت الرسالة للنحلة");clSheet("msgModal");}
     else toast(d&&d.msg||"تعذّر الإرسال","e");
   }catch(e){toast("خطأ في الإرسال","e");}
   finally{btn.disabled=false;btn.classList.remove("loading");}
