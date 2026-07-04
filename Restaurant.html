@@ -2,8 +2,8 @@
 <html lang="ar" dir="rtl">
 <head>
     <script>
-        // --- إصدار 38.0 (نسخة Google Play المحصّنة - موثوقية إرسال مطلقة + جسر أندرويد) ---
-        const CURRENT_APP_VERSION = "38.0.Nahla-Fortress";
+        // --- إصدار 38.1 (نسخة Google Play المحصّنة - كاميرا مباشرة + موثوقية وصل مطلقة + جسر أندرويد) ---
+        const CURRENT_APP_VERSION = "38.1.Nahla-Fortress";
         const RES_VERSION_KEY = 'hut_res_app_version';
         try {
             if (localStorage.getItem(RES_VERSION_KEY) !== CURRENT_APP_VERSION) {
@@ -29,12 +29,12 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     
-    <title>مطاعم نحلة | منصة نحلة</title>
+    <title>مطاعم نحلة | منصة الحوت</title>
 
     <meta name="theme-color" content="#111827"> 
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="نظام نحلة">
+    <meta name="apple-mobile-web-app-title" content="نظام الحوت">
     <meta name="mobile-web-app-capable" content="yes">
 
     <link rel="manifest" href="manifest_restaurant.json">
@@ -521,7 +521,7 @@
             <i data-lucide="message-square-dashed" size="30"></i>
         </div>
         <h5 class="fw-black mb-2" style="color: var(--primary-blue-dark);">لصق رسالة الزبون</h5>
-        <p class="text-muted fw-bold mb-3" style="font-size: 0.75rem;">الصق الرسالة هنا وسيقوم ذكاء نحلة الاصطناعي بتعبئة الحقول أوتوماتيكياً لاستخراج المنطقة وتفاصيل العنوان الدقيقة ✨.</p>
+        <p class="text-muted fw-bold mb-3" style="font-size: 0.75rem;">الصق الرسالة هنا وسيقوم ذكاء الحوت الاصطناعي بتعبئة الحقول أوتوماتيكياً لاستخراج المنطقة وتفاصيل العنوان الدقيقة ✨.</p>
         <textarea id="pasteTextInput" class="custom-input mb-3" rows="5" placeholder="مثال: أريد توصيل لحي الجامعة قرب مول بغداد، الحساب 15000، رقمي 077..."></textarea>
         <div class="d-flex gap-2">
             <button class="btn btn-light fw-bold" style="flex: 1; border-radius: 12px; font-size: 0.9rem;" onclick="closePasteModal()">إلغاء</button>
@@ -533,7 +533,7 @@
 <div id="loginSection" class="login-wrapper">
     <div class="container py-5">
         <div class="text-center mb-5 mt-4">
-            <h2 class="fw-black" style="color: white; letter-spacing: -0.5px;">منصة نحلة 🐝</h2>
+            <h2 class="fw-black" style="color: white; letter-spacing: -0.5px;">منصة الحوت 🐳</h2>
             <p class="fw-bold" style="color: #94a3b8; font-size: 0.85rem;">نظام الإدارة اللوجستية الذكي</p>
         </div>
 
@@ -620,7 +620,7 @@
                     </button>
                     
                     <div style="text-align: center; margin-top: 15px; font-size: 0.65rem; color: #94a3b8; font-weight: 700;">
-                        Powered by Nahla Cloud Infrastructure 🐝
+                        Powered by Al-Hout Cloud Infrastructure 🐳
                     </div>
                 </div>
 
@@ -647,7 +647,7 @@
         
         <div class="header-right">
             <h4 class="res-name-title" id="resTitle">جاري التحميل...</h4>
-            <div class="partner-badge">شريك معتمد الحوت</div>
+            <div class="partner-badge">شريك معتمد - الحوت</div>
         </div>
 
         <div class="header-center" id="headerCenterContainer">
@@ -777,7 +777,7 @@
 
                         <div id="photoSection" class="hidden-section">
                             <div class="mb-4 mt-2">
-                                <input type="file" id="receiptPhoto" accept="image/*" class="d-none" onchange="processImage(this)">
+                                <input type="file" id="receiptPhoto" accept="image/*" capture="environment" class="d-none" onchange="processImage(this)">
                                 <label for="receiptPhoto" class="camera-btn" id="cameraBtn">
                                     <i data-lucide="scan-line" size="48" style="color: var(--primary-blue);"></i>
                                     <span>اضغط لتصوير الوصل</span>
@@ -2283,17 +2283,51 @@
             // 🛡️ الموثوقية المطلقة: احفظ الطلب في الطابور الدائم *فوراً* قبل أي شبكة،
             // ثم أظهر النجاح فوراً للمستخدم وفرّغ الواجهة، وابدأ الإرسال في الخلفية.
             buildAndEnqueueOrder(finalDetails, "", finalPrice, areaWithHint);
-            showSuccessMessage(`<div style="background: var(--success); width: 48px; height: 48px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-bottom: 8px; box-shadow: 0 4px 15px rgba(16,185,129,0.3);"><i data-lucide="check" size="24" color="white"></i></div><div class="fw-black" style="font-size: 1rem;">تم استلام الطلب وحفظه! 🚀</div><div style="font-size: 0.75rem; opacity: 0.85; font-weight: 600; margin-top:4px;">يتم إرساله للرادار الآن.</div>`);
+            showSuccessMessage(`<div style="background: var(--success); width: 48px; height: 48px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-bottom: 8px; box-shadow: 0 4px 15px rgba(16,185,129,0.3);"><i data-lucide="check" size="24" color="white"></i></div><div class="fw-black" style="font-size: 1rem;">تم إرسال الطلب عبر خوادم الحوت بنجاح! 🚀</div><div style="font-size: 0.75rem; opacity: 0.85; font-weight: 600; margin-top:4px;">يتم إرساله للرادار الآن.</div>`);
             flushOutbox('submit');
             
         } else {
             if (!base64Receipt) return alert("يرجى التقاط صورة للوصل أولاً باستخدام الكاميرا.");
             const base64Content = base64Receipt.split(',')[1];
-            const currentRes = currentResName; 
+            const currentRes = currentResName;
+            // 🛡️ [V38.1] موثوقية مطلقة: احجز الطلب في الطابور الدائم فوراً (كاليدوي)،
+            // ثم عالج الصورة/الرفع/الـAI بالخلفية وحدّث نفس الطلب المحجوز.
+            const reservedId = enqueuePhotoPlaceholder(base64Receipt);
             showSuccessMessage(`<div style="background: var(--success); width: 48px; height: 48px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-bottom: 8px; box-shadow: 0 4px 15px rgba(16,185,129,0.3);"><i data-lucide="check" size="24" color="white"></i></div><div class="fw-black" style="font-size: 1rem;">تم استلام الصورة! 🚀</div><div style="font-size: 0.75rem; opacity: 0.8; font-weight: 500; margin-top:4px;">تتم المعالجة بالخلفية وسيتم توجيهها للسائقين قريباً.</div>`);
-            processPhotoOrderBackgroundSafe(base64Content, currentRes);
+            flushOutbox('photo-reserved');
+            processPhotoOrderBackgroundSafe(base64Content, currentRes, reservedId);
         }
     };
+
+    // 🛡️ [V38.1] يحجز طلب الوصل فوراً في الطابور الدائم (قبل أي رفع/AI) فلا يضيع أبداً
+    function enqueuePhotoPlaceholder(base64Img) {
+        const uniqueId = "HUT-" + Math.floor(Date.now() / 1000) + "-" + Math.floor(Math.random()*900+100);
+        const tsIso = new Date().toISOString();
+        let safeResPhone = regPhone, safeComm = '0', safePayType = 'المطعم يدفع';
+        const sessionStr = localStorage.getItem('hut_res_session');
+        if (sessionStr) {
+            const sData = JSON.parse(sessionStr);
+            if (!safeResPhone) safeResPhone = sData.phone;
+            safeComm = sData.comm || '0';
+            safePayType = sData.payType || 'المطعم يدفع';
+        }
+        let normResPhone = String(safeResPhone || "").replace(/[^\d]/g, '');
+        if (normResPhone.startsWith('964')) normResPhone = normResPhone.slice(3);
+        normResPhone = normResPhone.replace(/^0+/, '');
+
+        const orderObj = {
+            id: uniqueId, restaurant: currentResName, area: "⏳ جاري تحليل الوصل...",
+            details: "📸 وصل مصوّر — قيد المعالجة", status: "pending_driver",
+            driverPhone: "system_routing", price: 0, timestamp: tsIso, photoUrl: "",
+            last_update: tsIso, resPhone: normResPhone || "غير متوفر",
+            resLat: regLat || 0, resLng: regLng || 0, comm: safeComm, payType: safePayType,
+            is_sovereign: false, last_offered_to: null, ready_for_pickup: false,
+            _localImage: base64Img || null, _photoPending: true
+        };
+        const apiNotify = { action: 'NEW_ORDER', token: API_TOKEN, frontendId: uniqueId, restaurantName: currentResName, area: orderObj.area, price: 0, details: orderObj.details, image: "" };
+        enqueueOrder(orderObj, apiNotify);
+        return uniqueId;
+    }
 
     // يبني كائن الطلب الكامل ويضعه في الطابور الدائم (نمط الإدخال اليدوي/السريع والمصوّر)
     function buildAndEnqueueOrder(details, imageUrl, price, area) {
@@ -2327,61 +2361,68 @@
         enqueueOrder(orderObj, apiNotify);
     }
 
-    async function processPhotoOrderBackgroundSafe(base64Content, resName) {
+    async function processPhotoOrderBackgroundSafe(base64Content, resName, reservedId) {
+        // helper: يحدّث الطلب المحجوز في الطابور + في السحابة إن كان قد أُرسل
+        async function patchReserved(fields) {
+            const item = outbox.find(o => String(o.id) === String(reservedId));
+            if (item) {
+                Object.assign(item.order, fields);
+                delete item.order._photoPending;
+                delete item.order._localImage;
+                if (item.apiNotify) {
+                    if (fields.price != null) item.apiNotify.price = fields.price;
+                    if (fields.area != null) item.apiNotify.area = fields.area;
+                    if (fields.details != null) item.apiNotify.details = fields.details;
+                    if (fields.photoUrl != null) item.apiNotify.image = fields.photoUrl;
+                }
+                item.fbDone = false;   // أعد الكتابة بالبيانات المحدّثة
+                item.apiDone = false;
+                persistOutbox();
+            } else {
+                // الطلب أُرسل وأُزيل من الطابور بالفعل → حدّثه مباشرة في السحابة
+                try { await update(ref(db, 'active_orders/' + reservedId), fields); } catch (e) {}
+            }
+        }
+
+        let finalPrice = 0, finalArea = "تحديد ذكي (انظر الوصل)", finalDetails = "مسح ذكي - وصل مصور", imageUrl = "";
+
         try {
             const uniqueName = Date.now() + "_" + Math.floor(Math.random() * 1000) + ".jpg";
             const imgRef = storageRef(storage, 'receipts/' + uniqueName);
-            
             const uploadPromise = uploadString(imgRef, base64Content, 'base64')
                 .then(snapshot => getDownloadURL(snapshot.ref))
                 .catch(e => { console.error("Upload failed", e); return ""; });
-                
             const aiPromise = extractDataFromImageBg(base64Content);
 
             const results = await Promise.allSettled([uploadPromise, aiPromise]);
-            const uploadResult = results[0]; 
-            const aiResult = results[1];
+            const uploadResult = results[0], aiResult = results[1];
 
-            let imageUrl = "";
-            if (uploadResult.status === 'fulfilled' && uploadResult.value) { 
-                imageUrl = uploadResult.value; 
-            }
-
-            let finalPrice = 0;
-            let finalPhone = ""; 
-            let finalArea = "تحديد ذكي (انظر الوصل)"; 
-            let finalDetails = "مسح ذكي - وصل مصور";
+            if (uploadResult.status === 'fulfilled' && uploadResult.value) imageUrl = uploadResult.value;
 
             if (aiResult.status === 'fulfilled' && !aiResult.value.error) {
-                if (aiResult.value.price) { 
-                    let cleanStr = String(aiResult.value.price).replace(/\D/g, '');
-                    finalPrice = parseInt(cleanStr) || 0; 
-                }
+                if (aiResult.value.price) { let c = String(aiResult.value.price).replace(/\D/g, ''); finalPrice = parseInt(c) || 0; }
                 if (aiResult.value.phone) {
                     const { clean } = window.normalizeCustomerPhone(aiResult.value.phone);
-                    finalPhone = clean || aiResult.value.phone;
-                    finalDetails = `الهاتف: ${finalPhone} | ${finalDetails}`;
+                    const ph = clean || aiResult.value.phone;
+                    finalDetails = `الهاتف: ${ph} | ${finalDetails}`;
                 }
                 if (aiResult.value.area) {
                     const matched = matchAreaWithList(aiResult.value.area, myCustomPriceList);
-                    if (matched) {
-                        finalArea = `${matched.name} (توصيل: ${matched.price})`;
-                    } else {
-                        finalArea = `${aiResult.value.area} (مستخرج آلياً)`;
-                    }
+                    finalArea = matched ? `${matched.name} (توصيل: ${matched.price})` : `${aiResult.value.area} (مستخرج آلياً)`;
                 }
             } else {
                 finalArea = "يحتاج مراجعة (انظر الصورة)";
                 finalDetails = "⚠️ فشل التحليل الذكي | " + finalDetails;
             }
-
-            // ضع الطلب المصوّر في نفس الطابور الدائم لضمان عدم ضياعه
-            buildAndEnqueueOrder(finalDetails, imageUrl, finalPrice, finalArea);
-            flushOutbox('photo');
-
         } catch (e) {
-            console.error("Background processing completely failed:", e);
+            console.error("Background processing error (order still safe):", e);
+            finalArea = "يحتاج مراجعة (انظر الصورة)";
+            finalDetails = "⚠️ خطأ بالمعالجة | " + finalDetails;
         }
+
+        // مهما حدث أعلاه، الطلب محجوز — نحدّثه الآن ببياناته النهائية
+        await patchReserved({ price: finalPrice, area: finalArea, details: finalDetails, photoUrl: imageUrl });
+        flushOutbox('photo-final');
     }
 
     function showSuccessMessage(customHTML) {
@@ -2427,7 +2468,7 @@
             messages = [
                 "مساء الخير! نحن في أوقات الذروة، التعاون وسرعة التجهيز يصنعان تقييماً ممتازاً لمطعمكم. 🌟",
                 "أبطال التوصيل في الشوارع الآن لخدمة زبائنكم، شكراً لتعاونكم المستمر معهم. 🛵",
-                "نظام نحلة السحابي يراقب الأداء لضمان وصول طلباتكم بأسرع وقت. عمل موفق! 🐝"
+                "نظام الحوت السحابي يراقب الأداء لضمان وصول طلباتكم بأسرع وقت. عمل موفق! 🐳"
             ];
         }
 
