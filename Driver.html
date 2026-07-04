@@ -2,7 +2,7 @@
 <html lang="ar" dir="rtl">
 <head>
 <script>
-const CURRENT_APP_VERSION = "90.1.Nahla-Android-V1";
+const CURRENT_APP_VERSION = "90.2.Nahla-Android-V1";
 try {
   if (localStorage.getItem('hut_app_version') !== CURRENT_APP_VERSION) {
     localStorage.setItem('hut_app_version', CURRENT_APP_VERSION);
@@ -321,6 +321,16 @@ input:checked + .beast-slider:before{transform:translateX(26px);box-shadow:0 2px
 .btn-broadcast-ok{background:var(--grad-honey-deep);color:#111827;border:none;border-radius:16px;padding:14px 34px;font-family:'Cairo',sans-serif;font-size:1rem;font-weight:900;cursor:pointer;transition:.2s;box-shadow:var(--sh-gold);}
 .btn-broadcast-ok:active{transform:scale(.96);}
 
+/* ══ [V90.2] رسالة الليدر داخل التطبيق ══ */
+.leader-msg-overlay{position:fixed;inset:0;z-index:52000;background:rgba(15,22,38,.55);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);display:flex;align-items:center;justify-content:center;padding:20px;animation:fadeOverlay .3s;}
+.leader-msg-card{background:#fff;border:1px solid var(--gold-edge);border-radius:var(--r3);padding:30px 26px;max-width:360px;width:100%;text-align:center;animation:cardIn .4s var(--ease-bounce);box-shadow:var(--sh-lg);position:relative;overflow:hidden;}
+.leader-msg-card::before{content:'';position:absolute;top:0;left:0;right:0;height:4px;background:var(--grad-honey-deep);}
+.leader-msg-badge{width:72px;height:72px;border-radius:24px;background:var(--grad-honey);display:inline-flex;align-items:center;justify-content:center;font-size:2.4rem;margin-bottom:14px;box-shadow:var(--sh-gold);animation:floatBee 3s var(--ease) infinite;}
+.leader-msg-from{font-size:.9rem;font-weight:900;color:#92400e;margin-bottom:12px;}
+.leader-msg-body{font-size:1.08rem;font-weight:700;color:#111827;line-height:1.7;margin-bottom:22px;white-space:pre-wrap;word-break:break-word;}
+.leader-msg-ok{background:var(--grad-honey-deep);color:#111827;border:none;border-radius:16px;padding:14px 36px;font-family:'Cairo',sans-serif;font-size:1rem;font-weight:900;cursor:pointer;transition:.2s;box-shadow:var(--sh-gold);}
+.leader-msg-ok:active{transform:scale(.96);}
+
 /* ══ شريط تثبيت PWA ══ */
 #__ib{position:fixed;bottom:0;left:0;right:0;background:var(--grad-honey-deep);color:#111827;padding:12px 16px calc(12px + env(safe-area-inset-bottom));display:flex;align-items:center;gap:10px;z-index:99997;box-shadow:0 -10px 34px rgba(230,81,0,.4);}
 
@@ -438,7 +448,7 @@ self.addEventListener('fetch',e=>{
     <div class="brand-sub">منصة الكباتن الرسمية</div>
     <div class="brand-version">
       <span style="width:6px;height:6px;background:var(--green);border-radius:50%;display:inline-block;box-shadow:0 0 6px var(--green);"></span>
-      V90.1 · كركوك
+      V90.2 · كركوك
     </div>
   </div>
   <div class="login-card" id="authBox">
@@ -687,6 +697,7 @@ let driverData=null,currentOrderData=null,activeOrders=[],isOnline=false,isRegis
 let countdownInterval,heartbeatInterval=null,shiftTimerInterval=null,wakeLock=null;
 let lastSentLat=0,lastSentLng=0,lastActiveHtml="";
 let readyNotifiedOrders=new Set(),todayRejections=0;
+let _shownLeaderMsgs=JSON.parse(localStorage.getItem('nahla_shown_msgs')||'[]');
 let totalOffersToday=0,totalAcceptedToday=0;
 let liveEarnings=0,liveOrders=0,liveDebt=0;
 let offlineQueue=JSON.parse(localStorage.getItem('hut_offline_queue')||'[]');
@@ -934,6 +945,17 @@ async function ensureFbAuth(){
   }catch(e){console.error('FbAuth',e);}
   return false;
 }
+/* ══ [V90.2] رسالة الليدر/الإدارة داخل التطبيق — متناسقة مع notifyDriverMessage السحابي ══ */
+function showLeaderMessage(from,msg){
+  if(!window.AndroidRadar)_playOnce('ready');           // الصوت يتكفّل به تطبيق أندرويد عبر FCM؛ المتصفح فقط يشغّل نغمة
+  if(navigator.vibrate)navigator.vibrate([120,60,120]);
+  const safeFrom=String(from).replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  const safeMsg=String(msg).replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  const ov=document.createElement('div');ov.className='leader-msg-overlay';
+  ov.innerHTML=`<div class="leader-msg-card"><div class="leader-msg-badge">📣</div><div class="leader-msg-from">رسالة من ${safeFrom}</div><div class="leader-msg-body">${safeMsg}</div><button class="leader-msg-ok" onclick="this.closest('.leader-msg-overlay').remove()">حسناً، فهمت</button></div>`;
+  document.body.appendChild(ov);
+  setTimeout(()=>{if(ov.parentElement)ov.remove();},15000);
+}
 async function startListeners(){
   await ensureFbAuth();
   onValue(ref(db,`drivers_locations/${driverData.phone}/account_status`),snap=>{if(snap.val()==='banned'){alert('⚠️ تم حظر حسابك.');localStorage.removeItem('hut_driver_session');sessionStorage.clear();location.reload();}});
@@ -1006,6 +1028,16 @@ async function startListeners(){
   // ⏱️ عند إيقاف الإدارة لنظام الشفتات → دوام حر بلا أي قيود وقت
   onValue(ref(db,'system_settings/shifts_enabled'),snap=>{window._shiftsEnabled=(snap.val()!==false);});
   onValue(ref(db,'system_broadcast'),snap=>{const d=snap.val();if(d&&d.msg){const age=d.ts?Date.now()-d.ts:0;if(age<10000)showBroadcast(d.msg);}});
+  // 📣 [V90.2] رسائل الليدر/الإدارة — تظهر داخل التطبيق فوراً (متناسقة مع STAFF_MESSAGE و notifyDriverMessage)
+  onValue(ref(db,`driver_messages/${driverData.phone}`),snap=>{
+    const d=snap.val();
+    if(!d||!d.msg||!d.ts)return;
+    if(_shownLeaderMsgs.includes(d.ts))return;           // كل رسالة تُعرض مرة واحدة فقط (حتى بعد إعادة الفتح)
+    _shownLeaderMsgs.push(d.ts);
+    if(_shownLeaderMsgs.length>60)_shownLeaderMsgs=_shownLeaderMsgs.slice(-60);
+    localStorage.setItem('nahla_shown_msgs',JSON.stringify(_shownLeaderMsgs));
+    showLeaderMessage(d.from||'الإدارة',d.msg);
+  });
 }
 function showBroadcast(msg){
   const ov=document.createElement('div');ov.className='broadcast-overlay';
