@@ -2,7 +2,7 @@
 <html lang="ar" dir="rtl">
 <head>
 <script>
-const V="21.1",VK="hut_v21"; // تم تحديث رقم الإصدار لضمان مسح الكاش
+const V="22.0",VK="hut_v22"; // V22 محصّنة أمنياً — تحديث الإصدار لمسح الكاش
 try{if(localStorage.getItem(VK)!==V){localStorage.setItem(VK,V);if("caches"in window)caches.keys().then(n=>n.forEach(k=>caches.delete(k)));}}catch(e){}
 </script>
 <meta charset="UTF-8">
@@ -617,7 +617,6 @@ button,input,select,textarea{font-family:'Cairo',sans-serif;}
   font-size:.76rem;font-weight:800;cursor:pointer;
   display:inline-flex;align-items:center;gap:5px;
   background:var(--sky);color:#fff;box-shadow:var(--sh-sky);}
-/* ═══ تحسينات تبويب الموظفين (جديد V21) ═══ */
 .staff-hero{background:linear-gradient(135deg,#1e3a8a,#111827);border-radius:var(--r5);
   padding:16px 18px;margin-bottom:16px;color:#fff;display:flex;align-items:center;
   justify-content:space-between;gap:12px;box-shadow:var(--sh-sky);}
@@ -800,7 +799,7 @@ button,input,select,textarea{font-family:'Cairo',sans-serif;}
   <div class="auth-box">
     <div class="auth-mark">🏢</div>
     <div class="auth-h">مكتب نحلة</div>
-    <div class="auth-s">الإدارة العليا — Fortress V21.0</div>
+    <div class="auth-s">الإدارة العليا — Fortress V22.0</div>
     <input type="password" id="mPW" class="auth-in" placeholder="••••••••" autocomplete="off" onkeypress="if(event.key==='Enter')doAuth()">
     <button class="auth-btn" id="authB" onclick="doAuth()">دخول لوحة التحكم</button>
   </div>
@@ -809,7 +808,7 @@ button,input,select,textarea{font-family:'Cairo',sans-serif;}
   <aside class="sidebar">
     <div class="sidebar-head">
       <div class="sidebar-logo">🏢</div>
-      <div><div class="sidebar-name">مكتب نحلة</div><div class="sidebar-ver">V21.0 • كركوك</div></div>
+      <div><div class="sidebar-name">مكتب نحلة</div><div class="sidebar-ver">V22.0 • كركوك</div></div>
     </div>
     <span class="sidebar-sec">الرصد والتحليل</span>
     <button class="nb on" id="nb-live" onclick="goTab('live',this)">
@@ -1005,7 +1004,6 @@ button,input,select,textarea{font-family:'Cairo',sans-serif;}
   </nav>
 </div>
 <script>
-// 🚀 التعديل الأول: إضافة DOUBLE: 15 للفهارس
 const O={ID:0,RES:1,AREA:2,DETAILS:3,PRICE:4,STATUS:5,DRV:6,TIME:7,PHOTO:8,SOV:9,LU:10,LO:11,READY:12,COMM:13,PAY:14,DOUBLE:15};
 const R={ID:0,NAME:1,PHONE:2,AREA:3,STATUS:4,COMM:5,LAT:6,LNG:7,PAY:8,C9:9,C10:10,C11:11,C12:12,PRICELIST:12,PASS:13};
 const D={ID:0,NAME:1,PHONE:2,AREA:3,STATUS:4,LAT:5,LNG:6,PASS:12,SHIFT:13};
@@ -1028,17 +1026,15 @@ let gMap=null,gMarker=null,gAutoComplete=null;
 let dc=null,pc=null,archHtml="",drvSelOpts="";
 let _auInit=false,_alInit=false;
 
-/* ─── حالة نظام الموظفين (V21) ─── */
 let staffSessions={},staffLog=[],staffRoster=[],_stInit=false,stEditMode=false,_stIdleTimer=null;
 
 try{firebase.initializeApp({apiKey:"AIzaSyAsmQKlCCZpCgfJG8AZM7fWmYPWVZkpjSQ",authDomain:"nahla-delivery-6b06f.firebaseapp.com",databaseURL:"https://nahla-delivery-6b06f-default-rtdb.europe-west1.firebasedatabase.app",projectId:"nahla-delivery-6b06f",storageBucket:"nahla-delivery-6b06f.firebasestorage.app",messagingSenderId:"592782211437",appId:"1:592782211437:web:4af068aab5807926bf0264"});}catch(e){}
 const db=firebase.database();
 const auth=firebase.auth();
 
-/* ════ الحماية السحابية: استهلاك توكن الإدارة وتجديده ════ */
 let _adminTokenTimer=null;
 async function consumeAdminToken(tok,pass){
-  if(!tok){console.warn("⚠️ لم يصل firebase_token من السكربت — تحقق من مفاتيح الخدمة في Script Properties.");return;}
+  if(!tok){console.warn("لم يصل firebase_token من السكربت — تحقق من مفاتيح الخدمة في Script Properties.");return;}
   try{
     await auth.signInWithCustomToken(tok);
     scheduleAdminTokenRefresh(pass);
@@ -1113,8 +1109,7 @@ function rCoords(r){
 }
 
 window.addEventListener("DOMContentLoaded",()=>{
-  const s=sessionStorage.getItem("hut_v17");
-  if(s){document.getElementById("mPW").value=s;doAuth();}
+  document.getElementById("mPW").value="";
 });
 window.doAuth=async function(){
   const pass=document.getElementById("mPW").value.trim();
@@ -1125,7 +1120,6 @@ window.doAuth=async function(){
     const r=await fetch(API,{method:"POST",body:JSON.stringify({action:"VERIFY_MASTER_PASS",pass,token:TOK})});
     const d=await r.json();
     if(d.success){
-      sessionStorage.setItem("hut_v17",MP);
       await consumeAdminToken(d.firebase_token,pass);
       document.getElementById("auth").style.display="none";
       document.getElementById("app").classList.remove("dn");
@@ -1146,8 +1140,9 @@ function startClk(){
 }
 
 async function loadData(){
+  if(!MP){toast("انتهت الجلسة — أعد الدخول","e");return;}
   try{
-    const r=await fetch(`${API}?action=getGlobalData&token=${TOK}&ts=${Date.now()}`);
+    const r=await fetch(API,{method:"POST",headers:{"Content-Type":"text/plain"},body:JSON.stringify({action:"getGlobalDataSecure",token:TOK,pass:MP,ts:Date.now()})});
     const data=await r.json();
     const now=Date.now();
     data.drivers.forEach(d=>{const ov=ovr.d[d[D.PHONE]];if(ov&&now-ov.ts<120000)d[D.STATUS]=ov.status;else if(ov)delete ovr.d[d[D.PHONE]];});
@@ -1181,7 +1176,6 @@ function setupFB(){
     const obj=snap.val();let active=[],arch=[];const now=Date.now();
     if(obj){Object.values(obj).forEach(o=>{
       if(!o.restaurant?.trim())return;
-      // 🚀 التعديل الثاني: إضافة جلب الختم الحقيقي للطلب المزدوج
       let a=[o.id||"",o.restaurant||"",o.area||"غير محدد",o.details||"طلب توصيل",
         o.price||0,o.status||"pending",o.driverPhone||"",
         o.last_update||o.timestamp||"",o.photoUrl||"",o.is_sovereign||false,
@@ -1726,24 +1720,19 @@ function renderRadar(){
     if(!c.classList.contains("og"))c.className="og";
     const existIds=new Set([...c.querySelectorAll("[id^='oc-']")].map(el=>el.id));
     const newIds=new Set();
-    
-    // 🚀 التعديل الثالث: قراءة isDoubleDB الحقيقية من السيرفر وإلغاء تخمين dCnt
     list.forEach(o=>{
       const[oId,rN,oA,,oP,st,dp,oT,pU,isSov,,lastOff,isReady,, ,isDoubleDB]=o;
       const hD=dp&&!["pending_driver","system_routing","manual_pending"].includes(dp);
       const dn=hD?dN(dp):"جاري البحث...";
       const dMins=oT?Math.floor((now-new Date(oT).getTime())/60000):0;
       const tF=oT?new Date(oT).toLocaleTimeString("ar-EG",{hour:"2-digit",minute:"2-digit"}):"---";
-      const isDbl = isDoubleDB === true; // قراءة الختم الحقيقي بدلاً من التخمين
-
-            let clsCls,sbCls,sbTxt;
+      const isDbl = isDoubleDB === true;
+      let clsCls,sbCls,sbTxt;
       if(isSov){clsCls="os";sbCls="stb-v";sbTxt="👑 سيادي";}
       else if(!hD||st==="pending_driver"||st==="manual_pending"){
-        // 🚀 التعديل: إظهار "جاري الرنين" إذا كان هناك كابتن حقيقي (hD) والحالة يدوية أو آلية
         if(hD&&(st==="manual_pending"||st==="pending_driver")){clsCls="or";sbCls="stb-w";sbTxt="⏳ جاري الرنين";}
         else{clsCls="op";sbCls="stb-r";sbTxt="🔴 بانتظار كابتن";}
       }
-
       else if(st==="picked_up"||st==="في الطريق"||st==="heading"){clsCls="oa";sbCls="stb-g";sbTxt="🟢 بالطريق";}
       else if(st==="arrived_at_res"){clsCls="oar";sbCls="stb-o";sbTxt="🟠 في المطعم";}
       else{clsCls="oh";sbCls="stb-b";sbTxt="🔵 متوجه";}
@@ -1852,7 +1841,7 @@ window.asgnDrv=function(oId,dPhone,el){
   if(!dPhone||!MP)return;el.disabled=true;
   const now=new Date().toISOString();
   ovr.o[String(oId)]={status:"manual_pending",dp:dPhone,ts:Date.now()};
-  db.ref(`active_orders/${oId}`).update({status:"manual_pending",driverPhone:dPhone,last_update:now,is_sovereign:true});
+  db.ref(`active_orders/${oId}`).update({status:"manual_pending",driverPhone:dPhone,last_update:now,last_offered_to:dPhone,is_sovereign:true});
   fetch(API,{method:"POST",headers:{"Content-Type":"text/plain"},body:JSON.stringify({action:"ASSIGN_DRIVER",orderId:oId,driverPhone:dPhone,token:TOK,pass:MP})})
     .then(r=>r.json()).then(d=>{if(d.success){toast("تم التعيين السيادي 👑");logAudit("assignDriver",`طلب #${oId} ← ${dN(dPhone)}`);}else toast("خطأ","e");})
     .catch(()=>toast("تم الإرسال")).finally(()=>el.disabled=false);
@@ -1870,7 +1859,7 @@ window.wdOrder=function(oId,dPhone,el){
 window.arcSrt=function(col){
   if(arcSC===col)arcSD=arcSD==="asc"?"desc":"asc";
   else{arcSC=col;arcSD=col==="date"?"desc":"asc";}
-  ["id","date","price","comm"].forEach(x=>{const el=document.getElementById("si-"+x);if(el){el.textContent=x===arcSC?(arcSD==="asc"?"↑":"↓"):"⇅";el.style.color=x===arcSC?"var(--sky)":"";}}); 
+  ["id","date","price","comm"].forEach(x=>{const el=document.getElementById("si-"+x);if(el){el.textContent=x===arcSC?(arcSD==="asc"?"↑":"↓"):"⇅";el.style.color=x===arcSC?"var(--sky)":"";}});
   renderArch();
 };
 function renderArch(){
@@ -2049,9 +2038,6 @@ function renderAlerts(){
   c.innerHTML=html;
 }
 
-/* ═══════════════════════════════════════════
-   🧑‍💼 نظام إدارة الموظفين (V21) — مربوط بـ V14 + Firebase
-═══════════════════════════════════════════ */
 function setupStaffFB(){
   if(_stInit)return;
   _stInit=true;
@@ -2325,7 +2311,6 @@ window.stDelete=async function(phone,name,el){
   }catch(e){toast("خطأ","e");}
   finally{if(el)el.disabled=false;}
 };
-/* مؤقّت تحديث الخمول الحي (سلاسة) — يُعيد رسم المتصلين كل 30 ثانية */
 function startStaffIdleTimer(){
   stopStaffIdleTimer();
   _stIdleTimer=setInterval(()=>{
@@ -2336,4 +2321,4 @@ function startStaffIdleTimer(){
 function stopStaffIdleTimer(){if(_stIdleTimer){clearInterval(_stIdleTimer);_stIdleTimer=null;}}
 </script>
 </body>
-</html>​​​​​​​​
+</html>
