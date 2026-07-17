@@ -1,418 +1,418 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-  <script>
-    const CURRENT_APP_VERSION = "90.2.Nahla-Android-V1";
-    try {
-      if (localStorage.getItem('hut_app_version') !== CURRENT_APP_VERSION) {
-        localStorage.setItem('hut_app_version', CURRENT_APP_VERSION);
-        if (localStorage.getItem('hut_app_version') === CURRENT_APP_VERSION) {
-          if ('caches' in window) caches.keys().then(ns => ns.forEach(n => caches.delete(n)));
-          if ('serviceWorker' in navigator) navigator.serviceWorker.getRegistrations().then(rs => rs.forEach(r => r.unregister()));
-          window.location.reload();
-        }
-      }
-    } catch(e) {}
-  </script>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <title>كباتن نحلة 🐝 | النظام السحابي V90</title>
-  <meta name="theme-color" content="#FFC107">
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <meta name="mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-title" content="نحلة">
-  <link rel="manifest" href="data:application/manifest+json;base64,__MANIFEST_B64__">
-  <link rel="apple-touch-icon" href="data:image/svg+xml;base64,__LOGO_B64__">
-  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml;base64,__LOGO_B64__">
-  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&display=swap" rel="stylesheet">
-  <style>
-    :root{
-      /* ══ لوح العسل (Honey palette) ══ */
-      --bg:#fffdf5;--bg2:#fff8e1;--card:#ffffff;--card2:#fffdf2;
-      --honey:#FFB300;--honey-lite:#FFC107;--honey-glow:#FFD54F;
-      --amber:#FF8F00;--amber-deep:#E65100;--burnt:#C2410C;
-      --yellow:#FFC107;--yellow2:#FFD54F;
-      --y-glow:rgba(255,179,0,.30);--y-soft:rgba(255,193,7,.10);
-      --gold-edge:rgba(255,179,0,.22);--gold-edge2:rgba(255,179,0,.36);
-      --green:#10b981;--green-deep:#059669;--g-glow:rgba(16,185,129,.22);
-      --red:#ef4444;--red-deep:#dc2626;--orange:#f97316;--blue:#3b82f6;--violet:#8b5cf6;
-      --ink:#0f1626;--ink2:#1f2937;--text:#111827;--muted:#6b7280;--muted2:#9ca3af;
-      --r:18px;--r2:24px;--r3:32px;
-      --ease:cubic-bezier(.22,1,.36,1);--ease-bounce:cubic-bezier(.34,1.56,.64,1);
-      /* ══ نظام ظلال متعدّد الطبقات ══ */
-      --sh-sm:0 2px 10px rgba(120,80,0,.06);
-      --sh-md:0 10px 30px rgba(120,80,0,.09),0 2px 8px rgba(0,0,0,.04);
-      --sh-lg:0 24px 60px rgba(120,80,0,.14),0 6px 18px rgba(0,0,0,.05);
-      --sh-gold:0 16px 40px rgba(255,143,0,.36),0 4px 12px rgba(230,81,0,.16);
-      --sh-green:0 14px 32px rgba(16,185,129,.30),0 4px 10px rgba(5,150,105,.18);
-      /* ══ تدرّجات ══ */
-      --grad-honey:linear-gradient(135deg,#FFD54F 0%,#FFB300 46%,#FF8F00 100%);
-      --grad-honey-deep:linear-gradient(135deg,#FFC107 0%,#FF8F00 52%,#E65100 100%);
-      --grad-green:linear-gradient(135deg,#34d399,#10b981 60%,#059669);
-      /* ══ توقيع خلية النحل (honeycomb) ══ */
-      --hc:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='44' height='76' viewBox='0 0 44 76'%3E%3Cpath d='M22 2 L42 14 L42 38 L22 50 L2 38 L2 14 Z M22 50 L2 62 M22 50 L42 62' fill='none' stroke='%23ffffff' stroke-width='1.4' stroke-opacity='0.55' stroke-linejoin='round'/%3E%3C/svg%3E");
-      --hc-gold:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='44' height='76' viewBox='0 0 44 76'%3E%3Cpath d='M22 2 L42 14 L42 38 L22 50 L2 38 L2 14 Z M22 50 L2 62 M22 50 L42 62' fill='none' stroke='%23FFB300' stroke-width='1.4' stroke-opacity='0.5' stroke-linejoin='round'/%3E%3C/svg%3E");
+<script>
+const CURRENT_APP_VERSION = "90.2.Nahla-Android-V1";
+try {
+  if (localStorage.getItem('hut_app_version') !== CURRENT_APP_VERSION) {
+    localStorage.setItem('hut_app_version', CURRENT_APP_VERSION);
+    if (localStorage.getItem('hut_app_version') === CURRENT_APP_VERSION) {
+      if ('caches' in window) caches.keys().then(ns => ns.forEach(n => caches.delete(n)));
+      if ('serviceWorker' in navigator) navigator.serviceWorker.getRegistrations().then(rs => rs.forEach(r => r.unregister()));
+      window.location.reload();
     }
-    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
-    body{font-family:'Cairo',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden;-webkit-tap-highlight-color:transparent;user-select:none;-webkit-user-select:none;overscroll-behavior-y:contain;-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility;letter-spacing:-.1px;}
-    input,textarea,select{user-select:text!important;-webkit-user-select:text!important;}
-    .hidden-section{display:none!important;}
-    ::-webkit-scrollbar{width:4px;}::-webkit-scrollbar-track{background:transparent;}::-webkit-scrollbar-thumb{background:linear-gradient(var(--honey),var(--amber));border-radius:99px;}
+  }
+} catch(e) {}
+</script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<title>كباتن نحلة 🐝 | النظام السحابي V90</title>
+<meta name="theme-color" content="#FFC107">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="نحلة">
+<link rel="manifest" href="data:application/manifest+json;base64,__MANIFEST_B64__">
+<link rel="apple-touch-icon" href="data:image/svg+xml;base64,__LOGO_B64__">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml;base64,__LOGO_B64__">
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+:root{
+  /* ══ لوح العسل (Honey palette) ══ */
+  --bg:#fffdf5;--bg2:#fff8e1;--card:#ffffff;--card2:#fffdf2;
+  --honey:#FFB300;--honey-lite:#FFC107;--honey-glow:#FFD54F;
+  --amber:#FF8F00;--amber-deep:#E65100;--burnt:#C2410C;
+  --yellow:#FFC107;--yellow2:#FFD54F;
+  --y-glow:rgba(255,179,0,.30);--y-soft:rgba(255,193,7,.10);
+  --gold-edge:rgba(255,179,0,.22);--gold-edge2:rgba(255,179,0,.36);
+  --green:#10b981;--green-deep:#059669;--g-glow:rgba(16,185,129,.22);
+  --red:#ef4444;--red-deep:#dc2626;--orange:#f97316;--blue:#3b82f6;--violet:#8b5cf6;
+  --ink:#0f1626;--ink2:#1f2937;--text:#111827;--muted:#6b7280;--muted2:#9ca3af;
+  --r:18px;--r2:24px;--r3:32px;
+  --ease:cubic-bezier(.22,1,.36,1);--ease-bounce:cubic-bezier(.34,1.56,.64,1);
+  /* ══ نظام ظلال متعدّد الطبقات ══ */
+  --sh-sm:0 2px 10px rgba(120,80,0,.06);
+  --sh-md:0 10px 30px rgba(120,80,0,.09),0 2px 8px rgba(0,0,0,.04);
+  --sh-lg:0 24px 60px rgba(120,80,0,.14),0 6px 18px rgba(0,0,0,.05);
+  --sh-gold:0 16px 40px rgba(255,143,0,.36),0 4px 12px rgba(230,81,0,.16);
+  --sh-green:0 14px 32px rgba(16,185,129,.30),0 4px 10px rgba(5,150,105,.18);
+  /* ══ تدرّجات ══ */
+  --grad-honey:linear-gradient(135deg,#FFD54F 0%,#FFB300 46%,#FF8F00 100%);
+  --grad-honey-deep:linear-gradient(135deg,#FFC107 0%,#FF8F00 52%,#E65100 100%);
+  --grad-green:linear-gradient(135deg,#34d399,#10b981 60%,#059669);
+  /* ══ توقيع خلية النحل (honeycomb) ══ */
+  --hc:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='44' height='76' viewBox='0 0 44 76'%3E%3Cpath d='M22 2 L42 14 L42 38 L22 50 L2 38 L2 14 Z M22 50 L2 62 M22 50 L42 62' fill='none' stroke='%23ffffff' stroke-width='1.4' stroke-opacity='0.55' stroke-linejoin='round'/%3E%3C/svg%3E");
+  --hc-gold:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='44' height='76' viewBox='0 0 44 76'%3E%3Cpath d='M22 2 L42 14 L42 38 L22 50 L2 38 L2 14 Z M22 50 L2 62 M22 50 L42 62' fill='none' stroke='%23FFB300' stroke-width='1.4' stroke-opacity='0.5' stroke-linejoin='round'/%3E%3C/svg%3E");
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Cairo',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden;-webkit-tap-highlight-color:transparent;user-select:none;-webkit-user-select:none;overscroll-behavior-y:contain;-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility;letter-spacing:-.1px;}
+input,textarea,select{user-select:text!important;-webkit-user-select:text!important;}
+.hidden-section{display:none!important;}
+::-webkit-scrollbar{width:4px;}::-webkit-scrollbar-track{background:transparent;}::-webkit-scrollbar-thumb{background:linear-gradient(var(--honey),var(--amber));border-radius:99px;}
 
-    /* ══ الشريط العلوي والتحميل ══ */
-    #offlineBanner{position:fixed;top:0;left:0;width:100%;background:linear-gradient(135deg,#ef4444,#b91c1c);color:#fff;z-index:99999;padding:max(6px,env(safe-area-inset-top)) 12px 9px;font-weight:800;font-size:0.85rem;box-shadow:0 8px 30px rgba(185,28,28,.4);animation:slideDown .35s var(--ease);}
-    @keyframes slideDown{from{transform:translateY(-100%)}to{transform:translateY(0)}}
-    #syncStatus{position:fixed;bottom:max(14px,env(safe-area-inset-bottom));left:50%;transform:translateX(-50%);background:rgba(255,255,255,.82);border:1px solid var(--gold-edge2);color:#92400e;padding:8px 18px;border-radius:99px;font-size:0.75rem;font-weight:800;z-index:10000;display:none;align-items:center;gap:9px;backdrop-filter:blur(14px) saturate(140%);-webkit-backdrop-filter:blur(14px) saturate(140%);box-shadow:var(--sh-md);}
-    .sync-spinner{width:12px;height:12px;border:2px solid var(--y-soft);border-top-color:var(--honey);border-radius:50%;animation:spin 1s linear infinite;}
-    @keyframes spin{to{transform:rotate(360deg)}}
-    #loadingOverlay{position:fixed;inset:0;background:radial-gradient(120% 90% at 50% 0%,#fff8e1,var(--bg));z-index:30000;display:none;align-items:center;justify-content:center;flex-direction:column;gap:18px;}
-    .beast-spinner{width:58px;height:58px;border:3px solid var(--y-soft);border-top-color:var(--honey);border-right-color:var(--amber);border-radius:50%;animation:spin .8s linear infinite;box-shadow:0 0 30px rgba(255,179,0,.18);}
-    #loadingText{font-size:0.9rem;font-weight:800;color:#92400e;}
-    #permissionOverlay{position:fixed;inset:0;background:radial-gradient(120% 90% at 50% 0%,#fff1f1,var(--bg));z-index:30000;display:flex;align-items:center;justify-content:center;flex-direction:column;text-align:center;padding:30px;}
-    .perm-icon-wrap{width:92px;height:92px;border-radius:28px;background:rgba(239,68,68,0.08);border:1px solid rgba(239,68,68,0.24);display:flex;align-items:center;justify-content:center;margin-bottom:24px;box-shadow:0 12px 34px rgba(239,68,68,.16);animation:shakeAlert .55s ease-in-out infinite alternate;}
-    @keyframes shakeAlert{0%{transform:translateX(-5px) rotate(-2deg)}100%{transform:translateX(5px) rotate(2deg)}}
+/* ══ الشريط العلوي والتحميل ══ */
+#offlineBanner{position:fixed;top:0;left:0;width:100%;background:linear-gradient(135deg,#ef4444,#b91c1c);color:#fff;z-index:99999;padding:max(6px,env(safe-area-inset-top)) 12px 9px;font-weight:800;font-size:0.85rem;box-shadow:0 8px 30px rgba(185,28,28,.4);animation:slideDown .35s var(--ease);}
+@keyframes slideDown{from{transform:translateY(-100%)}to{transform:translateY(0)}}
+#syncStatus{position:fixed;bottom:max(14px,env(safe-area-inset-bottom));left:50%;transform:translateX(-50%);background:rgba(255,255,255,.82);border:1px solid var(--gold-edge2);color:#92400e;padding:8px 18px;border-radius:99px;font-size:0.75rem;font-weight:800;z-index:10000;display:none;align-items:center;gap:9px;backdrop-filter:blur(14px) saturate(140%);-webkit-backdrop-filter:blur(14px) saturate(140%);box-shadow:var(--sh-md);}
+.sync-spinner{width:12px;height:12px;border:2px solid var(--y-soft);border-top-color:var(--honey);border-radius:50%;animation:spin 1s linear infinite;}
+@keyframes spin{to{transform:rotate(360deg)}}
+#loadingOverlay{position:fixed;inset:0;background:radial-gradient(120% 90% at 50% 0%,#fff8e1,var(--bg));z-index:30000;display:none;align-items:center;justify-content:center;flex-direction:column;gap:18px;}
+.beast-spinner{width:58px;height:58px;border:3px solid var(--y-soft);border-top-color:var(--honey);border-right-color:var(--amber);border-radius:50%;animation:spin .8s linear infinite;box-shadow:0 0 30px rgba(255,179,0,.18);}
+#loadingText{font-size:0.9rem;font-weight:800;color:#92400e;}
+#permissionOverlay{position:fixed;inset:0;background:radial-gradient(120% 90% at 50% 0%,#fff1f1,var(--bg));z-index:30000;display:flex;align-items:center;justify-content:center;flex-direction:column;text-align:center;padding:30px;}
+.perm-icon-wrap{width:92px;height:92px;border-radius:28px;background:rgba(239,68,68,0.08);border:1px solid rgba(239,68,68,0.24);display:flex;align-items:center;justify-content:center;margin-bottom:24px;box-shadow:0 12px 34px rgba(239,68,68,.16);animation:shakeAlert .55s ease-in-out infinite alternate;}
+@keyframes shakeAlert{0%{transform:translateX(-5px) rotate(-2deg)}100%{transform:translateX(5px) rotate(2deg)}}
 
-    /* ══ تسجيل الدخول ══ */
-    .login-wrapper{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:20px;padding-bottom:max(20px,env(safe-area-inset-bottom));position:relative;overflow:hidden;background:linear-gradient(165deg,#FFF3CD 0%,#fffdf5 48%,#FFF8E1 100%);}
-    .login-wrapper::before{content:'';position:absolute;inset:0;background-image:var(--hc-gold);background-size:44px 76px;opacity:.5;mask-image:radial-gradient(ellipse 78% 72% at 50% 32%,#000 30%,transparent 100%);-webkit-mask-image:radial-gradient(ellipse 78% 72% at 50% 32%,#000 30%,transparent 100%);}
-    .login-wrapper::after{content:'';position:absolute;top:-14%;left:50%;width:560px;height:560px;background:radial-gradient(circle,rgba(255,179,0,.22) 0%,transparent 66%);pointer-events:none;transform:translateX(-50%);animation:auraDrift 9s ease-in-out infinite;}
-    @keyframes auraDrift{0%,100%{transform:translateX(-50%) scale(1);opacity:1}50%{transform:translateX(-46%) scale(1.08);opacity:.82}}
-    .brand-header{text-align:center;margin-bottom:32px;position:relative;z-index:1;}
-    .brand-bee{width:92px;height:92px;border-radius:30px;background:var(--grad-honey);display:inline-flex;align-items:center;justify-content:center;margin-bottom:16px;font-size:2.9rem;box-shadow:var(--sh-gold),inset 0 2px 0 rgba(255,255,255,.5),inset 0 -6px 14px rgba(230,81,0,.28);position:relative;animation:floatBee 3.4s var(--ease) infinite;}
-    .brand-bee::after{content:'';position:absolute;inset:0;border-radius:30px;padding:2px;background:linear-gradient(135deg,rgba(255,255,255,.7),transparent 60%);-webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask-composite:exclude;pointer-events:none;}
-    @keyframes floatBee{0%,100%{transform:translateY(0) rotate(-3deg)}50%{transform:translateY(-10px) rotate(3deg)}}
-    .brand-title{font-size:2rem;font-weight:900;color:#111827;margin-bottom:4px;letter-spacing:-0.8px;}
-    .brand-sub{font-size:0.82rem;font-weight:700;color:var(--muted);}
-    .brand-version{display:inline-flex;align-items:center;gap:6px;margin-top:12px;padding:5px 15px;border-radius:99px;background:rgba(255,255,255,.7);border:1px solid var(--gold-edge2);font-size:0.72rem;font-weight:800;color:#92400e;box-shadow:var(--sh-sm);}
-    .login-card{background:rgba(255,255,255,.96);border:1px solid var(--gold-edge);border-radius:var(--r3);padding:34px 28px;width:100%;max-width:400px;box-shadow:var(--sh-lg);position:relative;z-index:1;backdrop-filter:blur(6px);}
-    .login-card::before{content:'';position:absolute;inset:0;border-radius:var(--r3);padding:1.5px;background:linear-gradient(150deg,var(--honey-glow),transparent 40%,transparent 70%,rgba(255,143,0,.35));-webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask-composite:exclude;pointer-events:none;}
-    .field-label{font-size:0.72rem;font-weight:800;color:var(--muted);margin-bottom:8px;display:block;letter-spacing:.6px;text-transform:uppercase;}
-    .beast-input{width:100%;background:#fffdf2;border:1.5px solid var(--gold-edge2);border-radius:var(--r);padding:15px 18px;font-family:'Cairo',sans-serif;font-weight:700;font-size:1rem;color:#111827;transition:.25s var(--ease);margin-bottom:16px;}
-    .beast-input::placeholder{color:#c9b98a;}
-    .beast-input:focus{outline:none;border-color:var(--honey);background:#ffffff;box-shadow:0 0 0 4px rgba(255,179,0,.14);}
-    .beast-input.phone-fmt{letter-spacing:3px;font-size:1.35rem;text-align:center;font-variant-numeric:tabular-nums;}
-    .register-divider{display:flex;align-items:center;gap:12px;margin:20px 0;color:var(--muted2);font-size:0.75rem;font-weight:800;}
-    .register-divider::before,.register-divider::after{content:'';flex:1;height:1px;background:linear-gradient(90deg,transparent,var(--gold-edge2),transparent);}
-    .beast-btn{width:100%;padding:17px;border:none;border-radius:var(--r);font-family:'Cairo',sans-serif;font-size:1.05rem;font-weight:900;cursor:pointer;transition:.22s var(--ease);display:flex;align-items:center;justify-content:center;gap:10px;position:relative;overflow:hidden;}
-    .beast-btn::after{content:'';position:absolute;top:0;left:-120%;width:60%;height:100%;background:linear-gradient(100deg,transparent,rgba(255,255,255,.45),transparent);transform:skewX(-18deg);animation:gloss 4.5s ease-in-out infinite;pointer-events:none;}
-    .beast-btn:active{transform:scale(0.97);}
-    @keyframes gloss{0%,60%{left:-120%}80%,100%{left:130%}}
-    .beast-btn-primary{background:var(--grad-honey-deep);color:#111827;box-shadow:var(--sh-gold);margin-top:8px;}
-    .beast-btn-secondary{background:#fbfbfb;border:1.5px solid #e5e7eb;color:var(--muted);font-size:0.9rem;padding:13px;margin-top:10px;}
-    .beast-btn-secondary::after{display:none;}
-    .beast-btn-reg{background:var(--grad-green);color:white;box-shadow:var(--sh-green);margin-top:8px;}
-    .waiting-card{text-align:center;padding:32px 28px;}
-    .waiting-anim{width:92px;height:92px;border-radius:50%;border:3px solid var(--y-soft);border-top-color:var(--honey);border-right-color:var(--amber);animation:spin 2s linear infinite;margin:0 auto 20px;display:flex;align-items:center;justify-content:center;font-size:2.1rem;box-shadow:0 0 30px rgba(255,179,0,.16);}
-    .btn-edit-reg{background:transparent;color:var(--red);border:1px solid rgba(239,68,68,0.28);border-radius:var(--r);padding:12px;font-family:'Cairo',sans-serif;font-weight:800;font-size:0.9rem;cursor:pointer;width:100%;margin-top:10px;transition:.2s;}
-    .btn-edit-reg:active{background:rgba(239,68,68,.06);}
-    select.beast-input{appearance:none;-webkit-appearance:none;cursor:pointer;background-image:linear-gradient(45deg,transparent 50%,var(--amber) 50%),linear-gradient(135deg,var(--amber) 50%,transparent 50%);background-position:calc(0% + 18px) calc(1.1rem),calc(0% + 23px) calc(1.1rem);background-size:5px 5px,5px 5px;background-repeat:no-repeat;}
+/* ══ تسجيل الدخول ══ */
+.login-wrapper{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:20px;padding-bottom:max(20px,env(safe-area-inset-bottom));position:relative;overflow:hidden;background:linear-gradient(165deg,#FFF3CD 0%,#fffdf5 48%,#FFF8E1 100%);}
+.login-wrapper::before{content:'';position:absolute;inset:0;background-image:var(--hc-gold);background-size:44px 76px;opacity:.5;mask-image:radial-gradient(ellipse 78% 72% at 50% 32%,#000 30%,transparent 100%);-webkit-mask-image:radial-gradient(ellipse 78% 72% at 50% 32%,#000 30%,transparent 100%);}
+.login-wrapper::after{content:'';position:absolute;top:-14%;left:50%;width:560px;height:560px;background:radial-gradient(circle,rgba(255,179,0,.22) 0%,transparent 66%);pointer-events:none;transform:translateX(-50%);animation:auraDrift 9s ease-in-out infinite;}
+@keyframes auraDrift{0%,100%{transform:translateX(-50%) scale(1);opacity:1}50%{transform:translateX(-46%) scale(1.08);opacity:.82}}
+.brand-header{text-align:center;margin-bottom:32px;position:relative;z-index:1;}
+.brand-bee{width:92px;height:92px;border-radius:30px;background:var(--grad-honey);display:inline-flex;align-items:center;justify-content:center;margin-bottom:16px;font-size:2.9rem;box-shadow:var(--sh-gold),inset 0 2px 0 rgba(255,255,255,.5),inset 0 -6px 14px rgba(230,81,0,.28);position:relative;animation:floatBee 3.4s var(--ease) infinite;}
+.brand-bee::after{content:'';position:absolute;inset:0;border-radius:30px;padding:2px;background:linear-gradient(135deg,rgba(255,255,255,.7),transparent 60%);-webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask-composite:exclude;pointer-events:none;}
+@keyframes floatBee{0%,100%{transform:translateY(0) rotate(-3deg)}50%{transform:translateY(-10px) rotate(3deg)}}
+.brand-title{font-size:2rem;font-weight:900;color:#111827;margin-bottom:4px;letter-spacing:-0.8px;}
+.brand-sub{font-size:0.82rem;font-weight:700;color:var(--muted);}
+.brand-version{display:inline-flex;align-items:center;gap:6px;margin-top:12px;padding:5px 15px;border-radius:99px;background:rgba(255,255,255,.7);border:1px solid var(--gold-edge2);font-size:0.72rem;font-weight:800;color:#92400e;box-shadow:var(--sh-sm);}
+.login-card{background:rgba(255,255,255,.96);border:1px solid var(--gold-edge);border-radius:var(--r3);padding:34px 28px;width:100%;max-width:400px;box-shadow:var(--sh-lg);position:relative;z-index:1;backdrop-filter:blur(6px);}
+.login-card::before{content:'';position:absolute;inset:0;border-radius:var(--r3);padding:1.5px;background:linear-gradient(150deg,var(--honey-glow),transparent 40%,transparent 70%,rgba(255,143,0,.35));-webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask-composite:exclude;pointer-events:none;}
+.field-label{font-size:0.72rem;font-weight:800;color:var(--muted);margin-bottom:8px;display:block;letter-spacing:.6px;text-transform:uppercase;}
+.beast-input{width:100%;background:#fffdf2;border:1.5px solid var(--gold-edge2);border-radius:var(--r);padding:15px 18px;font-family:'Cairo',sans-serif;font-weight:700;font-size:1rem;color:#111827;transition:.25s var(--ease);margin-bottom:16px;}
+.beast-input::placeholder{color:#c9b98a;}
+.beast-input:focus{outline:none;border-color:var(--honey);background:#ffffff;box-shadow:0 0 0 4px rgba(255,179,0,.14);}
+.beast-input.phone-fmt{letter-spacing:3px;font-size:1.35rem;text-align:center;font-variant-numeric:tabular-nums;}
+.register-divider{display:flex;align-items:center;gap:12px;margin:20px 0;color:var(--muted2);font-size:0.75rem;font-weight:800;}
+.register-divider::before,.register-divider::after{content:'';flex:1;height:1px;background:linear-gradient(90deg,transparent,var(--gold-edge2),transparent);}
+.beast-btn{width:100%;padding:17px;border:none;border-radius:var(--r);font-family:'Cairo',sans-serif;font-size:1.05rem;font-weight:900;cursor:pointer;transition:.22s var(--ease);display:flex;align-items:center;justify-content:center;gap:10px;position:relative;overflow:hidden;}
+.beast-btn::after{content:'';position:absolute;top:0;left:-120%;width:60%;height:100%;background:linear-gradient(100deg,transparent,rgba(255,255,255,.45),transparent);transform:skewX(-18deg);animation:gloss 4.5s ease-in-out infinite;pointer-events:none;}
+.beast-btn:active{transform:scale(0.97);}
+@keyframes gloss{0%,60%{left:-120%}80%,100%{left:130%}}
+.beast-btn-primary{background:var(--grad-honey-deep);color:#111827;box-shadow:var(--sh-gold);margin-top:8px;}
+.beast-btn-secondary{background:#fbfbfb;border:1.5px solid #e5e7eb;color:var(--muted);font-size:0.9rem;padding:13px;margin-top:10px;}
+.beast-btn-secondary::after{display:none;}
+.beast-btn-reg{background:var(--grad-green);color:white;box-shadow:var(--sh-green);margin-top:8px;}
+.waiting-card{text-align:center;padding:32px 28px;}
+.waiting-anim{width:92px;height:92px;border-radius:50%;border:3px solid var(--y-soft);border-top-color:var(--honey);border-right-color:var(--amber);animation:spin 2s linear infinite;margin:0 auto 20px;display:flex;align-items:center;justify-content:center;font-size:2.1rem;box-shadow:0 0 30px rgba(255,179,0,.16);}
+.btn-edit-reg{background:transparent;color:var(--red);border:1px solid rgba(239,68,68,0.28);border-radius:var(--r);padding:12px;font-family:'Cairo',sans-serif;font-weight:800;font-size:0.9rem;cursor:pointer;width:100%;margin-top:10px;transition:.2s;}
+.btn-edit-reg:active{background:rgba(239,68,68,.06);}
+select.beast-input{appearance:none;-webkit-appearance:none;cursor:pointer;background-image:linear-gradient(45deg,transparent 50%,var(--amber) 50%),linear-gradient(135deg,var(--amber) 50%,transparent 50%);background-position:calc(0% + 18px) calc(1.1rem),calc(0% + 23px) calc(1.1rem);background-size:5px 5px,5px 5px;background-repeat:no-repeat;}
 
-    /* ══ لوحة القيادة ══ */
-    #dashboardPage{min-height:100vh;background:var(--bg);}
-    .hero-header{background:var(--hc),radial-gradient(140% 120% at 85% -10%,rgba(255,255,255,.22),transparent 55%),var(--grad-honey-deep);background-size:44px 76px,auto,auto;padding:max(32px,env(safe-area-inset-top)) 20px 74px 20px;position:relative;overflow:hidden;box-shadow:0 18px 46px rgba(230,81,0,.24);border-bottom-left-radius:30px;border-bottom-right-radius:30px;}
-    .hero-header::before{content:'';position:absolute;top:-45%;left:60%;width:520px;height:420px;background:radial-gradient(ellipse,rgba(255,255,255,.28) 0%,transparent 64%);pointer-events:none;animation:auraDrift 11s ease-in-out infinite;}
-    .hero-header::after{content:'🐝';position:absolute;left:-26px;bottom:-30px;font-size:11rem;opacity:0.09;pointer-events:none;line-height:1;transform:rotate(-8deg);}
-    .hero-top-row{display:flex;justify-content:space-between;align-items:flex-start;position:relative;z-index:1;}
-    .hero-name{font-size:1.18rem;font-weight:900;color:#111827;display:flex;align-items:center;gap:8px;flex-wrap:wrap;text-shadow:0 1px 0 rgba(255,255,255,.25);}
-    .hero-level-badge{font-size:0.62rem;font-weight:900;padding:3px 9px;border-radius:99px;letter-spacing:.3px;backdrop-filter:blur(4px);}
-    .level-new{background:rgba(0,0,0,.12);color:rgba(0,0,0,.6);border:1px solid rgba(0,0,0,.1);}
-    .level-bronze{background:rgba(124,45,18,.16);color:#7c2d12;border:1px solid rgba(124,45,18,.24);}
-    .level-silver{background:rgba(255,255,255,.34);color:#374151;border:1px solid rgba(255,255,255,.5);}
-    .level-gold{background:rgba(255,255,255,.28);color:#7c2d12;border:1px solid rgba(255,255,255,.42);box-shadow:0 0 12px rgba(255,255,255,.25);}
-    .level-diamond{background:rgba(16,185,129,.24);color:#064e3b;border:1px solid rgba(16,185,129,.4);box-shadow:0 0 12px rgba(16,185,129,.3);}
-    .rejection-pill{display:inline-flex;align-items:center;gap:5px;font-size:0.65rem;font-weight:800;padding:3px 9px;border-radius:99px;background:rgba(255,255,255,.7);color:#991b1b;border:1px solid rgba(239,68,68,.3);margin-top:6px;backdrop-filter:blur(4px);}
-    .hero-actions{display:flex;align-items:center;gap:10px;}
-    .btn-logout-hero{width:40px;height:40px;border-radius:14px;background:rgba(255,255,255,.28);border:1px solid rgba(255,255,255,.4);color:#111827;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:.2s;backdrop-filter:blur(6px);box-shadow:0 4px 14px rgba(0,0,0,.08);}
-    .btn-logout-hero:active{transform:scale(0.9);}
-    .online-row{display:flex;align-items:center;gap:10px;margin-top:14px;position:relative;z-index:1;}
-    .beast-toggle{position:relative;display:inline-block;width:56px;height:30px;flex-shrink:0;}
-    .beast-toggle input{opacity:0;width:0;height:0;}
-    .beast-slider{position:absolute;cursor:pointer;inset:0;background:rgba(0,0,0,0.18);border:1px solid rgba(255,255,255,0.24);transition:.4s var(--ease);border-radius:30px;box-shadow:inset 0 1px 4px rgba(0,0,0,.12);}
-    .beast-slider:before{position:absolute;content:"";height:24px;width:24px;left:3px;bottom:2px;background:#fff;transition:.4s var(--ease-bounce);border-radius:50%;box-shadow:0 2px 6px rgba(0,0,0,.22);}
-    input:checked + .beast-slider{background:rgba(16,185,129,.4);border-color:rgba(255,255,255,.4);}
-    input:checked + .beast-slider:before{transform:translateX(26px);box-shadow:0 2px 10px rgba(16,185,129,.5);}
-    .online-badge{font-size:0.8rem;font-weight:800;padding:6px 13px;border-radius:99px;background:rgba(255,255,255,.28);border:1px solid rgba(255,255,255,.4);color:#111827;transition:.3s;backdrop-filter:blur(6px);}
-    .online-badge.on{background:rgba(255,255,255,.9);border-color:rgba(16,185,129,.45);color:#065f46;box-shadow:0 4px 16px rgba(16,185,129,.2);}
-    .online-dot{width:8px;height:8px;border-radius:50%;background:rgba(0,0,0,0.3);display:inline-block;margin-left:5px;transition:.3s;}
-    .online-dot.on{background:var(--green);box-shadow:0 0 8px var(--green);animation:pulse-dot 2s infinite;}
-    @keyframes pulse-dot{0%,100%{opacity:1;box-shadow:0 0 8px var(--green)}50%{opacity:.55;box-shadow:0 0 14px var(--green)}}
-    .shift-timer-row{margin-top:12px;position:relative;z-index:1;display:none;}
-    .shift-bar-wrap{height:5px;background:rgba(0,0,0,0.16);border-radius:99px;margin-top:6px;overflow:hidden;}
-    .shift-bar-fill{height:100%;border-radius:99px;background:linear-gradient(90deg,rgba(255,255,255,0.95),rgba(255,255,255,0.5));transition:width 1s linear;box-shadow:0 0 8px rgba(255,255,255,.4);}
-    .shift-time-text{font-size:0.7rem;font-weight:800;color:rgba(0,0,0,0.55);display:flex;justify-content:space-between;margin-top:4px;}
-    .earnings-hero{position:relative;z-index:1;margin-top:24px;text-align:center;padding:0 10px;}
-    .earnings-label{font-size:0.72rem;font-weight:800;color:rgba(0,0,0,0.5);letter-spacing:.6px;text-transform:uppercase;margin-bottom:5px;}
-    .earnings-amount{font-size:3.2rem;font-weight:900;color:#111827;line-height:1;letter-spacing:-1.5px;text-shadow:0 2px 10px rgba(0,0,0,0.14),0 1px 0 rgba(255,255,255,.3);transition:transform .5s var(--ease-bounce);font-variant-numeric:tabular-nums;}
-    .earnings-amount.bump{transform:scale(1.09);}
-    .earnings-unit{font-size:1rem;font-weight:700;color:rgba(0,0,0,0.5);margin-right:5px;}
+/* ══ لوحة القيادة ══ */
+#dashboardPage{min-height:100vh;background:var(--bg);}
+.hero-header{background:var(--hc),radial-gradient(140% 120% at 85% -10%,rgba(255,255,255,.22),transparent 55%),var(--grad-honey-deep);background-size:44px 76px,auto,auto;padding:max(32px,env(safe-area-inset-top)) 20px 74px 20px;position:relative;overflow:hidden;box-shadow:0 18px 46px rgba(230,81,0,.24);border-bottom-left-radius:30px;border-bottom-right-radius:30px;}
+.hero-header::before{content:'';position:absolute;top:-45%;left:60%;width:520px;height:420px;background:radial-gradient(ellipse,rgba(255,255,255,.28) 0%,transparent 64%);pointer-events:none;animation:auraDrift 11s ease-in-out infinite;}
+.hero-header::after{content:'🐝';position:absolute;left:-26px;bottom:-30px;font-size:11rem;opacity:0.09;pointer-events:none;line-height:1;transform:rotate(-8deg);}
+.hero-top-row{display:flex;justify-content:space-between;align-items:flex-start;position:relative;z-index:1;}
+.hero-name{font-size:1.18rem;font-weight:900;color:#111827;display:flex;align-items:center;gap:8px;flex-wrap:wrap;text-shadow:0 1px 0 rgba(255,255,255,.25);}
+.hero-level-badge{font-size:0.62rem;font-weight:900;padding:3px 9px;border-radius:99px;letter-spacing:.3px;backdrop-filter:blur(4px);}
+.level-new{background:rgba(0,0,0,.12);color:rgba(0,0,0,.6);border:1px solid rgba(0,0,0,.1);}
+.level-bronze{background:rgba(124,45,18,.16);color:#7c2d12;border:1px solid rgba(124,45,18,.24);}
+.level-silver{background:rgba(255,255,255,.34);color:#374151;border:1px solid rgba(255,255,255,.5);}
+.level-gold{background:rgba(255,255,255,.28);color:#7c2d12;border:1px solid rgba(255,255,255,.42);box-shadow:0 0 12px rgba(255,255,255,.25);}
+.level-diamond{background:rgba(16,185,129,.24);color:#064e3b;border:1px solid rgba(16,185,129,.4);box-shadow:0 0 12px rgba(16,185,129,.3);}
+.rejection-pill{display:inline-flex;align-items:center;gap:5px;font-size:0.65rem;font-weight:800;padding:3px 9px;border-radius:99px;background:rgba(255,255,255,.7);color:#991b1b;border:1px solid rgba(239,68,68,.3);margin-top:6px;backdrop-filter:blur(4px);}
+.hero-actions{display:flex;align-items:center;gap:10px;}
+.btn-logout-hero{width:40px;height:40px;border-radius:14px;background:rgba(255,255,255,.28);border:1px solid rgba(255,255,255,.4);color:#111827;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:.2s;backdrop-filter:blur(6px);box-shadow:0 4px 14px rgba(0,0,0,.08);}
+.btn-logout-hero:active{transform:scale(0.9);}
+.online-row{display:flex;align-items:center;gap:10px;margin-top:14px;position:relative;z-index:1;}
+.beast-toggle{position:relative;display:inline-block;width:56px;height:30px;flex-shrink:0;}
+.beast-toggle input{opacity:0;width:0;height:0;}
+.beast-slider{position:absolute;cursor:pointer;inset:0;background:rgba(0,0,0,0.18);border:1px solid rgba(255,255,255,0.24);transition:.4s var(--ease);border-radius:30px;box-shadow:inset 0 1px 4px rgba(0,0,0,.12);}
+.beast-slider:before{position:absolute;content:"";height:24px;width:24px;left:3px;bottom:2px;background:#fff;transition:.4s var(--ease-bounce);border-radius:50%;box-shadow:0 2px 6px rgba(0,0,0,.22);}
+input:checked + .beast-slider{background:rgba(16,185,129,.4);border-color:rgba(255,255,255,.4);}
+input:checked + .beast-slider:before{transform:translateX(26px);box-shadow:0 2px 10px rgba(16,185,129,.5);}
+.online-badge{font-size:0.8rem;font-weight:800;padding:6px 13px;border-radius:99px;background:rgba(255,255,255,.28);border:1px solid rgba(255,255,255,.4);color:#111827;transition:.3s;backdrop-filter:blur(6px);}
+.online-badge.on{background:rgba(255,255,255,.9);border-color:rgba(16,185,129,.45);color:#065f46;box-shadow:0 4px 16px rgba(16,185,129,.2);}
+.online-dot{width:8px;height:8px;border-radius:50%;background:rgba(0,0,0,0.3);display:inline-block;margin-left:5px;transition:.3s;}
+.online-dot.on{background:var(--green);box-shadow:0 0 8px var(--green);animation:pulse-dot 2s infinite;}
+@keyframes pulse-dot{0%,100%{opacity:1;box-shadow:0 0 8px var(--green)}50%{opacity:.55;box-shadow:0 0 14px var(--green)}}
+.shift-timer-row{margin-top:12px;position:relative;z-index:1;display:none;}
+.shift-bar-wrap{height:5px;background:rgba(0,0,0,0.16);border-radius:99px;margin-top:6px;overflow:hidden;}
+.shift-bar-fill{height:100%;border-radius:99px;background:linear-gradient(90deg,rgba(255,255,255,0.95),rgba(255,255,255,0.5));transition:width 1s linear;box-shadow:0 0 8px rgba(255,255,255,.4);}
+.shift-time-text{font-size:0.7rem;font-weight:800;color:rgba(0,0,0,0.55);display:flex;justify-content:space-between;margin-top:4px;}
+.earnings-hero{position:relative;z-index:1;margin-top:24px;text-align:center;padding:0 10px;}
+.earnings-label{font-size:0.72rem;font-weight:800;color:rgba(0,0,0,0.5);letter-spacing:.6px;text-transform:uppercase;margin-bottom:5px;}
+.earnings-amount{font-size:3.2rem;font-weight:900;color:#111827;line-height:1;letter-spacing:-1.5px;text-shadow:0 2px 10px rgba(0,0,0,0.14),0 1px 0 rgba(255,255,255,.3);transition:transform .5s var(--ease-bounce);font-variant-numeric:tabular-nums;}
+.earnings-amount.bump{transform:scale(1.09);}
+.earnings-unit{font-size:1rem;font-weight:700;color:rgba(0,0,0,0.5);margin-right:5px;}
 
-    /* ══ الإحصائيات ══ */
-    .stats-grid{margin-top:-54px;padding:0 16px;position:relative;z-index:10;}
-    .stats-row{display:grid;grid-template-columns:repeat(3,1fr);gap:11px;}
-    .stat-pill{background:#ffffff;border:1px solid var(--gold-edge);border-radius:var(--r2);padding:15px 10px 14px;text-align:center;box-shadow:var(--sh-md);transition:.25s var(--ease);position:relative;overflow:hidden;}
-    .stat-pill::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:var(--grad-honey);opacity:.9;}
-    .stat-pill:active{transform:translateY(2px) scale(0.98);}
-    .stat-pill-val{font-size:1.45rem;font-weight:900;color:#111827;line-height:1;display:block;font-variant-numeric:tabular-nums;}
-    .stat-pill-val.danger{color:var(--red);}
-    .stat-pill-lbl{font-size:0.6rem;font-weight:800;color:var(--muted);margin-top:5px;display:block;letter-spacing:.3px;}
+/* ══ الإحصائيات ══ */
+.stats-grid{margin-top:-54px;padding:0 16px;position:relative;z-index:10;}
+.stats-row{display:grid;grid-template-columns:repeat(3,1fr);gap:11px;}
+.stat-pill{background:#ffffff;border:1px solid var(--gold-edge);border-radius:var(--r2);padding:15px 10px 14px;text-align:center;box-shadow:var(--sh-md);transition:.25s var(--ease);position:relative;overflow:hidden;}
+.stat-pill::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:var(--grad-honey);opacity:.9;}
+.stat-pill:active{transform:translateY(2px) scale(0.98);}
+.stat-pill-val{font-size:1.45rem;font-weight:900;color:#111827;line-height:1;display:block;font-variant-numeric:tabular-nums;}
+.stat-pill-val.danger{color:var(--red);}
+.stat-pill-lbl{font-size:0.6rem;font-weight:800;color:var(--muted);margin-top:5px;display:block;letter-spacing:.3px;}
 
-    /* ══ الهدف اليومي ══ */
-    .daily-goal-card{margin:16px 0;background:#ffffff;border:1px solid var(--gold-edge);border-radius:var(--r2);padding:16px 18px;position:relative;overflow:hidden;box-shadow:var(--sh-sm);cursor:pointer;}
-    .daily-goal-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--honey),var(--amber),var(--honey));}
-    .goal-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;}
-    .goal-title{font-size:0.75rem;font-weight:800;color:var(--muted);display:flex;align-items:center;gap:6px;}
-    .goal-count{font-size:0.85rem;font-weight:900;color:#92400e;font-variant-numeric:tabular-nums;}
-    .goal-bar-wrap{height:8px;background:var(--y-soft);border-radius:99px;overflow:hidden;position:relative;}
-    .goal-bar{height:100%;border-radius:99px;background:linear-gradient(90deg,var(--honey),var(--green));transition:width .8s var(--ease);box-shadow:0 0 10px rgba(255,179,0,.32);position:relative;overflow:hidden;}
-    .goal-bar::after{content:'';position:absolute;inset:0;background:linear-gradient(100deg,transparent,rgba(255,255,255,.55),transparent);transform:translateX(-100%);animation:shimmer 2.4s ease-in-out infinite;}
-    @keyframes shimmer{0%{transform:translateX(-100%)}60%,100%{transform:translateX(200%)}}
-    .goal-milestones{display:flex;justify-content:space-between;margin-top:7px;}
-    .goal-m{font-size:0.6rem;font-weight:800;color:rgba(255,179,0,.38);transition:.3s;}
-    .goal-m.reached{color:var(--amber);transform:scale(1.08);}
-    .content-area{padding:0 16px 100px;}
-    .btn-ledger{width:100%;padding:15px 18px;background:#ffffff;border:1px solid var(--gold-edge);border-radius:var(--r2);margin-bottom:16px;font-family:'Cairo',sans-serif;font-size:0.9rem;font-weight:800;color:#111827;display:flex;align-items:center;justify-content:space-between;cursor:pointer;transition:.2s var(--ease);box-shadow:var(--sh-sm);}
-    .btn-ledger:active{transform:scale(0.98);background:#fffdf2;}
-    .ledger-btn-left{display:flex;align-items:center;gap:11px;}
-    .ledger-icon{width:38px;height:38px;border-radius:13px;background:var(--y-soft);border:1px solid var(--gold-edge2);display:flex;align-items:center;justify-content:center;color:#92400e;}
+/* ══ الهدف اليومي ══ */
+.daily-goal-card{margin:16px 0;background:#ffffff;border:1px solid var(--gold-edge);border-radius:var(--r2);padding:16px 18px;position:relative;overflow:hidden;box-shadow:var(--sh-sm);cursor:pointer;}
+.daily-goal-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--honey),var(--amber),var(--honey));}
+.goal-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;}
+.goal-title{font-size:0.75rem;font-weight:800;color:var(--muted);display:flex;align-items:center;gap:6px;}
+.goal-count{font-size:0.85rem;font-weight:900;color:#92400e;font-variant-numeric:tabular-nums;}
+.goal-bar-wrap{height:8px;background:var(--y-soft);border-radius:99px;overflow:hidden;position:relative;}
+.goal-bar{height:100%;border-radius:99px;background:linear-gradient(90deg,var(--honey),var(--green));transition:width .8s var(--ease);box-shadow:0 0 10px rgba(255,179,0,.32);position:relative;overflow:hidden;}
+.goal-bar::after{content:'';position:absolute;inset:0;background:linear-gradient(100deg,transparent,rgba(255,255,255,.55),transparent);transform:translateX(-100%);animation:shimmer 2.4s ease-in-out infinite;}
+@keyframes shimmer{0%{transform:translateX(-100%)}60%,100%{transform:translateX(200%)}}
+.goal-milestones{display:flex;justify-content:space-between;margin-top:7px;}
+.goal-m{font-size:0.6rem;font-weight:800;color:rgba(255,179,0,.38);transition:.3s;}
+.goal-m.reached{color:var(--amber);transform:scale(1.08);}
+.content-area{padding:0 16px 100px;}
+.btn-ledger{width:100%;padding:15px 18px;background:#ffffff;border:1px solid var(--gold-edge);border-radius:var(--r2);margin-bottom:16px;font-family:'Cairo',sans-serif;font-size:0.9rem;font-weight:800;color:#111827;display:flex;align-items:center;justify-content:space-between;cursor:pointer;transition:.2s var(--ease);box-shadow:var(--sh-sm);}
+.btn-ledger:active{transform:scale(0.98);background:#fffdf2;}
+.ledger-btn-left{display:flex;align-items:center;gap:11px;}
+.ledger-icon{width:38px;height:38px;border-radius:13px;background:var(--y-soft);border:1px solid var(--gold-edge2);display:flex;align-items:center;justify-content:center;color:#92400e;}
 
-    /* ══ الرادار ══ */
-    .radar-wrap{background:var(--hc-gold),#ffffff;background-size:44px 76px,auto;border:1px solid var(--gold-edge);border-radius:var(--r3);padding:38px 20px;text-align:center;margin-bottom:16px;transition:.5s var(--ease);position:relative;overflow:hidden;box-shadow:var(--sh-md);}
-    .radar-wrap.offline{opacity:.62;filter:grayscale(50%);}
-    .radar-wrap::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at 50% 0%,rgba(255,179,0,.14),transparent 66%);pointer-events:none;opacity:0;transition:opacity .5s;}
-    .radar-wrap.online::before{opacity:1;}
-    .radar-center-wrap{width:154px;height:154px;margin:0 auto 24px;position:relative;display:flex;align-items:center;justify-content:center;}
-    .radar-ring{position:absolute;inset:0;border-radius:50%;border:2px solid var(--honey);opacity:0;}
-    .radar-wrap.online .radar-ring{animation:radarWave 2.6s cubic-bezier(.25,1,.5,1) infinite;}
-    .radar-ring:nth-child(2){animation-delay:.85s!important;}
-    .radar-ring:nth-child(3){animation-delay:1.7s!important;}
-    @keyframes radarWave{0%{transform:scale(.3);opacity:1}100%{transform:scale(1.85);opacity:0}}
-    .radar-core{width:82px;height:82px;border-radius:50%;background:radial-gradient(circle at 40% 35%,#FFF8E1,#FFE9A8);border:2px solid var(--gold-edge2);display:flex;align-items:center;justify-content:center;position:relative;z-index:2;font-size:2.1rem;box-shadow:0 0 0 8px rgba(255,179,0,.07),inset 0 2px 8px rgba(255,255,255,.7);}
-    .radar-wrap.online .radar-core{box-shadow:0 0 0 8px rgba(255,179,0,.1),0 0 30px rgba(255,179,0,.32);animation:coreGlow 2.2s ease-in-out infinite;}
-    @keyframes coreGlow{0%,100%{box-shadow:0 0 0 8px rgba(255,179,0,.08),0 0 22px rgba(255,179,0,.24)}50%{box-shadow:0 0 0 8px rgba(255,179,0,.12),0 0 44px rgba(255,179,0,.42)}}
-    .radar-title{font-size:1.08rem;font-weight:900;color:#111827;margin-bottom:4px;}
-    .radar-desc{font-size:0.82rem;font-weight:700;color:var(--muted);}
+/* ══ الرادار ══ */
+.radar-wrap{background:var(--hc-gold),#ffffff;background-size:44px 76px,auto;border:1px solid var(--gold-edge);border-radius:var(--r3);padding:38px 20px;text-align:center;margin-bottom:16px;transition:.5s var(--ease);position:relative;overflow:hidden;box-shadow:var(--sh-md);}
+.radar-wrap.offline{opacity:.62;filter:grayscale(50%);}
+.radar-wrap::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at 50% 0%,rgba(255,179,0,.14),transparent 66%);pointer-events:none;opacity:0;transition:opacity .5s;}
+.radar-wrap.online::before{opacity:1;}
+.radar-center-wrap{width:154px;height:154px;margin:0 auto 24px;position:relative;display:flex;align-items:center;justify-content:center;}
+.radar-ring{position:absolute;inset:0;border-radius:50%;border:2px solid var(--honey);opacity:0;}
+.radar-wrap.online .radar-ring{animation:radarWave 2.6s cubic-bezier(.25,1,.5,1) infinite;}
+.radar-ring:nth-child(2){animation-delay:.85s!important;}
+.radar-ring:nth-child(3){animation-delay:1.7s!important;}
+@keyframes radarWave{0%{transform:scale(.3);opacity:1}100%{transform:scale(1.85);opacity:0}}
+.radar-core{width:82px;height:82px;border-radius:50%;background:radial-gradient(circle at 40% 35%,#FFF8E1,#FFE9A8);border:2px solid var(--gold-edge2);display:flex;align-items:center;justify-content:center;position:relative;z-index:2;font-size:2.1rem;box-shadow:0 0 0 8px rgba(255,179,0,.07),inset 0 2px 8px rgba(255,255,255,.7);}
+.radar-wrap.online .radar-core{box-shadow:0 0 0 8px rgba(255,179,0,.1),0 0 30px rgba(255,179,0,.32);animation:coreGlow 2.2s ease-in-out infinite;}
+@keyframes coreGlow{0%,100%{box-shadow:0 0 0 8px rgba(255,179,0,.08),0 0 22px rgba(255,179,0,.24)}50%{box-shadow:0 0 0 8px rgba(255,179,0,.12),0 0 44px rgba(255,179,0,.42)}}
+.radar-title{font-size:1.08rem;font-weight:900;color:#111827;margin-bottom:4px;}
+.radar-desc{font-size:0.82rem;font-weight:700;color:var(--muted);}
 
-    /* ══ بطاقات الطلب ══ */
-    .order-card-beast{background:#ffffff;border:1px solid var(--gold-edge);border-radius:var(--r3);margin-bottom:16px;overflow:hidden;position:relative;box-shadow:var(--sh-md);animation:cardIn .4s var(--ease-bounce);}
-    @keyframes cardIn{from{opacity:0;transform:translateY(22px) scale(.96)}to{opacity:1;transform:translateY(0) scale(1)}}
-    .oc-top-stripe{height:5px;width:100%;}
-    .oc-top-stripe.blue{background:linear-gradient(90deg,#60a5fa,#2563eb);}
-    .oc-top-stripe.yellow{background:linear-gradient(90deg,var(--honey),var(--amber));}
-    .oc-top-stripe.green{background:linear-gradient(90deg,#34d399,#059669);}
-    .oc-body{padding:18px;}
-    .oc-header-row{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:14px;}
-    .oc-id{font-size:0.78rem;font-weight:900;color:var(--muted);font-variant-numeric:tabular-nums;letter-spacing:.5px;}
-    .oc-price{font-size:1.75rem;font-weight:900;color:var(--green);line-height:1;text-align:left;letter-spacing:-1px;font-variant-numeric:tabular-nums;}
-    .oc-price small{font-size:0.85rem;color:var(--muted);font-weight:700;margin-right:2px;}
-    .oc-meta{display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin-top:4px;}
-    .oc-tag{font-size:0.62rem;font-weight:900;padding:4px 9px;border-radius:99px;letter-spacing:.3px;}
-    .tag-single{background:var(--y-soft);color:#92400e;border:1px solid var(--gold-edge2);}
-    .tag-double{background:rgba(249,115,22,0.12);color:#c2410c;border:1px solid rgba(249,115,22,0.28);box-shadow:0 0 12px rgba(249,115,22,.18);}
-    .tag-sovereign{background:rgba(139,92,246,0.12);color:#6d28d9;border:1px solid rgba(139,92,246,0.26);}
-    .step-progress{display:flex;align-items:center;margin:16px 0;}
-    .step-item{display:flex;flex-direction:column;align-items:center;flex:1;position:relative;}
-    .step-item:not(:last-child)::after{content:'';position:absolute;top:12px;right:50%;left:-50%;height:2px;background:var(--y-soft);z-index:0;transition:.4s;}
-    .step-item.done:not(:last-child)::after{background:linear-gradient(90deg,var(--green),var(--honey));}
-    .step-item.active:not(:last-child)::after{background:linear-gradient(90deg,var(--honey),var(--y-soft));}
-    .step-dot{width:26px;height:26px;border-radius:50%;border:2px solid var(--gold-edge2);background:#fbfbfb;display:flex;align-items:center;justify-content:center;font-size:0.62rem;position:relative;z-index:1;transition:.4s var(--ease-bounce);}
-    .step-item.done .step-dot{background:var(--green);border-color:var(--green);color:#fff;box-shadow:0 0 12px rgba(16,185,129,.32);}
-    .step-item.active .step-dot{background:var(--honey);border-color:var(--honey);box-shadow:0 0 16px rgba(255,179,0,.42);animation:stepPulse 1.5s ease-in-out infinite;}
-    @keyframes stepPulse{0%,100%{box-shadow:0 0 10px rgba(255,179,0,.3)}50%{box-shadow:0 0 24px rgba(255,179,0,.62)}}
-    .step-label{font-size:0.55rem;font-weight:800;color:var(--muted2);margin-top:6px;text-align:center;line-height:1.2;}
-    .step-item.done .step-label,.step-item.active .step-label{color:#111827;}
-    .timer-pill{display:inline-flex;align-items:center;gap:5px;font-size:0.8rem;font-weight:900;padding:5px 12px;border-radius:99px;transition:.3s;font-variant-numeric:tabular-nums;}
-    .t-safe{background:rgba(16,185,129,.08);color:#065f46;border:1px solid rgba(16,185,129,.2);}
-    .t-warn{background:rgba(249,115,22,.08);color:#c2410c;border:1px solid rgba(249,115,22,.2);}
-    .t-danger{background:rgba(239,68,68,.08);color:var(--red);border:1px solid rgba(239,68,68,.2);animation:dangerPulse 1.2s infinite;}
-    @keyframes dangerPulse{0%,100%{box-shadow:0 0 0 0 rgba(239,68,68,.2)}50%{box-shadow:0 0 0 7px rgba(239,68,68,0)}}
-    .status-banner{background:linear-gradient(135deg,#fffdf2,#fff8e1);border:1px solid var(--gold-edge2);border-radius:13px;padding:11px 14px;text-align:center;font-weight:800;font-size:0.9rem;color:#92400e;margin-bottom:14px;display:flex;align-items:center;justify-content:center;gap:8px;}
-    .route-timeline{position:relative;padding-right:24px;border-right:2px dashed var(--gold-edge2);margin-right:8px;}
-    .route-point{position:relative;margin-bottom:18px;}
-    .route-point:last-child{margin-bottom:0;}
-    .route-point::before{content:'';position:absolute;right:-31px;top:5px;width:13px;height:13px;border-radius:50%;border:3px solid;background:#ffffff;transition:.3s;}
-    .route-point.pickup::before{border-color:var(--honey);box-shadow:0 0 10px rgba(255,179,0,.32);}
-    .route-point.dropoff::before{border-color:var(--green);box-shadow:0 0 10px rgba(16,185,129,.32);}
-    .rp-title{font-size:0.65rem;font-weight:800;color:var(--muted);margin-bottom:3px;}
-    .rp-name{font-size:1rem;font-weight:900;color:#111827;line-height:1.3;}
-    .action-grid{display:flex;gap:8px;flex-wrap:wrap;margin-top:9px;}
-    .action-pill{flex:1;min-width:80px;padding:10px;border-radius:14px;border:none;cursor:pointer;font-family:'Cairo',sans-serif;font-size:0.78rem;font-weight:800;display:flex;align-items:center;justify-content:center;gap:5px;transition:.2s var(--ease);}
-    .action-pill:active{transform:scale(.93);}
-    .ap-call{background:rgba(59,130,246,.08);color:#1d4ed8;border:1px solid rgba(59,130,246,.16);}
-    .ap-wa{background:rgba(16,185,129,.08);color:#065f46;border:1px solid rgba(16,185,129,.16);}
-    .ap-map{background:rgba(249,115,22,.08);color:#c2410c;border:1px solid rgba(249,115,22,.16);}
-    .ap-img{background:rgba(139,92,246,.08);color:#6d28d9;border:1px solid rgba(139,92,246,.16);}
-    .ap-support{background:var(--y-soft);color:#92400e;border:1px solid var(--gold-edge2);text-decoration:none;}
-    .ready-banner{background:linear-gradient(135deg,rgba(249,115,22,.09),rgba(255,193,7,.06));border:1px solid rgba(249,115,22,.22);border-radius:14px;padding:12px 16px;margin-bottom:14px;display:flex;align-items:center;gap:10px;animation:readyGlow 1.5s ease-in-out infinite;}
-    @keyframes readyGlow{0%,100%{box-shadow:0 0 0 0 rgba(249,115,22,.1)}50%{box-shadow:0 0 0 7px rgba(249,115,22,0)}}
-    .ready-text{font-weight:900;color:#c2410c;font-size:0.9rem;}
-    .btn-status-cta{width:100%;padding:17px;border:none;border-radius:18px;font-family:'Cairo',sans-serif;font-size:1.1rem;font-weight:900;color:white;cursor:pointer;transition:.2s var(--ease);display:flex;align-items:center;justify-content:center;gap:10px;margin-top:16px;position:relative;overflow:hidden;}
-    .btn-status-cta::after{content:'';position:absolute;top:0;left:-120%;width:55%;height:100%;background:linear-gradient(100deg,transparent,rgba(255,255,255,.35),transparent);transform:skewX(-18deg);animation:gloss 5s ease-in-out infinite;pointer-events:none;}
-    .btn-status-cta:active:not(:disabled){transform:scale(.97);}
-    .btn-status-cta:disabled{opacity:.55;cursor:not-allowed;background:#e5e7eb!important;color:#9ca3af!important;box-shadow:none!important;}
-    .btn-status-cta:disabled::after{display:none;}
-    .cta-heading{background:linear-gradient(135deg,#374151,#1f2937);box-shadow:0 10px 26px rgba(31,41,55,.28);}
-    .cta-arrived{background:var(--grad-honey-deep);color:#111827;box-shadow:var(--sh-gold);}
-    .cta-picked{background:var(--grad-green);box-shadow:var(--sh-green);}
-    .card-footer-row{display:flex;align-items:center;justify-content:center;margin-top:14px;padding-top:12px;border-top:1px dashed var(--gold-edge2);}
+/* ══ بطاقات الطلب ══ */
+.order-card-beast{background:#ffffff;border:1px solid var(--gold-edge);border-radius:var(--r3);margin-bottom:16px;overflow:hidden;position:relative;box-shadow:var(--sh-md);animation:cardIn .4s var(--ease-bounce);}
+@keyframes cardIn{from{opacity:0;transform:translateY(22px) scale(.96)}to{opacity:1;transform:translateY(0) scale(1)}}
+.oc-top-stripe{height:5px;width:100%;}
+.oc-top-stripe.blue{background:linear-gradient(90deg,#60a5fa,#2563eb);}
+.oc-top-stripe.yellow{background:linear-gradient(90deg,var(--honey),var(--amber));}
+.oc-top-stripe.green{background:linear-gradient(90deg,#34d399,#059669);}
+.oc-body{padding:18px;}
+.oc-header-row{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:14px;}
+.oc-id{font-size:0.78rem;font-weight:900;color:var(--muted);font-variant-numeric:tabular-nums;letter-spacing:.5px;}
+.oc-price{font-size:1.75rem;font-weight:900;color:var(--green);line-height:1;text-align:left;letter-spacing:-1px;font-variant-numeric:tabular-nums;}
+.oc-price small{font-size:0.85rem;color:var(--muted);font-weight:700;margin-right:2px;}
+.oc-meta{display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin-top:4px;}
+.oc-tag{font-size:0.62rem;font-weight:900;padding:4px 9px;border-radius:99px;letter-spacing:.3px;}
+.tag-single{background:var(--y-soft);color:#92400e;border:1px solid var(--gold-edge2);}
+.tag-double{background:rgba(249,115,22,0.12);color:#c2410c;border:1px solid rgba(249,115,22,0.28);box-shadow:0 0 12px rgba(249,115,22,.18);}
+.tag-sovereign{background:rgba(139,92,246,0.12);color:#6d28d9;border:1px solid rgba(139,92,246,0.26);}
+.step-progress{display:flex;align-items:center;margin:16px 0;}
+.step-item{display:flex;flex-direction:column;align-items:center;flex:1;position:relative;}
+.step-item:not(:last-child)::after{content:'';position:absolute;top:12px;right:50%;left:-50%;height:2px;background:var(--y-soft);z-index:0;transition:.4s;}
+.step-item.done:not(:last-child)::after{background:linear-gradient(90deg,var(--green),var(--honey));}
+.step-item.active:not(:last-child)::after{background:linear-gradient(90deg,var(--honey),var(--y-soft));}
+.step-dot{width:26px;height:26px;border-radius:50%;border:2px solid var(--gold-edge2);background:#fbfbfb;display:flex;align-items:center;justify-content:center;font-size:0.62rem;position:relative;z-index:1;transition:.4s var(--ease-bounce);}
+.step-item.done .step-dot{background:var(--green);border-color:var(--green);color:#fff;box-shadow:0 0 12px rgba(16,185,129,.32);}
+.step-item.active .step-dot{background:var(--honey);border-color:var(--honey);box-shadow:0 0 16px rgba(255,179,0,.42);animation:stepPulse 1.5s ease-in-out infinite;}
+@keyframes stepPulse{0%,100%{box-shadow:0 0 10px rgba(255,179,0,.3)}50%{box-shadow:0 0 24px rgba(255,179,0,.62)}}
+.step-label{font-size:0.55rem;font-weight:800;color:var(--muted2);margin-top:6px;text-align:center;line-height:1.2;}
+.step-item.done .step-label,.step-item.active .step-label{color:#111827;}
+.timer-pill{display:inline-flex;align-items:center;gap:5px;font-size:0.8rem;font-weight:900;padding:5px 12px;border-radius:99px;transition:.3s;font-variant-numeric:tabular-nums;}
+.t-safe{background:rgba(16,185,129,.08);color:#065f46;border:1px solid rgba(16,185,129,.2);}
+.t-warn{background:rgba(249,115,22,.08);color:#c2410c;border:1px solid rgba(249,115,22,.2);}
+.t-danger{background:rgba(239,68,68,.08);color:var(--red);border:1px solid rgba(239,68,68,.2);animation:dangerPulse 1.2s infinite;}
+@keyframes dangerPulse{0%,100%{box-shadow:0 0 0 0 rgba(239,68,68,.2)}50%{box-shadow:0 0 0 7px rgba(239,68,68,0)}}
+.status-banner{background:linear-gradient(135deg,#fffdf2,#fff8e1);border:1px solid var(--gold-edge2);border-radius:13px;padding:11px 14px;text-align:center;font-weight:800;font-size:0.9rem;color:#92400e;margin-bottom:14px;display:flex;align-items:center;justify-content:center;gap:8px;}
+.route-timeline{position:relative;padding-right:24px;border-right:2px dashed var(--gold-edge2);margin-right:8px;}
+.route-point{position:relative;margin-bottom:18px;}
+.route-point:last-child{margin-bottom:0;}
+.route-point::before{content:'';position:absolute;right:-31px;top:5px;width:13px;height:13px;border-radius:50%;border:3px solid;background:#ffffff;transition:.3s;}
+.route-point.pickup::before{border-color:var(--honey);box-shadow:0 0 10px rgba(255,179,0,.32);}
+.route-point.dropoff::before{border-color:var(--green);box-shadow:0 0 10px rgba(16,185,129,.32);}
+.rp-title{font-size:0.65rem;font-weight:800;color:var(--muted);margin-bottom:3px;}
+.rp-name{font-size:1rem;font-weight:900;color:#111827;line-height:1.3;}
+.action-grid{display:flex;gap:8px;flex-wrap:wrap;margin-top:9px;}
+.action-pill{flex:1;min-width:80px;padding:10px;border-radius:14px;border:none;cursor:pointer;font-family:'Cairo',sans-serif;font-size:0.78rem;font-weight:800;display:flex;align-items:center;justify-content:center;gap:5px;transition:.2s var(--ease);}
+.action-pill:active{transform:scale(.93);}
+.ap-call{background:rgba(59,130,246,.08);color:#1d4ed8;border:1px solid rgba(59,130,246,.16);}
+.ap-wa{background:rgba(16,185,129,.08);color:#065f46;border:1px solid rgba(16,185,129,.16);}
+.ap-map{background:rgba(249,115,22,.08);color:#c2410c;border:1px solid rgba(249,115,22,.16);}
+.ap-img{background:rgba(139,92,246,.08);color:#6d28d9;border:1px solid rgba(139,92,246,.16);}
+.ap-support{background:var(--y-soft);color:#92400e;border:1px solid var(--gold-edge2);text-decoration:none;}
+.ready-banner{background:linear-gradient(135deg,rgba(249,115,22,.09),rgba(255,193,7,.06));border:1px solid rgba(249,115,22,.22);border-radius:14px;padding:12px 16px;margin-bottom:14px;display:flex;align-items:center;gap:10px;animation:readyGlow 1.5s ease-in-out infinite;}
+@keyframes readyGlow{0%,100%{box-shadow:0 0 0 0 rgba(249,115,22,.1)}50%{box-shadow:0 0 0 7px rgba(249,115,22,0)}}
+.ready-text{font-weight:900;color:#c2410c;font-size:0.9rem;}
+.btn-status-cta{width:100%;padding:17px;border:none;border-radius:18px;font-family:'Cairo',sans-serif;font-size:1.1rem;font-weight:900;color:white;cursor:pointer;transition:.2s var(--ease);display:flex;align-items:center;justify-content:center;gap:10px;margin-top:16px;position:relative;overflow:hidden;}
+.btn-status-cta::after{content:'';position:absolute;top:0;left:-120%;width:55%;height:100%;background:linear-gradient(100deg,transparent,rgba(255,255,255,.35),transparent);transform:skewX(-18deg);animation:gloss 5s ease-in-out infinite;pointer-events:none;}
+.btn-status-cta:active:not(:disabled){transform:scale(.97);}
+.btn-status-cta:disabled{opacity:.55;cursor:not-allowed;background:#e5e7eb!important;color:#9ca3af!important;box-shadow:none!important;}
+.btn-status-cta:disabled::after{display:none;}
+.cta-heading{background:linear-gradient(135deg,#374151,#1f2937);box-shadow:0 10px 26px rgba(31,41,55,.28);}
+.cta-arrived{background:var(--grad-honey-deep);color:#111827;box-shadow:var(--sh-gold);}
+.cta-picked{background:var(--grad-green);box-shadow:var(--sh-green);}
+.card-footer-row{display:flex;align-items:center;justify-content:center;margin-top:14px;padding-top:12px;border-top:1px dashed var(--gold-edge2);}
 
-    /* ══ الطبقات العلوية ══ */
-    #cancelAlertOverlay{position:fixed;inset:0;z-index:45000;background:radial-gradient(120% 100% at 50% 0%,#2a0808,#0a0505);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:30px;text-align:center;animation:fadeOverlay .3s;}
-    @keyframes fadeOverlay{from{opacity:0}to{opacity:1}}
-    .cancel-icon{width:92px;height:92px;border-radius:50%;background:rgba(239,68,68,.16);border:1px solid rgba(239,68,68,.32);display:flex;align-items:center;justify-content:center;margin-bottom:24px;font-size:2.6rem;box-shadow:0 0 40px rgba(239,68,68,.24);animation:cancelShake .6s ease-in-out;}
-    @keyframes cancelShake{0%,100%{transform:rotate(0)}25%{transform:rotate(-9deg)}75%{transform:rotate(9deg)}}
-    #orderAlertOverlay{position:fixed;inset:0;z-index:40000;background:radial-gradient(130% 90% at 50% -5%,rgba(255,179,0,.16),transparent 42%),linear-gradient(180deg,#0f1626 0%,#1f2937 100%);display:flex;flex-direction:column;justify-content:space-between;padding:max(48px,env(safe-area-inset-top)) 20px calc(28px + env(safe-area-inset-bottom));text-align:center;overflow-y:auto;}
-    .alert-bee{width:92px;height:92px;border-radius:50%;background:rgba(255,179,0,.13);border:1px solid rgba(255,179,0,.32);display:flex;align-items:center;justify-content:center;margin:0 auto 16px;font-size:3rem;animation:alertPulse 1.4s ease-in-out infinite;}
-    @keyframes alertPulse{0%,100%{box-shadow:0 0 0 0 rgba(255,179,0,.42)}70%{box-shadow:0 0 0 28px rgba(255,179,0,0)}}
-    .alert-title{font-size:2.1rem;font-weight:900;color:#f8fafc;letter-spacing:-.5px;}
-    .alert-sovereign{font-size:0.9rem;font-weight:800;color:#c4b5fd;margin-top:6px;}
-    .timer-wrap{width:168px;height:168px;margin:16px auto;position:relative;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
-    .timer-svg{transform:rotate(-90deg);width:168px;height:168px;}
-    .timer-circle{fill:none;stroke:var(--honey);stroke-width:10;stroke-dasharray:471;stroke-dashoffset:0;transition:1s linear;stroke-linecap:round;filter:drop-shadow(0 0 12px rgba(255,179,0,.6));}
-    .timer-number{position:absolute;font-size:3.6rem;font-weight:900;color:#f8fafc;letter-spacing:-2px;font-variant-numeric:tabular-nums;}
-    .alert-details{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,0.08);border-radius:var(--r3);padding:22px;margin-bottom:16px;text-align:right;backdrop-filter:blur(8px);}
-    .alert-detail-row{display:flex;justify-content:space-between;align-items:center;padding:11px 0;border-bottom:1px solid rgba(255,255,255,0.06);}
-    .alert-detail-row:last-child{border-bottom:none;padding-bottom:0;}
-    .adl{font-size:0.75rem;font-weight:700;color:#94a3b8;}
-    .adv{font-size:1.05rem;font-weight:900;color:#f1f5f9;}
-    .adv.price{color:#34d399;font-size:1.45rem;}
-    .adv.area{color:#60a5fa;}
-    .btn-accept-beast{width:100%;padding:20px;background:var(--grad-green);color:white;border:none;border-radius:20px;font-family:'Cairo',sans-serif;font-size:1.2rem;font-weight:900;display:flex;align-items:center;justify-content:center;gap:12px;cursor:pointer;transition:.2s var(--ease);box-shadow:0 12px 34px rgba(16,185,129,.36);margin-bottom:12px;position:relative;overflow:hidden;}
-    .btn-accept-beast::after{content:'';position:absolute;top:0;left:-120%;width:55%;height:100%;background:linear-gradient(100deg,transparent,rgba(255,255,255,.4),transparent);transform:skewX(-18deg);animation:gloss 3.5s ease-in-out infinite;pointer-events:none;}
-    .btn-accept-beast:active{transform:scale(.97);}
-    .btn-mute-beast{width:100%;padding:14px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);color:#94a3b8;border-radius:16px;font-family:'Cairo',sans-serif;font-size:0.9rem;font-weight:800;cursor:pointer;transition:.2s;margin-bottom:10px;display:flex;align-items:center;justify-content:center;gap:8px;}
-    .btn-mute-beast:active{background:rgba(255,255,255,.12);}
-    .btn-decline-link{background:none;border:none;color:rgba(255,255,255,.36);font-family:'Cairo',sans-serif;font-size:1rem;font-weight:700;cursor:pointer;width:100%;padding:10px;transition:.2s;}
+/* ══ الطبقات العلوية ══ */
+#cancelAlertOverlay{position:fixed;inset:0;z-index:45000;background:radial-gradient(120% 100% at 50% 0%,#2a0808,#0a0505);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:30px;text-align:center;animation:fadeOverlay .3s;}
+@keyframes fadeOverlay{from{opacity:0}to{opacity:1}}
+.cancel-icon{width:92px;height:92px;border-radius:50%;background:rgba(239,68,68,.16);border:1px solid rgba(239,68,68,.32);display:flex;align-items:center;justify-content:center;margin-bottom:24px;font-size:2.6rem;box-shadow:0 0 40px rgba(239,68,68,.24);animation:cancelShake .6s ease-in-out;}
+@keyframes cancelShake{0%,100%{transform:rotate(0)}25%{transform:rotate(-9deg)}75%{transform:rotate(9deg)}}
+#orderAlertOverlay{position:fixed;inset:0;z-index:40000;background:radial-gradient(130% 90% at 50% -5%,rgba(255,179,0,.16),transparent 42%),linear-gradient(180deg,#0f1626 0%,#1f2937 100%);display:flex;flex-direction:column;justify-content:space-between;padding:max(48px,env(safe-area-inset-top)) 20px calc(28px + env(safe-area-inset-bottom));text-align:center;overflow-y:auto;}
+.alert-bee{width:92px;height:92px;border-radius:50%;background:rgba(255,179,0,.13);border:1px solid rgba(255,179,0,.32);display:flex;align-items:center;justify-content:center;margin:0 auto 16px;font-size:3rem;animation:alertPulse 1.4s ease-in-out infinite;}
+@keyframes alertPulse{0%,100%{box-shadow:0 0 0 0 rgba(255,179,0,.42)}70%{box-shadow:0 0 0 28px rgba(255,179,0,0)}}
+.alert-title{font-size:2.1rem;font-weight:900;color:#f8fafc;letter-spacing:-.5px;}
+.alert-sovereign{font-size:0.9rem;font-weight:800;color:#c4b5fd;margin-top:6px;}
+.timer-wrap{width:168px;height:168px;margin:16px auto;position:relative;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.timer-svg{transform:rotate(-90deg);width:168px;height:168px;}
+.timer-circle{fill:none;stroke:var(--honey);stroke-width:10;stroke-dasharray:471;stroke-dashoffset:0;transition:1s linear;stroke-linecap:round;filter:drop-shadow(0 0 12px rgba(255,179,0,.6));}
+.timer-number{position:absolute;font-size:3.6rem;font-weight:900;color:#f8fafc;letter-spacing:-2px;font-variant-numeric:tabular-nums;}
+.alert-details{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,0.08);border-radius:var(--r3);padding:22px;margin-bottom:16px;text-align:right;backdrop-filter:blur(8px);}
+.alert-detail-row{display:flex;justify-content:space-between;align-items:center;padding:11px 0;border-bottom:1px solid rgba(255,255,255,0.06);}
+.alert-detail-row:last-child{border-bottom:none;padding-bottom:0;}
+.adl{font-size:0.75rem;font-weight:700;color:#94a3b8;}
+.adv{font-size:1.05rem;font-weight:900;color:#f1f5f9;}
+.adv.price{color:#34d399;font-size:1.45rem;}
+.adv.area{color:#60a5fa;}
+.btn-accept-beast{width:100%;padding:20px;background:var(--grad-green);color:white;border:none;border-radius:20px;font-family:'Cairo',sans-serif;font-size:1.2rem;font-weight:900;display:flex;align-items:center;justify-content:center;gap:12px;cursor:pointer;transition:.2s var(--ease);box-shadow:0 12px 34px rgba(16,185,129,.36);margin-bottom:12px;position:relative;overflow:hidden;}
+.btn-accept-beast::after{content:'';position:absolute;top:0;left:-120%;width:55%;height:100%;background:linear-gradient(100deg,transparent,rgba(255,255,255,.4),transparent);transform:skewX(-18deg);animation:gloss 3.5s ease-in-out infinite;pointer-events:none;}
+.btn-accept-beast:active{transform:scale(.97);}
+.btn-mute-beast{width:100%;padding:14px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);color:#94a3b8;border-radius:16px;font-family:'Cairo',sans-serif;font-size:0.9rem;font-weight:800;cursor:pointer;transition:.2s;margin-bottom:10px;display:flex;align-items:center;justify-content:center;gap:8px;}
+.btn-mute-beast:active{background:rgba(255,255,255,.12);}
+.btn-decline-link{background:none;border:none;color:rgba(255,255,255,.36);font-family:'Cairo',sans-serif;font-size:1rem;font-weight:700;cursor:pointer;width:100%;padding:10px;transition:.2s;}
 
-    /* ══ سجل اليوم ══ */
-    #ledgerModal{position:fixed;inset:0;z-index:20000;background:var(--bg);overflow-y:auto;padding:20px;padding-top:max(20px,env(safe-area-inset-top));animation:slideUp .35s var(--ease);}
-    @keyframes slideUp{from{transform:translateY(100%)}to{transform:translateY(0)}}
-    .ledger-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;}
-    .ledger-close{width:40px;height:40px;border-radius:14px;background:#f3f4f6;border:1px solid #e5e7eb;display:flex;align-items:center;justify-content:center;cursor:pointer;color:#374151;transition:.2s;}
-    .ledger-close:active{transform:scale(.9);}
-    .ledger-hero{background:var(--hc),var(--grad-honey-deep);background-size:44px 76px,auto;border-radius:var(--r3);padding:30px 28px;text-align:center;margin-bottom:16px;position:relative;overflow:hidden;box-shadow:var(--sh-gold);}
-    .ledger-hero::before{content:'';position:absolute;top:-30px;left:50%;transform:translateX(-50%);width:220px;height:110px;background:radial-gradient(rgba(255,255,255,0.28),transparent 70%);}
-    .ledger-total-label{font-size:0.72rem;font-weight:800;color:rgba(0,0,0,0.55);text-transform:uppercase;letter-spacing:.6px;position:relative;}
-    .ledger-total-amount{font-size:2.7rem;font-weight:900;color:#111827;letter-spacing:-1.5px;margin:4px 0;position:relative;font-variant-numeric:tabular-nums;text-shadow:0 2px 8px rgba(0,0,0,.1);}
-    .ledger-total-unit{font-size:1rem;color:rgba(0,0,0,0.5);}
-    .ledger-entry{background:#ffffff;border:1px solid var(--gold-edge);border-radius:var(--r2);padding:15px 16px;margin-bottom:9px;display:flex;justify-content:space-between;align-items:center;box-shadow:var(--sh-sm);}
-    .le-left{flex:1;min-width:0;}
-    .le-id{font-size:0.8rem;font-weight:900;color:#111827;}
-    .le-info{font-size:0.68rem;font-weight:700;color:var(--muted);margin-top:3px;}
-    .le-price{font-size:1.15rem;font-weight:900;color:var(--green);font-variant-numeric:tabular-nums;}
-    .le-time{font-size:0.65rem;font-weight:700;color:var(--muted);margin-top:2px;text-align:left;}
+/* ══ سجل اليوم ══ */
+#ledgerModal{position:fixed;inset:0;z-index:20000;background:var(--bg);overflow-y:auto;padding:20px;padding-top:max(20px,env(safe-area-inset-top));animation:slideUp .35s var(--ease);}
+@keyframes slideUp{from{transform:translateY(100%)}to{transform:translateY(0)}}
+.ledger-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;}
+.ledger-close{width:40px;height:40px;border-radius:14px;background:#f3f4f6;border:1px solid #e5e7eb;display:flex;align-items:center;justify-content:center;cursor:pointer;color:#374151;transition:.2s;}
+.ledger-close:active{transform:scale(.9);}
+.ledger-hero{background:var(--hc),var(--grad-honey-deep);background-size:44px 76px,auto;border-radius:var(--r3);padding:30px 28px;text-align:center;margin-bottom:16px;position:relative;overflow:hidden;box-shadow:var(--sh-gold);}
+.ledger-hero::before{content:'';position:absolute;top:-30px;left:50%;transform:translateX(-50%);width:220px;height:110px;background:radial-gradient(rgba(255,255,255,0.28),transparent 70%);}
+.ledger-total-label{font-size:0.72rem;font-weight:800;color:rgba(0,0,0,0.55);text-transform:uppercase;letter-spacing:.6px;position:relative;}
+.ledger-total-amount{font-size:2.7rem;font-weight:900;color:#111827;letter-spacing:-1.5px;margin:4px 0;position:relative;font-variant-numeric:tabular-nums;text-shadow:0 2px 8px rgba(0,0,0,.1);}
+.ledger-total-unit{font-size:1rem;color:rgba(0,0,0,0.5);}
+.ledger-entry{background:#ffffff;border:1px solid var(--gold-edge);border-radius:var(--r2);padding:15px 16px;margin-bottom:9px;display:flex;justify-content:space-between;align-items:center;box-shadow:var(--sh-sm);}
+.le-left{flex:1;min-width:0;}
+.le-id{font-size:0.8rem;font-weight:900;color:#111827;}
+.le-info{font-size:0.68rem;font-weight:700;color:var(--muted);margin-top:3px;}
+.le-price{font-size:1.15rem;font-weight:900;color:var(--green);font-variant-numeric:tabular-nums;}
+.le-time{font-size:0.65rem;font-weight:700;color:var(--muted);margin-top:2px;text-align:left;}
 
-    /* ══ التوستات ══ */
-    #toast-container{position:fixed;top:max(20px,env(safe-area-inset-top));left:50%;transform:translateX(-50%);z-index:60000;display:flex;flex-direction:column;gap:8px;width:92%;max-width:340px;pointer-events:none;}
-    .beast-toast{padding:14px 18px;border-radius:18px;font-weight:800;font-size:0.9rem;backdrop-filter:blur(18px) saturate(150%);-webkit-backdrop-filter:blur(18px) saturate(150%);border:1px solid transparent;display:flex;align-items:center;gap:10px;animation:toastSlide .35s var(--ease-bounce);transition:opacity .3s;box-shadow:var(--sh-md);}
-    @keyframes toastSlide{from{opacity:0;transform:translateY(-18px) scale(.94)}to{opacity:1;transform:translateY(0) scale(1)}}
-    .beast-toast.success{background:rgba(209,250,229,.92);border-color:rgba(16,185,129,.28);color:#065f46;}
-    .beast-toast.error{background:rgba(254,226,226,.92);border-color:rgba(239,68,68,.28);color:#991b1b;}
-    .beast-toast.info{background:rgba(219,234,254,.92);border-color:rgba(59,130,246,.28);color:#1d4ed8;}
-    .beast-toast.warn{background:rgba(255,243,205,.94);border-color:var(--gold-edge2);color:#92400e;}
-    .toast-icon{width:28px;height:28px;border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:1rem;}
+/* ══ التوستات ══ */
+#toast-container{position:fixed;top:max(20px,env(safe-area-inset-top));left:50%;transform:translateX(-50%);z-index:60000;display:flex;flex-direction:column;gap:8px;width:92%;max-width:340px;pointer-events:none;}
+.beast-toast{padding:14px 18px;border-radius:18px;font-weight:800;font-size:0.9rem;backdrop-filter:blur(18px) saturate(150%);-webkit-backdrop-filter:blur(18px) saturate(150%);border:1px solid transparent;display:flex;align-items:center;gap:10px;animation:toastSlide .35s var(--ease-bounce);transition:opacity .3s;box-shadow:var(--sh-md);}
+@keyframes toastSlide{from{opacity:0;transform:translateY(-18px) scale(.94)}to{opacity:1;transform:translateY(0) scale(1)}}
+.beast-toast.success{background:rgba(209,250,229,.92);border-color:rgba(16,185,129,.28);color:#065f46;}
+.beast-toast.error{background:rgba(254,226,226,.92);border-color:rgba(239,68,68,.28);color:#991b1b;}
+.beast-toast.info{background:rgba(219,234,254,.92);border-color:rgba(59,130,246,.28);color:#1d4ed8;}
+.beast-toast.warn{background:rgba(255,243,205,.94);border-color:var(--gold-edge2);color:#92400e;}
+.toast-icon{width:28px;height:28px;border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:1rem;}
 
-    /* ══ البث العام ══ */
-    .broadcast-overlay{position:fixed;inset:0;z-index:50000;background:rgba(15,22,38,.5);backdrop-filter:blur(12px);display:flex;align-items:center;justify-content:center;padding:20px;animation:fadeOverlay .3s;}
-    .broadcast-card{background:#ffffff;border:1px solid var(--gold-edge);border-radius:var(--r3);padding:34px 30px;max-width:360px;width:100%;text-align:center;animation:cardIn .4s var(--ease-bounce);box-shadow:var(--sh-lg);position:relative;overflow:hidden;}
-    .broadcast-card::before{content:'';position:absolute;top:0;left:0;right:0;height:4px;background:var(--grad-honey);}
-    .broadcast-icon{font-size:3rem;margin-bottom:12px;display:block;}
-    .broadcast-msg{font-size:1.05rem;font-weight:700;color:#111827;line-height:1.6;margin:14px 0 22px;}
-    .btn-broadcast-ok{background:var(--grad-honey-deep);color:#111827;border:none;border-radius:16px;padding:14px 34px;font-family:'Cairo',sans-serif;font-size:1rem;font-weight:900;cursor:pointer;transition:.2s;box-shadow:var(--sh-gold);}
-    .btn-broadcast-ok:active{transform:scale(.96);}
+/* ══ البث العام ══ */
+.broadcast-overlay{position:fixed;inset:0;z-index:50000;background:rgba(15,22,38,.5);backdrop-filter:blur(12px);display:flex;align-items:center;justify-content:center;padding:20px;animation:fadeOverlay .3s;}
+.broadcast-card{background:#ffffff;border:1px solid var(--gold-edge);border-radius:var(--r3);padding:34px 30px;max-width:360px;width:100%;text-align:center;animation:cardIn .4s var(--ease-bounce);box-shadow:var(--sh-lg);position:relative;overflow:hidden;}
+.broadcast-card::before{content:'';position:absolute;top:0;left:0;right:0;height:4px;background:var(--grad-honey);}
+.broadcast-icon{font-size:3rem;margin-bottom:12px;display:block;}
+.broadcast-msg{font-size:1.05rem;font-weight:700;color:#111827;line-height:1.6;margin:14px 0 22px;}
+.btn-broadcast-ok{background:var(--grad-honey-deep);color:#111827;border:none;border-radius:16px;padding:14px 34px;font-family:'Cairo',sans-serif;font-size:1rem;font-weight:900;cursor:pointer;transition:.2s;box-shadow:var(--sh-gold);}
+.btn-broadcast-ok:active{transform:scale(.96);}
 
-    /* ══ [V90.2] رسالة الليدر داخل التطبيق ══ */
-    .leader-msg-overlay{position:fixed;inset:0;z-index:52000;background:rgba(15,22,38,.55);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);display:flex;align-items:center;justify-content:center;padding:20px;animation:fadeOverlay .3s;}
-    .leader-msg-card{background:#fff;border:1px solid var(--gold-edge);border-radius:var(--r3);padding:30px 26px;max-width:360px;width:100%;text-align:center;animation:cardIn .4s var(--ease-bounce);box-shadow:var(--sh-lg);position:relative;overflow:hidden;}
-    .leader-msg-card::before{content:'';position:absolute;top:0;left:0;right:0;height:4px;background:var(--grad-honey-deep);}
-    .leader-msg-badge{width:72px;height:72px;border-radius:24px;background:var(--grad-honey);display:inline-flex;align-items:center;justify-content:center;font-size:2.4rem;margin-bottom:14px;box-shadow:var(--sh-gold);animation:floatBee 3s var(--ease) infinite;}
-    .leader-msg-from{font-size:.9rem;font-weight:900;color:#92400e;margin-bottom:12px;}
-    .leader-msg-body{font-size:1.08rem;font-weight:700;color:#111827;line-height:1.7;margin-bottom:22px;white-space:pre-wrap;word-break:break-word;}
-    .leader-msg-ok{background:var(--grad-honey-deep);color:#111827;border:none;border-radius:16px;padding:14px 36px;font-family:'Cairo',sans-serif;font-size:1rem;font-weight:900;cursor:pointer;transition:.2s;box-shadow:var(--sh-gold);}
-    .leader-msg-ok:active{transform:scale(.96);}
+/* ══ [V90.2] رسالة الليدر داخل التطبيق ══ */
+.leader-msg-overlay{position:fixed;inset:0;z-index:52000;background:rgba(15,22,38,.55);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);display:flex;align-items:center;justify-content:center;padding:20px;animation:fadeOverlay .3s;}
+.leader-msg-card{background:#fff;border:1px solid var(--gold-edge);border-radius:var(--r3);padding:30px 26px;max-width:360px;width:100%;text-align:center;animation:cardIn .4s var(--ease-bounce);box-shadow:var(--sh-lg);position:relative;overflow:hidden;}
+.leader-msg-card::before{content:'';position:absolute;top:0;left:0;right:0;height:4px;background:var(--grad-honey-deep);}
+.leader-msg-badge{width:72px;height:72px;border-radius:24px;background:var(--grad-honey);display:inline-flex;align-items:center;justify-content:center;font-size:2.4rem;margin-bottom:14px;box-shadow:var(--sh-gold);animation:floatBee 3s var(--ease) infinite;}
+.leader-msg-from{font-size:.9rem;font-weight:900;color:#92400e;margin-bottom:12px;}
+.leader-msg-body{font-size:1.08rem;font-weight:700;color:#111827;line-height:1.7;margin-bottom:22px;white-space:pre-wrap;word-break:break-word;}
+.leader-msg-ok{background:var(--grad-honey-deep);color:#111827;border:none;border-radius:16px;padding:14px 36px;font-family:'Cairo',sans-serif;font-size:1rem;font-weight:900;cursor:pointer;transition:.2s;box-shadow:var(--sh-gold);}
+.leader-msg-ok:active{transform:scale(.96);}
 
-    /* ══ شريط تثبيت PWA ══ */
-    #__ib{position:fixed;bottom:0;left:0;right:0;background:var(--grad-honey-deep);color:#111827;padding:12px 16px calc(12px + env(safe-area-inset-bottom));display:flex;align-items:center;gap:10px;z-index:99997;box-shadow:0 -10px 34px rgba(230,81,0,.4);}
+/* ══ شريط تثبيت PWA ══ */
+#__ib{position:fixed;bottom:0;left:0;right:0;background:var(--grad-honey-deep);color:#111827;padding:12px 16px calc(12px + env(safe-area-inset-bottom));display:flex;align-items:center;gap:10px;z-index:99997;box-shadow:0 -10px 34px rgba(230,81,0,.4);}
 
-    /* ══ [إضافة V90.1] نافذة الإعدادات: الهدف اليومي + الشفت ══ */
-    #settingsModal{position:fixed;inset:0;z-index:25000;background:rgba(15,22,38,.45);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);display:flex;align-items:flex-end;justify-content:center;animation:fadeOverlay .25s;}
-    .settings-sheet{background:var(--bg);border-top-left-radius:28px;border-top-right-radius:28px;padding:10px 20px calc(24px + env(safe-area-inset-bottom));width:100%;max-width:480px;box-shadow:0 -18px 60px rgba(120,80,0,.25);animation:slideUp .35s var(--ease);max-height:85vh;overflow-y:auto;}
-    .sheet-handle{width:44px;height:5px;background:var(--gold-edge2);border-radius:99px;margin:6px auto 16px;}
-    .settings-title{font-size:1.15rem;font-weight:900;color:#111827;display:flex;align-items:center;gap:8px;margin-bottom:18px;}
-    .setting-card{background:#ffffff;border:1px solid var(--gold-edge);border-radius:var(--r2);padding:16px 18px;margin-bottom:12px;box-shadow:var(--sh-sm);}
-    .setting-label{font-size:0.85rem;font-weight:900;color:#111827;display:flex;align-items:center;gap:8px;}
-    .setting-hint{font-size:0.68rem;font-weight:700;color:var(--muted);margin-top:3px;line-height:1.5;}
-    .goal-stepper{display:flex;align-items:center;justify-content:center;gap:18px;margin-top:14px;}
-    .stepper-btn{width:46px;height:46px;border-radius:16px;border:1.5px solid var(--gold-edge2);background:#fffdf2;color:#92400e;font-size:1.5rem;font-weight:900;cursor:pointer;transition:.15s;display:flex;align-items:center;justify-content:center;font-family:'Cairo',sans-serif;}
-    .stepper-btn:active{transform:scale(.9);background:var(--y-soft);}
-    .stepper-val{font-size:2.2rem;font-weight:900;color:#111827;min-width:70px;text-align:center;font-variant-numeric:tabular-nums;}
-    .stepper-val small{display:block;font-size:0.62rem;color:var(--muted);font-weight:800;margin-top:-4px;}
-    .setting-row{display:flex;justify-content:space-between;align-items:center;margin-top:4px;}
-    .shift-info-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px;}
-    .shift-info-box{background:#fffdf2;border:1px solid var(--gold-edge);border-radius:14px;padding:12px;text-align:center;}
-    .sib-val{font-size:1.1rem;font-weight:900;color:#92400e;font-variant-numeric:tabular-nums;}
-    .sib-lbl{font-size:0.6rem;font-weight:800;color:var(--muted);margin-top:2px;}
-    .btn-settings-done{width:100%;padding:15px;background:var(--grad-honey-deep);color:#111827;border:none;border-radius:16px;font-family:'Cairo',sans-serif;font-size:1rem;font-weight:900;cursor:pointer;margin-top:6px;box-shadow:var(--sh-gold);transition:.2s;}
-    .btn-settings-done:active{transform:scale(.97);}
+/* ══ [إضافة V90.1] نافذة الإعدادات: الهدف اليومي + الشفت ══ */
+#settingsModal{position:fixed;inset:0;z-index:25000;background:rgba(15,22,38,.45);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);display:flex;align-items:flex-end;justify-content:center;animation:fadeOverlay .25s;}
+.settings-sheet{background:var(--bg);border-top-left-radius:28px;border-top-right-radius:28px;padding:10px 20px calc(24px + env(safe-area-inset-bottom));width:100%;max-width:480px;box-shadow:0 -18px 60px rgba(120,80,0,.25);animation:slideUp .35s var(--ease);max-height:85vh;overflow-y:auto;}
+.sheet-handle{width:44px;height:5px;background:var(--gold-edge2);border-radius:99px;margin:6px auto 16px;}
+.settings-title{font-size:1.15rem;font-weight:900;color:#111827;display:flex;align-items:center;gap:8px;margin-bottom:18px;}
+.setting-card{background:#ffffff;border:1px solid var(--gold-edge);border-radius:var(--r2);padding:16px 18px;margin-bottom:12px;box-shadow:var(--sh-sm);}
+.setting-label{font-size:0.85rem;font-weight:900;color:#111827;display:flex;align-items:center;gap:8px;}
+.setting-hint{font-size:0.68rem;font-weight:700;color:var(--muted);margin-top:3px;line-height:1.5;}
+.goal-stepper{display:flex;align-items:center;justify-content:center;gap:18px;margin-top:14px;}
+.stepper-btn{width:46px;height:46px;border-radius:16px;border:1.5px solid var(--gold-edge2);background:#fffdf2;color:#92400e;font-size:1.5rem;font-weight:900;cursor:pointer;transition:.15s;display:flex;align-items:center;justify-content:center;font-family:'Cairo',sans-serif;}
+.stepper-btn:active{transform:scale(.9);background:var(--y-soft);}
+.stepper-val{font-size:2.2rem;font-weight:900;color:#111827;min-width:70px;text-align:center;font-variant-numeric:tabular-nums;}
+.stepper-val small{display:block;font-size:0.62rem;color:var(--muted);font-weight:800;margin-top:-4px;}
+.setting-row{display:flex;justify-content:space-between;align-items:center;margin-top:4px;}
+.shift-info-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px;}
+.shift-info-box{background:#fffdf2;border:1px solid var(--gold-edge);border-radius:14px;padding:12px;text-align:center;}
+.sib-val{font-size:1.1rem;font-weight:900;color:#92400e;font-variant-numeric:tabular-nums;}
+.sib-lbl{font-size:0.6rem;font-weight:800;color:var(--muted);margin-top:2px;}
+.btn-settings-done{width:100%;padding:15px;background:var(--grad-honey-deep);color:#111827;border:none;border-radius:16px;font-family:'Cairo',sans-serif;font-size:1rem;font-weight:900;cursor:pointer;margin-top:6px;box-shadow:var(--sh-gold);transition:.2s;}
+.btn-settings-done:active{transform:scale(.97);}
 
-    /* ══ أيقونات الخط ══ */
-    .si{width:20px;height:20px;stroke:currentColor;stroke-width:2.5;stroke-linecap:round;stroke-linejoin:round;fill:none;flex-shrink:0;}
-    .si-sm{width:15px;height:15px;}
-    .si-xs{width:12px;height:12px;}
+/* ══ أيقونات الخط ══ */
+.si{width:20px;height:20px;stroke:currentColor;stroke-width:2.5;stroke-linecap:round;stroke-linejoin:round;fill:none;flex-shrink:0;}
+.si-sm{width:15px;height:15px;}
+.si-xs{width:12px;height:12px;}
 
-    /* ══ احترام تقليل الحركة ══ */
-    @media (prefers-reduced-motion:reduce){
-      .brand-bee,.waiting-anim,.login-wrapper::after,.hero-header::before,.online-dot.on,
-      .radar-wrap.online .radar-ring,.radar-wrap.online .radar-core,.step-item.active .step-dot,
-      .alert-bee,.t-danger,.ready-banner,.goal-bar::after,.beast-btn::after,.btn-status-cta::after,
-      .btn-accept-beast::after{animation:none!important;}
-    }
-  </style>
+/* ══ احترام تقليل الحركة ══ */
+@media (prefers-reduced-motion:reduce){
+  .brand-bee,.waiting-anim,.login-wrapper::after,.hero-header::before,.online-dot.on,
+  .radar-wrap.online .radar-ring,.radar-wrap.online .radar-core,.step-item.active .step-dot,
+  .alert-bee,.t-danger,.ready-banner,.goal-bar::after,.beast-btn::after,.btn-status-cta::after,
+  .btn-accept-beast::after{animation:none!important;}
+}
+</style>
 </head>
 <body>
 
 <!-- PWA Service Worker — [تعديل V90.1] كود JS مباشر بدل base64 (نفس المنطق، أسهل صيانة) -->
 <script>
-  (function(){
-    if('serviceWorker' in navigator && location.protocol.startsWith('http')){
-      var sw = `const CV='nahla-v1';
-  self.addEventListener('install',e=>{self.skipWaiting();e.waitUntil(caches.open(CV).then(c=>c.add('./').catch(()=>{})));});
-  self.addEventListener('activate',e=>{e.waitUntil(caches.keys().then(ks=>Promise.all(ks.filter(k=>k!==CV).map(k=>caches.delete(k)))).then(()=>self.clients.claim()));});
-  self.addEventListener('fetch',e=>{
-    if(e.request.method!=='GET')return;
-    if(e.request.mode==='navigate'){
-      e.respondWith(fetch(e.request).then(r=>{const cl=r.clone();caches.open(CV).then(c=>c.put(e.request,cl));return r;})
-      .catch(()=>caches.match('./').then(r=>r||new Response(
-        '<html dir=rtl><head><meta charset=UTF-8><meta name=viewport content="width=device-width,initial-scale=1"><title>نحلة</title>'
-        +'<style>body{font-family:Cairo,sans-serif;text-align:center;padding:60px 20px;background:#FFF8E1;color:#111827}'
-        +'h2{font-size:1.5rem;margin-bottom:12px}p{color:#6b7280;font-size:.95rem}button{background:linear-gradient(135deg,#FFC107,#FF8F00);color:#111827;border:none;'
-        +'border-radius:16px;padding:14px 32px;font-size:1rem;font-weight:700;margin-top:20px;cursor:pointer}'
-        +'</style></head><body><div style="font-size:64px;margin-bottom:16px">\\uD83D\\uDC1D</div>'
-        +'<h2>\\u0646\\u062D\\u0644\\u0629 \\u062A\\u0639\\u0645\\u0644 \\u0628\\u062F\\u0648\\u0646 \\u0625\\u0646\\u062A\\u0631\\u0646\\u062A</h2><p>\\u0628\\u064A\\u0627\\u0646\\u0627\\u062A\\u0643 \\u0645\\u062D\\u0641\\u0648\\u0638\\u0629. \\u0633\\u062A\\u0639\\u0648\\u062F \\u0627\\u0644\\u0645\\u0632\\u0627\\u0645\\u0646\\u0629 \\u062A\\u0644\\u0642\\u0627\\u0626\\u064A\\u0627\\u064B.</p>'
-        +'<button onclick=location.reload()>\\u062A\\u062D\\u062F\\u064A\\u062B \\u0627\\u0644\\u0622\\u0646</button></body></html>',
-        {headers:{'Content-Type':'text/html;charset=utf-8'}}))));return;}
-    e.respondWith(fetch(e.request).catch(()=>caches.match(e.request)));
-  });`;
-      var blob=new Blob([sw],{type:'application/javascript'});
-      navigator.serviceWorker.register(URL.createObjectURL(blob),{scope:location.pathname.replace(/[^\/]*$/,'')})
-      .then(function(reg){window._SW=reg;setInterval(function(){if(reg.active){var ch=new MessageChannel();reg.active.postMessage('ping',[ch.port2]);}},20000);}).catch(function(){});
-    }
-    var _ip=null;
-    window.addEventListener('beforeinstallprompt',function(e){e.preventDefault();_ip=e;setTimeout(function(){if(_ip)_showIB();},5000);});
-    window.addEventListener('appinstalled',function(){_ip=null;var b=document.getElementById('__ib');if(b)b.remove();});
-    function _showIB(){
-      if(document.getElementById('__ib'))return;
-      var d=document.createElement('div');d.id='__ib';
-      var t=document.createElement('div');t.style.flex='1';
-      t.innerHTML='<div style="font-weight:900;font-size:.95rem;">&#x062B;&#x0628;&#x0651;&#x062A; &#x062A;&#x0637;&#x0628;&#x064A;&#x0642; &#x0646;&#x062D;&#x0644;&#x0629; &#x1F41D;</div><div style="font-size:.72rem;opacity:.75;">&#x064A;&#x0639;&#x0645;&#x0644; &#x0628;&#x062F;&#x0648;&#x0646; &#x0625;&#x0646;&#x062A;&#x0631;&#x0646;&#x062A;</div>';
-      var b1=document.createElement('button');b1.innerHTML='&#x1F4F2; &#x062A;&#x062B;&#x0628;&#x064A;&#x062A;';
-      b1.style.cssText='background:#111827;color:#FFC107;border:none;border-radius:12px;padding:9px 14px;font-weight:900;font-size:.82rem;cursor:pointer;font-family:Cairo,sans-serif;flex-shrink:0;';
-      b1.onclick=function(){if(_ip)_ip.prompt();var el=document.getElementById('__ib');if(el)el.remove();};
-      var b2=document.createElement('button');b2.textContent='x';b2.style.cssText='background:rgba(0,0,0,.12);color:#111827;border:none;border-radius:10px;width:30px;height:30px;cursor:pointer;font-size:14px;flex-shrink:0;';
-      b2.onclick=function(){var el=document.getElementById('__ib');if(el)el.remove();};
-      d.appendChild(t);d.appendChild(b1);d.appendChild(b2);document.body.appendChild(d);
-    }
-  })();
+(function(){
+  if('serviceWorker' in navigator && location.protocol.startsWith('http')){
+    var sw = `const CV='nahla-v1';
+self.addEventListener('install',e=>{self.skipWaiting();e.waitUntil(caches.open(CV).then(c=>c.add('./').catch(()=>{})));});
+self.addEventListener('activate',e=>{e.waitUntil(caches.keys().then(ks=>Promise.all(ks.filter(k=>k!==CV).map(k=>caches.delete(k)))).then(()=>self.clients.claim()));});
+self.addEventListener('fetch',e=>{
+  if(e.request.method!=='GET')return;
+  if(e.request.mode==='navigate'){
+    e.respondWith(fetch(e.request).then(r=>{const cl=r.clone();caches.open(CV).then(c=>c.put(e.request,cl));return r;})
+    .catch(()=>caches.match('./').then(r=>r||new Response(
+      '<html dir=rtl><head><meta charset=UTF-8><meta name=viewport content="width=device-width,initial-scale=1"><title>نحلة</title>'
+      +'<style>body{font-family:Cairo,sans-serif;text-align:center;padding:60px 20px;background:#FFF8E1;color:#111827}'
+      +'h2{font-size:1.5rem;margin-bottom:12px}p{color:#6b7280;font-size:.95rem}button{background:linear-gradient(135deg,#FFC107,#FF8F00);color:#111827;border:none;'
+      +'border-radius:16px;padding:14px 32px;font-size:1rem;font-weight:700;margin-top:20px;cursor:pointer}'
+      +'</style></head><body><div style="font-size:64px;margin-bottom:16px">\\uD83D\\uDC1D</div>'
+      +'<h2>\\u0646\\u062D\\u0644\\u0629 \\u062A\\u0639\\u0645\\u0644 \\u0628\\u062F\\u0648\\u0646 \\u0625\\u0646\\u062A\\u0631\\u0646\\u062A</h2><p>\\u0628\\u064A\\u0627\\u0646\\u0627\\u062A\\u0643 \\u0645\\u062D\\u0641\\u0648\\u0638\\u0629. \\u0633\\u062A\\u0639\\u0648\\u062F \\u0627\\u0644\\u0645\\u0632\\u0627\\u0645\\u0646\\u0629 \\u062A\\u0644\\u0642\\u0627\\u0626\\u064A\\u0627\\u064B.</p>'
+      +'<button onclick=location.reload()>\\u062A\\u062D\\u062F\\u064A\\u062B \\u0627\\u0644\\u0622\\u0646</button></body></html>',
+      {headers:{'Content-Type':'text/html;charset=utf-8'}}))));return;}
+  e.respondWith(fetch(e.request).catch(()=>caches.match(e.request)));
+});`;
+    var blob=new Blob([sw],{type:'application/javascript'});
+    navigator.serviceWorker.register(URL.createObjectURL(blob),{scope:location.pathname.replace(/[^\/]*$/,'')})
+    .then(function(reg){window._SW=reg;setInterval(function(){if(reg.active){var ch=new MessageChannel();reg.active.postMessage('ping',[ch.port2]);}},20000);}).catch(function(){});
+  }
+  var _ip=null;
+  window.addEventListener('beforeinstallprompt',function(e){e.preventDefault();_ip=e;setTimeout(function(){if(_ip)_showIB();},5000);});
+  window.addEventListener('appinstalled',function(){_ip=null;var b=document.getElementById('__ib');if(b)b.remove();});
+  function _showIB(){
+    if(document.getElementById('__ib'))return;
+    var d=document.createElement('div');d.id='__ib';
+    var t=document.createElement('div');t.style.flex='1';
+    t.innerHTML='<div style="font-weight:900;font-size:.95rem;">&#x062B;&#x0628;&#x0651;&#x062A; &#x062A;&#x0637;&#x0628;&#x064A;&#x0642; &#x0646;&#x062D;&#x0644;&#x0629; &#x1F41D;</div><div style="font-size:.72rem;opacity:.75;">&#x064A;&#x0639;&#x0645;&#x0644; &#x0628;&#x062F;&#x0648;&#x0646; &#x0625;&#x0646;&#x062A;&#x0631;&#x0646;&#x062A;</div>';
+    var b1=document.createElement('button');b1.innerHTML='&#x1F4F2; &#x062A;&#x062B;&#x0628;&#x064A;&#x062A;';
+    b1.style.cssText='background:#111827;color:#FFC107;border:none;border-radius:12px;padding:9px 14px;font-weight:900;font-size:.82rem;cursor:pointer;font-family:Cairo,sans-serif;flex-shrink:0;';
+    b1.onclick=function(){if(_ip)_ip.prompt();var el=document.getElementById('__ib');if(el)el.remove();};
+    var b2=document.createElement('button');b2.textContent='x';b2.style.cssText='background:rgba(0,0,0,.12);color:#111827;border:none;border-radius:10px;width:30px;height:30px;cursor:pointer;font-size:14px;flex-shrink:0;';
+    b2.onclick=function(){var el=document.getElementById('__ib');if(el)el.remove();};
+    d.appendChild(t);d.appendChild(b1);d.appendChild(b2);document.body.appendChild(d);
+  }
+})();
 </script>
 
 <div id="offlineBanner" class="hidden-section">⚠️ انقطع الاتصال بالإنترنت</div>
@@ -636,569 +636,569 @@
 </div>
 <div id="toast-container"></div>
 <script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-  import { getDatabase, ref, onValue, update, get, increment } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
-  import { getAuth, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+import { getDatabase, ref, onValue, update, get, increment } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+import { getAuth, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 
-  const API_URL   = "https://script.google.com/macros/s/AKfycbyiFprfbDKMwOG75eZl-V5_M7XmqLkmK49YBQjhHKr_Gka77Gmdgt6uU6K5KeXilMViDw/exec";
-  const API_TOKEN = "NAHLA_SECURE_TOKEN_2026";
-  /* [تعديل V90.1] الهدف اليومي صار قابلاً للتعديل من الإعدادات (محفوظ محلياً) */
-  let DAILY_GOAL = Math.min(30, Math.max(5, parseInt(localStorage.getItem('nahla_daily_goal')) || 10));
-  const firebaseConfig = {
-    apiKey:"AIzaSyAsmQKlCCZpCgfJG8AZM7fWmYPWVZkpjSQ",
-    authDomain:"nahla-delivery-6b06f.firebaseapp.com",
-    databaseURL:"https://nahla-delivery-6b06f-default-rtdb.europe-west1.firebasedatabase.app",
-    projectId:"nahla-delivery-6b06f",
-    storageBucket:"nahla-delivery-6b06f.firebasestorage.app",
-    messagingSenderId:"592782211437",
-    appId:"1:592782211437:web:4af068aab5807926bf0264"
-  };
-  const app=initializeApp(firebaseConfig);
-  const db=getDatabase(app);
-  const auth=getAuth(app);
+const API_URL   = "https://script.google.com/macros/s/AKfycbyiFprfbDKMwOG75eZl-V5_M7XmqLkmK49YBQjhHKr_Gka77Gmdgt6uU6K5KeXilMViDw/exec";
+const API_TOKEN = "NAHLA_SECURE_TOKEN_2026";
+/* [تعديل V90.1] الهدف اليومي صار قابلاً للتعديل من الإعدادات (محفوظ محلياً) */
+let DAILY_GOAL = Math.min(30, Math.max(5, parseInt(localStorage.getItem('nahla_daily_goal')) || 10));
+const firebaseConfig = {
+  apiKey:"AIzaSyAsmQKlCCZpCgfJG8AZM7fWmYPWVZkpjSQ",
+  authDomain:"nahla-delivery-6b06f.firebaseapp.com",
+  databaseURL:"https://nahla-delivery-6b06f-default-rtdb.europe-west1.firebasedatabase.app",
+  projectId:"nahla-delivery-6b06f",
+  storageBucket:"nahla-delivery-6b06f.firebasestorage.app",
+  messagingSenderId:"592782211437",
+  appId:"1:592782211437:web:4af068aab5807926bf0264"
+};
+const app=initializeApp(firebaseConfig);
+const db=getDatabase(app);
+const auth=getAuth(app);
 
-  /* ══ Nahla Audio Engine V90.1 — الأصوات من ملفات assets/sounds بدل base64 ══ */
-  let _ac=null,_alLp=null,_alOn=false,_alCur=null;
-  function _getAC(){if(!_ac){try{_ac=new(window.AudioContext||window.webkitAudioContext)();}catch(e){}}if(_ac&&_ac.state==='suspended')_ac.resume().catch(()=>{});return _ac;}
-  function _beep(f,d,v){const ctx=_getAC();if(!ctx)return;const g=ctx.createGain();g.connect(ctx.destination);g.gain.setValueAtTime(v||.7,ctx.currentTime);g.gain.exponentialRampToValueAtTime(.001,ctx.currentTime+(d||.5));const o=ctx.createOscillator();o.connect(g);o.frequency.value=f||1046;o.start();o.stop(ctx.currentTime+(d||.5));}
-  function _startAlarm(type){
-    _stopAlarm();_alOn=true;
-    const el=document.getElementById(type==='double'?'doubleOrderSound':'alertSound');
-    if(el){el.currentTime=0;el.volume=1.0;el.play().catch(()=>_beep(type==='double'?1568:1046,.8,.9));_alCur=el;}
-    _alLp=setInterval(()=>{if(!_alOn)return;_beep(type==='double'?1568:1046,.2,.5);},1100);
-  }
-  function _stopAlarm(){
-    _alOn=false;
-    try{if(window.AndroidRadar&&window.AndroidRadar.stopAlarm)window.AndroidRadar.stopAlarm();}catch(e){}
-    if(_alCur){_alCur.pause();_alCur.currentTime=0;_alCur=null;}
-    if(_alLp){clearInterval(_alLp);_alLp=null;}
-    try{document.getElementById('alertSound').pause();document.getElementById('doubleOrderSound').pause();}catch(e){}
-  }
-  function _playOnce(type){
-    const m={cancel:'cancelSound',welcome:'welcomeSound',ready:'readySound'};
-    const el=document.getElementById(m[type]);if(!el)return;
-    el.currentTime=0;el.play().catch(()=>{});
-  }
-  function _unlockAudio(){const ctx=_getAC();if(ctx&&ctx.state==='suspended')ctx.resume();['alertSound','doubleOrderSound','cancelSound','welcomeSound','readySound'].forEach(id=>{const el=document.getElementById(id);if(!el)return;const v=el.volume;el.volume=0;const p=el.play();if(p)p.then(()=>{el.pause();el.currentTime=0;el.volume=v;}).catch(()=>{});});const ka=document.getElementById('keepAliveAudio');if(ka){ka.volume=0.001;ka.play().catch(()=>{});}setInterval(()=>{const c=_getAC();if(!c)return;if(c.state==='suspended')c.resume();try{const o=c.createOscillator();const g=c.createGain();g.gain.value=.00001;o.connect(g);g.connect(c.destination);o.frequency.value=20000;o.start();o.stop(c.currentTime+.01);}catch(e){}},3000);document.removeEventListener('touchstart',_unlockAudio,true);document.removeEventListener('click',_unlockAudio,true);}
-  document.addEventListener('touchstart',_unlockAudio,true);document.addEventListener('click',_unlockAudio,true);
-  let _wl=null;
-  async function _keepAwake(){if('wakeLock' in navigator){try{if(!_wl||_wl.released)_wl=await navigator.wakeLock.request('screen');}catch(e){}}const ka=document.getElementById('keepAliveAudio');if(ka){ka.volume=0.001;ka.play().catch(()=>{});}}
-  function _relWake(){if(_wl&&!_wl.released)_wl.release().then(()=>{_wl=null;}).catch(()=>{});}
-  document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible'){_keepAwake();const c=_getAC();if(c&&c.state==='suspended')c.resume();}});
-  function _showOff(){const b=document.getElementById('offlineBanner');if(!b)return;b.innerHTML='';const d=document.createElement('span');d.style.cssText='width:8px;height:8px;border-radius:50%;background:#fbbf24;flex-shrink:0;display:inline-block;';const t=document.createElement('span');t.style.cssText='flex:1;font-weight:800;';t.innerHTML='انقطع الاتصال — التطبيق يعمل بالبيانات المحفوظة';b.style.display='flex';b.style.alignItems='center';b.style.gap='10px';b.classList.remove('hidden-section');b.appendChild(d);b.appendChild(t);}
-  window.addEventListener('online',()=>{const b=document.getElementById('offlineBanner');if(b)b.classList.add('hidden-section');processQueue&&processQueue();});
-  window.addEventListener('offline',()=>_showOff());
-  if(!navigator.onLine)setTimeout(_showOff,500);
-  window.muteAlarmOnly=function(){_stopAlarm();if(window.AndroidRadar)window.AndroidRadar.stopAlarm();};
-  async function requestWakeLock(){await _keepAwake();}
-  function releaseWakeLock(){_relWake();}
+/* ══ Nahla Audio Engine V90.1 — الأصوات من ملفات assets/sounds بدل base64 ══ */
+let _ac=null,_alLp=null,_alOn=false,_alCur=null;
+function _getAC(){if(!_ac){try{_ac=new(window.AudioContext||window.webkitAudioContext)();}catch(e){}}if(_ac&&_ac.state==='suspended')_ac.resume().catch(()=>{});return _ac;}
+function _beep(f,d,v){const ctx=_getAC();if(!ctx)return;const g=ctx.createGain();g.connect(ctx.destination);g.gain.setValueAtTime(v||.7,ctx.currentTime);g.gain.exponentialRampToValueAtTime(.001,ctx.currentTime+(d||.5));const o=ctx.createOscillator();o.connect(g);o.frequency.value=f||1046;o.start();o.stop(ctx.currentTime+(d||.5));}
+function _startAlarm(type){
+  _stopAlarm();_alOn=true;
+  const el=document.getElementById(type==='double'?'doubleOrderSound':'alertSound');
+  if(el){el.currentTime=0;el.volume=1.0;el.play().catch(()=>_beep(type==='double'?1568:1046,.8,.9));_alCur=el;}
+  _alLp=setInterval(()=>{if(!_alOn)return;_beep(type==='double'?1568:1046,.2,.5);},1100);
+}
+function _stopAlarm(){
+  _alOn=false;
+  try{if(window.AndroidRadar&&window.AndroidRadar.stopAlarm)window.AndroidRadar.stopAlarm();}catch(e){}
+  if(_alCur){_alCur.pause();_alCur.currentTime=0;_alCur=null;}
+  if(_alLp){clearInterval(_alLp);_alLp=null;}
+  try{document.getElementById('alertSound').pause();document.getElementById('doubleOrderSound').pause();}catch(e){}
+}
+function _playOnce(type){
+  const m={cancel:'cancelSound',welcome:'welcomeSound',ready:'readySound'};
+  const el=document.getElementById(m[type]);if(!el)return;
+  el.currentTime=0;el.play().catch(()=>{});
+}
+function _unlockAudio(){const ctx=_getAC();if(ctx&&ctx.state==='suspended')ctx.resume();['alertSound','doubleOrderSound','cancelSound','welcomeSound','readySound'].forEach(id=>{const el=document.getElementById(id);if(!el)return;const v=el.volume;el.volume=0;const p=el.play();if(p)p.then(()=>{el.pause();el.currentTime=0;el.volume=v;}).catch(()=>{});});const ka=document.getElementById('keepAliveAudio');if(ka){ka.volume=0.001;ka.play().catch(()=>{});}setInterval(()=>{const c=_getAC();if(!c)return;if(c.state==='suspended')c.resume();try{const o=c.createOscillator();const g=c.createGain();g.gain.value=.00001;o.connect(g);g.connect(c.destination);o.frequency.value=20000;o.start();o.stop(c.currentTime+.01);}catch(e){}},3000);document.removeEventListener('touchstart',_unlockAudio,true);document.removeEventListener('click',_unlockAudio,true);}
+document.addEventListener('touchstart',_unlockAudio,true);document.addEventListener('click',_unlockAudio,true);
+let _wl=null;
+async function _keepAwake(){if('wakeLock' in navigator){try{if(!_wl||_wl.released)_wl=await navigator.wakeLock.request('screen');}catch(e){}}const ka=document.getElementById('keepAliveAudio');if(ka){ka.volume=0.001;ka.play().catch(()=>{});}}
+function _relWake(){if(_wl&&!_wl.released)_wl.release().then(()=>{_wl=null;}).catch(()=>{});}
+document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible'){_keepAwake();const c=_getAC();if(c&&c.state==='suspended')c.resume();}});
+function _showOff(){const b=document.getElementById('offlineBanner');if(!b)return;b.innerHTML='';const d=document.createElement('span');d.style.cssText='width:8px;height:8px;border-radius:50%;background:#fbbf24;flex-shrink:0;display:inline-block;';const t=document.createElement('span');t.style.cssText='flex:1;font-weight:800;';t.innerHTML='انقطع الاتصال — التطبيق يعمل بالبيانات المحفوظة';b.style.display='flex';b.style.alignItems='center';b.style.gap='10px';b.classList.remove('hidden-section');b.appendChild(d);b.appendChild(t);}
+window.addEventListener('online',()=>{const b=document.getElementById('offlineBanner');if(b)b.classList.add('hidden-section');processQueue&&processQueue();});
+window.addEventListener('offline',()=>_showOff());
+if(!navigator.onLine)setTimeout(_showOff,500);
+window.muteAlarmOnly=function(){_stopAlarm();if(window.AndroidRadar)window.AndroidRadar.stopAlarm();};
+async function requestWakeLock(){await _keepAwake();}
+function releaseWakeLock(){_relWake();}
 
-  let driverData=null,currentOrderData=null,activeOrders=[],isOnline=false,isRegistering=false;
-  let countdownInterval,heartbeatInterval=null,shiftTimerInterval=null,wakeLock=null;
-  let lastSentLat=0,lastSentLng=0,lastActiveHtml="";
-  let readyNotifiedOrders=new Set(),todayRejections=0;
-  let _shownLeaderMsgs=JSON.parse(localStorage.getItem('nahla_shown_msgs')||'[]');
-  let totalOffersToday=0,totalAcceptedToday=0;
-  let liveEarnings=0,liveOrders=0,liveDebt=0;
-  let offlineQueue=JSON.parse(localStorage.getItem('hut_offline_queue')||'[]');
-  let isProcessingQueue=false;
+let driverData=null,currentOrderData=null,activeOrders=[],isOnline=false,isRegistering=false;
+let countdownInterval,heartbeatInterval=null,shiftTimerInterval=null,wakeLock=null;
+let lastSentLat=0,lastSentLng=0,lastActiveHtml="";
+let readyNotifiedOrders=new Set(),todayRejections=0;
+let _shownLeaderMsgs=JSON.parse(localStorage.getItem('nahla_shown_msgs')||'[]');
+let totalOffersToday=0,totalAcceptedToday=0;
+let liveEarnings=0,liveOrders=0,liveDebt=0;
+let offlineQueue=JSON.parse(localStorage.getItem('hut_offline_queue')||'[]');
+let isProcessingQueue=false;
 
-  function showToast(msg,type='success'){
-    const c=document.getElementById('toast-container');const t=document.createElement('div');
-    const icons={success:'✅',error:'❌',info:'ℹ️',warn:'⚡'};
-    t.className=`beast-toast ${type}`;
-    t.innerHTML=`<span class="toast-icon">${icons[type]||'📢'}</span><span style="flex:1;">${msg}</span>`;
-    c.appendChild(t);setTimeout(()=>{t.style.opacity='0';setTimeout(()=>t.remove(),300);},5000);
-  }
-  function calcDist(a,b,c,d){
-    if(!a||!b||!c||!d)return 9999;
-    const R=6371e3,p1=a*Math.PI/180,p2=c*Math.PI/180,dp=(c-a)*Math.PI/180,dl=(d-b)*Math.PI/180;
-    const x=Math.sin(dp/2)**2+Math.cos(p1)*Math.cos(p2)*Math.sin(dl/2)**2;
-    return R*2*Math.atan2(Math.sqrt(x),Math.sqrt(1-x));
-  }
-  async function processQueue(){
-    if(isProcessingQueue||offlineQueue.length===0||!navigator.onLine){document.getElementById('syncStatus').style.display='none';return;}
-    isProcessingQueue=true;document.getElementById('syncStatus').style.display='flex';document.getElementById('syncText').innerText=`مزامنة ${offlineQueue.length}...`;
-    let fail=[];for(const a of offlineQueue){try{await fetch(a.url,{method:'GET',mode:'no-cors',cache:'no-store'});}catch(e){fail.push(a);}}
-    offlineQueue=fail;localStorage.setItem('hut_offline_queue',JSON.stringify(offlineQueue));document.getElementById('syncStatus').style.display='none';isProcessingQueue=false;
-  }
-  setInterval(processQueue,5000);
-  document.addEventListener('contextmenu',e=>e.preventDefault());
-  function showLoading(s,t='جاري المزامنة...'){document.getElementById('loadingText').innerText=t;document.getElementById('loadingOverlay').style.display=s?'flex':'none';}
-  function getLevel(n){
-    if(n>=200)return{cls:'level-diamond',label:'💎 ماسي'};if(n>=100)return{cls:'level-gold',label:'🥇 ذهبي'};
-    if(n>=30)return{cls:'level-silver',label:'🥈 فضي'};if(n>=10)return{cls:'level-bronze',label:'🥉 برونزي'};
-    return{cls:'level-new',label:'🐝 جديد'};
-  }
-  /* [إضافة V90.1] إعادة رسم معالم الهدف حسب القيمة المختارة */
-  function renderGoalMilestones(){
-    const gt=document.getElementById('goalTarget');if(gt)gt.innerText=DAILY_GOAL;
-    const vals=[0.2,0.4,0.6,0.8,1.0].map(p=>Math.max(1,Math.round(DAILY_GOAL*p)));
-    [1,2,3,4,5].forEach((i,idx)=>{const el=document.getElementById('gm'+i);if(!el)return;el.dataset.v=vals[idx];el.innerText=(idx===4?'🎯 ':'')+vals[idx];});
-  }
-  function updateHeroUI(){
-    const ea=document.getElementById('earningsAmount');
-    if(ea){ea.innerHTML=`${liveEarnings.toLocaleString('ar-EG')} <span class="earnings-unit">د.ع</span>`;ea.classList.add('bump');setTimeout(()=>ea.classList.remove('bump'),400);}
-    const so=document.getElementById('statOrders');const sd=document.getElementById('statDebt');const sr=document.getElementById('statAcceptRate');
-    if(so)so.innerText=liveOrders;if(sd)sd.innerText=liveDebt;
-    const rate=totalOffersToday>0?Math.round((totalAcceptedToday/totalOffersToday)*100):100;
-    if(sr){sr.innerText=rate+'%';sr.style.color=rate>=80?'var(--green)':rate>=60?'#92400e':'var(--red)';}
-    const pct=Math.min(100,(liveOrders/DAILY_GOAL)*100);
-    const gb=document.getElementById('goalBar');const gc=document.getElementById('goalCurrent');
-    if(gb)gb.style.width=pct+'%';if(gc)gc.innerText=liveOrders;
-    [1,2,3,4,5].forEach(i=>{const el=document.getElementById('gm'+i);if(el)el.classList.toggle('reached',liveOrders>=parseInt(el.dataset.v));});
-    const lv=getLevel(liveOrders);const lb=document.getElementById('levelBadge');
-    if(lb){lb.className='hero-level-badge '+lv.cls;lb.innerText=lv.label;}
-  }
-  /* ══ [إضافة V90.1] نافذة الإعدادات: الهدف اليومي + الشفت ══ */
-  window.openSettings=function(){
-    document.getElementById('goalStepperVal').innerText=DAILY_GOAL;
-    const rt=document.getElementById('shiftReminderToggle');
-    if(rt)rt.checked=(localStorage.getItem('nahla_shift_reminder')!=='off');
-    const sh=document.getElementById('siShiftHours');if(sh)sh.innerText=(driverData?.shiftHours||'--')+' ساعة';
-    const sm=document.getElementById('siShiftMode');if(sm)sm.innerText=(window._shiftsEnabled===false)?'دوام حر 🐝':'نظام شفتات';
-    const se=document.getElementById('siShiftEnd');const srm=document.getElementById('siShiftRemain');
-    if(driverData?.shiftEnd&&isOnline&&window._shiftsEnabled!==false){
-      const end=new Date(driverData.shiftEnd);
-      if(se)se.innerText=end.toLocaleTimeString('ar-EG',{hour:'2-digit',minute:'2-digit'});
-      const rem=end.getTime()-Date.now();
-      if(srm)srm.innerText=rem>0?`${Math.floor(rem/3600000)}س ${Math.floor((rem%3600000)/60000)}د`:'انتهى';
-    }else{if(se)se.innerText='--';if(srm)srm.innerText=isOnline?'∞':'خارج الشفت';}
-    document.getElementById('settingsModal').classList.remove('hidden-section');
-  };
-  window.closeSettings=function(){document.getElementById('settingsModal').classList.add('hidden-section');showToast(`🎯 هدفك اليومي: ${DAILY_GOAL} طلب`,'warn');};
-  window.changeGoal=function(d){
-    DAILY_GOAL=Math.min(30,Math.max(5,DAILY_GOAL+d));
-    localStorage.setItem('nahla_daily_goal',DAILY_GOAL);
-    document.getElementById('goalStepperVal').innerText=DAILY_GOAL;
-    renderGoalMilestones();updateHeroUI();
-  };
-  window.toggleShiftReminder=function(){
-    const on=document.getElementById('shiftReminderToggle').checked;
-    localStorage.setItem('nahla_shift_reminder',on?'on':'off');
-    showToast(on?'⏰ سيصلك تنبيه قبل نهاية الشفت بـ٣٠ دقيقة':'تم إيقاف تنبيه نهاية الشفت','info');
-  };
-  function checkFriday(){
-    if(new Date().getDay()===5){const k='hut_friday_msg',t=new Date().toISOString().split('T')[0];if(localStorage.getItem(k)!==t){setTimeout(()=>{showToast('جمعة مباركة 🕌✨ لا تنسَ الصلاة على النبي ﷺ','warn');localStorage.setItem(k,t);},3000);}}
-  }
-  window.openSafeLink=function(url){if(window.AndroidRadar?.openExternalApp)window.AndroidRadar.openExternalApp(url);else window.open(url,'_blank');};
-  window.openSmartWhatsapp=function(phone,res,area,id,price){
-    if(!phone)return;const name=driverData?.name||'الكابتن';const a=area.split('(')[0].trim();
-    const msg=encodeURIComponent(`مرحباً 🌹
-  معك الكابتن ${name} من نحلة للتوصيل 🐝.
-  طلبك من (${res}) متجه إلى ${a}.
-  💵 الفاتورة: ${price} د.ع
+function showToast(msg,type='success'){
+  const c=document.getElementById('toast-container');const t=document.createElement('div');
+  const icons={success:'✅',error:'❌',info:'ℹ️',warn:'⚡'};
+  t.className=`beast-toast ${type}`;
+  t.innerHTML=`<span class="toast-icon">${icons[type]||'📢'}</span><span style="flex:1;">${msg}</span>`;
+  c.appendChild(t);setTimeout(()=>{t.style.opacity='0';setTimeout(()=>t.remove(),300);},5000);
+}
+function calcDist(a,b,c,d){
+  if(!a||!b||!c||!d)return 9999;
+  const R=6371e3,p1=a*Math.PI/180,p2=c*Math.PI/180,dp=(c-a)*Math.PI/180,dl=(d-b)*Math.PI/180;
+  const x=Math.sin(dp/2)**2+Math.cos(p1)*Math.cos(p2)*Math.sin(dl/2)**2;
+  return R*2*Math.atan2(Math.sqrt(x),Math.sqrt(1-x));
+}
+async function processQueue(){
+  if(isProcessingQueue||offlineQueue.length===0||!navigator.onLine){document.getElementById('syncStatus').style.display='none';return;}
+  isProcessingQueue=true;document.getElementById('syncStatus').style.display='flex';document.getElementById('syncText').innerText=`مزامنة ${offlineQueue.length}...`;
+  let fail=[];for(const a of offlineQueue){try{await fetch(a.url,{method:'GET',mode:'no-cors',cache:'no-store'});}catch(e){fail.push(a);}}
+  offlineQueue=fail;localStorage.setItem('hut_offline_queue',JSON.stringify(offlineQueue));document.getElementById('syncStatus').style.display='none';isProcessingQueue=false;
+}
+setInterval(processQueue,5000);
+document.addEventListener('contextmenu',e=>e.preventDefault());
+function showLoading(s,t='جاري المزامنة...'){document.getElementById('loadingText').innerText=t;document.getElementById('loadingOverlay').style.display=s?'flex':'none';}
+function getLevel(n){
+  if(n>=200)return{cls:'level-diamond',label:'💎 ماسي'};if(n>=100)return{cls:'level-gold',label:'🥇 ذهبي'};
+  if(n>=30)return{cls:'level-silver',label:'🥈 فضي'};if(n>=10)return{cls:'level-bronze',label:'🥉 برونزي'};
+  return{cls:'level-new',label:'🐝 جديد'};
+}
+/* [إضافة V90.1] إعادة رسم معالم الهدف حسب القيمة المختارة */
+function renderGoalMilestones(){
+  const gt=document.getElementById('goalTarget');if(gt)gt.innerText=DAILY_GOAL;
+  const vals=[0.2,0.4,0.6,0.8,1.0].map(p=>Math.max(1,Math.round(DAILY_GOAL*p)));
+  [1,2,3,4,5].forEach((i,idx)=>{const el=document.getElementById('gm'+i);if(!el)return;el.dataset.v=vals[idx];el.innerText=(idx===4?'🎯 ':'')+vals[idx];});
+}
+function updateHeroUI(){
+  const ea=document.getElementById('earningsAmount');
+  if(ea){ea.innerHTML=`${liveEarnings.toLocaleString('ar-EG')} <span class="earnings-unit">د.ع</span>`;ea.classList.add('bump');setTimeout(()=>ea.classList.remove('bump'),400);}
+  const so=document.getElementById('statOrders');const sd=document.getElementById('statDebt');const sr=document.getElementById('statAcceptRate');
+  if(so)so.innerText=liveOrders;if(sd)sd.innerText=liveDebt;
+  const rate=totalOffersToday>0?Math.round((totalAcceptedToday/totalOffersToday)*100):100;
+  if(sr){sr.innerText=rate+'%';sr.style.color=rate>=80?'var(--green)':rate>=60?'#92400e':'var(--red)';}
+  const pct=Math.min(100,(liveOrders/DAILY_GOAL)*100);
+  const gb=document.getElementById('goalBar');const gc=document.getElementById('goalCurrent');
+  if(gb)gb.style.width=pct+'%';if(gc)gc.innerText=liveOrders;
+  [1,2,3,4,5].forEach(i=>{const el=document.getElementById('gm'+i);if(el)el.classList.toggle('reached',liveOrders>=parseInt(el.dataset.v));});
+  const lv=getLevel(liveOrders);const lb=document.getElementById('levelBadge');
+  if(lb){lb.className='hero-level-badge '+lv.cls;lb.innerText=lv.label;}
+}
+/* ══ [إضافة V90.1] نافذة الإعدادات: الهدف اليومي + الشفت ══ */
+window.openSettings=function(){
+  document.getElementById('goalStepperVal').innerText=DAILY_GOAL;
+  const rt=document.getElementById('shiftReminderToggle');
+  if(rt)rt.checked=(localStorage.getItem('nahla_shift_reminder')!=='off');
+  const sh=document.getElementById('siShiftHours');if(sh)sh.innerText=(driverData?.shiftHours||'--')+' ساعة';
+  const sm=document.getElementById('siShiftMode');if(sm)sm.innerText=(window._shiftsEnabled===false)?'دوام حر 🐝':'نظام شفتات';
+  const se=document.getElementById('siShiftEnd');const srm=document.getElementById('siShiftRemain');
+  if(driverData?.shiftEnd&&isOnline&&window._shiftsEnabled!==false){
+    const end=new Date(driverData.shiftEnd);
+    if(se)se.innerText=end.toLocaleTimeString('ar-EG',{hour:'2-digit',minute:'2-digit'});
+    const rem=end.getTime()-Date.now();
+    if(srm)srm.innerText=rem>0?`${Math.floor(rem/3600000)}س ${Math.floor((rem%3600000)/60000)}د`:'انتهى';
+  }else{if(se)se.innerText='--';if(srm)srm.innerText=isOnline?'∞':'خارج الشفت';}
+  document.getElementById('settingsModal').classList.remove('hidden-section');
+};
+window.closeSettings=function(){document.getElementById('settingsModal').classList.add('hidden-section');showToast(`🎯 هدفك اليومي: ${DAILY_GOAL} طلب`,'warn');};
+window.changeGoal=function(d){
+  DAILY_GOAL=Math.min(30,Math.max(5,DAILY_GOAL+d));
+  localStorage.setItem('nahla_daily_goal',DAILY_GOAL);
+  document.getElementById('goalStepperVal').innerText=DAILY_GOAL;
+  renderGoalMilestones();updateHeroUI();
+};
+window.toggleShiftReminder=function(){
+  const on=document.getElementById('shiftReminderToggle').checked;
+  localStorage.setItem('nahla_shift_reminder',on?'on':'off');
+  showToast(on?'⏰ سيصلك تنبيه قبل نهاية الشفت بـ٣٠ دقيقة':'تم إيقاف تنبيه نهاية الشفت','info');
+};
+function checkFriday(){
+  if(new Date().getDay()===5){const k='hut_friday_msg',t=new Date().toISOString().split('T')[0];if(localStorage.getItem(k)!==t){setTimeout(()=>{showToast('جمعة مباركة 🕌✨ لا تنسَ الصلاة على النبي ﷺ','warn');localStorage.setItem(k,t);},3000);}}
+}
+window.openSafeLink=function(url){if(window.AndroidRadar?.openExternalApp)window.AndroidRadar.openExternalApp(url);else window.open(url,'_blank');};
+window.openSmartWhatsapp=function(phone,res,area,id,price){
+  if(!phone)return;const name=driverData?.name||'الكابتن';const a=area.split('(')[0].trim();
+  const msg=encodeURIComponent(`مرحباً 🌹
+معك الكابتن ${name} من نحلة للتوصيل 🐝.
+طلبك من (${res}) متجه إلى ${a}.
+💵 الفاتورة: ${price} د.ع
 
-  أرسل موقعك 📍 لأسرع توصيل!
-  شكراً لاختيارك نحلة ✨`);
-    const clean=phone.startsWith('0')?'964'+phone.substring(1):phone;
-    window.openSafeLink(`https://wa.me/${clean}?text=${msg}`);
-  };
-  function checkSession(){
-    const s=localStorage.getItem('hut_driver_session'),p=localStorage.getItem('hut_driver_pending');
-    if(s){try{const sess=JSON.parse(s);const pass=sessionStorage.getItem('hut_driver_pass');if(pass)document.getElementById('driverPassword').value=atob(pass);if(sess){driverData=sess;document.getElementById('driverPhone').value=sess.phone;showDashboard();const saved=localStorage.getItem('hut_active_orders');if(saved){activeOrders=JSON.parse(saved);activeOrders.forEach(o=>{if(!o.acceptedTime)o.acceptedTime=Date.now();});}if(sess.shiftEnd&&new Date(sess.shiftEnd)>new Date()){document.getElementById('onlineToggle').checked=true;window.toggleOnlineStatus();}else{document.getElementById('onlineToggle').checked=false;window.toggleOnlineStatus();}return true;}}catch(e){}}
-    else if(p){document.getElementById('driverPhone').value=p;const pp=sessionStorage.getItem('hut_driver_pending_pass');if(pp)document.getElementById('driverPassword').value=atob(pp);showWaitingRoom();return true;}
-    return false;
+أرسل موقعك 📍 لأسرع توصيل!
+شكراً لاختيارك نحلة ✨`);
+  const clean=phone.startsWith('0')?'964'+phone.substring(1):phone;
+  window.openSafeLink(`https://wa.me/${clean}?text=${msg}`);
+};
+function checkSession(){
+  const s=localStorage.getItem('hut_driver_session'),p=localStorage.getItem('hut_driver_pending');
+  if(s){try{const sess=JSON.parse(s);const pass=sessionStorage.getItem('hut_driver_pass');if(pass)document.getElementById('driverPassword').value=atob(pass);if(sess){driverData=sess;document.getElementById('driverPhone').value=sess.phone;showDashboard();const saved=localStorage.getItem('hut_active_orders');if(saved){activeOrders=JSON.parse(saved);activeOrders.forEach(o=>{if(!o.acceptedTime)o.acceptedTime=Date.now();});}if(sess.shiftEnd&&new Date(sess.shiftEnd)>new Date()){document.getElementById('onlineToggle').checked=true;window.toggleOnlineStatus();}else{document.getElementById('onlineToggle').checked=false;window.toggleOnlineStatus();}return true;}}catch(e){}}
+  else if(p){document.getElementById('driverPhone').value=p;const pp=sessionStorage.getItem('hut_driver_pending_pass');if(pp)document.getElementById('driverPassword').value=atob(pp);showWaitingRoom();return true;}
+  return false;
+}
+window.onload=function(){renderGoalMilestones();if(!checkSession()){const sp=localStorage.getItem('hut_driver_phone');if(sp)document.getElementById('driverPhone').value=sp.startsWith('0')?sp:'0'+sp;}};
+window.initAudioAndAuth=function(){
+  _unlockAudio();
+  if('Notification' in window&&Notification.permission!=='granted')Notification.requestPermission();
+  if(navigator.geolocation)navigator.geolocation.getCurrentPosition(()=>{},()=>{},{enableHighAccuracy:true,maximumAge:0});
+  authAction();
+};
+function authAction(){
+  const raw=document.getElementById('driverPhone').value.trim();const pass=document.getElementById('driverPassword').value.trim();
+  if(!raw)return alert('يرجى إدخال رقم الهاتف');const phone=raw.replace(/\D/g,'').replace(/^0+/,'');
+  if(isRegistering){
+    const name=document.getElementById('driverName').value.trim();const rp=document.getElementById('regPassword').value.trim();const sh=document.getElementById('regShift').value;
+    if(!name)return alert('يرجى كتابة الاسم الثلاثي');if(!rp)return alert('يرجى إنشاء كلمة مرور');
+    showLoading(true,'جاري إنشاء الحساب...');
+    fetch(API_URL,{method:'POST',body:JSON.stringify({action:'DRIVER_REG',token:API_TOKEN,name,phone,password:rp,shift:sh})})
+    .then(()=>{showLoading(false);localStorage.setItem('hut_driver_pending',phone);sessionStorage.setItem('hut_driver_pending_pass',btoa(rp));showWaitingRoom();})
+    .catch(()=>{showLoading(false);alert('ضعف في الاتصال.');});return;
   }
-  window.onload=function(){renderGoalMilestones();if(!checkSession()){const sp=localStorage.getItem('hut_driver_phone');if(sp)document.getElementById('driverPhone').value=sp.startsWith('0')?sp:'0'+sp;}};
-  window.initAudioAndAuth=function(){
-    _unlockAudio();
-    if('Notification' in window&&Notification.permission!=='granted')Notification.requestPermission();
-    if(navigator.geolocation)navigator.geolocation.getCurrentPosition(()=>{},()=>{},{enableHighAccuracy:true,maximumAge:0});
-    authAction();
-  };
-  function authAction(){
-    const raw=document.getElementById('driverPhone').value.trim();const pass=document.getElementById('driverPassword').value.trim();
-    if(!raw)return alert('يرجى إدخال رقم الهاتف');const phone=raw.replace(/\D/g,'').replace(/^0+/,'');
-    if(isRegistering){
-      const name=document.getElementById('driverName').value.trim();const rp=document.getElementById('regPassword').value.trim();const sh=document.getElementById('regShift').value;
-      if(!name)return alert('يرجى كتابة الاسم الثلاثي');if(!rp)return alert('يرجى إنشاء كلمة مرور');
-      showLoading(true,'جاري إنشاء الحساب...');
-      fetch(API_URL,{method:'POST',body:JSON.stringify({action:'DRIVER_REG',token:API_TOKEN,name,phone,password:rp,shift:sh})})
-      .then(()=>{showLoading(false);localStorage.setItem('hut_driver_pending',phone);sessionStorage.setItem('hut_driver_pending_pass',btoa(rp));showWaitingRoom();})
-      .catch(()=>{showLoading(false);alert('ضعف في الاتصال.');});return;
-    }
-    if(!pass)return alert('يرجى إدخال كلمة المرور');
-    showLoading(true,'جاري المزامنة...');
-    fetch(`${API_URL}?action=checkDriver&phone=${phone}&password=${encodeURIComponent(pass)}&token=${API_TOKEN}`)
-    .then(r=>r.json()).then(d=>handleLogin(d,phone,pass)).catch(()=>{showLoading(false);alert('خطأ في الاتصال');});
-  }
-  function handleLogin(data,phone,pass){
-    showLoading(false);
-    if(data.status==='wrong_password')return alert('❌ كلمة المرور غير صحيحة.');
-    if(data.status==='rate_limited')return alert('🛡️ تم حظر المحاولات. انتظر 15 دقيقة.');
-    if(data.status==='active'||data.status==='inactive'){
-      driverData={phone,name:data.name,shiftHours:data.shift||10,timestamp:Date.now()};
-      localStorage.setItem('hut_driver',JSON.stringify(driverData));localStorage.setItem('hut_driver_session',JSON.stringify(driverData));
-      localStorage.setItem('hut_driver_phone',phone);sessionStorage.setItem('hut_driver_pass',btoa(pass));ensureFbAuth();
-      showDashboard();document.getElementById('onlineToggle').checked=false;window.toggleOnlineStatus();
-    }else if(data.status==='banned'){alert('حساب محظور.');location.reload();}
-    else if(data.status==='pending'||data.status==='waiting'){localStorage.setItem('hut_driver_pending',phone);sessionStorage.setItem('hut_driver_pending_pass',btoa(pass));showWaitingRoom();}
-    else{
-      isRegistering=true;document.getElementById('loginPassContainer').classList.add('hidden-section');document.getElementById('registerFields').classList.remove('hidden-section');
-      const btn=document.getElementById('mainAuthBtn');btn.className='beast-btn beast-btn-reg';btn.innerHTML='<svg class="si" viewBox="0 0 24 24"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg> إرسال طلب الانضمام';
-    }
-  }
-  function showWaitingRoom(){document.getElementById('authBox').classList.add('hidden-section');document.getElementById('waitingBox').classList.remove('hidden-section');}
-  window.exitWaitingRoom=function(){
-    localStorage.removeItem('hut_driver_pending');sessionStorage.removeItem('hut_driver_pending_pass');
-    document.getElementById('waitingBox').classList.add('hidden-section');document.getElementById('authBox').classList.remove('hidden-section');
+  if(!pass)return alert('يرجى إدخال كلمة المرور');
+  showLoading(true,'جاري المزامنة...');
+  fetch(`${API_URL}?action=checkDriver&phone=${phone}&password=${encodeURIComponent(pass)}&token=${API_TOKEN}`)
+  .then(r=>r.json()).then(d=>handleLogin(d,phone,pass)).catch(()=>{showLoading(false);alert('خطأ في الاتصال');});
+}
+function handleLogin(data,phone,pass){
+  showLoading(false);
+  if(data.status==='wrong_password')return alert('❌ كلمة المرور غير صحيحة.');
+  if(data.status==='rate_limited')return alert('🛡️ تم حظر المحاولات. انتظر 15 دقيقة.');
+  if(data.status==='active'||data.status==='inactive'){
+    driverData={phone,name:data.name,shiftHours:data.shift||10,timestamp:Date.now()};
+    localStorage.setItem('hut_driver',JSON.stringify(driverData));localStorage.setItem('hut_driver_session',JSON.stringify(driverData));
+    localStorage.setItem('hut_driver_phone',phone);sessionStorage.setItem('hut_driver_pass',btoa(pass));ensureFbAuth();
+    showDashboard();document.getElementById('onlineToggle').checked=false;window.toggleOnlineStatus();
+  }else if(data.status==='banned'){alert('حساب محظور.');location.reload();}
+  else if(data.status==='pending'||data.status==='waiting'){localStorage.setItem('hut_driver_pending',phone);sessionStorage.setItem('hut_driver_pending_pass',btoa(pass));showWaitingRoom();}
+  else{
     isRegistering=true;document.getElementById('loginPassContainer').classList.add('hidden-section');document.getElementById('registerFields').classList.remove('hidden-section');
-    const btn=document.getElementById('mainAuthBtn');btn.className='beast-btn beast-btn-reg';btn.innerHTML='إرسال طلب الانضمام';
-  };
-  window.checkWaitingStatus=function(){
-    let raw=document.getElementById('driverPhone').value.trim()||localStorage.getItem('hut_driver_pending');if(!raw)return;
-    const phone=raw.replace(/\D/g,'').replace(/^0+/,'');let pass=document.getElementById('driverPassword').value.trim();
-    if(!pass){const sp=sessionStorage.getItem('hut_driver_pending_pass');if(sp)pass=atob(sp);}
-    const btn=document.querySelector('.beast-btn-secondary');
-    if(btn){const oh=btn.innerHTML;btn.innerHTML='جاري التحقق...';btn.disabled=true;
-      fetch(`${API_URL}?action=checkDriver&phone=${phone}&password=${encodeURIComponent(pass)}&token=${API_TOKEN}`)
-      .then(r=>r.json()).then(d=>{
-        btn.innerHTML=oh;btn.disabled=false;
-        if(d.status==='active'||d.status==='inactive'){localStorage.removeItem('hut_driver_pending');sessionStorage.removeItem('hut_driver_pending_pass');driverData={phone,name:d.name,shiftHours:d.shift||10,timestamp:Date.now()};localStorage.setItem('hut_driver',JSON.stringify(driverData));localStorage.setItem('hut_driver_session',JSON.stringify(driverData));_playOnce('welcome');document.getElementById('waitingBox').classList.add('hidden-section');showDashboard();}
-        else if(d.status==='banned'){localStorage.removeItem('hut_driver_pending');alert('حسابك محظور.');location.reload();}
-        else showToast('حسابك لا يزال قيد المراجعة.','info');
-      }).catch(()=>{btn.innerHTML=oh;btn.disabled=false;showToast('خطأ في الاتصال','error');});
-    }
-  };
-  function showDashboard(){
-    // 📡 الاشتراك بقناة إشعارات هذا الكابتن — أساس انبثاق الطلب فوق التطبيقات والشاشة المقفلة
-    try{if(window.AndroidRadar&&AndroidRadar.subscribeToDriverTopic)AndroidRadar.subscribeToDriverTopic(driverData.phone);}catch(e){}
-    document.getElementById('loginSection').classList.add('hidden-section');document.getElementById('dashboardPage').classList.remove('hidden-section');document.getElementById('driverNameDisplay').innerText='كابتن '+driverData.name;renderGoalMilestones();startSystem();checkFriday();}
-  window.logout=function(){if(activeOrders.length>0)return alert('⚠️ أنهِ الطلبات أولاً.');if(confirm('تأكيد تسجيل الخروج؟')){try{if(window.AndroidRadar&&AndroidRadar.unsubscribeFromDriverTopic)AndroidRadar.unsubscribeFromDriverTopic(driverData.phone);}catch(e){}try{if(window.AndroidRadar&&AndroidRadar.stopLocationService)AndroidRadar.stopLocationService();}catch(e){}_relWake();updateFbStatus('inactive');localStorage.removeItem('hut_driver_session');sessionStorage.clear();location.reload();}};
-  function startShiftTimer(){
-    if(shiftTimerInterval)clearInterval(shiftTimerInterval);
-    const row=document.getElementById('shiftTimerRow');if(row)row.style.display='block';
-    window._shiftWarned=false; /* [إضافة V90.1] إعادة ضبط تنبيه نهاية الشفت */
-    shiftTimerInterval=setInterval(()=>{
-      if(window._shiftsEnabled===false){const e=document.getElementById('shiftTimeLeft');if(e)e.innerText='دوام حر 🐝';return;}
-      if(!driverData?.shiftEnd)return;
-      const end=new Date(driverData.shiftEnd).getTime(),remaining=end-Date.now(),totalMs=(driverData.shiftHours||10)*3600000;
-      if(remaining<=0){clearInterval(shiftTimerInterval);document.getElementById('shiftTimeLeft').innerText='انتهى الشفت';document.getElementById('onlineToggle').checked=false;window.toggleOnlineStatus();alert('⏰ انتهى الشفت.');return;}
-      /* [إضافة V90.1] تنبيه قبل نهاية الشفت بـ٣٠ دقيقة (يُدار من الإعدادات) */
-      if(!window._shiftWarned&&remaining<=30*60*1000&&localStorage.getItem('nahla_shift_reminder')!=='off'){
-        window._shiftWarned=true;_playOnce('ready');
-        showToast('⏰ باقي ٣٠ دقيقة على نهاية الشفت — أنهِ طلباتك','warn');
-        if('Notification' in window&&Notification.permission==='granted')new Notification('⏰ تنبيه الشفت',{body:'باقي ٣٠ دقيقة على نهاية شفتك'});
-      }
-      const h=Math.floor(remaining/3600000),m=Math.floor((remaining%3600000)/60000),pct=Math.round((remaining/totalMs)*100);
-      document.getElementById('shiftTimeLeft').innerText=`متبقي: ${h}س ${m}د`;document.getElementById('shiftPct').innerText=pct+'%';document.getElementById('shiftBarFill').style.width=pct+'%';
-      if(h<1)document.getElementById('shiftBarFill').style.background='linear-gradient(90deg,rgba(255,100,100,0.8),rgba(255,255,255,0.45))';
-    },1000);
+    const btn=document.getElementById('mainAuthBtn');btn.className='beast-btn beast-btn-reg';btn.innerHTML='<svg class="si" viewBox="0 0 24 24"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg> إرسال طلب الانضمام';
   }
-  window.toggleOnlineStatus=async function(){
-    isOnline=document.getElementById('onlineToggle').checked;
-    const badge=document.getElementById('onlineBadge'),dot=document.getElementById('onlineDot'),txt=document.getElementById('onlineText'),radar=document.getElementById('radarWrap');
+}
+function showWaitingRoom(){document.getElementById('authBox').classList.add('hidden-section');document.getElementById('waitingBox').classList.remove('hidden-section');}
+window.exitWaitingRoom=function(){
+  localStorage.removeItem('hut_driver_pending');sessionStorage.removeItem('hut_driver_pending_pass');
+  document.getElementById('waitingBox').classList.add('hidden-section');document.getElementById('authBox').classList.remove('hidden-section');
+  isRegistering=true;document.getElementById('loginPassContainer').classList.add('hidden-section');document.getElementById('registerFields').classList.remove('hidden-section');
+  const btn=document.getElementById('mainAuthBtn');btn.className='beast-btn beast-btn-reg';btn.innerHTML='إرسال طلب الانضمام';
+};
+window.checkWaitingStatus=function(){
+  let raw=document.getElementById('driverPhone').value.trim()||localStorage.getItem('hut_driver_pending');if(!raw)return;
+  const phone=raw.replace(/\D/g,'').replace(/^0+/,'');let pass=document.getElementById('driverPassword').value.trim();
+  if(!pass){const sp=sessionStorage.getItem('hut_driver_pending_pass');if(sp)pass=atob(sp);}
+  const btn=document.querySelector('.beast-btn-secondary');
+  if(btn){const oh=btn.innerHTML;btn.innerHTML='جاري التحقق...';btn.disabled=true;
+    fetch(`${API_URL}?action=checkDriver&phone=${phone}&password=${encodeURIComponent(pass)}&token=${API_TOKEN}`)
+    .then(r=>r.json()).then(d=>{
+      btn.innerHTML=oh;btn.disabled=false;
+      if(d.status==='active'||d.status==='inactive'){localStorage.removeItem('hut_driver_pending');sessionStorage.removeItem('hut_driver_pending_pass');driverData={phone,name:d.name,shiftHours:d.shift||10,timestamp:Date.now()};localStorage.setItem('hut_driver',JSON.stringify(driverData));localStorage.setItem('hut_driver_session',JSON.stringify(driverData));_playOnce('welcome');document.getElementById('waitingBox').classList.add('hidden-section');showDashboard();}
+      else if(d.status==='banned'){localStorage.removeItem('hut_driver_pending');alert('حسابك محظور.');location.reload();}
+      else showToast('حسابك لا يزال قيد المراجعة.','info');
+    }).catch(()=>{btn.innerHTML=oh;btn.disabled=false;showToast('خطأ في الاتصال','error');});
+  }
+};
+function showDashboard(){
+  // 📡 الاشتراك بقناة إشعارات هذا الكابتن — أساس انبثاق الطلب فوق التطبيقات والشاشة المقفلة
+  try{if(window.AndroidRadar&&AndroidRadar.subscribeToDriverTopic)AndroidRadar.subscribeToDriverTopic(driverData.phone);}catch(e){}
+  document.getElementById('loginSection').classList.add('hidden-section');document.getElementById('dashboardPage').classList.remove('hidden-section');document.getElementById('driverNameDisplay').innerText='كابتن '+driverData.name;renderGoalMilestones();startSystem();checkFriday();}
+window.logout=function(){if(activeOrders.length>0)return alert('⚠️ أنهِ الطلبات أولاً.');if(confirm('تأكيد تسجيل الخروج؟')){try{if(window.AndroidRadar&&AndroidRadar.unsubscribeFromDriverTopic)AndroidRadar.unsubscribeFromDriverTopic(driverData.phone);}catch(e){}try{if(window.AndroidRadar&&AndroidRadar.stopLocationService)AndroidRadar.stopLocationService();}catch(e){}_relWake();updateFbStatus('inactive');localStorage.removeItem('hut_driver_session');sessionStorage.clear();location.reload();}};
+function startShiftTimer(){
+  if(shiftTimerInterval)clearInterval(shiftTimerInterval);
+  const row=document.getElementById('shiftTimerRow');if(row)row.style.display='block';
+  window._shiftWarned=false; /* [إضافة V90.1] إعادة ضبط تنبيه نهاية الشفت */
+  shiftTimerInterval=setInterval(()=>{
+    if(window._shiftsEnabled===false){const e=document.getElementById('shiftTimeLeft');if(e)e.innerText='دوام حر 🐝';return;}
+    if(!driverData?.shiftEnd)return;
+    const end=new Date(driverData.shiftEnd).getTime(),remaining=end-Date.now(),totalMs=(driverData.shiftHours||10)*3600000;
+    if(remaining<=0){clearInterval(shiftTimerInterval);document.getElementById('shiftTimeLeft').innerText='انتهى الشفت';document.getElementById('onlineToggle').checked=false;window.toggleOnlineStatus();alert('⏰ انتهى الشفت.');return;}
+    /* [إضافة V90.1] تنبيه قبل نهاية الشفت بـ٣٠ دقيقة (يُدار من الإعدادات) */
+    if(!window._shiftWarned&&remaining<=30*60*1000&&localStorage.getItem('nahla_shift_reminder')!=='off'){
+      window._shiftWarned=true;_playOnce('ready');
+      showToast('⏰ باقي ٣٠ دقيقة على نهاية الشفت — أنهِ طلباتك','warn');
+      if('Notification' in window&&Notification.permission==='granted')new Notification('⏰ تنبيه الشفت',{body:'باقي ٣٠ دقيقة على نهاية شفتك'});
+    }
+    const h=Math.floor(remaining/3600000),m=Math.floor((remaining%3600000)/60000),pct=Math.round((remaining/totalMs)*100);
+    document.getElementById('shiftTimeLeft').innerText=`متبقي: ${h}س ${m}د`;document.getElementById('shiftPct').innerText=pct+'%';document.getElementById('shiftBarFill').style.width=pct+'%';
+    if(h<1)document.getElementById('shiftBarFill').style.background='linear-gradient(90deg,rgba(255,100,100,0.8),rgba(255,255,255,0.45))';
+  },1000);
+}
+window.toggleOnlineStatus=async function(){
+  isOnline=document.getElementById('onlineToggle').checked;
+  const badge=document.getElementById('onlineBadge'),dot=document.getElementById('onlineDot'),txt=document.getElementById('onlineText'),radar=document.getElementById('radarWrap');
+  if(isOnline){
+    badge.className='online-badge on';dot.className='online-dot on';txt.innerText='متاح للطلبات';
+    try{const res=await fetch(`${API_URL}?action=START_SHIFT&phone=${driverData.phone}&token=${API_TOKEN}`);const data=await res.json();if(data.success){driverData.shiftEnd=data.shift_end;localStorage.setItem('hut_driver_session',JSON.stringify(driverData));}else{showToast(data.msg||'تعذّر بدء الشفت.','error');document.getElementById('onlineToggle').checked=false;isOnline=false;badge.className='online-badge';dot.className='online-dot';txt.innerText='في استراحة';return;}}catch(e){showToast('تعذر الاتصال.','error');document.getElementById('onlineToggle').checked=false;isOnline=false;badge.className='online-badge';dot.className='online-dot';txt.innerText='في استراحة';return;}
+    if(radar){radar.classList.remove('offline');radar.classList.add('online');}
+    document.getElementById('radarTitle').innerText='الرادار يعمل 📡';document.getElementById('radarDesc').innerText='أسراب النحل تبحث عن طلبات...';
+    startShiftTimer();
+    /* [إضافة V90.1] تشغيل خدمة الموقع الأصلية (Foreground Service) — بقاء بالخلفية بقوة أندرويد */
+    try{if(window.AndroidRadar&&AndroidRadar.startLocationService)AndroidRadar.startLocationService();}catch(e){}
+    if(navigator.geolocation)navigator.geolocation.getCurrentPosition(pos=>{lastSentLat=pos.coords.latitude;lastSentLng=pos.coords.longitude;updateFbStatus('active');},()=>updateFbStatus('active'),{enableHighAccuracy:true,timeout:5000});
+    else updateFbStatus('active');
+    await _keepAwake();
+    const ka=document.getElementById('keepAliveAudio');if(ka){ka.volume=0.001;ka.play().catch(()=>{});}
+    if(heartbeatInterval)clearInterval(heartbeatInterval);heartbeatInterval=setInterval(sendHeartbeat,(activeOrders.length>0)?10000:20000);displayActiveOrders();
+  }else{
+    badge.className='online-badge';dot.className='online-dot';txt.innerText='في استراحة';
+    if(radar){radar.classList.add('offline');radar.classList.remove('online');}
+    document.getElementById('radarTitle').innerText='الرادار متوقف';document.getElementById('radarDesc').innerText='فعّل "متاح للطلبات" لبدء الشفت';
+    if(shiftTimerInterval)clearInterval(shiftTimerInterval);const row=document.getElementById('shiftTimerRow');if(row)row.style.display='none';
+    /* [إضافة V90.1] إيقاف خدمة الموقع الأصلية عند الاستراحة — توفير بطارية */
+    try{if(window.AndroidRadar&&AndroidRadar.stopLocationService)AndroidRadar.stopLocationService();}catch(e){}
+    updateFbStatus('inactive');_relWake();
+    const ka=document.getElementById('keepAliveAudio');if(ka)ka.pause();
+    if(heartbeatInterval){clearInterval(heartbeatInterval);heartbeatInterval=null;}displayActiveOrders();
+  }
+};
+function adjustHeartbeat(){if(heartbeatInterval)clearInterval(heartbeatInterval);if(!isOnline||!driverData)return;heartbeatInterval=setInterval(sendHeartbeat,(activeOrders.length>0)?10000:20000);}
+function sendHeartbeat(){if(!isOnline||!driverData)return;if(lastSentLat&&lastSentLng)updateFbStatus('active');else if(navigator.geolocation)navigator.geolocation.getCurrentPosition(pos=>{lastSentLat=pos.coords.latitude;lastSentLng=pos.coords.longitude;updateFbStatus('active');});}
+function updateFbStatus(status){if(!driverData||!lastSentLat||!lastSentLng)return;const u={};const _b=`drivers_locations/${driverData.phone}`;u[`${_b}/lat`]=lastSentLat;u[`${_b}/lng`]=lastSentLng;u[`${_b}/status`]=status;u[`${_b}/last_update`]=new Date().toISOString();update(ref(db),u);}
+function startSystem(){
+  if(isOnline){_keepAwake();adjustHeartbeat();}startListeners();
+  if(navigator.geolocation){
+    navigator.geolocation.getCurrentPosition(pos=>{lastSentLat=pos.coords.latitude;lastSentLng=pos.coords.longitude;if(driverData){driverData.currentLat=pos.coords.latitude;driverData.currentLng=pos.coords.longitude;}updateFbStatus(isOnline?'active':'inactive');},()=>{document.getElementById('permissionOverlay').classList.remove('hidden-section');},{enableHighAccuracy:true,timeout:10000});
+    navigator.geolocation.watchPosition(pos=>{document.getElementById('permissionOverlay').classList.add('hidden-section');lastSentLat=pos.coords.latitude;lastSentLng=pos.coords.longitude;if(driverData){driverData.currentLat=pos.coords.latitude;driverData.currentLng=pos.coords.longitude;}updateFbStatus(isOnline?'active':'inactive');},()=>{document.getElementById('permissionOverlay').classList.remove('hidden-section');},{enableHighAccuracy:true,maximumAge:5000});
+  }
+}
+window.closeCancelAlert=function(){document.getElementById('cancelAlertOverlay').classList.add('hidden-section');_stopAlarm();};
+function forceRemove(msg,orderId){
+  _playOnce('cancel');
+  document.getElementById('cancelAlertText').innerText=`الطلب #${orderId}: ${msg}`;
+  document.getElementById('cancelAlertOverlay').classList.remove('hidden-section');
+  activeOrders=activeOrders.filter(o=>String(o.id)!==String(orderId));readyNotifiedOrders.delete(String(orderId));
+  localStorage.setItem('hut_active_orders',JSON.stringify(activeOrders));adjustHeartbeat();displayActiveOrders();
+  if(currentOrderData&&String(currentOrderData.id)===String(orderId)){clearInterval(countdownInterval);document.getElementById('orderAlertOverlay').classList.add('hidden-section');_stopAlarm();currentOrderData=null;}
+}
+async function ensureFbAuth(){
+  if(auth.currentUser) return true;
+  try{
+    const sp=sessionStorage.getItem('hut_driver_pass');
+    const pass=sp?atob(sp):((document.getElementById('driverPassword')||{}).value||'').trim();
+    if(!driverData||!driverData.phone||!pass) return false;
+    const r=await fetch(`${API_URL}?action=checkDriver&phone=${driverData.phone}&password=${encodeURIComponent(pass)}&token=${API_TOKEN}`);
+    const d=await r.json();
+    if(d&&d.firebase_token){await signInWithCustomToken(auth,d.firebase_token);return true;}
+  }catch(e){console.error('FbAuth',e);}
+  return false;
+}
+/* ══ [V90.2] رسالة الليدر/الإدارة داخل التطبيق — متناسقة مع notifyDriverMessage السحابي ══ */
+function showLeaderMessage(from,msg){
+  if(!window.AndroidRadar)_playOnce('ready');           // الصوت يتكفّل به تطبيق أندرويد عبر FCM؛ المتصفح فقط يشغّل نغمة
+  if(navigator.vibrate)navigator.vibrate([120,60,120]);
+  const safeFrom=String(from).replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  const safeMsg=String(msg).replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  const ov=document.createElement('div');ov.className='leader-msg-overlay';
+  ov.innerHTML=`<div class="leader-msg-card"><div class="leader-msg-badge">📣</div><div class="leader-msg-from">رسالة من ${safeFrom}</div><div class="leader-msg-body">${safeMsg}</div><button class="leader-msg-ok" onclick="this.closest('.leader-msg-overlay').remove()">حسناً، فهمت</button></div>`;
+  document.body.appendChild(ov);
+  setTimeout(()=>{if(ov.parentElement)ov.remove();},15000);
+}
+async function startListeners(){
+  await ensureFbAuth();
+  onValue(ref(db,`drivers_locations/${driverData.phone}/account_status`),snap=>{if(snap.val()==='banned'){alert('⚠️ تم حظر حسابك.');localStorage.removeItem('hut_driver_session');sessionStorage.clear();location.reload();}});
+  onValue(ref(db,`ledgers/drivers/${driverData.phone}`),snap=>{
+    const l=snap.val()||{completed_orders:0,debt:0};const todayISO=new Date().toISOString().split('T')[0];
+    onValue(ref(db,`daily_ledgers/${driverData.phone}/${todayISO}`),ds=>{
+      const daily=ds.val()||{};let liveE=0,liveD=0;
+      Object.values(daily).forEach(d=>{liveE+=(parseFloat(d.price)||0);liveD+=(parseFloat(d.comm)||0);});
+      liveOrders=(l.completed_orders||0)+Object.keys(daily).length;liveDebt=(parseFloat(l.debt)||0)+liveD;liveEarnings=liveE;updateHeroUI();
+    });
+  });
+  const todayStr=new Date().toISOString().split('T')[0];
+  onValue(ref(db,`daily_ledgers/${driverData.phone}/${todayStr}`),snap=>{
+    const daily=snap.val()||{};let total=0,html='';
+    Object.values(daily).sort((a,b)=>b.timestamp-a.timestamp).forEach(r=>{
+      total+=r.price;const t=new Date(r.timestamp).toLocaleTimeString('ar-EG',{hour:'2-digit',minute:'2-digit'});
+      html+=`<div class="ledger-entry"><div class="le-left"><div class="le-id">#${r.orderId} — ${r.resName}</div><div class="le-info">📍 ${r.area}</div></div><div style="text-align:left;"><div class="le-price">${r.price} <small style="font-size:.7rem;color:var(--muted);">د.ع</small></div><div class="le-time">${t}</div></div></div>`;
+    });
+    document.getElementById('ledgerTotal').innerHTML=`${total} <span class="ledger-total-unit">د.ع</span>`;
+    document.getElementById('ledgerEntries').innerHTML=html||'<div style="text-align:center;padding:40px 0;color:var(--muted);font-weight:700;">لا توجد رحلات اليوم بعد.</div>';
+  });
+  onValue(ref(db,`daily_metrics/${driverData.phone}/${todayStr}/rejected_orders`),snap=>{
+    todayRejections=snap.val()||0;const el=document.getElementById('rejectionPill');const ec=document.getElementById('rejectionCount');
+    if(el&&ec){if(todayRejections>0){el.classList.remove('hidden-section');ec.innerText=todayRejections;}else el.classList.add('hidden-section');if(todayRejections>=5)el.style.background='rgba(239,68,68,.2)';}
+  });
+  onValue(ref(db,'active_orders'),snap=>{
+    const fbOrders=snap.val()||{};const myId=String(driverData.phone).replace(/\D/g,'').replace(/^0+/,'').trim();
+    /* forEach mutation fix */
+    const _toRm=[];
+    for(let i=activeOrders.length-1;i>=0;i--){const mo=activeOrders[i],fb=fbOrders[mo.id];
+      if(!fb){_toRm.push({id:mo.id,msg:'تم حذف الطلب.'});continue;}
+      const _st=String(fb.status||'').toLowerCase();
+      const _done=['completed','مكتمل','settled','delivered','done','تم','deleted'];
+      if(_done.includes(_st)||_done.includes(fb.status)){_toRm.push({id:mo.id,msg:'تم إنهاء الطلب.'});continue;}
+      const fp=String(fb.driverPhone||'').replace(/\D/g,'').replace(/^0+/,'').trim();
+      if(fp&&fp!==myId&&fb.status!=='pending_driver'&&fb.status!=='manual_pending'){_toRm.push({id:mo.id,msg:'تم سحب الطلب لكابتن آخر.'});}
+    }
+    _toRm.forEach(({id,msg})=>forceRemove(msg,id));
+    activeOrders.forEach(mo=>{
+      const fb=fbOrders[mo.id];if(!fb)return;const oid=String(mo.id);
+      if(fb.ready_for_pickup===true&&!readyNotifiedOrders.has(oid)){readyNotifiedOrders.add(oid);mo.readyForPickup=true;localStorage.setItem('hut_active_orders',JSON.stringify(activeOrders));_playOnce('ready');showToast(`🍽️ طلبيتك جاهزة في <b>${mo.resName}</b>! توجّه للاستلام`,'warn');if('Notification' in window&&Notification.permission==='granted'){new Notification('🍽️ الطلبية جاهزة!',{body:`طلبيتك في ${mo.resName} جاهزة`});}displayActiveOrders();}
+      if(fb.ready_for_pickup===false&&readyNotifiedOrders.has(oid)){readyNotifiedOrders.delete(oid);mo.readyForPickup=false;localStorage.setItem('hut_active_orders',JSON.stringify(activeOrders));displayActiveOrders();}
+    });
     if(isOnline){
-      badge.className='online-badge on';dot.className='online-dot on';txt.innerText='متاح للطلبات';
-      try{const res=await fetch(`${API_URL}?action=START_SHIFT&phone=${driverData.phone}&token=${API_TOKEN}`);const data=await res.json();if(data.success){driverData.shiftEnd=data.shift_end;localStorage.setItem('hut_driver_session',JSON.stringify(driverData));}else{showToast(data.msg||'تعذّر بدء الشفت.','error');document.getElementById('onlineToggle').checked=false;isOnline=false;badge.className='online-badge';dot.className='online-dot';txt.innerText='في استراحة';return;}}catch(e){showToast('تعذر الاتصال.','error');document.getElementById('onlineToggle').checked=false;isOnline=false;badge.className='online-badge';dot.className='online-dot';txt.innerText='في استراحة';return;}
-      if(radar){radar.classList.remove('offline');radar.classList.add('online');}
-      document.getElementById('radarTitle').innerText='الرادار يعمل 📡';document.getElementById('radarDesc').innerText='أسراب النحل تبحث عن طلبات...';
-      startShiftTimer();
-      /* [إضافة V90.1] تشغيل خدمة الموقع الأصلية (Foreground Service) — بقاء بالخلفية بقوة أندرويد */
-      try{if(window.AndroidRadar&&AndroidRadar.startLocationService)AndroidRadar.startLocationService();}catch(e){}
-      if(navigator.geolocation)navigator.geolocation.getCurrentPosition(pos=>{lastSentLat=pos.coords.latitude;lastSentLng=pos.coords.longitude;updateFbStatus('active');},()=>updateFbStatus('active'),{enableHighAccuracy:true,timeout:5000});
-      else updateFbStatus('active');
-      await _keepAwake();
-      const ka=document.getElementById('keepAliveAudio');if(ka){ka.volume=0.001;ka.play().catch(()=>{});}
-      if(heartbeatInterval)clearInterval(heartbeatInterval);heartbeatInterval=setInterval(sendHeartbeat,(activeOrders.length>0)?10000:20000);displayActiveOrders();
-    }else{
-      badge.className='online-badge';dot.className='online-dot';txt.innerText='في استراحة';
-      if(radar){radar.classList.add('offline');radar.classList.remove('online');}
-      document.getElementById('radarTitle').innerText='الرادار متوقف';document.getElementById('radarDesc').innerText='فعّل "متاح للطلبات" لبدء الشفت';
-      if(shiftTimerInterval)clearInterval(shiftTimerInterval);const row=document.getElementById('shiftTimerRow');if(row)row.style.display='none';
-      /* [إضافة V90.1] إيقاف خدمة الموقع الأصلية عند الاستراحة — توفير بطارية */
-      try{if(window.AndroidRadar&&AndroidRadar.stopLocationService)AndroidRadar.stopLocationService();}catch(e){}
-      updateFbStatus('inactive');_relWake();
-      const ka=document.getElementById('keepAliveAudio');if(ka)ka.pause();
-      if(heartbeatInterval){clearInterval(heartbeatInterval);heartbeatInterval=null;}displayActiveOrders();
-    }
-  };
-  function adjustHeartbeat(){if(heartbeatInterval)clearInterval(heartbeatInterval);if(!isOnline||!driverData)return;heartbeatInterval=setInterval(sendHeartbeat,(activeOrders.length>0)?10000:20000);}
-  function sendHeartbeat(){if(!isOnline||!driverData)return;if(lastSentLat&&lastSentLng)updateFbStatus('active');else if(navigator.geolocation)navigator.geolocation.getCurrentPosition(pos=>{lastSentLat=pos.coords.latitude;lastSentLng=pos.coords.longitude;updateFbStatus('active');});}
-  function updateFbStatus(status){if(!driverData||!lastSentLat||!lastSentLng)return;const u={};const _b=`drivers_locations/${driverData.phone}`;u[`${_b}/lat`]=lastSentLat;u[`${_b}/lng`]=lastSentLng;u[`${_b}/status`]=status;u[`${_b}/last_update`]=new Date().toISOString();update(ref(db),u);}
-  function startSystem(){
-    if(isOnline){_keepAwake();adjustHeartbeat();}startListeners();
-    if(navigator.geolocation){
-      navigator.geolocation.getCurrentPosition(pos=>{lastSentLat=pos.coords.latitude;lastSentLng=pos.coords.longitude;if(driverData){driverData.currentLat=pos.coords.latitude;driverData.currentLng=pos.coords.longitude;}updateFbStatus(isOnline?'active':'inactive');},()=>{document.getElementById('permissionOverlay').classList.remove('hidden-section');},{enableHighAccuracy:true,timeout:10000});
-      navigator.geolocation.watchPosition(pos=>{document.getElementById('permissionOverlay').classList.add('hidden-section');lastSentLat=pos.coords.latitude;lastSentLng=pos.coords.longitude;if(driverData){driverData.currentLat=pos.coords.latitude;driverData.currentLng=pos.coords.longitude;}updateFbStatus(isOnline?'active':'inactive');},()=>{document.getElementById('permissionOverlay').classList.remove('hidden-section');},{enableHighAccuracy:true,maximumAge:5000});
-    }
-  }
-  window.closeCancelAlert=function(){document.getElementById('cancelAlertOverlay').classList.add('hidden-section');_stopAlarm();};
-  function forceRemove(msg,orderId){
-    _playOnce('cancel');
-    document.getElementById('cancelAlertText').innerText=`الطلب #${orderId}: ${msg}`;
-    document.getElementById('cancelAlertOverlay').classList.remove('hidden-section');
-    activeOrders=activeOrders.filter(o=>String(o.id)!==String(orderId));readyNotifiedOrders.delete(String(orderId));
-    localStorage.setItem('hut_active_orders',JSON.stringify(activeOrders));adjustHeartbeat();displayActiveOrders();
-    if(currentOrderData&&String(currentOrderData.id)===String(orderId)){clearInterval(countdownInterval);document.getElementById('orderAlertOverlay').classList.add('hidden-section');_stopAlarm();currentOrderData=null;}
-  }
-  async function ensureFbAuth(){
-    if(auth.currentUser) return true;
-    try{
-      const sp=sessionStorage.getItem('hut_driver_pass');
-      const pass=sp?atob(sp):((document.getElementById('driverPassword')||{}).value||'').trim();
-      if(!driverData||!driverData.phone||!pass) return false;
-      const r=await fetch(`${API_URL}?action=checkDriver&phone=${driverData.phone}&password=${encodeURIComponent(pass)}&token=${API_TOKEN}`);
-      const d=await r.json();
-      if(d&&d.firebase_token){await signInWithCustomToken(auth,d.firebase_token);return true;}
-    }catch(e){console.error('FbAuth',e);}
-    return false;
-  }
-  /* ══ [V90.2] رسالة الليدر/الإدارة داخل التطبيق — متناسقة مع notifyDriverMessage السحابي ══ */
-  function showLeaderMessage(from,msg){
-    if(!window.AndroidRadar)_playOnce('ready');           // الصوت يتكفّل به تطبيق أندرويد عبر FCM؛ المتصفح فقط يشغّل نغمة
-    if(navigator.vibrate)navigator.vibrate([120,60,120]);
-    const safeFrom=String(from).replace(/</g,'&lt;').replace(/>/g,'&gt;');
-    const safeMsg=String(msg).replace(/</g,'&lt;').replace(/>/g,'&gt;');
-    const ov=document.createElement('div');ov.className='leader-msg-overlay';
-    ov.innerHTML=`<div class="leader-msg-card"><div class="leader-msg-badge">📣</div><div class="leader-msg-from">رسالة من ${safeFrom}</div><div class="leader-msg-body">${safeMsg}</div><button class="leader-msg-ok" onclick="this.closest('.leader-msg-overlay').remove()">حسناً، فهمت</button></div>`;
-    document.body.appendChild(ov);
-    setTimeout(()=>{if(ov.parentElement)ov.remove();},15000);
-  }
-  async function startListeners(){
-    await ensureFbAuth();
-    onValue(ref(db,`drivers_locations/${driverData.phone}/account_status`),snap=>{if(snap.val()==='banned'){alert('⚠️ تم حظر حسابك.');localStorage.removeItem('hut_driver_session');sessionStorage.clear();location.reload();}});
-    onValue(ref(db,`ledgers/drivers/${driverData.phone}`),snap=>{
-      const l=snap.val()||{completed_orders:0,debt:0};const todayISO=new Date().toISOString().split('T')[0];
-      onValue(ref(db,`daily_ledgers/${driverData.phone}/${todayISO}`),ds=>{
-        const daily=ds.val()||{};let liveE=0,liveD=0;
-        Object.values(daily).forEach(d=>{liveE+=(parseFloat(d.price)||0);liveD+=(parseFloat(d.comm)||0);});
-        liveOrders=(l.completed_orders||0)+Object.keys(daily).length;liveDebt=(parseFloat(l.debt)||0)+liveD;liveEarnings=liveE;updateHeroUI();
+      Object.values(fbOrders).forEach(fb=>{
+        if(!fb.restaurant||fb.restaurant.trim()===''||fb.restaurant==='undefined')return;
+        const sfp=String(fb.driverPhone||'').replace(/\D/g,'').replace(/^0+/,'').trim();
+        const isForMe=(sfp===myId)&&(fb.status==='pending_driver'||fb.status==='manual_pending');
+        if(!isForMe)return;
+        const _mine=activeOrders.find(o=>String(o.id)===String(fb.id));
+        if(_mine){guaranteeAccept(fb.id);_stopAlarm();return;}   // 🩹 شفاء ذاتي: مقبول محلياً وما زال معلقاً → أعد تثبيته وأسكت الجرس
+        if(currentOrderData&&String(currentOrderData.id)===String(fb.id))return;
+        totalOffersToday++;
+        currentOrderData={id:fb.id,resName:fb.restaurant,area:fb.area||'غير محدد',price:fb.price||0,details:fb.details||'',photoUrl:fb.photoUrl||'',resLat:fb.resLat,resLng:fb.resLng,resPhone:fb.resPhone,comm:fb.comm||0,payType:fb.payType||'المطعم يدفع',is_sovereign:fb.is_sovereign||false};
+        const age=fb.last_update?(Date.now()-new Date(fb.last_update).getTime()):0;
+        currentOrderData.expireTime=Date.now()+Math.max(10000,60000-age);
+        document.getElementById('alertTitle').innerText=activeOrders.length>0?'طلب إضافي! 🔥':'طلب جديد! 🐝';
+        document.getElementById('alertSovereign').innerText=currentOrderData.is_sovereign?'⚠️ تعيين إداري مباشر — لا يمكن تجاهله':'';
+        document.getElementById('alertResName').innerText=fb.restaurant;
+        document.getElementById('alertArea').innerText=fb.area||'غير محدد';
+        document.getElementById('alertPrice').innerHTML=`${fb.price||0} <small style="font-size:.8rem;color:#6b7280;">د.ع</small>`;
+        document.getElementById('orderAlertOverlay').classList.remove('hidden-section');
+        if(window.AndroidRadar)window.AndroidRadar.triggerOrderAlarm();
+        else _startAlarm(activeOrders.length>0?'double':'alert');
+        if(navigator.vibrate)navigator.vibrate([300,100,300,100,300]);
+        startCountdown();
       });
-    });
-    const todayStr=new Date().toISOString().split('T')[0];
-    onValue(ref(db,`daily_ledgers/${driverData.phone}/${todayStr}`),snap=>{
-      const daily=snap.val()||{};let total=0,html='';
-      Object.values(daily).sort((a,b)=>b.timestamp-a.timestamp).forEach(r=>{
-        total+=r.price;const t=new Date(r.timestamp).toLocaleTimeString('ar-EG',{hour:'2-digit',minute:'2-digit'});
-        html+=`<div class="ledger-entry"><div class="le-left"><div class="le-id">#${r.orderId} — ${r.resName}</div><div class="le-info">📍 ${r.area}</div></div><div style="text-align:left;"><div class="le-price">${r.price} <small style="font-size:.7rem;color:var(--muted);">د.ع</small></div><div class="le-time">${t}</div></div></div>`;
-      });
-      document.getElementById('ledgerTotal').innerHTML=`${total} <span class="ledger-total-unit">د.ع</span>`;
-      document.getElementById('ledgerEntries').innerHTML=html||'<div style="text-align:center;padding:40px 0;color:var(--muted);font-weight:700;">لا توجد رحلات اليوم بعد.</div>';
-    });
-    onValue(ref(db,`daily_metrics/${driverData.phone}/${todayStr}/rejected_orders`),snap=>{
-      todayRejections=snap.val()||0;const el=document.getElementById('rejectionPill');const ec=document.getElementById('rejectionCount');
-      if(el&&ec){if(todayRejections>0){el.classList.remove('hidden-section');ec.innerText=todayRejections;}else el.classList.add('hidden-section');if(todayRejections>=5)el.style.background='rgba(239,68,68,.2)';}
-    });
-    onValue(ref(db,'active_orders'),snap=>{
-      const fbOrders=snap.val()||{};const myId=String(driverData.phone).replace(/\D/g,'').replace(/^0+/,'').trim();
-      /* forEach mutation fix */
-      const _toRm=[];
-      for(let i=activeOrders.length-1;i>=0;i--){const mo=activeOrders[i],fb=fbOrders[mo.id];
-        if(!fb){_toRm.push({id:mo.id,msg:'تم حذف الطلب.'});continue;}
-        const _st=String(fb.status||'').toLowerCase();
-        const _done=['completed','مكتمل','settled','delivered','done','تم','deleted'];
-        if(_done.includes(_st)||_done.includes(fb.status)){_toRm.push({id:mo.id,msg:'تم إنهاء الطلب.'});continue;}
-        const fp=String(fb.driverPhone||'').replace(/\D/g,'').replace(/^0+/,'').trim();
-        if(fp&&fp!==myId&&fb.status!=='pending_driver'&&fb.status!=='manual_pending'){_toRm.push({id:mo.id,msg:'تم سحب الطلب لكابتن آخر.'});}
-      }
-      _toRm.forEach(({id,msg})=>forceRemove(msg,id));
-      activeOrders.forEach(mo=>{
-        const fb=fbOrders[mo.id];if(!fb)return;const oid=String(mo.id);
-        if(fb.ready_for_pickup===true&&!readyNotifiedOrders.has(oid)){readyNotifiedOrders.add(oid);mo.readyForPickup=true;localStorage.setItem('hut_active_orders',JSON.stringify(activeOrders));_playOnce('ready');showToast(`🍽️ طلبيتك جاهزة في <b>${mo.resName}</b>! توجّه للاستلام`,'warn');if('Notification' in window&&Notification.permission==='granted'){new Notification('🍽️ الطلبية جاهزة!',{body:`طلبيتك في ${mo.resName} جاهزة`});}displayActiveOrders();}
-        if(fb.ready_for_pickup===false&&readyNotifiedOrders.has(oid)){readyNotifiedOrders.delete(oid);mo.readyForPickup=false;localStorage.setItem('hut_active_orders',JSON.stringify(activeOrders));displayActiveOrders();}
-      });
-      if(isOnline){
-        Object.values(fbOrders).forEach(fb=>{
-          if(!fb.restaurant||fb.restaurant.trim()===''||fb.restaurant==='undefined')return;
-          const sfp=String(fb.driverPhone||'').replace(/\D/g,'').replace(/^0+/,'').trim();
-          const isForMe=(sfp===myId)&&(fb.status==='pending_driver'||fb.status==='manual_pending');
-          if(!isForMe)return;
-          const _mine=activeOrders.find(o=>String(o.id)===String(fb.id));
-          if(_mine){guaranteeAccept(fb.id);_stopAlarm();return;}   // 🩹 شفاء ذاتي: مقبول محلياً وما زال معلقاً → أعد تثبيته وأسكت الجرس
-          if(currentOrderData&&String(currentOrderData.id)===String(fb.id))return;
-          totalOffersToday++;
-          currentOrderData={id:fb.id,resName:fb.restaurant,area:fb.area||'غير محدد',price:fb.price||0,details:fb.details||'',photoUrl:fb.photoUrl||'',resLat:fb.resLat,resLng:fb.resLng,resPhone:fb.resPhone,comm:fb.comm||0,payType:fb.payType||'المطعم يدفع',is_sovereign:fb.is_sovereign||false};
-          const age=fb.last_update?(Date.now()-new Date(fb.last_update).getTime()):0;
-          currentOrderData.expireTime=Date.now()+Math.max(10000,60000-age);
-          document.getElementById('alertTitle').innerText=activeOrders.length>0?'طلب إضافي! 🔥':'طلب جديد! 🐝';
-          document.getElementById('alertSovereign').innerText=currentOrderData.is_sovereign?'⚠️ تعيين إداري مباشر — لا يمكن تجاهله':'';
-          document.getElementById('alertResName').innerText=fb.restaurant;
-          document.getElementById('alertArea').innerText=fb.area||'غير محدد';
-          document.getElementById('alertPrice').innerHTML=`${fb.price||0} <small style="font-size:.8rem;color:#6b7280;">د.ع</small>`;
-          document.getElementById('orderAlertOverlay').classList.remove('hidden-section');
-          if(window.AndroidRadar)window.AndroidRadar.triggerOrderAlarm();
-          else _startAlarm(activeOrders.length>0?'double':'alert');
-          if(navigator.vibrate)navigator.vibrate([300,100,300,100,300]);
-          startCountdown();
-        });
-      }
-    });
-    // ⏱️ عند إيقاف الإدارة لنظام الشفتات → دوام حر بلا أي قيود وقت
-    onValue(ref(db,'system_settings/shifts_enabled'),snap=>{window._shiftsEnabled=(snap.val()!==false);});
-    onValue(ref(db,'system_broadcast'),snap=>{const d=snap.val();if(d&&d.msg){const age=d.ts?Date.now()-d.ts:0;if(age<10000)showBroadcast(d.msg);}});
-    // 📣 [V90.2] رسائل الليدر/الإدارة — تظهر داخل التطبيق فوراً (متناسقة مع STAFF_MESSAGE و notifyDriverMessage)
-    onValue(ref(db,`driver_messages/${driverData.phone}`),snap=>{
-      const d=snap.val();
-      if(!d||!d.msg||!d.ts)return;
-      if(_shownLeaderMsgs.includes(d.ts))return;           // كل رسالة تُعرض مرة واحدة فقط (حتى بعد إعادة الفتح)
-      _shownLeaderMsgs.push(d.ts);
-      if(_shownLeaderMsgs.length>60)_shownLeaderMsgs=_shownLeaderMsgs.slice(-60);
-      localStorage.setItem('nahla_shown_msgs',JSON.stringify(_shownLeaderMsgs));
-      showLeaderMessage(d.from||'الإدارة',d.msg);
-    });
-  }
-  function showBroadcast(msg){
-    const ov=document.createElement('div');ov.className='broadcast-overlay';
-    ov.innerHTML=`<div class="broadcast-card"><span class="broadcast-icon">📢</span><h3 style="font-weight:900;color:#111827;margin-bottom:0;">تنبيه الإدارة</h3><p class="broadcast-msg">${msg}</p><button class="btn-broadcast-ok" onclick="this.closest('.broadcast-overlay').remove()">حسناً</button></div>`;
-    document.body.appendChild(ov);setTimeout(()=>{if(ov.parentElement)ov.remove();},8000);
-  }
-  function startCountdown(){
-    const circle=document.getElementById('timerCircle');clearInterval(countdownInterval);const totalMs=currentOrderData.expireTime-Date.now();
-    countdownInterval=setInterval(()=>{
-      if(!currentOrderData)return;let rem=Math.ceil((currentOrderData.expireTime-Date.now())/1000);if(rem<0)rem=0;
-      document.getElementById('secondsLeft').innerText=rem;const totalSec=Math.ceil(totalMs/1000);
-      if(circle)circle.style.strokeDashoffset=471-(rem*(471/Math.max(totalSec,1)));
-      if(rem<=0)window.declineOrder();
-    },1000);
-  }
-  window.declineOrder=function(){
-    if(currentOrderData?.is_sovereign){alert('⚠️ تعيين إداري لا يمكن تجاهله.');return;}
-    clearInterval(countdownInterval);document.getElementById('orderAlertOverlay').classList.add('hidden-section');_stopAlarm();
-    if(currentOrderData){
-      const now=new Date().toISOString();const u={};
-      u[`active_orders/${currentOrderData.id}/status`]='pending_driver';u[`active_orders/${currentOrderData.id}/driverPhone`]='system_routing';
-      u[`active_orders/${currentOrderData.id}/last_update`]=now;u[`active_orders/${currentOrderData.id}/last_offered_to`]=driverData.phone;
-      u[`active_orders/${currentOrderData.id}/last_offered_time`]=now;u[`active_orders/${currentOrderData.id}/is_sovereign`]=false;
-      const ts=now.split('T')[0];u[`daily_metrics/${driverData.phone}/${ts}/rejected_orders`]=increment(1);
-      const _did=currentOrderData.id;todayRejections++;
-      update(ref(db),u).catch(()=>{try{fetch(`${API_URL}?action=DECLINE_ORDER&orderId=${encodeURIComponent(_did)}&driverPhone=${driverData.phone}&token=${API_TOKEN}`);}catch(e){}});
-      currentOrderData=null;
     }
-  };
-  window.acceptOrder=async function(){
-    const btn=document.getElementById('btnAccept');
-    btn.innerHTML='<div class="beast-spinner" style="width:24px;height:24px;border-width:2px;border-top-color:white;"></div> جاري تأمين الطلب...';
-    btn.disabled=true;clearInterval(countdownInterval);_stopAlarm();totalAcceptedToday++;
-    setTimeout(async()=>{
-      try{if(!currentOrderData.resPhone||!currentOrderData.resLat){const r=await fetch(`${API_URL}?action=getGlobalData&token=${API_TOKEN}`);const d=await r.json();const ri=d.restaurants.find(x=>x[1]===currentOrderData.resName);if(ri){currentOrderData.resPhone=ri[2];currentOrderData.resArea=ri[3];currentOrderData.resLat=ri[6];currentOrderData.resLng=ri[7];currentOrderData.comm=parseFloat(ri[5])||0;currentOrderData.payType=ri[8]||'المطعم يدفع';}else currentOrderData.resPhone='غير متوفر';}}catch(e){if(!currentOrderData.resPhone)currentOrderData.resPhone='غير متوفر';}
-      finalizeAccept();
-    },1200);
-  };
-  // ═══ القبول المضمون (مواصفات عالمية): ٤ طبقات ضمان ═══
-  async function guaranteeAccept(orderId){
-    const path=`active_orders/${orderId}`;
-    const payload={status:'accepted',driverPhone:driverData.phone,last_update:new Date().toISOString()};
-    let ok=false;
-    try{await update(ref(db,path),payload);ok=true;}catch(e){}
-    if(!ok){try{await ensureFbAuth();await update(ref(db,path),payload);ok=true;}catch(e){}}
-    try{const s=await get(ref(db,path+'/status'));if(s.val()!=='accepted')ok=false;}catch(e){ok=false;}
-    if(!ok){try{fetch(`${API_URL}?action=ACCEPT_ORDER&orderId=${encodeURIComponent(orderId)}&driverPhone=${driverData.phone}&token=${API_TOKEN}`);}catch(e){}}
+  });
+  // ⏱️ عند إيقاف الإدارة لنظام الشفتات → دوام حر بلا أي قيود وقت
+  onValue(ref(db,'system_settings/shifts_enabled'),snap=>{window._shiftsEnabled=(snap.val()!==false);});
+  onValue(ref(db,'system_broadcast'),snap=>{const d=snap.val();if(d&&d.msg){const age=d.ts?Date.now()-d.ts:0;if(age<10000)showBroadcast(d.msg);}});
+  // 📣 [V90.2] رسائل الليدر/الإدارة — تظهر داخل التطبيق فوراً (متناسقة مع STAFF_MESSAGE و notifyDriverMessage)
+  onValue(ref(db,`driver_messages/${driverData.phone}`),snap=>{
+    const d=snap.val();
+    if(!d||!d.msg||!d.ts)return;
+    if(_shownLeaderMsgs.includes(d.ts))return;           // كل رسالة تُعرض مرة واحدة فقط (حتى بعد إعادة الفتح)
+    _shownLeaderMsgs.push(d.ts);
+    if(_shownLeaderMsgs.length>60)_shownLeaderMsgs=_shownLeaderMsgs.slice(-60);
+    localStorage.setItem('nahla_shown_msgs',JSON.stringify(_shownLeaderMsgs));
+    showLeaderMessage(d.from||'الإدارة',d.msg);
+  });
+}
+function showBroadcast(msg){
+  const ov=document.createElement('div');ov.className='broadcast-overlay';
+  ov.innerHTML=`<div class="broadcast-card"><span class="broadcast-icon">📢</span><h3 style="font-weight:900;color:#111827;margin-bottom:0;">تنبيه الإدارة</h3><p class="broadcast-msg">${msg}</p><button class="btn-broadcast-ok" onclick="this.closest('.broadcast-overlay').remove()">حسناً</button></div>`;
+  document.body.appendChild(ov);setTimeout(()=>{if(ov.parentElement)ov.remove();},8000);
+}
+function startCountdown(){
+  const circle=document.getElementById('timerCircle');clearInterval(countdownInterval);const totalMs=currentOrderData.expireTime-Date.now();
+  countdownInterval=setInterval(()=>{
+    if(!currentOrderData)return;let rem=Math.ceil((currentOrderData.expireTime-Date.now())/1000);if(rem<0)rem=0;
+    document.getElementById('secondsLeft').innerText=rem;const totalSec=Math.ceil(totalMs/1000);
+    if(circle)circle.style.strokeDashoffset=471-(rem*(471/Math.max(totalSec,1)));
+    if(rem<=0)window.declineOrder();
+  },1000);
+}
+window.declineOrder=function(){
+  if(currentOrderData?.is_sovereign){alert('⚠️ تعيين إداري لا يمكن تجاهله.');return;}
+  clearInterval(countdownInterval);document.getElementById('orderAlertOverlay').classList.add('hidden-section');_stopAlarm();
+  if(currentOrderData){
+    const now=new Date().toISOString();const u={};
+    u[`active_orders/${currentOrderData.id}/status`]='pending_driver';u[`active_orders/${currentOrderData.id}/driverPhone`]='system_routing';
+    u[`active_orders/${currentOrderData.id}/last_update`]=now;u[`active_orders/${currentOrderData.id}/last_offered_to`]=driverData.phone;
+    u[`active_orders/${currentOrderData.id}/last_offered_time`]=now;u[`active_orders/${currentOrderData.id}/is_sovereign`]=false;
+    const ts=now.split('T')[0];u[`daily_metrics/${driverData.phone}/${ts}/rejected_orders`]=increment(1);
+    const _did=currentOrderData.id;todayRejections++;
+    update(ref(db),u).catch(()=>{try{fetch(`${API_URL}?action=DECLINE_ORDER&orderId=${encodeURIComponent(_did)}&driverPhone=${driverData.phone}&token=${API_TOKEN}`);}catch(e){}});
+    currentOrderData=null;
   }
-  function finalizeAccept(){
-    document.getElementById('orderAlertOverlay').classList.add('hidden-section');
-    const o={id:currentOrderData.id,resName:currentOrderData.resName,resArea:currentOrderData.resArea||null,details:String(currentOrderData.details),price:parseFloat(currentOrderData.price)||0,area:currentOrderData.area,state:'heading',photoUrl:currentOrderData.photoUrl,resPhone:currentOrderData.resPhone,resLat:currentOrderData.resLat,resLng:currentOrderData.resLng,comm:currentOrderData.comm||0,payType:currentOrderData.payType||'المطعم يدفع',acceptedTime:Date.now(),is_sovereign:currentOrderData.is_sovereign||false,readyForPickup:false};
-    activeOrders.push(o);localStorage.setItem('hut_active_orders',JSON.stringify(activeOrders));adjustHeartbeat();displayActiveOrders();
-    guaranteeAccept(o.id);   // ✅ قبول مضمون: كتابة مؤكدة + إعادة مصادقة + تحقق + ضمانة السيرفر
-    const ab=document.getElementById('btnAccept');if(ab){ab.innerHTML='<svg class="si" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg> قبول الطلب فوراً';ab.disabled=false;}
-  }
-  function displayActiveOrders(){
-    const box=document.getElementById('activeOrderBox');const radar=document.getElementById('radarWrap');
-    if(activeOrders.length===0){if(radar)radar.style.display='';box.innerHTML='';lastActiveHtml='empty';return;}
-    if(radar)radar.style.display='none';
-    const isDouble=activeOrders.length>1;let html='';
-    activeOrders.forEach((order,idx)=>{
-      const step=order.state==='heading'?1:order.state==='arrived'?2:order.state==='picked_up'?3:4;
-      const stripeClass=order.state==='heading'?'blue':order.state==='arrived'?'yellow':'green';
-      const stateEmoji=order.state==='heading'?'🗺️ متوجه للمطعم':order.state==='arrived'?'🏪 في المطعم':'🛵 في الطريق للزبون';
-      const btnAction=order.state==='heading'?'arrive':order.state==='arrived'?'pickup':'finish';
-      const btnText=order.state==='heading'?'تأكيد الوصول للمطعم':order.state==='arrived'?'تأكيد استلام الطلب':'تأكيد تسليم الطلب';
-      const btnCls=order.state==='heading'?'cta-heading':order.state==='arrived'?'cta-arrived':'cta-picked';
-      const btnIcon=order.state==='heading'?'🗺️':order.state==='arrived'?'📦':'✅';
-      let disAttr='';
-      if(order.state==='picked_up'){const el=Date.now()-(order.pickupTime||0);if(el<120000){disAttr='disabled';setTimeout(()=>{if(document.getElementById(`o-${order.id}`))displayActiveOrders();},120000-el);}}
-      const resPhone=order.resPhone?String(order.resPhone):'';
-      const resPhoneNum=resPhone?(resPhone.startsWith('0')?resPhone:'0'+resPhone):null;
-      const waRes=resPhone?(resPhone.startsWith('0')?'964'+resPhone.substring(1):resPhone):null;
-      const safeDetails=String(order.details||'');const custM=safeDetails.match(/(07[0-9]{8,9})/);const custPhone=custM?String(custM[0]):null;
-      const mapUrl=order.resLat?`https://www.google.com/maps/dir/?api=1&destination=${order.resLat},${order.resLng}`:'';
-      const badgeHtml=isDouble?`<span class="oc-tag tag-double">🔥 طلب مزدوج (${idx+1}/${activeOrders.length})</span>`:`<span class="oc-tag tag-single">⭐ طلب حصري</span>`;
-      const sovBadge=order.is_sovereign?`<span class="oc-tag tag-sovereign">👑 تكليف مباشر</span>`:'';
-      const readyHtml=order.readyForPickup?`<div class="ready-banner"><svg class="si" style="width:20px;height:20px;color:var(--orange);flex-shrink:0;" viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg><span class="ready-text">🍽️ الطلبية جاهزة في المطعم — توجّه للاستلام فوراً!</span></div>`:'';
-      const photoBtn=order.photoUrl&&String(order.photoUrl).startsWith('http')?`<button class="action-pill ap-img" onclick="window.openSafeLink('${order.photoUrl}')">🖼️ عرض الوصل</button>`:'';
-      const pickLabel=order.resArea||'موقع المطعم';
-      html+=`
-      <div class="order-card-beast" id="o-${order.id}">
-        <div class="oc-top-stripe ${stripeClass}"></div>
-        <div class="oc-body">
-          <div class="oc-header-row">
-            <div><div class="oc-id">#${order.id}</div><div class="oc-meta" style="margin-top:6px;">${badgeHtml}${sovBadge}</div><div id="tmr-${order.id}" class="timer-pill t-safe" style="margin-top:8px;">⏱ --:--</div></div>
-            <div style="text-align:left;"><div class="oc-price">${order.price}<small>د.ع</small></div><a href="#" onclick="window.openSafeLink('https://wa.me/9647709366053');return false;" class="action-pill ap-support" style="margin-top:8px;font-size:0.7rem;padding:5px 10px;">🎧 دعم فني</a></div>
-          </div>
-          <div class="step-progress">
-            <div class="step-item ${step>=1?(step===1?'active':'done'):''}"><div class="step-dot">${step>1?'✓':'🐝'}</div><span class="step-label">قبِلت</span></div>
-            <div class="step-item ${step>=2?(step===2?'active':'done'):''}"><div class="step-dot">${step>2?'✓':'🏪'}</div><span class="step-label">بالمطعم</span></div>
-            <div class="step-item ${step>=3?(step===3?'active':'done'):''}"><div class="step-dot">${step>3?'✓':'📦'}</div><span class="step-label">استلمت</span></div>
-            <div class="step-item ${step>=4?'active':''}"><div class="step-dot">🏁</div><span class="step-label">سلّمت</span></div>
-          </div>
-          <div class="status-banner">${stateEmoji}</div>
-          ${readyHtml}
-          <div class="route-timeline">
-            <div class="route-point pickup">
-              <div class="rp-title">📍 الاستلام من (${pickLabel})</div>
-              <div class="rp-name">${order.resName}</div>
-              <div class="action-grid">
-                ${resPhoneNum?`<button class="action-pill ap-call" onclick="window.openSafeLink('tel:${resPhoneNum}')">📞 اتصال</button>`:''}
-                ${waRes?`<button class="action-pill ap-wa" onclick="window.openSafeLink('https://wa.me/${waRes}')">💬 واتساب</button>`:''}
-                ${mapUrl?`<button class="action-pill ap-map" onclick="window.openSafeLink('${mapUrl}')">🗺️ خريطة</button>`:''}
-              </div>
-            </div>
-            <div class="route-point dropoff">
-              <div class="rp-title">🏠 التسليم إلى (${order.area})</div>
-              <div class="rp-name">${safeDetails}</div>
-              <div class="action-grid">
-                ${custPhone?`<button class="action-pill ap-call" onclick="window.openSafeLink('tel:${custPhone}')">📞 اتصال</button>`:''}
-                ${custPhone?`<button class="action-pill ap-wa" onclick="window.openSmartWhatsapp('${custPhone}','${order.resName}','${order.area}','${order.id}','${order.price}')">💬 رسالة الزبون</button>`:''}
-                ${photoBtn}
-              </div>
-            </div>
-          </div>
-          <button class="btn-status-cta ${btnCls}" ${disAttr} onclick="window.updateOrderStatus('${order.id}','${btnAction}',this)">${btnIcon} ${btnText}</button>
+};
+window.acceptOrder=async function(){
+  const btn=document.getElementById('btnAccept');
+  btn.innerHTML='<div class="beast-spinner" style="width:24px;height:24px;border-width:2px;border-top-color:white;"></div> جاري تأمين الطلب...';
+  btn.disabled=true;clearInterval(countdownInterval);_stopAlarm();totalAcceptedToday++;
+  setTimeout(async()=>{
+    try{if(!currentOrderData.resPhone||!currentOrderData.resLat){const r=await fetch(`${API_URL}?action=getGlobalData&token=${API_TOKEN}`);const d=await r.json();const ri=d.restaurants.find(x=>x[1]===currentOrderData.resName);if(ri){currentOrderData.resPhone=ri[2];currentOrderData.resArea=ri[3];currentOrderData.resLat=ri[6];currentOrderData.resLng=ri[7];currentOrderData.comm=parseFloat(ri[5])||0;currentOrderData.payType=ri[8]||'المطعم يدفع';}else currentOrderData.resPhone='غير متوفر';}}catch(e){if(!currentOrderData.resPhone)currentOrderData.resPhone='غير متوفر';}
+    finalizeAccept();
+  },1200);
+};
+// ═══ القبول المضمون (مواصفات عالمية): ٤ طبقات ضمان ═══
+async function guaranteeAccept(orderId){
+  const path=`active_orders/${orderId}`;
+  const payload={status:'accepted',driverPhone:driverData.phone,last_update:new Date().toISOString()};
+  let ok=false;
+  try{await update(ref(db,path),payload);ok=true;}catch(e){}
+  if(!ok){try{await ensureFbAuth();await update(ref(db,path),payload);ok=true;}catch(e){}}
+  try{const s=await get(ref(db,path+'/status'));if(s.val()!=='accepted')ok=false;}catch(e){ok=false;}
+  if(!ok){try{fetch(`${API_URL}?action=ACCEPT_ORDER&orderId=${encodeURIComponent(orderId)}&driverPhone=${driverData.phone}&token=${API_TOKEN}`);}catch(e){}}
+}
+function finalizeAccept(){
+  document.getElementById('orderAlertOverlay').classList.add('hidden-section');
+  const o={id:currentOrderData.id,resName:currentOrderData.resName,resArea:currentOrderData.resArea||null,details:String(currentOrderData.details),price:parseFloat(currentOrderData.price)||0,area:currentOrderData.area,state:'heading',photoUrl:currentOrderData.photoUrl,resPhone:currentOrderData.resPhone,resLat:currentOrderData.resLat,resLng:currentOrderData.resLng,comm:currentOrderData.comm||0,payType:currentOrderData.payType||'المطعم يدفع',acceptedTime:Date.now(),is_sovereign:currentOrderData.is_sovereign||false,readyForPickup:false};
+  activeOrders.push(o);localStorage.setItem('hut_active_orders',JSON.stringify(activeOrders));adjustHeartbeat();displayActiveOrders();
+  guaranteeAccept(o.id);   // ✅ قبول مضمون: كتابة مؤكدة + إعادة مصادقة + تحقق + ضمانة السيرفر
+  const ab=document.getElementById('btnAccept');if(ab){ab.innerHTML='<svg class="si" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg> قبول الطلب فوراً';ab.disabled=false;}
+}
+function displayActiveOrders(){
+  const box=document.getElementById('activeOrderBox');const radar=document.getElementById('radarWrap');
+  if(activeOrders.length===0){if(radar)radar.style.display='';box.innerHTML='';lastActiveHtml='empty';return;}
+  if(radar)radar.style.display='none';
+  const isDouble=activeOrders.length>1;let html='';
+  activeOrders.forEach((order,idx)=>{
+    const step=order.state==='heading'?1:order.state==='arrived'?2:order.state==='picked_up'?3:4;
+    const stripeClass=order.state==='heading'?'blue':order.state==='arrived'?'yellow':'green';
+    const stateEmoji=order.state==='heading'?'🗺️ متوجه للمطعم':order.state==='arrived'?'🏪 في المطعم':'🛵 في الطريق للزبون';
+    const btnAction=order.state==='heading'?'arrive':order.state==='arrived'?'pickup':'finish';
+    const btnText=order.state==='heading'?'تأكيد الوصول للمطعم':order.state==='arrived'?'تأكيد استلام الطلب':'تأكيد تسليم الطلب';
+    const btnCls=order.state==='heading'?'cta-heading':order.state==='arrived'?'cta-arrived':'cta-picked';
+    const btnIcon=order.state==='heading'?'🗺️':order.state==='arrived'?'📦':'✅';
+    let disAttr='';
+    if(order.state==='picked_up'){const el=Date.now()-(order.pickupTime||0);if(el<120000){disAttr='disabled';setTimeout(()=>{if(document.getElementById(`o-${order.id}`))displayActiveOrders();},120000-el);}}
+    const resPhone=order.resPhone?String(order.resPhone):'';
+    const resPhoneNum=resPhone?(resPhone.startsWith('0')?resPhone:'0'+resPhone):null;
+    const waRes=resPhone?(resPhone.startsWith('0')?'964'+resPhone.substring(1):resPhone):null;
+    const safeDetails=String(order.details||'');const custM=safeDetails.match(/(07[0-9]{8,9})/);const custPhone=custM?String(custM[0]):null;
+    const mapUrl=order.resLat?`https://www.google.com/maps/dir/?api=1&destination=${order.resLat},${order.resLng}`:'';
+    const badgeHtml=isDouble?`<span class="oc-tag tag-double">🔥 طلب مزدوج (${idx+1}/${activeOrders.length})</span>`:`<span class="oc-tag tag-single">⭐ طلب حصري</span>`;
+    const sovBadge=order.is_sovereign?`<span class="oc-tag tag-sovereign">👑 تكليف مباشر</span>`:'';
+    const readyHtml=order.readyForPickup?`<div class="ready-banner"><svg class="si" style="width:20px;height:20px;color:var(--orange);flex-shrink:0;" viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg><span class="ready-text">🍽️ الطلبية جاهزة في المطعم — توجّه للاستلام فوراً!</span></div>`:'';
+    const photoBtn=order.photoUrl&&String(order.photoUrl).startsWith('http')?`<button class="action-pill ap-img" onclick="window.openSafeLink('${order.photoUrl}')">🖼️ عرض الوصل</button>`:'';
+    const pickLabel=order.resArea||'موقع المطعم';
+    html+=`
+    <div class="order-card-beast" id="o-${order.id}">
+      <div class="oc-top-stripe ${stripeClass}"></div>
+      <div class="oc-body">
+        <div class="oc-header-row">
+          <div><div class="oc-id">#${order.id}</div><div class="oc-meta" style="margin-top:6px;">${badgeHtml}${sovBadge}</div><div id="tmr-${order.id}" class="timer-pill t-safe" style="margin-top:8px;">⏱ --:--</div></div>
+          <div style="text-align:left;"><div class="oc-price">${order.price}<small>د.ع</small></div><a href="#" onclick="window.openSafeLink('https://wa.me/9647709366053');return false;" class="action-pill ap-support" style="margin-top:8px;font-size:0.7rem;padding:5px 10px;">🎧 دعم فني</a></div>
         </div>
-      </div>`;
-    });
-    if(lastActiveHtml!==html){box.innerHTML=html;lastActiveHtml=html;}
+        <div class="step-progress">
+          <div class="step-item ${step>=1?(step===1?'active':'done'):''}"><div class="step-dot">${step>1?'✓':'🐝'}</div><span class="step-label">قبِلت</span></div>
+          <div class="step-item ${step>=2?(step===2?'active':'done'):''}"><div class="step-dot">${step>2?'✓':'🏪'}</div><span class="step-label">بالمطعم</span></div>
+          <div class="step-item ${step>=3?(step===3?'active':'done'):''}"><div class="step-dot">${step>3?'✓':'📦'}</div><span class="step-label">استلمت</span></div>
+          <div class="step-item ${step>=4?'active':''}"><div class="step-dot">🏁</div><span class="step-label">سلّمت</span></div>
+        </div>
+        <div class="status-banner">${stateEmoji}</div>
+        ${readyHtml}
+        <div class="route-timeline">
+          <div class="route-point pickup">
+            <div class="rp-title">📍 الاستلام من (${pickLabel})</div>
+            <div class="rp-name">${order.resName}</div>
+            <div class="action-grid">
+              ${resPhoneNum?`<button class="action-pill ap-call" onclick="window.openSafeLink('tel:${resPhoneNum}')">📞 اتصال</button>`:''}
+              ${waRes?`<button class="action-pill ap-wa" onclick="window.openSafeLink('https://wa.me/${waRes}')">💬 واتساب</button>`:''}
+              ${mapUrl?`<button class="action-pill ap-map" onclick="window.openSafeLink('${mapUrl}')">🗺️ خريطة</button>`:''}
+            </div>
+          </div>
+          <div class="route-point dropoff">
+            <div class="rp-title">🏠 التسليم إلى (${order.area})</div>
+            <div class="rp-name">${safeDetails}</div>
+            <div class="action-grid">
+              ${custPhone?`<button class="action-pill ap-call" onclick="window.openSafeLink('tel:${custPhone}')">📞 اتصال</button>`:''}
+              ${custPhone?`<button class="action-pill ap-wa" onclick="window.openSmartWhatsapp('${custPhone}','${order.resName}','${order.area}','${order.id}','${order.price}')">💬 رسالة الزبون</button>`:''}
+              ${photoBtn}
+            </div>
+          </div>
+        </div>
+        <button class="btn-status-cta ${btnCls}" ${disAttr} onclick="window.updateOrderStatus('${order.id}','${btnAction}',this)">${btnIcon} ${btnText}</button>
+      </div>
+    </div>`;
+  });
+  if(lastActiveHtml!==html){box.innerHTML=html;lastActiveHtml=html;}
+}
+window.updateOrderStatus=function(id,action,btn){
+  const order=activeOrders.find(o=>String(o.id)===String(id));if(!order)return;
+  if(action==='arrive'&&order.resLat&&order.resLng&&driverData?.currentLat){
+    const dist=calcDist(driverData.currentLat,driverData.currentLng,order.resLat,order.resLng);
+    if(dist>150){showToast(`⚠️ أنت تبعد <b>${Math.round(dist)} متر</b> عن المطعم 📍`,'error');return;}
   }
-  window.updateOrderStatus=function(id,action,btn){
-    const order=activeOrders.find(o=>String(o.id)===String(id));if(!order)return;
-    if(action==='arrive'&&order.resLat&&order.resLng&&driverData?.currentLat){
-      const dist=calcDist(driverData.currentLat,driverData.currentLng,order.resLat,order.resLng);
-      if(dist>150){showToast(`⚠️ أنت تبعد <b>${Math.round(dist)} متر</b> عن المطعم 📍`,'error');return;}
-    }
-    const orig=btn.innerHTML;btn.innerHTML=`<div class="beast-spinner" style="width:20px;height:20px;border-width:2px;border-top-color:white;"></div>`;btn.disabled=true;
-    if(action==='arrive'){order.state='arrived';update(ref(db,`active_orders/${id}`),{status:'arrived_at_res'});localStorage.setItem('hut_active_orders',JSON.stringify(activeOrders));displayActiveOrders();}
-    else if(action==='pickup'){order.state='picked_up';order.pickupTime=Date.now();update(ref(db,`active_orders/${id}`),{status:'picked_up'});localStorage.setItem('hut_active_orders',JSON.stringify(activeOrders));displayActiveOrders();}
-    else if(action==='finish'){
-      if(Date.now()-order.pickupTime<120000){btn.innerHTML=orig;btn.disabled=false;return;}
-      const card=document.getElementById(`o-${id}`);if(card){card.style.transition='.4s';card.style.opacity='0';card.style.transform='scale(0.95) translateY(-10px)';}
-      setTimeout(()=>{
-        const ts=new Date().toISOString().split('T')[0];const u={};
-        u[`active_orders/${id}/status`]='completed';u[`active_orders/${id}/status_ar`]='مكتمل';
-        const delMins=Math.max(1,Math.floor((Date.now()-order.acceptedTime)/60000));
-        u[`daily_metrics/${driverData.phone}/${ts}/completed_orders`]=increment(1);u[`daily_metrics/${driverData.phone}/${ts}/total_delivery_minutes`]=increment(delMins);
-        let drvComm=0;const cs=String(order.comm||'0'),pt=String(order.payType||'');
-        if(!cs.includes('شهري')){if(cs.includes('/'))drvComm=parseFloat(cs.split('/')[0])||0;else{const v=parseFloat(cs)||0;if(pt.includes('مناصفة'))drvComm=v/2;}}
-        u[`daily_ledgers/${driverData.phone}/${ts}/${id}`]={orderId:id,resName:order.resName,area:order.area,price:order.price,comm:drvComm,timestamp:Date.now()};
-        update(ref(db),u);
-        readyNotifiedOrders.delete(String(id));activeOrders=activeOrders.filter(o=>String(o.id)!==String(id));
-        localStorage.setItem('hut_active_orders',JSON.stringify(activeOrders));adjustHeartbeat();
-        showToast(`🎉 أكملت طلب #${id} بنجاح! 🐝`,'success');displayActiveOrders();
-      },400);
-    }
-  };
-  function updateTimers(){
-    activeOrders.forEach(o=>{
-      const el=document.getElementById(`tmr-${o.id}`);if(!el)return;
-      const elapsed=Date.now()-(o.acceptedTime||Date.now()),allowed=30*60*1000,rem=allowed-elapsed;
-      const isNeg=rem<0,abs=Math.abs(rem),m=Math.floor(abs/60000),s=Math.floor((abs%60000)/1000);
-      el.innerHTML=`⏱ ${isNeg?'-':''}${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
-      el.className='timer-pill '+(rem>600000?'t-safe':rem>0?'t-warn':'t-danger');
-    });
+  const orig=btn.innerHTML;btn.innerHTML=`<div class="beast-spinner" style="width:20px;height:20px;border-width:2px;border-top-color:white;"></div>`;btn.disabled=true;
+  if(action==='arrive'){order.state='arrived';update(ref(db,`active_orders/${id}`),{status:'arrived_at_res'});localStorage.setItem('hut_active_orders',JSON.stringify(activeOrders));displayActiveOrders();}
+  else if(action==='pickup'){order.state='picked_up';order.pickupTime=Date.now();update(ref(db,`active_orders/${id}`),{status:'picked_up'});localStorage.setItem('hut_active_orders',JSON.stringify(activeOrders));displayActiveOrders();}
+  else if(action==='finish'){
+    if(Date.now()-order.pickupTime<120000){btn.innerHTML=orig;btn.disabled=false;return;}
+    const card=document.getElementById(`o-${id}`);if(card){card.style.transition='.4s';card.style.opacity='0';card.style.transform='scale(0.95) translateY(-10px)';}
+    setTimeout(()=>{
+      const ts=new Date().toISOString().split('T')[0];const u={};
+      u[`active_orders/${id}/status`]='completed';u[`active_orders/${id}/status_ar`]='مكتمل';
+      const delMins=Math.max(1,Math.floor((Date.now()-order.acceptedTime)/60000));
+      u[`daily_metrics/${driverData.phone}/${ts}/completed_orders`]=increment(1);u[`daily_metrics/${driverData.phone}/${ts}/total_delivery_minutes`]=increment(delMins);
+      let drvComm=0;const cs=String(order.comm||'0'),pt=String(order.payType||'');
+      if(!cs.includes('شهري')){if(cs.includes('/'))drvComm=parseFloat(cs.split('/')[0])||0;else{const v=parseFloat(cs)||0;if(pt.includes('مناصفة'))drvComm=v/2;}}
+      u[`daily_ledgers/${driverData.phone}/${ts}/${id}`]={orderId:id,resName:order.resName,area:order.area,price:order.price,comm:drvComm,timestamp:Date.now()};
+      update(ref(db),u);
+      readyNotifiedOrders.delete(String(id));activeOrders=activeOrders.filter(o=>String(o.id)!==String(id));
+      localStorage.setItem('hut_active_orders',JSON.stringify(activeOrders));adjustHeartbeat();
+      showToast(`🎉 أكملت طلب #${id} بنجاح! 🐝`,'success');displayActiveOrders();
+    },400);
   }
-  setInterval(updateTimers,1000);
-  window.openLedger=function(){document.getElementById('ledgerModal').classList.remove('hidden-section');};
-  window.closeLedger=function(){document.getElementById('ledgerModal').classList.add('hidden-section');};
+};
+function updateTimers(){
+  activeOrders.forEach(o=>{
+    const el=document.getElementById(`tmr-${o.id}`);if(!el)return;
+    const elapsed=Date.now()-(o.acceptedTime||Date.now()),allowed=30*60*1000,rem=allowed-elapsed;
+    const isNeg=rem<0,abs=Math.abs(rem),m=Math.floor(abs/60000),s=Math.floor((abs%60000)/1000);
+    el.innerHTML=`⏱ ${isNeg?'-':''}${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+    el.className='timer-pill '+(rem>600000?'t-safe':rem>0?'t-warn':'t-danger');
+  });
+}
+setInterval(updateTimers,1000);
+window.openLedger=function(){document.getElementById('ledgerModal').classList.remove('hidden-section');};
+window.closeLedger=function(){document.getElementById('ledgerModal').classList.add('hidden-section');};
 </script>
 </body>
 </html>
