@@ -1,25 +1,27 @@
 // =========================================================
-// Nahla-Rocket-V13: محرك الكاش الصاروخي (Hybrid Enterprise Edition)
-// نسخة مخصصة لشركة نحلة كركوك 🐝
+// AlHut-Rocket-V13: محرك الكاش الصاروخي (Hybrid Enterprise Edition)
 // تحديث: حماية Firebase اللحظي + تمرير رفع الصور (POST) + تسريع الأوفلاين 🚀
 // =========================================================
 
-const CACHE_NAME = 'Nahla-Core-V13.0'; 
-const CDN_CACHE_NAME = 'Nahla-CDNs-V13.0';
+const CACHE_NAME = 'AlHut-Core-V13.0'; 
+const CDN_CACHE_NAME = 'AlHut-CDNs-V13.0';
 
-// قائمة الملفات الأساسية لنظام نحلة (جميع الواجهات)
+// قائمة الملفات الأساسية للنظام
+// 🩹 [كاش الأوفلاين] تصحيح حالة الأحرف: GitHub Pages حسّاس لها، وكانت القائمة
+//   تطلب 'Restaurant.html' و'Driver.html' بينما الملفان بحروف صغيرة — فيعودان
+//   بـ404 ويُتخطّيان بصمت (cache.add(...).catch). النتيجة: تطبيقا الكابتن
+//   والمطعم بلا قشرة أوفلاين إطلاقاً، وهما الأشدّ حاجة إليها (الكابتن على
+//   الطريق بشبكة متقطّعة). أُزيل كذلك manifest_driver.json و driver-logo.png
+//   لأنهما غير موجودَين في المستودع — أعِدهما هنا فور رفعهما.
 const ASSETS_TO_CACHE = [
   './',
-  './Master.html',
-  './Restaurant.html', 
-  './Driver.html',     
-  './manifest_master.json',
-  './manifest_restaurant.json',
-  './manifest_driver.json',
-  './master-logo.png',
-  './rest-logo.png',
+  './Driver.html',
+  './Restaurant.html',
+  './Nhleman.html',
+  './Driver-manifest.json',
+  './manifest_rest.json',
   './driver-logo.png',
-  './sw.js'
+  './rest-logo.png'
 ];
 
 // 1. التثبيت (Install)
@@ -27,9 +29,9 @@ self.addEventListener('install', event => {
   self.skipWaiting(); 
   event.waitUntil(
     caches.open(CACHE_NAME).then(cache => {
-      console.log('🚀 [Nahla SW] جاري تهيئة محركات الكاش الصاروخية V13...');
+      console.log('🚀 [AlHut SW] جاري تهيئة محركات الكاش الصاروخية V13...');
       return Promise.allSettled(
-        ASSETS_TO_CACHE.map(url => cache.add(url).catch(err => console.warn(`⚠️ [Nahla SW] ملف مفقود تم تخطيه: ${url}`)))
+        ASSETS_TO_CACHE.map(url => cache.add(url).catch(err => console.warn(`⚠️ [AlHut SW] ملف مفقود تم تخطيه: ${url}`)))
       );
     })
   );
@@ -42,7 +44,7 @@ self.addEventListener('activate', event => {
       return Promise.all(
         cacheNames.map(cache => {
           if (cache !== CACHE_NAME && cache !== CDN_CACHE_NAME) {
-            console.log('🧹 [Nahla SW] تم تطهير الذاكرة القديمة:', cache);
+            console.log('🧹 [AlHut SW] تم تطهير الذاكرة القديمة:', cache);
             return caches.delete(cache);
           }
         })
@@ -89,7 +91,7 @@ self.addEventListener('fetch', event => {
             caches.open(CDN_CACHE_NAME).then(cache => cache.put(event.request, responseClone));
           }
           return networkResponse;
-        }).catch(err => console.log('⚠️ [Nahla SW] CDN Offline:', url.hostname));
+        }).catch(err => console.log('⚠️ [AlHut SW] CDN Offline:', url.hostname));
       })
     );
     return;
@@ -129,7 +131,7 @@ self.addEventListener('notificationclick', event => {
     clients.matchAll({ type: 'window', includeUncontrolled: true }).then(windowClients => {
       // البحث عن أي نافذة مفتوحة للنظام وتفعيلها
       for (let client of windowClients) {
-        if (client.url.includes('Driver.html') || client.url.includes('Restaurant.html') || client.url.includes('Master.html')) {
+        if (client.url.includes('Driver.html') || client.url.includes('Restaurant.html') || client.url.includes('Nhleman.html')) {
           if ('focus' in client) {
             return client.focus();
           }
