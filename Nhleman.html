@@ -2,34 +2,32 @@
 <html lang="ar" dir="rtl">
 <head>
 <script>
-const V="22.0",VK="hut_v22"; // V22 محصّنة أمنياً — تحديث الإصدار لمسح الكاش
+// 🛡️ V22.0 "Fortress" — رفع رقم الإصدار يفرض مسح الكاش على كل الأجهزة
+const V="22.0",VK="nahla_v22";
 try{if(localStorage.getItem(VK)!==V){localStorage.setItem(VK,V);if("caches"in window)caches.keys().then(n=>n.forEach(k=>caches.delete(k)));}}catch(e){}
 </script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no,viewport-fit=cover">
 <title>نحلة — لوحة الإدارة</title>
-<meta name="theme-color" content="#111827">
+<meta name="theme-color" content="#0a1628">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAo1rmqUzieYZU3RIwXOAN87GkpNrp-_Hc&libraries=places"></script>
+<!-- ⚡ الأداء: خرائط جوجل تُحمَّل كسولاً عند فتح نافذة التعديل فقط (كانت تُحمَّل
+     مع كل فتح للّوحة وتُبطئها بشدّة). markercluster حُذف (كان يُحمَّل بلا استخدام). -->
 <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-database-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js" defer></script>
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet.heat/0.2.0/leaflet-heat.js"></script>
-<link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.4.1/dist/MarkerCluster.css"/>
-<link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.4.1/dist/MarkerCluster.Default.css"/>
-<script src="https://unpkg.com/leaflet.markercluster@1.4.1/dist/leaflet.markercluster.js"></script>
-<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
-<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet.heat/0.2.0/leaflet-heat.js" defer></script>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap" rel="stylesheet">
 <style>
 :root{
-  --ink:#111827;--ink2:#1e3a5f;--ink3:#4a6fa5;--ink4:#8bafd4;
-  --sky:#111827;--sky-d:#000000;--sky-l:#FFF8E1;--sky-m:#FFFDF5;
-  --jade:#05A357;--jade-l:#ecfdf5;
-  --fire:#FFC107;--fire-d:#E0A800;--fire-l:#FFF8E1;
+  --ink:#0a1628;--ink2:#1e3a5f;--ink3:#4a6fa5;--ink4:#8bafd4;
+  --sky:#2563eb;--sky-d:#1d4ed8;--sky-l:#eff6ff;--sky-m:#f0f7ff;
+  --jade:#059669;--jade-l:#ecfdf5;
+  --fire:#f97316;--fire-d:#ea580c;--fire-l:#fff7ed;
   --rose:#ef4444;--rose-l:#fef2f2;
   --amber:#f59e0b;--amber-l:#fffbeb;
   --violet:#7c3aed;--violet-l:#f5f3ff;
@@ -56,7 +54,7 @@ button,input,select,textarea{font-family:'Cairo',sans-serif;}
 #toasts{position:fixed;top:max(16px,env(safe-area-inset-top));left:50%;
   transform:translateX(-50%);z-index:99999;display:flex;flex-direction:column;
   gap:8px;width:min(94%,360px);pointer-events:none;}
-.ti{background:rgba(255,255,255,.97);backdrop-filter:blur(24px);
+.ti{background:rgba(255,255,255,.97);
   border-radius:14px;padding:12px 16px;box-shadow:var(--sh-lg);
   display:flex;align-items:center;gap:10px;font-weight:700;font-size:.84rem;
   border:1px solid rgba(255,255,255,.9);animation:tin .3s var(--ease);pointer-events:auto;}
@@ -75,10 +73,10 @@ button,input,select,textarea{font-family:'Cairo',sans-serif;}
 .fb-dot.off{background:var(--rose);}
 @media(min-width:769px){#fbSt{left:calc(var(--sb)+16px);bottom:16px;}}
 #auth{position:fixed;inset:0;z-index:60000;
-  background:linear-gradient(135deg,#dbeeff 0%,#FFFDF5 50%,#fff4ed 100%);
+  background:linear-gradient(135deg,#dbeeff 0%,#f0f7ff 50%,#fff4ed 100%);
   display:flex;align-items:center;justify-content:center;padding:20px;}
 .auth-box{width:100%;max-width:380px;
-  background:rgba(255,255,255,.92);backdrop-filter:blur(32px);
+  background:rgba(255,255,255,.92);
   border-radius:28px;border:1px solid rgba(255,255,255,.95);
   box-shadow:var(--sh-lg);padding:48px 36px 40px;text-align:center;}
 .auth-mark{width:72px;height:72px;border-radius:22px;
@@ -155,7 +153,7 @@ button,input,select,textarea{font-family:'Cairo',sans-serif;}
   .sidebar,.dh,.desk-only{display:none!important;}
   .main{margin-right:0!important;width:100%;padding:0;overflow:hidden;}
   .bnav{display:flex;position:fixed;bottom:0;left:0;width:100%;height:var(--nav);
-    background:rgba(255,255,255,.95);backdrop-filter:blur(24px) saturate(180%);
+    background:rgba(255,255,255,.95);
     border-top:1px solid var(--line);border-radius:22px 22px 0 0;
     justify-content:space-around;align-items:center;z-index:9000;
     padding-bottom:env(safe-area-inset-bottom);box-shadow:0 -6px 28px rgba(10,22,40,.07);}
@@ -182,13 +180,13 @@ button,input,select,textarea{font-family:'Cairo',sans-serif;}
     left:14px;right:14px;z-index:20;display:flex;
     justify-content:space-between;align-items:center;pointer-events:none;}
   .mob-hdr>*{pointer-events:auto;}
-  .pill{background:rgba(255,255,255,.96);backdrop-filter:blur(12px);
+  .pill{background:rgba(255,255,255,.96);
     padding:7px 14px;border-radius:var(--rf);display:flex;
     align-items:center;gap:8px;box-shadow:var(--sh-sm);}
   .pill-t{font-size:.82rem;font-weight:900;color:var(--sky-d);}
   .mob-st{position:absolute;top:calc(max(14px,env(safe-area-inset-top)) + 54px);
     right:14px;z-index:20;display:flex;flex-direction:column;gap:6px;}
-  .mst{background:rgba(255,255,255,.96);backdrop-filter:blur(12px);
+  .mst{background:rgba(255,255,255,.96);
     padding:6px 12px;border-radius:var(--rf);font-weight:800;font-size:.82rem;
     box-shadow:var(--sh-xs);display:flex;align-items:center;gap:6px;color:var(--ink);}
   .b-sheet{position:absolute;bottom:0;left:0;right:0;
@@ -255,9 +253,9 @@ button,input,select,textarea{font-family:'Cairo',sans-serif;}
 .oa::after{background:var(--jade);}
 .oar::after{background:var(--fire);}
 .os::after{background:var(--violet);}
-.op{animation:rp 2.2s ease-in-out infinite;}
+.op{}
 @keyframes rp{0%,100%{box-shadow:var(--sh-xs)}50%{box-shadow:0 4px 18px rgba(239,68,68,.2)}}
-.or{animation:rw 2.2s ease-in-out infinite;}
+.or{}
 @keyframes rw{0%,100%{box-shadow:var(--sh-xs)}50%{box-shadow:0 4px 18px rgba(245,158,11,.18)}}
 .oc-head{padding-bottom:10px;margin-bottom:10px;border-bottom:1px solid var(--line2);}
 .oc-id{font-size:.92rem;font-weight:900;color:var(--ink);}
@@ -294,7 +292,7 @@ button,input,select,textarea{font-family:'Cairo',sans-serif;}
 .rdy-badge{background:var(--jade-l);color:var(--jade);font-size:.62rem;font-weight:900;
   padding:2px 7px;border-radius:var(--rf);border:1px solid #a7f3d0;
   display:inline-flex;align-items:center;gap:3px;
-  animation:rdp 2s ease-in-out infinite;}
+  }
 @keyframes rdp{0%,100%{box-shadow:0 0 0 0 rgba(5,150,105,.4)}50%{box-shadow:0 0 0 5px rgba(5,150,105,0)}}
 .asel{border:1.5px solid var(--line);border-radius:8px;padding:4px 8px;
   font-size:.7rem;font-weight:800;max-width:115px;background:var(--base);
@@ -372,7 +370,7 @@ button,input,select,textarea{font-family:'Cairo',sans-serif;}
 .dr-br{background:#fef3c7;color:#b45309;border-color:#fde68a;}
 .dr-sv{background:#f8fafc;color:#64748b;border-color:#cbd5e1;}
 .dr-gd{background:#fffbeb;color:#d97706;border-color:#fde68a;}
-.dr-dm{background:#f0fdfa;color:#05A357;border-color:#a7f3d0;box-shadow:0 0 8px rgba(5,150,105,.18);}
+.dr-dm{background:#f0fdfa;color:#059669;border-color:#a7f3d0;box-shadow:0 0 8px rgba(5,150,105,.18);}
 .dm-row{display:flex;gap:7px;font-size:.65rem;font-weight:800;
   margin-bottom:8px;background:var(--base2);padding:5px 8px;
   border-radius:10px;border:1px solid var(--line2);}
@@ -431,7 +429,7 @@ button,input,select,textarea{font-family:'Cairo',sans-serif;}
   font-size:.82rem;font-weight:800;color:var(--sky-d);
   white-space:nowrap;overflow:hidden;display:flex;align-items:center;
   box-shadow:var(--sh-xs);border:1px solid var(--line2);margin-bottom:16px;}
-.ticker-in{display:inline-block;animation:tsc 22s linear infinite;}
+.ticker-in{display:inline-block;}
 @keyframes tsc{0%{transform:translateX(100vw)}100%{transform:translateX(-100%)}}
 .st-card{background:var(--base);border-radius:var(--r5);padding:15px 14px;
   box-shadow:var(--sh-xs);border:1px solid var(--line2);
@@ -470,7 +468,7 @@ button,input,select,textarea{font-family:'Cairo',sans-serif;}
 .fc:focus{background:#fff;border-color:var(--sky);box-shadow:0 0 0 3px var(--sky-l);}
 .el{font-size:.7rem;font-weight:800;color:var(--ink4);margin-bottom:4px;display:block;}
 .mbg{position:fixed;inset:0;background:rgba(10,22,40,.65);
-  backdrop-filter:blur(7px);z-index:20000;display:none;
+  z-index:20000;display:none;
   align-items:center;justify-content:center;padding:16px;}
 .mbg.open{display:flex;animation:mfade .25s;}
 @keyframes mfade{from{opacity:0}to{opacity:1}}
@@ -507,7 +505,7 @@ button,input,select,textarea{font-family:'Cairo',sans-serif;}
 #editPickerMap{width:100%;height:240px;border-radius:14px;
   border:2px solid var(--line);margin-bottom:7px;overflow:hidden;}
 #eModal{position:fixed;inset:0;background:rgba(0,0,0,.55);
-  backdrop-filter:blur(8px);z-index:40000;display:none;
+  z-index:40000;display:none;
   align-items:center;justify-content:center;padding:20px;}
 .em-card{background:var(--base);border-radius:24px;padding:32px 24px;
   max-width:330px;width:100%;text-align:center;
@@ -516,7 +514,7 @@ button,input,select,textarea{font-family:'Cairo',sans-serif;}
 .em-ic{animation:eb 1s ease-in-out infinite;display:inline-block;font-size:52px;}
 @keyframes eb{0%,100%{transform:scale(1)}50%{transform:scale(1.1)}}
 #invModal{position:fixed;inset:0;background:rgba(10,22,40,.55);
-  backdrop-filter:blur(9px);z-index:30000;display:none;
+  z-index:30000;display:none;
   align-items:flex-end;justify-content:center;}
 @media(min-width:769px){#invModal{align-items:center;padding:20px;}}
 .inv-c{background:var(--base);border-radius:22px 22px 0 0;
@@ -535,7 +533,7 @@ button,input,select,textarea{font-family:'Cairo',sans-serif;}
 .inv-lb{font-weight:700;color:var(--ink3);}
 .inv-vl{font-weight:800;color:var(--ink);text-align:left;max-width:57%;}
 #imgModal{position:fixed;inset:0;background:rgba(10,22,40,.9);
-  backdrop-filter:blur(14px);z-index:50000;display:none;
+  z-index:50000;display:none;
   align-items:center;justify-content:center;padding:18px;}
 .img-w{position:relative;border-radius:12px;overflow:hidden;
   box-shadow:var(--sh-lg);animation:mpop .26s;}
@@ -572,11 +570,11 @@ button,input,select,textarea{font-family:'Cairo',sans-serif;}
 .rt{font-size:.9rem;font-weight:900;color:var(--ink);
   display:flex;align-items:center;gap:6px;margin-bottom:11px;}
 .rt-dot{width:7px;height:7px;border-radius:50%;background:var(--fire);
-  animation:db 1.5s ease-in-out infinite;}
+  }
 @keyframes db{0%,100%{transform:scale(1)}50%{transform:scale(1.6)}}
 .flash{animation:fl .55s ease-out;}
 @keyframes fl{0%{background:var(--sky-l)}100%{background:var(--base)}}
-.path-anim{animation:da 16s linear infinite;}
+.path-anim{}
 @keyframes da{to{stroke-dashoffset:-1000}}
 .leaflet-container{font-family:'Cairo',sans-serif;}
 .dm{width:31px;height:31px;border-radius:50%;border:2.5px solid #fff;
@@ -593,7 +591,7 @@ button,input,select,textarea{font-family:'Cairo',sans-serif;}
   text-align:center;line-height:1.4;}
 .rp{width:21px;height:21px;background:var(--fire);border-radius:50%;
   border:2px solid #fff;color:#fff;display:flex;align-items:center;
-  justify-content:center;font-size:8px;animation:rpp 1.5s infinite;}
+  justify-content:center;font-size:8px;}
 @keyframes rpp{70%{box-shadow:0 0 0 9px rgba(249,115,22,0)}100%{box-shadow:0 0 0 0 rgba(249,115,22,0)}}
 .pg-ttl{font-size:1.1rem;font-weight:900;color:var(--ink);margin-bottom:14px;}
 @media(min-width:769px){.pg-ttl{display:none;}}
@@ -617,13 +615,14 @@ button,input,select,textarea{font-family:'Cairo',sans-serif;}
   font-size:.76rem;font-weight:800;cursor:pointer;
   display:inline-flex;align-items:center;gap:5px;
   background:var(--sky);color:#fff;box-shadow:var(--sh-sky);}
-.staff-hero{background:linear-gradient(135deg,#1e3a8a,#111827);border-radius:var(--r5);
+/* ═══ تحسينات تبويب الموظفين ═══ */
+.staff-hero{background:linear-gradient(135deg,#1e3a8a,#2563eb);border-radius:var(--r5);
   padding:16px 18px;margin-bottom:16px;color:#fff;display:flex;align-items:center;
   justify-content:space-between;gap:12px;box-shadow:var(--sh-sky);}
 .staff-hero-t{font-size:1rem;font-weight:900;}
 .staff-hero-s{font-size:.7rem;font-weight:700;opacity:.85;margin-top:2px;}
 .live-pulse{width:9px;height:9px;border-radius:50%;background:#4ade80;
-  box-shadow:0 0 0 0 rgba(74,222,128,.7);animation:lpz 1.6s infinite;}
+  box-shadow:0 0 0 0 rgba(74,222,128,.7);}
 @keyframes lpz{70%{box-shadow:0 0 0 8px rgba(74,222,128,0)}100%{box-shadow:0 0 0 0 rgba(74,222,128,0)}}
 .idle-dot{display:inline-block;width:7px;height:7px;border-radius:50%;margin-left:4px;}
 .idle-fresh{background:var(--jade);}.idle-mid{background:var(--amber);}.idle-stale{background:var(--rose);}
@@ -990,7 +989,7 @@ button,input,select,textarea{font-family:'Cairo',sans-serif;}
     </div>
     <div id="pg-audit" class="pg tab-p">
       <div class="pg-ttl">سجل التدقيق</div>
-      <div class="arch-alert" style="margin-bottom:12px">🕒 يُحفظ سجل التدقيق ليوم واحد — يُصفّره النظام تلقائياً في التقرير الليلي (3 فجراً).</div>
+      <div class="arch-alert" style="margin-bottom:12px">🕒 سجل التدقيق محفوظ تراكمياً — منذ CF-6.0 لم يعد يُمحى ليلياً 🔧[خ٢٢]. يُعرض هنا آخر 120 حدثاً.</div>
       <div class="srch-w" style="margin-bottom:16px"><span class="si">🔍</span><input type="text" id="auSch" class="srch" placeholder="ابحث في السجل..." oninput="renderAudit()"></div>
       <div id="auList"></div>
     </div>
@@ -1004,11 +1003,39 @@ button,input,select,textarea{font-family:'Cairo',sans-serif;}
   </nav>
 </div>
 <script>
-const O={ID:0,RES:1,AREA:2,DETAILS:3,PRICE:4,STATUS:5,DRV:6,TIME:7,PHOTO:8,SOV:9,LU:10,LO:11,READY:12,COMM:13,PAY:14,DOUBLE:15};
+/* ═══════════════════════════════════════════════════════════════
+   🛡️ لوحة الإدارة V22.0 "Fortress" — متناسقة مع النظام المحصّن
+   (قواعد V2.0 + GAS V16.0 + CF-6.0)
+   ما تغيّر عن V21.1:
+   🔧[خ١]  getGlobalData صارت بوابة إدارية: نداؤها يتطلب ATOK
+           (ADMIN_API_TOKEN) المنفصل — لا يوجد إلا في هذه اللوحة.
+           ملاحظة: أعمدة كلمات المرور تصل الآن معمّاة "•••" — اللوحة
+           لا تعرضها أصلاً فلا شيء ينكسر.
+   🔧[خ٣]  التوكن المحروق NAHLA_SECURE_TOKEN_2026 استُبدل بموضعَي التوكنين.
+   🩹      كل مستمعات فايربيس صارت ذاتية الشفاء عبر listen():
+           عند أي رفض قراءة (انتهاء توكن الساعة، انقطاع) تُعاد
+           المصادقة بـ VERIFY_MASTER_PASS ويُعاد الربط تلقائياً —
+           فايربيس يفصل المستمع المرفوض نهائياً ولا يعيده بنفسه.
+   🔧[خ٧]  nP() تحوّل الأرقام العربية/الفارسية (تطبيع موحّد مع
+           GAS/CF) — البحث برقم عربي يعمل الآن.
+   🔧[خ٢٢] نص تنبيه سجل التدقيق حُدّث: CF-6.0 لم يعد يمحو
+           admin_audit_trail ليلياً — السجل تراكمي.
+   ملاحظة: الكتابات المباشرة على فايربيس (إكمال/إلغاء/تعيين/سحب/
+   بث/تدقيق) متوافقة مع قواعد V2.0 لأن توكن اللوحة يحمل دور admin.
+   delOrder أصلاً يكتب status:'deleted' لا حذفاً — متوافق مع منع
+   الحذف الجديد.
+═══════════════════════════════════════════════════════════════ */
+const O={ID:0,RES:1,AREA:2,DETAILS:3,PRICE:4,STATUS:5,DRV:6,TIME:7,PHOTO:8,SOV:9,LU:10,LO:11,READY:12,COMM:13,PAY:14,DOUBLE:15,RESPH:16}; // 🩹[خ٣٣] RESPH: هاتف المطعم — المفتاح الحقيقي
 const R={ID:0,NAME:1,PHONE:2,AREA:3,STATUS:4,COMM:5,LAT:6,LNG:7,PAY:8,C9:9,C10:10,C11:11,C12:12,PRICELIST:12,PASS:13};
 const D={ID:0,NAME:1,PHONE:2,AREA:3,STATUS:4,LAT:5,LNG:6,PASS:12,SHIFT:13};
+/* ⚠️ بعد إعادة نشر سكربت GAS V16.0 قد يتغيّر رابط النشر — حدّثه هنا. */
 const API="https://script.google.com/macros/s/AKfycbyiFprfbDKMwOG75eZl-V5_M7XmqLkmK49YBQjhHKr_Gka77Gmdgt6uU6K5KeXilMViDw/exec";
+/* 🔧[خ٣] توكن التطبيقات العام (API_TOKEN من Script Properties). */
 const TOK="NAHLA_SECURE_TOKEN_2026";
+/* 🩹 [① تسريب البيانات] أُزيل ATOK نهائياً من مصدر اللوحة: كان توكن الإدارة
+   مكتوباً هنا فيُستخرَج من "عرض المصدر" بلا كلمة مرور، ثم يُنادى getGlobalData
+   فتتسرّب كل البيانات. الآن getGlobalData تُنادى عبر POST بكلمة المرور فقط
+   (تُفحص في السيرفر)، ولا يوجد أي سرّ إداري في هذا الملف. */
 const TITLES={live:"الرصد الميداني",orders:"سجل اليوم",restaurants:"إدارة المطاعم",drivers:"إدارة الأسطول",staff:"إدارة الموظفين",aiops:"مركز القيادة",audit:"سجل التدقيق"};
 
 let MP="",gD=null;
@@ -1026,15 +1053,17 @@ let gMap=null,gMarker=null,gAutoComplete=null;
 let dc=null,pc=null,archHtml="",drvSelOpts="";
 let _auInit=false,_alInit=false;
 
+/* ─── حالة نظام الموظفين ─── */
 let staffSessions={},staffLog=[],staffRoster=[],_stInit=false,stEditMode=false,_stIdleTimer=null;
 
 try{firebase.initializeApp({apiKey:"AIzaSyAsmQKlCCZpCgfJG8AZM7fWmYPWVZkpjSQ",authDomain:"nahla-delivery-6b06f.firebaseapp.com",databaseURL:"https://nahla-delivery-6b06f-default-rtdb.europe-west1.firebasedatabase.app",projectId:"nahla-delivery-6b06f",storageBucket:"nahla-delivery-6b06f.firebasestorage.app",messagingSenderId:"592782211437",appId:"1:592782211437:web:4af068aab5807926bf0264"});}catch(e){}
 const db=firebase.database();
 const auth=firebase.auth();
 
+/* ════ الحماية السحابية: استهلاك توكن الإدارة وتجديده ════ */
 let _adminTokenTimer=null;
 async function consumeAdminToken(tok,pass){
-  if(!tok){console.warn("لم يصل firebase_token من السكربت — تحقق من مفاتيح الخدمة في Script Properties.");return;}
+  if(!tok){console.warn("⚠️ لم يصل firebase_token من السكربت — تحقق من مفاتيح الخدمة في Script Properties.");return;}
   try{
     await auth.signInWithCustomToken(tok);
     scheduleAdminTokenRefresh(pass);
@@ -1052,9 +1081,52 @@ function scheduleAdminTokenRefresh(pass){
   },50*60*1000);
 }
 
+/* 🩹 شفاء المصادقة عند رفض القراءة — نداء واحد جارٍ مهما تعددت المستمعات */
+let _reauthInFlight=null;
+function healAdminAuth(){
+  if(_reauthInFlight)return _reauthInFlight;
+  _reauthInFlight=(async()=>{
+    let ok=false;
+    try{
+      if(MP){
+        const r=await fetch(API,{method:"POST",body:JSON.stringify({action:"VERIFY_MASTER_PASS",pass:MP,token:TOK})});
+        const d=await r.json();
+        if(d&&d.success&&d.firebase_token){await auth.signInWithCustomToken(d.firebase_token);ok=true;}
+      }
+    }catch(e){}
+    _reauthInFlight=null;
+    return ok;
+  })();
+  return _reauthInFlight;
+}
+
+/* 🩹 مستمع ذاتي الشفاء: mkRef دالة تُعيد ref/query (لدعم limitToLast عند
+   إعادة الربط). فايربيس يفصل المستمع المرفوض نهائياً — هنا نشفي
+   المصادقة ونعيد الربط بأنفسنا. */
+function listen(mkRef,cb){
+  const ref=mkRef();
+  const cancel=async(err)=>{
+    console.warn("🔒 رُفضت القراءة:",err&&err.message);
+    const ok=await healAdminAuth();
+    setTimeout(()=>listen(mkRef,cb),ok?1200:15000);
+  };
+  ref.on("value",cb,cancel);
+  fbL.push({ref,cb});
+}
+
 function esc(s){if(s==null)return"";const d=document.createElement("div");d.textContent=String(s);return d.innerHTML;}
 function ej(s){return String(s??'').replace(/\\/g,'\\\\').replace(/'/g,"\\'").replace(/"/g,'&quot;');}
-function nP(p){if(!p)return"";let s=String(p).replace(/[^\d]/g,"");if(s.startsWith("964"))s=s.slice(3);return s.replace(/^0+/,"");}
+/* 🔧[خ٧] التطبيع الموحّد حرفياً مع GAS V16.0 و CF-6.0:
+   أرقام عربية/فارسية → لاتينية، إسقاط 964، إسقاط كل الأصفار البادئة. */
+function nP(p){
+  if(!p)return"";
+  let s=String(p);
+  const ar=['٠','١','٢','٣','٤','٥','٦','٧','٨','٩'],fa=['۰','۱','۲','۳','۴','۵','۶','۷','۸','۹'];
+  for(let i=0;i<10;i++){s=s.split(ar[i]).join(String(i));s=s.split(fa[i]).join(String(i));}
+  s=s.replace(/[^\d]/g,"");
+  if(s.startsWith("964"))s=s.slice(3);
+  return s.replace(/^0+/,"");
+}
 function dN(p){
   if(!p)return"غير محدد";
   const found=gD?.drivers.find(x=>nP(x[D.PHONE])===nP(p));
@@ -1069,6 +1141,8 @@ function toast(m,t="s"){
   c.appendChild(el);
   setTimeout(()=>{el.style.opacity="0";el.style.transition=".3s";setTimeout(()=>el.remove(),320);},3200);
 }
+/* الكتابة على admin_audit_trail مسموحة لدور admin في قواعد V2.0.
+   🔧[خ٢٢] السجل تراكمي الآن — CF-6.0 لم يعد يمحوه ليلياً. */
 function logAudit(a,d){db.ref("admin_audit_trail").push({action:a,details:d,timestamp:new Date().toISOString(),user:"admin"}).catch(()=>{});}
 function opMod(id){document.getElementById(id).classList.add("open");}
 function clMod(id){document.getElementById(id).classList.remove("open");}
@@ -1077,6 +1151,19 @@ function clImg(){document.getElementById("imgModal").style.display="none";docume
 function clEmerg(){document.getElementById("eModal").style.display="none";document.getElementById("esnd").pause();emrgMuted=true;}
 function trEmerg(){const m=document.getElementById("eModal");if(m.style.display!=="flex"){m.style.display="flex";document.getElementById("esnd").play().catch(()=>{});}}
 function debounce(fn,ms){let t;return function(){clearTimeout(t);t=setTimeout(()=>fn.apply(this,arguments),ms);};}
+/* ⚡ الأداء: بدل إعادة رسم كل شيء (رادار+خريطة+جدول+رسوم) عند كل تغيّر طلب،
+   نجمع الدفعات في ربع ثانية ونرسم **التبويب المرئي فقط**. كانت اللوحة تعيد
+   بناء الجدول والرسوم والخريطة حتى وهي مخفية، فتهنج. */
+let _derivedT=null;
+function scheduleDerived(){
+  if(_derivedT)return;
+  _derivedT=setTimeout(()=>{
+    _derivedT=null;
+    if(document.getElementById("pg-live").classList.contains("on")){renderRadar();updHeat();updResMk();}
+    if(document.getElementById("pg-orders").classList.contains("on")){renderArch();renderCharts();}
+  },250);
+}
+const _drvListDebounced=debounce(()=>{if(gD&&document.getElementById("pg-drivers").classList.contains("on"))filtEnt("DRV");},600);
 
 function pComm(cs,pt){
   const s=String(cs||"").toLowerCase().trim(),ptt=String(pt||"").trim();
@@ -1094,10 +1181,25 @@ function cDisp(cs){
   if(s.includes("/")){const p=s.split("/");return{text:`📊 كابتن ${p[0]} / مطعم ${p[1]} د.ع`,cls:"ct-sp"};}
   return{text:`💰 ${cs} د.ع / طلب`,cls:"ct-f"};
 }
+/* 🩹[خ٣٣] البحث عن المطعم بالهاتف أولاً — المفتاح الحقيقي.
+   البحث بالاسم كان يخلط مطعمين متشابهي الاسم (أو فرعين)، فتظهر
+   إحداثيات وعمولة المطعم الخطأ. الاسم يبقى احتياطاً للطلبات القديمة. */
+function findRes(o){
+  if(!gD?.restaurants) return null;
+  const ph=nP(o?.[O.RESPH]);
+  if(ph){ const byPh=gD.restaurants.find(r=>nP(r[R.PHONE])===ph); if(byPh) return byPh; }
+  return gD.restaurants.find(r=>r[R.NAME]===o?.[O.RES]) || null;
+}
+function findResByName(nm){
+  if(!gD?.restaurants) return null;
+  const o=liveOrd.find(x=>x[O.RES]===nm) || archOrd.find(x=>x[O.RES]===nm);
+  if(o) return findRes(o);
+  return gD.restaurants.find(r=>r[R.NAME]===nm) || null;
+}
 function getCommVal(o){
   const sc=o[O.COMM];
   if(sc!=null&&!isNaN(parseFloat(sc))&&!String(sc).includes("/")&&!String(sc).includes("شهري"))return parseFloat(sc);
-  const rD=gD?.restaurants.find(r=>r[R.NAME]===o[O.RES]);
+  const rD=findRes(o);
   return rD?pComm(String(rD[R.COMM]||"0"),String(rD[R.PAY]||"")).res||0:0;
 }
 function rCoords(r){
@@ -1108,9 +1210,9 @@ function rCoords(r){
   return null;
 }
 
-window.addEventListener("DOMContentLoaded",()=>{
-  document.getElementById("mPW").value="";
-});
+/* 🩹 [④] أُزيل الدخول الآلي وتخزين كلمة مرور المدير نصّاً صريحاً في
+   sessionStorage (كانت تُلتقط بأي XSS). المدير يُدخل كلمته كل جلسة، وتبقى
+   في الذاكرة فقط للتجديد. */
 window.doAuth=async function(){
   const pass=document.getElementById("mPW").value.trim();
   if(!pass)return toast("أدخل رمز المرور","e");
@@ -1120,6 +1222,8 @@ window.doAuth=async function(){
     const r=await fetch(API,{method:"POST",body:JSON.stringify({action:"VERIFY_MASTER_PASS",pass,token:TOK})});
     const d=await r.json();
     if(d.success){
+      /* المصادقة تكتمل هنا قبل setupFB — فالمستمعات تُربط دائماً
+         بجلسة admin فعلية (شرط القراءة في قواعد V2.0). */
       await consumeAdminToken(d.firebase_token,pass);
       document.getElementById("auth").style.display="none";
       document.getElementById("app").classList.remove("dn");
@@ -1140,10 +1244,16 @@ function startClk(){
 }
 
 async function loadData(){
-  if(!MP){toast("انتهت الجلسة — أعد الدخول","e");return;}
+  if(!MP)return;
   try{
-    const r=await fetch(API,{method:"POST",headers:{"Content-Type":"text/plain"},body:JSON.stringify({action:"getGlobalDataSecure",token:TOK,pass:MP,ts:Date.now()})});
+    /* 🩹 [①] getGlobalData عبر POST بكلمة المرور (في الجسم، لا في الرابط) —
+       لا توكن إداري ثابت في العميل بعد الآن. */
+    const r=await fetch(API,{method:"POST",headers:{"Content-Type":"text/plain"},body:JSON.stringify({action:"getGlobalData",token:TOK,pass:MP})});
     const data=await r.json();
+    if(data&&data.success===false){
+      toast(data.msg||"مرفوض — تحقّق من كلمة مرور الإدارة","e");
+      return;
+    }
     const now=Date.now();
     data.drivers.forEach(d=>{const ov=ovr.d[d[D.PHONE]];if(ov&&now-ov.ts<120000)d[D.STATUS]=ov.status;else if(ov)delete ovr.d[d[D.PHONE]];});
     data.restaurants.forEach(r=>{const ov=ovr.r[r[R.PHONE]];if(ov&&now-ov.ts<120000)r[R.STATUS]=ov.status;else if(ov)delete ovr.r[r[R.PHONE]];});
@@ -1163,6 +1273,7 @@ async function loadData(){
 }
 
 function setupFB(){
+  /* مؤشر الاتصال — لا يحتاج مصادقة، يبقى ربطاً مباشراً */
   db.ref(".info/connected").on("value",snap=>{
     fbConn=snap.val()===true;
     const dot=document.getElementById("fbDot"),txt=document.getElementById("fbTxt"),cs=document.getElementById("fbCS");
@@ -1171,7 +1282,6 @@ function setupFB(){
     if(cs)cs.textContent=fbConn?"🟢 متصل":"🔴 منقطع";
     updTicker();
   });
-  const oRef=db.ref("active_orders");
   const oCb=snap=>{
     const obj=snap.val();let active=[],arch=[];const now=Date.now();
     if(obj){Object.values(obj).forEach(o=>{
@@ -1180,7 +1290,7 @@ function setupFB(){
         o.price||0,o.status||"pending",o.driverPhone||"",
         o.last_update||o.timestamp||"",o.photoUrl||"",o.is_sovereign||false,
         o.last_update||"",o.last_offered_to||"",o.ready_for_pickup||false,
-        o.comm??null,o.payType||"",o.is_double||false];
+        o.comm??null,o.payType||"",o.is_double||false,o.resPhone||""];
       const st=String(o.status||"").toLowerCase().trim();
       const DONE=["completed","مكتمل","settled","delivered","done","تم التسليم","تم","finished","complete"];
       const isDone=DONE.includes(st)||DONE.includes(o.status)||st==="deleted"||o.status==="deleted";
@@ -1214,10 +1324,9 @@ function setupFB(){
     const wd=document.getElementById("wdT");if(wd)wd.textContent=active.length+arch.length;
     const nb=document.getElementById("nbO");if(nb){nb.textContent=np;nb.style.display=np>0?"":"none";}
     const bd=document.getElementById("bnDot");if(bd)bd.classList.toggle("on",np>0);
-    updRadarCnts();renderRadar();updHeat();updResMk();renderArch();updTicker();renderCharts();
+    updRadarCnts();updTicker();scheduleDerived();
   };
-  oRef.on("value",oCb);fbL.push({ref:oRef,cb:oCb});
-  const lRef=db.ref("drivers_locations");
+  listen(()=>db.ref("active_orders"),oCb);
   const lCb=snap=>{
     const locs=snap.val();if(!locs)return;
     const now=Date.now();actDrv.clear();
@@ -1246,34 +1355,30 @@ function setupFB(){
     document.querySelectorAll(".v-drv").forEach(e=>e.textContent=actDrv.size);
     if(gD){updBadges("DRV",gD.drivers);}
     updTicker();
-    if(gD&&document.getElementById("pg-drivers").classList.contains("on"))filtEnt("DRV");
+    // ⚡ تأجيل رسم قائمة الأسطول: كان يُعاد بناؤها كاملةً مع كل نبضة موقع لكل كابتن
+    if(gD&&document.getElementById("pg-drivers").classList.contains("on"))_drvListDebounced();
   };
-  lRef.on("value",lCb);fbL.push({ref:lRef,cb:lCb});
-  const ledRef=db.ref("ledgers");
+  listen(()=>db.ref("drivers_locations"),lCb);
   const ledCb=snap=>{
     liveLed=snap.val()||{drivers:{},restaurants:{}};
     if(gD){updBadges("RES",gD.restaurants);updBadges("DRV",gD.drivers);}
     patchCards("RES");patchCards("DRV");updTicker();
   };
-  ledRef.on("value",ledCb);fbL.push({ref:ledRef,cb:ledCb});
-  const dmRef=db.ref("daily_metrics");
+  listen(()=>db.ref("ledgers"),ledCb);
   const dmCb=snap=>{liveMet=snap.val()||{};if(gD&&document.getElementById("pg-drivers").classList.contains("on"))filtEnt("DRV");};
-  dmRef.on("value",dmCb);fbL.push({ref:dmRef,cb:dmCb});
-  const shRef=db.ref("system_settings/shifts_enabled");
+  listen(()=>db.ref("daily_metrics"),dmCb);
   const shCb=snap=>{shiftsOn=snap.val()!==false;updShiftsUI();};
-  shRef.on("value",shCb);fbL.push({ref:shRef,cb:shCb});
-  const hcRef=db.ref("system_settings/health_check");
+  listen(()=>db.ref("system_settings/shifts_enabled"),shCb);
   const hcCb=snap=>{
     const hc=snap.val();const el=document.getElementById("hcSt");
     if(el&&hc!=null){const age=Date.now()-(typeof hc==="number"?hc:new Date(hc).getTime());
       el.textContent=age<300000?"مستقر":"متأخر";el.style.color=age<300000?"var(--jade)":"var(--amber)";}
   };
-  hcRef.on("value",hcCb);fbL.push({ref:hcRef,cb:hcCb});
+  listen(()=>db.ref("system_settings/health_check"),hcCb);
   const _days=[];
   for(let i=0;i<3;i++){const d=new Date();d.setDate(d.getDate()-i);_days.push(d.toISOString().split("T")[0]);}
   compArch=[];compByDay={};
   _days.forEach(day=>{
-    const cRef=db.ref("completed_orders/"+day);
     const cCb=snap=>{
       const obj=snap.val();const arr=[];
       if(obj)Object.values(obj).forEach(o=>{
@@ -1281,19 +1386,18 @@ function setupFB(){
         arr.push([o.id||"",o.restaurant||"مطعم",o.area||"غير محدد",o.details||"طلب توصيل",
           o.price||0,o.status||"completed",o.driverPhone||"",
           o.last_update||o.completed_at||day+"T00:00:00Z",o.photoUrl||"",o.is_sovereign||false,
-          o.last_update||"",o.last_offered_to||"",false,o.comm??null,o.payType||""]);
+          o.last_update||"",o.last_offered_to||"",false,o.comm??null,o.payType||"",false,o.resPhone||""]);
       });
       compByDay[day]=arr;
       compArch=[].concat.apply([],Object.values(compByDay));
       renderArch();
     };
-    cRef.on("value",cCb);fbL.push({ref:cRef,cb:cCb});
+    listen(()=>db.ref("completed_orders/"+day),cCb);
   });
-  const rlRef=db.ref("restaurants_locations");
   const rlCb=snap=>{liveResLoc=snap.val()||{};updResMk();};
-  rlRef.on("value",rlCb);fbL.push({ref:rlRef,cb:rlCb});
-  if(!_alInit){_alInit=true;db.ref("system_alerts").limitToLast(60).on("value",snap=>{alData=[];const v=snap.val();if(v)Object.keys(v).forEach(k=>alData.unshift({id:k,...v[k]}));updTicker();if(document.getElementById("pg-aiops").classList.contains("on"))renderAlerts();});}
-  if(!_auInit){_auInit=true;db.ref("admin_audit_trail").limitToLast(120).on("value",snap=>{auData=[];const v=snap.val();if(v)Object.keys(v).forEach(k=>auData.unshift(v[k]));if(document.getElementById("pg-audit").classList.contains("on"))renderAudit();});}
+  listen(()=>db.ref("restaurants_locations"),rlCb);
+  if(!_alInit){_alInit=true;listen(()=>db.ref("system_alerts").limitToLast(60),snap=>{alData=[];const v=snap.val();if(v)Object.keys(v).forEach(k=>alData.unshift({id:k,...v[k]}));updTicker();if(document.getElementById("pg-aiops").classList.contains("on"))renderAlerts();});}
+  if(!_auInit){_auInit=true;listen(()=>db.ref("admin_audit_trail").limitToLast(120),snap=>{auData=[];const v=snap.val();if(v)Object.keys(v).forEach(k=>auData.unshift(v[k]));if(document.getElementById("pg-audit").classList.contains("on"))renderAudit();});}
   setupStaffFB();
   updRadarCnts();updTicker();
 }
@@ -1451,8 +1555,26 @@ window.rstDebt=function(type,id,el){
     .catch(()=>toast("تم الإرسال")).finally(()=>{if(el)el.disabled=false;});
 };
 
+/* ⚡ الأداء: خرائط جوجل تُحمَّل كسولاً عند أول فتح لمنتقي الموقع فقط — لا مع كل
+   فتح للّوحة. (المفتاح متصفّحي عام؛ قيّده بالـreferrer في Cloud Console.) */
+let _gmapsPromise=null;
+function loadGoogleMaps(){
+  if(window.google&&window.google.maps)return Promise.resolve();
+  if(_gmapsPromise)return _gmapsPromise;
+  _gmapsPromise=new Promise((res,rej)=>{
+    const s=document.createElement("script");
+    s.src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAo1rmqUzieYZU3RIwXOAN87GkpNrp-_Hc&libraries=places";
+    s.async=true;s.defer=true;s.onload=()=>res();s.onerror=()=>rej(new Error("gmaps"));
+    document.head.appendChild(s);
+  });
+  return _gmapsPromise;
+}
+
 function initEditMap(){
   const div=document.getElementById("editPickerMap");if(!div)return;
+  loadGoogleMaps().then(()=>_initEditMapCore(div)).catch(()=>toast("تعذّر تحميل الخرائط","e"));
+}
+function _initEditMapCore(div){
   const lat=parseFloat(document.getElementById("eLat").value)||35.468;
   const lng=parseFloat(document.getElementById("eLng").value)||44.392;
   const center={lat,lng};
@@ -1616,7 +1738,7 @@ function initMap(){
   map=L.map("amap",{zoomControl:false,attributionControl:false}).setView([35.468,44.392],13);
   L.control.zoom({position:"bottomright"}).addTo(map);
   L.tileLayer("https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png",{maxZoom:19,subdomains:"abcd"}).addTo(map);
-  heatL=L.heatLayer([],{radius:28,blur:18,maxZoom:14,gradient:{0.3:"#fed7aa",0.6:"#fb923c",0.85:"#FFC107",1.0:"#E0A800"}}).addTo(map);
+  heatL=L.heatLayer([],{radius:28,blur:18,maxZoom:14,gradient:{0.3:"#fed7aa",0.6:"#fb923c",0.85:"#f97316",1.0:"#ea580c"}}).addTo(map);
   drvCluster=L.layerGroup().addTo(map);
   setTimeout(()=>map.invalidateSize(),400);
 }
@@ -1645,13 +1767,13 @@ window.trackDriver=function(dPhone,rNm){
   Object.values(resMk).forEach(m=>m.setOpacity(.3));
   if(drvMk[String(dPhone)])drvMk[String(dPhone)].setOpacity(1);
   if(trkPoly){map.removeLayer(trkPoly);trkPoly=null;}
-  const r=gD.restaurants.find(x=>x[R.NAME]===rNm);
+  const r=findResByName(rNm);
   const co=rCoords(r);const rLat=co?co[0]:NaN,rLng=co?co[1]:NaN;
   let bounds=[[dLat,dLng]];
   if(!isNaN(rLat)&&!isNaN(rLng)){
     bounds.push([rLat,rLng]);
     if(resMk[rNm])resMk[rNm].setOpacity(1);
-    trkPoly=L.polyline([[dLat,dLng],[rLat,rLng]],{color:"#FFC107",weight:5,dashArray:"12,12",className:"path-anim"}).addTo(map);
+    trkPoly=L.polyline([[dLat,dLng],[rLat,rLng]],{color:"#f97316",weight:5,dashArray:"12,12",className:"path-anim"}).addTo(map);
     map.fitBounds(bounds,{padding:[44,44],maxZoom:16,animate:true});
   }else map.flyTo([dLat,dLng],16,{duration:1.1});
   document.getElementById("btnCxl").style.display="flex";
@@ -1660,14 +1782,14 @@ window.trackDriver=function(dPhone,rNm){
 };
 function updHeat(){
   if(!heatL||!gD)return;
-  const pts=[];liveOrd.forEach(o=>{const r=gD.restaurants.find(x=>x[R.NAME]===o[O.RES]);const co=rCoords(r);if(co)pts.push([co[0],co[1],1]);});
+  const pts=[];liveOrd.forEach(o=>{const r=findRes(o);const co=rCoords(r);if(co)pts.push([co[0],co[1],1]);});
   heatL.setLatLngs(pts);
 }
 function updResMk(){
   if(!map||!gD)return;
   Object.keys(resMk).forEach(k=>{map.removeLayer(resMk[k]);delete resMk[k];});
   [...new Set(liveOrd.map(o=>o[O.RES]))].forEach(rNm=>{
-    const r=gD.restaurants.find(x=>x[R.NAME]===rNm);
+    const r=findResByName(rNm);
     const co=rCoords(r);
     if(co){const ico=L.divIcon({className:"",html:'<div class="rp">🍽</div>',iconSize:[21,21],iconAnchor:[10,10]});
       resMk[rNm]=L.marker(co,{icon:ico}).addTo(map);}
@@ -1682,10 +1804,10 @@ window.goTab=function(name){
     b.classList.toggle("on",oc.includes("'"+name+"'"));
   });
   const dh=document.getElementById("dhT");if(dh)dh.textContent=TITLES[name]||"لوحة التحكم";
-  if(name==="live"&&typeof map!=="undefined")setTimeout(()=>map.invalidateSize(),320);
+  if(name==="live"&&typeof map!=="undefined"){setTimeout(()=>map.invalidateSize(),320);renderRadar();updHeat();updResMk();}
   if(name==="audit")renderAudit();
   if(name==="aiops")renderAlerts();
-  if(name==="orders")renderCharts();
+  if(name==="orders"){renderArch();renderCharts();}
   if(name==="restaurants"&&gD)filtEnt("RES");
   if(name==="drivers"&&gD)filtEnt("DRV");
   if(name==="staff"){loadStaffRoster();renderStaffOnline();renderStaffList();renderStaffLog();updStaffKPIs();startStaffIdleTimer();}
@@ -1726,7 +1848,8 @@ function renderRadar(){
       const dn=hD?dN(dp):"جاري البحث...";
       const dMins=oT?Math.floor((now-new Date(oT).getTime())/60000):0;
       const tF=oT?new Date(oT).toLocaleTimeString("ar-EG",{hour:"2-digit",minute:"2-digit"}):"---";
-      const isDbl = isDoubleDB === true;
+      const isDbl = isDoubleDB === true; // قراءة الختم الحقيقي من السيرفر — لا تخمين
+
       let clsCls,sbCls,sbTxt;
       if(isSov){clsCls="os";sbCls="stb-v";sbTxt="👑 سيادي";}
       else if(!hD||st==="pending_driver"||st==="manual_pending"){
@@ -1812,12 +1935,16 @@ function updRadarCnts(){
   Object.keys(m).forEach(k=>m[k].forEach(id=>{const el=document.getElementById(id);if(el)el.textContent=c[k];}));
 }
 
+/* الكتابات المباشرة أدناه (إكمال/إلغاء/تعيين/سحب) متوافقة مع قواعد V2.0:
+   توكن اللوحة يحمل دور admin والدور الإداري مستثنى من قيود الحقول. */
 window.forceComplete=function(oId,el){
   if(!MP)return toast("انتهت الجلسة","e");
   if(!confirm("تأكيد إكمال الطلب؟ ستُحتسب المحاسبة تلقائياً في التقرير الليلي."))return;
   if(el){el.disabled=true;el.classList.add("loading");}
   const order=liveOrd.find(o=>String(o[O.ID])===String(oId));
-  const rD=order?gD?.restaurants.find(r=>r[R.NAME]===order[O.RES]):null;
+  // 🩹 [② عمولة خاطئة] findRes يطابق بالهاتف أولاً (خ٣٣) — كان .find بالاسم
+  //   يخلط مطعمين بنفس الاسم فيكتب عمولة الخطأ. الآن مطابقة الهاتف الموثوقة.
+  const rD=order?findRes(order):null;
   const cr=rD?pComm(String(rD[R.COMM]||"0"),String(rD[R.PAY]||"")):{drv:0,res:0};
   const upd={};
   upd[`active_orders/${oId}/status`]="completed";
@@ -1829,6 +1956,8 @@ window.forceComplete=function(oId,el){
     const card=el?.closest(".oc");if(card){card.style.opacity="0";setTimeout(()=>card.remove(),260);}
   }).catch(()=>toast("خطأ في الإكمال","e")).finally(()=>{if(el){el.disabled=false;el.classList.remove("loading");}});
 };
+/* delOrder يكتب status:'deleted' (لا حذف عقدة) — هذا ما تسمح به قواعد V2.0
+   حتى للطلبات، والحذف الفعلي محصور بمحرك الأرشفة السيرفري. */
 window.delOrder=function(oId,el){
   if(!confirm("إلغاء الطلب؟"))return;
   if(el){el.disabled=true;el.classList.add("loading");}
@@ -1841,13 +1970,23 @@ window.asgnDrv=function(oId,dPhone,el){
   if(!dPhone||!MP)return;el.disabled=true;
   const now=new Date().toISOString();
   ovr.o[String(oId)]={status:"manual_pending",dp:dPhone,ts:Date.now()};
-  db.ref(`active_orders/${oId}`).update({status:"manual_pending",driverPhone:dPhone,last_update:now,last_offered_to:dPhone,is_sovereign:true});
+  db.ref(`active_orders/${oId}`).update({status:"manual_pending",driverPhone:dPhone,last_update:now,is_sovereign:true});
   fetch(API,{method:"POST",headers:{"Content-Type":"text/plain"},body:JSON.stringify({action:"ASSIGN_DRIVER",orderId:oId,driverPhone:dPhone,token:TOK,pass:MP})})
     .then(r=>r.json()).then(d=>{if(d.success){toast("تم التعيين السيادي 👑");logAudit("assignDriver",`طلب #${oId} ← ${dN(dPhone)}`);}else toast("خطأ","e");})
     .catch(()=>toast("تم الإرسال")).finally(()=>el.disabled=false);
 };
+/* ملاحظة V16.0: نداء DECLINE_ORDER هنا يسجّل الرفض في daily_metrics فقط —
+   🔧[خ١٣] لم يعد يُنقص daily_count (الخصم الشرعي الوحيد في سحب الموظف
+   staffWithdrawOrder لأن الطلب هناك قُبل فعلاً وزاد العدّاد). */
 window.wdOrder=function(oId,dPhone,el){
   if(!confirm("سحب الطلب وإعادته للرادار؟"))return;
+  // 🩹 [③ سباق الحالة] لا تسحب طلباً اكتمل/أُلغي للتوّ: الكتابة المباشرة كانت
+  //   تعيد المكتمل للرادار متجاوزةً الحارس السيرفري. نفحص الحالة الحيّة أولاً.
+  const cur=liveOrd.find(o=>String(o[O.ID])===String(oId));
+  const DONE=["completed","مكتمل","settled","delivered","done","تم التسليم","تم","finished","complete","deleted"];
+  if(cur&&DONE.includes(String(cur[O.STATUS]||"").toLowerCase().trim())){
+    return toast("الطلب اكتمل أو أُلغي — لا يمكن سحبه","e");
+  }
   if(el)el.disabled=true;
   const now=new Date().toISOString();
   ovr.o[String(oId)]={status:"pending_driver",dp:"system_routing",ts:Date.now()};
@@ -1900,7 +2039,7 @@ function renderArch(){
     let dateStr="---",timeStr="";
     if(o[O.TIME]){const dt=new Date(o[O.TIME]);if(!isNaN(dt)){dateStr=dt.toISOString().split("T")[0];timeStr=dt.toLocaleTimeString("ar-EG",{hour:"2-digit",minute:"2-digit"});}}
     const dn2=dN(dp);const cVal=getCommVal(o);
-    const pT=(o[O.PAY])||(gD.restaurants.find(r=>r[R.NAME]===rN)?.[R.PAY])||"";
+    const pT=(o[O.PAY])||(findRes(o)?.[R.PAY])||"";
     const inv=encodeURIComponent(JSON.stringify({id:oId,date:o[O.TIME]?new Date(o[O.TIME]).toLocaleString("ar-EG"):"---",res:rN,drv:dn2,details:o[O.DETAILS],price:pr,comm:cVal,payType:pT,isDel,isSt})).replace(/'/g,"%27");
     const stH=isDel?'<span class="stb stb-r">ملغي</span>':isSt?'<span class="stb stb-b">مسدد ✓</span>':'<span class="stb stb-g">مكتمل</span>';
     let idH=esc(oId);if(pU)idH+=` <button onclick="event.stopPropagation();opImg('${ej(pU)}')" style="background:transparent;border:none;cursor:pointer;color:var(--sky)">🖼</button>`;
@@ -1949,7 +2088,7 @@ window.expCSV=function(){
   const q2=v=>'"'+String(v??'').replace(/"/g,'""')+'"';
   let csv="\uFEFFرقم الطلب,الوقت,المطعم,الكابتن,السعر,العمولة,نظام الدفع,الحالة\n";
   rows.forEach(o=>{
-    const cVal=getCommVal(o);const pT=(o[O.PAY])||(gD.restaurants.find(r=>r[R.NAME]===o[O.RES])?.[R.PAY])||"";
+    const cVal=getCommVal(o);const pT=(o[O.PAY])||(findRes(o)?.[R.PAY])||"";
     const dt=o[O.TIME]?new Date(o[O.TIME]).toLocaleString("ar-EG"):"---";
     csv+=[q2(o[O.ID]),q2(dt),q2(o[O.RES]),q2(dN(o[O.DRV])),q2(o[O.PRICE]||0),q2(cVal),q2(pT),q2(o[O.STATUS]==="deleted"?"ملغي":"مكتمل")].join(",")+"\n";
   });
@@ -1964,11 +2103,17 @@ function renderCharts(){
   [].concat(archOrd,compArch).forEach(o=>{const k=String(o[O.ID]);if(k&&seen.has(k))return;if(k)seen.add(k);all.push(o);});
   const comp=all.filter(o=>!["deleted"].includes(o[O.STATUS])).length;
   const canc=all.filter(o=>o[O.STATUS]==="deleted").length;
+  // ⚡ تحديث البيانات مكانها إن وُجد الرسم (كان destroy+new مع كل تحديث = بطء)
   const c1=document.getElementById("dchart");
-  if(c1){if(dc)dc.destroy();dc=new Chart(c1,{type:"bar",data:{labels:["مكتمل","ملغي"],datasets:[{data:[comp,canc],backgroundColor:["rgba(5,150,105,.8)","rgba(239,68,68,.8)"],borderRadius:8,borderSkipped:false}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{beginAtZero:true,ticks:{stepSize:1,font:{family:"Cairo"}},grid:{color:"rgba(37,99,235,.04)"}},x:{ticks:{font:{family:"Cairo"}}}}}});}
-  if(comp+canc===0)return;
+  if(c1){
+    if(dc){dc.data.datasets[0].data=[comp,canc];dc.update("none");}
+    else dc=new Chart(c1,{type:"bar",data:{labels:["مكتمل","ملغي"],datasets:[{data:[comp,canc],backgroundColor:["rgba(5,150,105,.8)","rgba(239,68,68,.8)"],borderRadius:8,borderSkipped:false}]},options:{responsive:true,maintainAspectRatio:false,animation:false,plugins:{legend:{display:false}},scales:{y:{beginAtZero:true,ticks:{stepSize:1,font:{family:"Cairo"}},grid:{color:"rgba(37,99,235,.04)"}},x:{ticks:{font:{family:"Cairo"}}}}}});
+  }
   const c2=document.getElementById("pchart");
-  if(c2){if(pc)pc.destroy();pc=new Chart(c2,{type:"doughnut",data:{labels:["مكتمل","ملغي"],datasets:[{data:[comp,canc],backgroundColor:["rgba(5,150,105,.85)","rgba(239,68,68,.85)"],borderWidth:3,borderColor:"#fff"}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:"bottom",labels:{font:{family:"Cairo",size:11},padding:16}}}}});}
+  if(c2){
+    if(pc){pc.data.datasets[0].data=[comp,canc];pc.update("none");}
+    else pc=new Chart(c2,{type:"doughnut",data:{labels:["مكتمل","ملغي"],datasets:[{data:[comp,canc],backgroundColor:["rgba(5,150,105,.85)","rgba(239,68,68,.85)"],borderWidth:3,borderColor:"#fff"}]},options:{responsive:true,maintainAspectRatio:false,animation:false,plugins:{legend:{position:"bottom",labels:{font:{family:"Cairo",size:11},padding:16}}}}});
+  }
 }
 function updTicker(){
   const el=document.getElementById("tickTx");if(!el)return;
@@ -2038,10 +2183,14 @@ function renderAlerts(){
   c.innerHTML=html;
 }
 
+/* ═══════════════════════════════════════════
+   🧑‍💼 نظام إدارة الموظفين — مربوط بـ GAS V16.0 + Firebase
+   (V22.0: مستمعا staff_sessions و staff_activity_log صارا
+    ذاتيي الشفاء عبر listen — قواعد V2.0 تجعلهما قراءة admin فقط)
+═══════════════════════════════════════════ */
 function setupStaffFB(){
   if(_stInit)return;
   _stInit=true;
-  const sRef=db.ref("staff_sessions");
   const sCb=snap=>{
     staffSessions=snap.val()||{};
     let online=0;Object.values(staffSessions).forEach(s=>{if(s&&s.online===true)online++;});
@@ -2049,14 +2198,13 @@ function setupStaffFB(){
     const bsd=document.getElementById("bnStaffDot");if(bsd)bsd.classList.toggle("on",online>0);
     if(document.getElementById("pg-staff").classList.contains("on")){renderStaffOnline();renderStaffList();updStaffKPIs();}
   };
-  sRef.on("value",sCb);fbL.push({ref:sRef,cb:sCb});
-  const lRef=db.ref("staff_activity_log").limitToLast(200);
+  listen(()=>db.ref("staff_sessions"),sCb);
   const lCb=snap=>{
     staffLog=[];const v=snap.val();
     if(v)Object.keys(v).forEach(k=>staffLog.unshift({id:k,...v[k]}));
     if(document.getElementById("pg-staff").classList.contains("on")){renderStaffLog();renderStaffList();updStaffKPIs();}
   };
-  lRef.on("value",lCb);fbL.push({ref:lRef,cb:lCb});
+  listen(()=>db.ref("staff_activity_log").limitToLast(200),lCb);
 }
 async function loadStaffRoster(){
   if(!MP)return;
@@ -2311,6 +2459,7 @@ window.stDelete=async function(phone,name,el){
   }catch(e){toast("خطأ","e");}
   finally{if(el)el.disabled=false;}
 };
+/* مؤقّت تحديث الخمول الحي (سلاسة) — يُعيد رسم المتصلين كل 30 ثانية */
 function startStaffIdleTimer(){
   stopStaffIdleTimer();
   _stIdleTimer=setInterval(()=>{
