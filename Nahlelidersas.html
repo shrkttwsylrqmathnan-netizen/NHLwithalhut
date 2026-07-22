@@ -1139,6 +1139,8 @@ const MSG_TEMPLATES = [
 /* ════ STATE ════ */
 let STOKEN="",EMP_NAME="",EMP_PHONE="";
 let liveOrd=[],actDrv=new Set(),gDrivers=[],liveLed={drivers:{}};
+/* 🔔 معرّفات الطلبات التي رآها الليدر — null تعني «لم يُحمَّل بعد» فلا نُصوّت أول مرة */
+let _ordSeen=null;
 let drvLocs={},rfilt="all",pendCnt=0,fbConn=true,fbL=[];
 let radarHtml="";
 let rawOrders={};        /* خريطة الطلبات الخام (للمسار الزمني) */
@@ -1621,6 +1623,30 @@ function attachDataListeners(){
     });
     rawOrders=raw;_ordIdx=null;_onlineCache=null;
     active.sort((a,b)=>new Date(b[O.TIME])-new Date(a[O.TIME]));
+
+    /* ══════════════════════════════════════════════════════════════════
+       🔔 تنبيه الطلبات الجديدة
+       ──────────────────────────────────────────────────────────────────
+       نقارن معرّفات الطلبات لا عددها: الاعتماد على العدد يُخطئ حين يدخل
+       طلب ويخرج آخر في نفس اللحظة (العدد ثابت والطلب جديد فعلاً).
+       وأول تحميل لا يُصدر صوتاً — وإلا انفجرت النغمات عند فتح اللوحة.
+       ══════════════════════════════════════════════════════════════════ */
+    (function alertNewOrders(){
+      const ids = new Set(active.map(o=>String(o[O.ID]||"")));
+      if(_ordSeen === null){ _ordSeen = ids; return; }   /* أول تحميل: نسجّل فقط */
+      const fresh = [];
+      ids.forEach(id=>{ if(id && !_ordSeen.has(id)) fresh.push(id); });
+      _ordSeen = ids;
+      if(!fresh.length) return;
+
+      _newOrderBeep(fresh.length);
+      const one = fresh.length===1
+        ? (function(){ const o=active.find(x=>String(x[O.ID])===fresh[0]);
+            return o ? `${o[O.RES]||"مطعم"} · ${o[O.AREA]||""}` : ""; })()
+        : "";
+      toast(fresh.length===1 ? `🆕 طلب جديد — ${one}` : `🆕 ${fresh.length} طلبات جديدة`);
+    })();
+
     liveOrd=active;
     const np=active.filter(o=>!o[O.DRV]||["pending_driver","system_routing","manual_pending"].includes(o[O.DRV])).length;
     pendCnt=np;
@@ -2453,6 +2479,52 @@ const QUICK_REPLIES=[
 ];
 
 function _ccBeep(){try{const a=new (window.AudioContext||window.webkitAudioContext)();const o=a.createOscillator(),g=a.createGain();o.connect(g);g.connect(a.destination);o.frequency.value=880;g.gain.setValueAtTime(.12,a.currentTime);g.gain.exponentialRampToValueAtTime(.001,a.currentTime+.35);o.start();o.stop(a.currentTime+.35);}catch(e){}}
+
+/* ══════════════════════════════════════════════════════════════════════════
+   🔔 نغمة الطلب الجديد — مميّزة عن نغمة الدردشة عمداً
+   ──────────────────────────────────────────────────────────────────────────
+   الدردشة: نغمة واحدة 880Hz قصيرة.
+   الطلب:   نغمتان صاعدتان (660→990) أعلى صوتاً — يميّزها الليدر بلا نظر للشاشة.
+   وعند دخول عدّة طلبات دفعةً تتكرّر مرتين لا أكثر، فلا تتحوّل إلى إزعاج.
+
+   ⚠️ المتصفّحات تحجب الصوت قبل أول تفاعل من المستخدم. لذلك نُهيّئ سياق
+      الصوت عند أول لمسة/نقرة ونُبقيه حيّاً — وإلا صمتت اللوحة بلا سبب ظاهر.
+   ══════════════════════════════════════════════════════════════════════════ */
+let _audioCtx=null;
+function _ensureAudio(){
+  try{
+    if(!_audioCtx) _audioCtx=new (window.AudioContext||window.webkitAudioContext)();
+    if(_audioCtx.state==="suspended") _audioCtx.resume();
+  }catch(e){}
+  return _audioCtx;
+}
+/* فتح الصوت عند أول تفاعل — مرة واحدة */
+["click","touchstart","keydown"].forEach(ev=>{
+  document.addEventListener(ev,function _once(){ _ensureAudio();
+    ["click","touchstart","keydown"].forEach(e2=>document.removeEventListener(e2,_once));
+  },{once:false,passive:true});
+});
+
+function _newOrderBeep(count){
+  const a=_ensureAudio(); if(!a) return;
+  const rounds=Math.min(count||1,2);            /* سقف: نغمتان مهما كثرت الطلبات */
+  for(let r=0;r<rounds;r++){
+    const base=a.currentTime + r*0.62;
+    [[660,0],[990,0.16]].forEach(([hz,off])=>{
+      try{
+        const o=a.createOscillator(),g=a.createGain();
+        o.type="sine"; o.frequency.value=hz;
+        o.connect(g); g.connect(a.destination);
+        g.gain.setValueAtTime(.0001, base+off);
+        g.gain.exponentialRampToValueAtTime(.22, base+off+0.02);   /* أعلى من الدردشة */
+        g.gain.exponentialRampToValueAtTime(.0001, base+off+0.30);
+        o.start(base+off); o.stop(base+off+0.32);
+      }catch(e){}
+    });
+  }
+  /* اهتزاز على الهاتف — يصل ولو كان الصوت مكتوماً */
+  try{ if(navigator.vibrate) navigator.vibrate(rounds>1?[120,80,120]:[140]); }catch(e){}
+}
 
 /* إشعار سطح المكتب — يُطلب الإذن مرة واحدة عند أول محادثة واردة */
 let _notifAsked=false;
