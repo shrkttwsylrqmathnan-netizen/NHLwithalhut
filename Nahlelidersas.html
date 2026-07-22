@@ -836,6 +836,9 @@ button,input,select,textarea{font-family:'Cairo',sans-serif;}
 </style>
 </head>
 <body>
+<!-- 🔊 نبض صامت يُبقي جلسة الصوت حيّة على الهاتف حتى لو خفتت الشاشة.
+     بدونه يقتل النظام سياق الصوت بعد ثوانٍ من الخمول فتصمت اللوحة. -->
+<audio id="keepAlive" loop preload="auto" src="data:audio/wav;base64,UklGRjIAAABXQVZFZm10IBIAAAABAAEAQB8AAEAfAAABAAgAAABkYXRhDAAAAAA="></audio>
 <div id="toasts"></div>
 <div id="fbSt" class="dn"><span class="fb-dot" id="fbDot"></span><span id="fbTxt">متصل</span></div>
 
@@ -1000,6 +1003,12 @@ button,input,select,textarea{font-family:'Cairo',sans-serif;}
 
 <!-- 💬 مركز مراسلة الكباتن (V3.0) — يطابق مخطط driver_chats في تطبيق الكابتن V14 حرفياً -->
 <button class="chat-fab" id="chatFab" onclick="openChatCenter()" style="display:none">💬<span class="cf-bdg" id="chatFabBdg">0</span></button>
+<!-- 🔊 زر اختبار الصوت — يلمسه الليدر قبل الشفت ليتأكد أن التنبيه يعمل -->
+<button id="sndTest" onclick="_testSound()" title="اختبار صوت التنبيه"
+  style="position:fixed;bottom:18px;left:84px;width:52px;height:52px;border-radius:17px;
+         background:linear-gradient(145deg,#FFB300,#FF8F00);color:#3A2A18;font-size:1.3rem;
+         border:0;cursor:pointer;z-index:90;display:none;align-items:center;justify-content:center;
+         box-shadow:0 8px 22px rgba(255,143,0,.42);">🔊</button>
 <div id="chatCenter" onclick="if(event.target.id==='chatCenter')closeChatCenter()">
   <div class="cc-panel" id="ccPanel">
     <div class="cc-hd">
@@ -1139,6 +1148,11 @@ const MSG_TEMPLATES = [
 /* ════ STATE ════ */
 let STOKEN="",EMP_NAME="",EMP_PHONE="";
 let liveOrd=[],actDrv=new Set(),gDrivers=[],liveLed={drivers:{}};
+/* 🔊 متغيّرات نظام الصوت — تُعرَّف هنا (أعلى النطاق) لا عند دوالّها،
+   لأن مستمعي الأحداث يُسجَّلون فور تحميل السكربت وقد يُستدعَون قبل
+   الوصول إلى تعريف let المتأخّر ⇒ خطأ «المنطقة الميتة الزمنية». */
+let _audioCtx=null, _wakeLock=null, _pulseTimer=null;
+let _titleFlash=null, _titleOrig=(typeof document!=="undefined"?document.title:"");
 /* 🔔 معرّفات الطلبات التي رآها الليدر — null تعني «لم يُحمَّل بعد» فلا نُصوّت أول مرة */
 let _ordSeen=null;
 let drvLocs={},rfilt="all",pendCnt=0,fbConn=true,fbL=[];
@@ -1639,11 +1653,11 @@ function attachDataListeners(){
       _ordSeen = ids;
       if(!fresh.length) return;
 
-      _newOrderBeep(fresh.length);
       const one = fresh.length===1
         ? (function(){ const o=active.find(x=>String(x[O.ID])===fresh[0]);
             return o ? `${o[O.RES]||"مطعم"} · ${o[O.AREA]||""}` : ""; })()
         : "";
+      _newOrderBeep(fresh.length, one || `${fresh.length} طلبات بانتظار التوزيع`);
       toast(fresh.length===1 ? `🆕 طلب جديد — ${one}` : `🆕 ${fresh.length} طلبات جديدة`);
     })();
 
@@ -2478,52 +2492,165 @@ const QUICK_REPLIES=[
   ]}
 ];
 
-function _ccBeep(){try{const a=new (window.AudioContext||window.webkitAudioContext)();const o=a.createOscillator(),g=a.createGain();o.connect(g);g.connect(a.destination);o.frequency.value=880;g.gain.setValueAtTime(.12,a.currentTime);g.gain.exponentialRampToValueAtTime(.001,a.currentTime+.35);o.start();o.stop(a.currentTime+.35);}catch(e){}}
-
 /* ══════════════════════════════════════════════════════════════════════════
-   🔔 نغمة الطلب الجديد — مميّزة عن نغمة الدردشة عمداً
+   🔊 نظام الصوت على الهاتف — الوصفة المُجرَّبة من تطبيق الكباتن
    ──────────────────────────────────────────────────────────────────────────
-   الدردشة: نغمة واحدة 880Hz قصيرة.
-   الطلب:   نغمتان صاعدتان (660→990) أعلى صوتاً — يميّزها الليدر بلا نظر للشاشة.
-   وعند دخول عدّة طلبات دفعةً تتكرّر مرتين لا أكثر، فلا تتحوّل إلى إزعاج.
+   لماذا لم يكن الليدرز يسمعون؟ خمسة حواجز يضعها الهاتف، وكلٌّ يكفي للإسكات:
 
-   ⚠️ المتصفّحات تحجب الصوت قبل أول تفاعل من المستخدم. لذلك نُهيّئ سياق
-      الصوت عند أول لمسة/نقرة ونُبقيه حيّاً — وإلا صمتت اللوحة بلا سبب ظاهر.
+     ① المتصفّح يحجب الصوت قبل أول لمسة       → نفكّه عند أول لمسة/نقرة
+     ② النظام يُعلّق سياق الصوت عند الخمول     → نبض صامت كل 3 ثوانٍ يُبقيه حيّاً
+     ③ تعليق السياق عند العودة من الخلفية      → resume عند visibilitychange
+     ④ خفوت الشاشة يقطع الصوت                 → Wake Lock يُبقيها مضاءة
+     ⑤ الجهاز مكتوم أو الليدر بعيد            → اهتزاز + إشعار نظام + عنوان وامض
+
+   لا تكفي طبقة وحدها — التجربة في تطبيق الكباتن أثبتت أن اجتماعها هو الحل.
    ══════════════════════════════════════════════════════════════════════════ */
-let _audioCtx=null;
-function _ensureAudio(){
+
+function _AC(){
   try{
-    if(!_audioCtx) _audioCtx=new (window.AudioContext||window.webkitAudioContext)();
+    if(!_audioCtx) _audioCtx = new (window.AudioContext||window.webkitAudioContext)();
     if(_audioCtx.state==="suspended") _audioCtx.resume();
-  }catch(e){}
+  }catch(e){ return null; }
   return _audioCtx;
 }
-/* فتح الصوت عند أول تفاعل — مرة واحدة */
-["click","touchstart","keydown"].forEach(ev=>{
-  document.addEventListener(ev,function _once(){ _ensureAudio();
-    ["click","touchstart","keydown"].forEach(e2=>document.removeEventListener(e2,_once));
-  },{once:false,passive:true});
+
+/* ① فكّ القفل عند أول تفاعل + ② نبض صامت دائم */
+function _unlockAudio(){
+  const c=_AC();
+  const k=document.getElementById("keepAlive");
+  if(k){ k.volume=.001; k.play().catch(()=>{}); }
+
+  /* نبض 20kHz غير مسموع كل 3 ثوانٍ — يمنع النظام من تعليق السياق */
+  if(!_pulseTimer){
+    _pulseTimer=setInterval(()=>{
+      const a=_AC(); if(!a) return;
+      if(a.state==="suspended") a.resume();
+      try{
+        const o=a.createOscillator(), g=a.createGain();
+        g.gain.value=.00001; o.frequency.value=20000;
+        o.connect(g); g.connect(a.destination);
+        o.start(); o.stop(a.currentTime+.01);
+      }catch(e){}
+      const kk=document.getElementById("keepAlive");
+      if(kk&&kk.paused){ kk.volume=.001; kk.play().catch(()=>{}); }
+    },3000);
+  }
+  _requestWake();
+  if("Notification" in window && Notification.permission==="default"){
+    try{ Notification.requestPermission(); }catch(e){}
+  }
+  document.removeEventListener("touchstart",_unlockAudio,true);
+  document.removeEventListener("click",_unlockAudio,true);
+  document.removeEventListener("keydown",_unlockAudio,true);
+  toast("🔊 التنبيهات الصوتية مُفعّلة");
+}
+document.addEventListener("touchstart",_unlockAudio,true);
+document.addEventListener("click",_unlockAudio,true);
+document.addEventListener("keydown",_unlockAudio,true);
+
+/* ④ إبقاء الشاشة مضاءة */
+async function _requestWake(){
+  if(!("wakeLock" in navigator)) return;
+  try{ if(!_wakeLock||_wakeLock.released) _wakeLock=await navigator.wakeLock.request("screen"); }catch(e){}
+}
+
+/* ③ استعادة كل شيء عند العودة للواجهة */
+document.addEventListener("visibilitychange",()=>{
+  if(document.visibilityState!=="visible") return;
+  const a=_AC(); if(a&&a.state==="suspended") a.resume();
+  const k=document.getElementById("keepAlive");
+  if(k&&k.paused){ k.volume=.001; k.play().catch(()=>{}); }
+  _requestWake();
+  _stopTitleFlash();
 });
 
-function _newOrderBeep(count){
-  const a=_ensureAudio(); if(!a) return;
-  const rounds=Math.min(count||1,2);            /* سقف: نغمتان مهما كثرت الطلبات */
-  for(let r=0;r<rounds;r++){
-    const base=a.currentTime + r*0.62;
-    [[660,0],[990,0.16]].forEach(([hz,off])=>{
-      try{
-        const o=a.createOscillator(),g=a.createGain();
-        o.type="sine"; o.frequency.value=hz;
-        o.connect(g); g.connect(a.destination);
-        g.gain.setValueAtTime(.0001, base+off);
-        g.gain.exponentialRampToValueAtTime(.22, base+off+0.02);   /* أعلى من الدردشة */
-        g.gain.exponentialRampToValueAtTime(.0001, base+off+0.30);
-        o.start(base+off); o.stop(base+off+0.32);
-      }catch(e){}
-    });
+/* ── نغمة الدردشة (خفيفة) ── */
+function _ccBeep(){
+  const a=_AC(); if(!a) return;
+  try{
+    const o=a.createOscillator(), g=a.createGain();
+    o.connect(g); g.connect(a.destination);
+    o.frequency.value=880;
+    g.gain.setValueAtTime(.12,a.currentTime);
+    g.gain.exponentialRampToValueAtTime(.001,a.currentTime+.35);
+    o.start(); o.stop(a.currentTime+.35);
+  }catch(e){}
+}
+
+/* ── ⑤ عنوان التبويب الوامض — يُرى ولو صمت الجهاز ── */
+function _startTitleFlash(txt){
+  _stopTitleFlash();
+  let on=false;
+  _titleFlash=setInterval(()=>{ document.title = (on=!on) ? txt : _titleOrig; },900);
+}
+function _stopTitleFlash(){
+  if(_titleFlash){ clearInterval(_titleFlash); _titleFlash=null; document.title=_titleOrig; }
+}
+
+/* ══ 🔔 نغمة الطلب الجديد — مميّزة عن الدردشة عمداً ══
+   الدردشة: نغمة واحدة 880Hz. الطلب: نغمتان صاعدتان 660→990 أعلى صوتاً،
+   يميّزها الليدر بلا نظر إلى الشاشة. */
+function _newOrderBeep(count, label){
+  const rounds=Math.min(count||1,3);
+  const a=_AC();
+
+  if(a){
+    for(let r=0;r<rounds;r++){
+      const base=a.currentTime + r*0.62;
+      [[660,0],[990,0.16]].forEach(([hz,off])=>{
+        try{
+          const o=a.createOscillator(), g=a.createGain();
+          o.type="sine"; o.frequency.value=hz;
+          o.connect(g); g.connect(a.destination);
+          g.gain.setValueAtTime(.0001, base+off);
+          g.gain.exponentialRampToValueAtTime(.32, base+off+0.02);
+          g.gain.exponentialRampToValueAtTime(.0001, base+off+0.32);
+          o.start(base+off); o.stop(base+off+0.34);
+        }catch(e){}
+      });
+    }
   }
-  /* اهتزاز على الهاتف — يصل ولو كان الصوت مكتوماً */
-  try{ if(navigator.vibrate) navigator.vibrate(rounds>1?[120,80,120]:[140]); }catch(e){}
+
+  /* احتياط: عنصر <audio> حقيقي — يعمل أحياناً حين يفشل WebAudio */
+  try{
+    const el=document.createElement("audio");
+    el.src="data:audio/wav;base64,UklGRiQEAABXQVZFZm10IBAAAAABAAEAgD4AAAB9AAACABAAZGF0YQAEAAA=";
+    el.volume=1; el.style.cssText="position:absolute;width:0;height:0";
+    document.body.appendChild(el);
+    el.play().catch(()=>{});
+    setTimeout(()=>el.remove(),3000);
+  }catch(e){}
+
+  /* اهتزاز — يصل ولو كان الجهاز مكتوماً */
+  try{ if(navigator.vibrate) navigator.vibrate(rounds>1?[200,90,200,90,200]:[220,90,220]); }catch(e){}
+
+  /* إشعار نظام — يظهر ولو كانت اللوحة في الخلفية */
+  try{
+    if("Notification" in window && Notification.permission==="granted"){
+      const n=new Notification(count>1?`🆕 ${count} طلبات جديدة`:"🆕 طلب جديد",
+                               { body: label||"افتح لوحة نحلة", tag:"nahla-order", renotify:true });
+      n.onclick=()=>{ window.focus(); _stopTitleFlash(); n.close(); };
+    }
+  }catch(e){}
+
+  /* وميض العنوان إن كانت اللوحة في الخلفية */
+  if(document.visibilityState!=="visible"){
+    _startTitleFlash(count>1?`🔴 ${count} طلبات جديدة`:"🔴 طلب جديد!");
+  }
+}
+
+/* 🔊 اختبار الصوت — يشغّل النغمة ويُبلّغ الليدر بحالة كل طبقة */
+function _testSound(){
+  _unlockAudio();
+  _newOrderBeep(1,"هذا اختبار — لا يوجد طلب حقيقي");
+  const a=_AC();
+  const st=[];
+  st.push(a && a.state==="running" ? "✅ الصوت" : "❌ الصوت محجوب");
+  st.push(navigator.vibrate ? "✅ الاهتزاز" : "➖ لا اهتزاز");
+  st.push(("Notification" in window && Notification.permission==="granted")
+          ? "✅ الإشعارات" : "⚠️ الإشعارات مرفوضة");
+  st.push(_wakeLock ? "✅ الشاشة مضاءة" : "➖ لا wakeLock");
+  toast(st.join(" · "));
 }
 
 /* إشعار سطح المكتب — يُطلب الإذن مرة واحدة عند أول محادثة واردة */
@@ -2558,6 +2685,7 @@ function _ccSlaChip(c){
 function startChatCenter(){
   if(_ccStarted)return;_ccStarted=true;
   document.getElementById("chatFab").style.display="flex";
+  { const sb=document.getElementById("sndTest"); if(sb) sb.style.display="flex"; }
   listen("driver_chats",snap=>{
     _ccChats=snap.val()||{};
     let totalUnread=0;
