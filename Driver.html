@@ -1409,13 +1409,20 @@ async function guaranteedWrite(updates,vPath,vVal){
 }
 /* 🛡️ قبول مضمون */
 async function guaranteeAccept(id){
+  /* 🩹[سباق القبول] تُعيد الآن true/false بدل لا شيء، والتحقق يشمل **المالك**
+     لا الحالة وحدها: antiHijackGuard قد يتراجع عن القبول ويُعيد الطلب لغيرك،
+     فتبقى الحالة accepted بينما driverPhone صار لكابتن آخر. */
   const p={status:'accepted',driverPhone:drv.phone,last_update:new Date().toISOString()};
   const path=`active_orders/${id}`;let ok=false;
-  /* نفس علّة التعليق كانت هنا في سطرين غير محميّين */
   try{await withTimeout(update(ref(db,path),p));ok=true;}catch(e){}
   if(!ok){try{await reAuth();await withTimeout(update(ref(db,path),p));ok=true;}catch(e){}}
-  try{const s=await withTimeout(get(ref(db,path+'/status')));if(s.val()!=='accepted')ok=false;}catch(e){ok=false;}
-  if(!ok){try{fetch(`${API_URL}?action=ACCEPT_ORDER&orderId=${encodeURIComponent(id)}&driverPhone=${drv.phone}&token=${API_TOKEN}`);}catch(e){}}
+  if(!ok){try{await fetch(`${API_URL}?action=ACCEPT_ORDER&orderId=${encodeURIComponent(id)}&driverPhone=${drv.phone}&token=${API_TOKEN}`);}catch(e){}}
+  try{
+    const s=await withTimeout(get(ref(db,path)));
+    const f=s.val()||{};
+    ok=(String(f.status||'').toLowerCase()==='accepted')&&(nP(f.driverPhone)===nP(drv.phone));
+  }catch(e){ok=false;}
+  return ok;
 }
 /* 🕵️ سجل الإنجاز المبكّر — قواعد V2.1 تسمح للكابتن بالكتابة على نفسه فقط */
 function logEarly(id,d,m){try{if(!drv||!drv.phone)return;
@@ -1743,11 +1750,20 @@ function startListeners(){
   listen(()=>ref(db,`ledgers/drivers/${drv.phone}`),s=>{
     const l=s.val()||{}; lifetime=Number(l.completed_orders||0); debtNow=Number(l.debt||0); refreshDash();
   });
-  listen(()=>ref(db,`daily_metrics/${drv.phone}/${today}/completed_orders`),s=>{doneToday=Number(s.val()||0);refreshDash();});
-  listen(()=>ref(db,`daily_metrics/${drv.phone}/${today}/rejected_orders`),s=>{rejToday=Number(s.val()||0);refreshDash();});
+  /* 🩹[تجمّد العدّاد] كان `today` يُحسب مرة واحدة عند فتح التطبيق ولا يُعاد
+     حسابه أبداً، بينما التسليم يحسب تاريخه لحظياً. فبعد منتصف ليل UTC
+     (= 03:00 بغداد) تُكتب التسليمات إلى تاريخ جديد والتطبيق يسمع القديم:
+     يسلّم الكابتن ولا يزيد عدّاده حتى يغلق التطبيق ويفتحه.
+     الآن نشترك على العقدة الأب ونقرأ مفتاح اليوم **لحظياً** في كل تحديث،
+     فلا حاجة لإعادة اشتراك ولا يتجمّد شيء عند تبدّل اليوم. */
+  const dayKey=()=>new Date().toISOString().split('T')[0];
+  listen(()=>ref(db,`daily_metrics/${drv.phone}`),s=>{
+    const m=(s.val()||{})[dayKey()]||{};
+    doneToday=Number(m.completed_orders||0); rejToday=Number(m.rejected_orders||0); refreshDash();
+  });
 
-  listen(()=>ref(db,`daily_ledgers/${drv.phone}/${today}`),s=>{
-    const d=s.val()||{}; let total=0,html='';
+  listen(()=>ref(db,`daily_ledgers/${drv.phone}`),s=>{
+    const d=(s.val()||{})[dayKey()]||{}; let total=0,html='';
     Object.values(d).sort((a,b)=>b.timestamp-a.timestamp).forEach(r=>{
       total+=(parseFloat(r.price)||0);
       const t=new Date(r.timestamp).toLocaleTimeString('ar-EG',{hour:'2-digit',minute:'2-digit'});
@@ -1837,6 +1853,9 @@ function listenOrders(){
     const rm=[];
     for(let i=active.length-1;i>=0;i--){
       const mo=active[i], f=fb[mo.id];
+      /* 🩹[سباق القبول] مهلة سماح 6ث: استعلام الفهرس قد يتأخّر لحظات بعد
+         الكتابة، فكان الطلب المؤمَّن للتوّ يُحذف بـ«انتهى أو سُحب منك». */
+      if(!f && mo.acceptedTime && (Date.now()-mo.acceptedTime)<6000) continue;
       if(!f){rm.push({id:mo.id,m:'انتهى هذا الطلب أو سُحب منك.'});continue;}
       const st=String(f.status||'').toLowerCase();
       const DONE=['completed','مكتمل','settled','delivered','done','تم التسليم','تم','deleted'];
@@ -1848,6 +1867,46 @@ function listenOrders(){
        وكلها تكتب على نفس cancelTxt وتُظهر نفس النافذة — فلا يرى الكابتن إلا
        آخر رسالة ويُشغَّل صوت الإلغاء مرات متتالية. الآن: نافذة واحدة جامعة. */
     if(rm.length)removeOrdersBatch(rm);
+
+    /* ♻️[استرجاع الطلبات بعد إعادة التثبيت أو انطفاء الهاتف]
+       العلّة: هذا المستمع كان يفعل ثلاثة أشياء فقط — يحذف ما اختفى من
+       السيرفر، ويزامن راية الجهوزية لطلبات **موجودة أصلاً** في القائمة،
+       ويعرض الطلبات الرنّانة (pending_driver / manual_pending). فلم يكن
+       هناك أيّ مسار يعيد طلباً **مقبولاً** (accepted) من السيرفر إلى
+       القائمة المحلية. والقائمة تُبنى حصراً من localStorage('suf_orders')،
+       وهو يُمحى مع حذف التطبيق. فيبقى الطلب باسم الكابتن على السيرفر
+       والمطعم ينتظره، بينما شاشته فارغة إلى الأبد.
+       الحل: نبني القائمة من السيرفر — مصدر الحقيقة — لا من الذاكرة المحلية.
+       ملاحظة: الحالة المحلية (heading/arrived/picked_up) لا تُكتب للسيرفر
+       أبداً، فالمسترجَع يعود إلى «متوجّه للمطعم» ويُعاد الكابتن خطوةً
+       واحدة — وهذا خير من طلبٍ لا يراه أصلاً. ولا نقيّده بـisOnline:
+       من يحمل طلباً يجب أن يراه سواء فتح المناوبة أم لا. */
+    {
+      const DONE_R=['completed','مكتمل','settled','delivered','done','تم التسليم','تم','deleted'];
+      let restored=0;
+      Object.keys(fb).forEach(k=>{
+        const f=fb[k]; if(!f)return;
+        const st=String(f.status||'').toLowerCase().trim();
+        if(DONE_R.includes(st)||DONE_R.includes(f.status))return;      /* منتهٍ */
+        if(st==='pending_driver'||st==='manual_pending')return;        /* يرنّ — تتولّاه كتلة العرض */
+        if(nP(f.driverPhone)!==myId)return;                            /* ليس لي */
+        const oid=String(f.id||k);
+        if(active.find(o=>String(o.id)===oid))return;                  /* موجود أصلاً */
+        active.push({id:oid,resName:f.restaurant||'',resArea:f.resArea||null,
+          details:String(f.details||''),price:parseFloat(f.price)||0,area:f.area||'غير محدد',
+          state:'heading',photoUrl:f.photoUrl||'',resPhone:f.resPhone||'غير متوفر',
+          resLat:f.resLat,resLng:f.resLng,comm:f.comm||0,payType:f.payType||'المطعم يدفع',
+          acceptedTime:f.last_update?new Date(f.last_update).getTime():Date.now(),
+          is_sovereign:f.is_sovereign||false,readyForPickup:f.ready_for_pickup===true});
+        if(f.ready_for_pickup===true)readySet.add(oid);
+        restored++;
+      });
+      if(restored){
+        localStorage.setItem('suf_orders',JSON.stringify(active));
+        adjustHB(); renderOrders();
+        toast(`♻️ استُرجع ${restored===1?'طلب':restored+' طلبات'} ما زال باسمك.<br>راجع الحالة قبل المتابعة.`,'info');
+      }
+    }
 
     active.forEach(mo=>{
       const f=fb[mo.id]; if(!f)return; const oid=String(mo.id);
@@ -1925,18 +1984,35 @@ window.acceptOrder=async function(){
   }
   const b=document.getElementById('btnAccept');
   b.innerHTML='<div class="spin" style="border-top-color:#fff;"></div> جاري تأمين الطلب...'; b.disabled=true;
-  clearInterval(cdTimer); stopAlarm();
-  setTimeout(async()=>{
-    try{
-      enrichOrder(curOrder);
-      if(curOrder.resPhone && (!curOrder.resLat || !curOrder.resArea)){
-        const L=await fetchResLoc(curOrder.resPhone);
-        if(L){ if(!curOrder.resLat){curOrder.resLat=parseFloat(L.lat);curOrder.resLng=parseFloat(L.lng);} if(!curOrder.resArea)curOrder.resArea=L.area; }
-      }
-    }catch(e){}
-    if(!curOrder.resPhone) curOrder.resPhone='غير متوفر';
-    finalizeAccept();
-  },1200);
+  /* 🩹[سباق القبول] الترتيب القديم كان: أَلغِ العدّاد ← انتظر 1.2ث ← نداء شبكة
+     (fetchResLoc) ← أضِف الطلب محلياً ← ثم اكتب للسيرفر. فيدخل الطلب قائمتك
+     المحلية والسيرفر لا يعرف عنه شيئاً، ومطابِق listenOrders يقارن قائمتك
+     باستعلام لا يحتويه بعدُ → «انتهى هذا الطلب أو سُحب منك» لحظة القبول.
+     الترتيب الجديد: **أمِّن الطلب أولاً**، وبعد تأكيد ملكيتك له أثرِ وأضِف.
+     ويبقى العدّاد يعمل أثناء التأمين — فإن فشل عاد الطلب قابلاً للعرض. */
+  stopAlarm();
+  const oid=curOrder&&curOrder.id;
+  if(!oid){b.disabled=false;return;}
+  const secured=await guaranteeAccept(oid);
+  if(!secured){
+    clearInterval(cdTimer); stopAlarm();
+    document.getElementById('alertOv').classList.add('dn');
+    curOrder=null;
+    b.innerHTML='<svg class="si si-l" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>قبول الطلب فوراً'; b.disabled=false;
+    play('cancel');
+    toast('⚠️ تعذّر تأمين الطلب — قد يكون أُسنِد لكابتن آخر أو سُحب.<br><b>لا تذهب للمطعم.</b>','warn');
+    return;
+  }
+  clearInterval(cdTimer);
+  try{
+    enrichOrder(curOrder);
+    if(curOrder.resPhone && (!curOrder.resLat || !curOrder.resArea)){
+      const L=await fetchResLoc(curOrder.resPhone);
+      if(L){ if(!curOrder.resLat){curOrder.resLat=parseFloat(L.lat);curOrder.resLng=parseFloat(L.lng);} if(!curOrder.resArea)curOrder.resArea=L.area; }
+    }
+  }catch(e){}
+  if(!curOrder.resPhone) curOrder.resPhone='غير متوفر';
+  finalizeAccept();
 };
 function finalizeAccept(){
   document.getElementById('alertOv').classList.add('dn');
@@ -1946,7 +2022,7 @@ function finalizeAccept(){
     comm:curOrder.comm||0,payType:curOrder.payType||'المطعم يدفع',
     acceptedTime:Date.now(),is_sovereign:curOrder.is_sovereign||false,readyForPickup:false};
   active.push(o); localStorage.setItem('suf_orders',JSON.stringify(active));
-  adjustHB(); renderOrders(); guaranteeAccept(o.id);
+  adjustHB(); renderOrders();   /* 🩹 الكتابة تمّت وتأكّدت في acceptOrder */
   const b=document.getElementById('btnAccept');
   b.innerHTML='<svg class="si si-l" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>قبول الطلب فوراً'; b.disabled=false;
 }
