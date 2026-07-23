@@ -1,0 +1,19 @@
+{
+  "name": "إدارة نحلة | مركز القيادة",
+  "short_name": "إدارة نحلة",
+  "description": "لوحة الإدارة والرقابة الميدانية — نظام نحلة كركوك",
+  "start_url": "./Nhleman.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#0a1628",
+  "theme_color": "#0a1628",
+  "lang": "ar",
+  "dir": "rtl",
+  "categories": ["business", "productivity"],
+  "icons": [
+    { "src": "./admin-logo.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "./admin-logo.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "./admin-logo.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}
