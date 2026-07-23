@@ -20,8 +20,10 @@ const ASSETS_TO_CACHE = [
   './Nhleman.html',
   './Driver-manifest.json',
   './manifest_rest.json',
+  './manifest_admin.json',
   './driver-logo.png',
-  './rest-logo.png'
+  './rest-logo.png',
+  './admin-logo.png'
 ];
 
 // 1. التثبيت (Install)
