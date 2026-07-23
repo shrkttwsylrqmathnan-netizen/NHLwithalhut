@@ -12,6 +12,15 @@ try{if(localStorage.getItem(VK)!==V){localStorage.setItem(VK,V);if("caches"in wi
 <meta name="theme-color" content="#0a1628">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+
+<!-- 🐝 تطبيق ويب تقدّمي (PWA) -->
+<link rel="manifest" href="manifest_admin.json">
+<link rel="apple-touch-icon" href="admin-logo.png">
+<link rel="icon" type="image/png" href="admin-logo.png">
+<meta name="apple-mobile-web-app-title" content="إدارة نحلة">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="application-name" content="إدارة نحلة">
+<meta name="description" content="لوحة الإدارة والرقابة الميدانية — نظام نحلة كركوك">
 <!-- ⚡ الأداء: خرائط جوجل تُحمَّل كسولاً عند فتح نافذة التعديل فقط (كانت تُحمَّل
      مع كل فتح للّوحة وتُبطئها بشدّة). markercluster حُذف (كان يُحمَّل بلا استخدام). -->
 <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
@@ -2468,6 +2477,59 @@ function startStaffIdleTimer(){
   },30000);
 }
 function stopStaffIdleTimer(){if(_stIdleTimer){clearInterval(_stIdleTimer);_stIdleTimer=null;}}
+
+</script>
+
+<!-- 📲 PWA في سكربت مستقل: لا يُسقطه أي استثناء في السكربت الرئيسي
+     (مثل فشل تحميل فايربيس من CDN) — التثبيت يجب أن يعمل دائماً. -->
+<script>
+/* ══════════════════════════════════════════════════════════════════════════
+   📲 تطبيق ويب تقدّمي (PWA) — تثبيت لوحة الإدارة على الشاشة الرئيسية
+   ──────────────────────────────────────────────────────────────────────────
+   الفائدة: أيقونة مستقلة · شاشة كاملة بلا شريط المتصفّح · فتحٌ أسرع ·
+   وعملٌ محدود دون اتصال (الواجهة تُحمَّل، والبيانات تحتاج شبكة بطبيعتها).
+   ══════════════════════════════════════════════════════════════════════════ */
+(function initPWA(){
+  /* تسجيل عامل الخدمة — بمسار نسبي كي يعمل تحت /NHLwithalhut/
+     ملاحظة: لا ننتظر حدث load، لأن الصفحة قد تتعلّق بانتظار موارد خارجية
+     (فايربيس مثلاً) فلا يقع الحدث ولا يُسجَّل العامل إطلاقاً. */
+  if("serviceWorker" in navigator){
+    const reg = () => navigator.serviceWorker.register("./sw_admin.js")
+      .catch(err=>console.warn("SW لم يُسجَّل:", err && err.message));
+    if(document.readyState === "complete") reg();
+    else { window.addEventListener("load", reg, {once:true}); setTimeout(reg, 3000); }
+  }
+
+  /* زر التثبيت — يظهر فقط حين يسمح المتصفّح فعلاً */
+  let _deferredPrompt=null;
+  window.addEventListener("beforeinstallprompt",e=>{
+    e.preventDefault(); _deferredPrompt=e; _showInstallBtn();
+  });
+
+  function _showInstallBtn(){
+    if(document.getElementById("pwaInstall")) return;
+    const b=document.createElement("button");
+    b.id="pwaInstall"; b.textContent="📲 تثبيت اللوحة";
+    b.style.cssText="position:fixed;bottom:20px;right:20px;z-index:9999;"
+      +"background:linear-gradient(145deg,#FFB300,#FF8F00);color:#0a1628;"
+      +"border:0;border-radius:16px;padding:13px 20px;font-family:inherit;"
+      +"font-weight:900;font-size:.9rem;cursor:pointer;"
+      +"box-shadow:0 10px 26px rgba(255,143,0,.45)";
+    b.onclick=async()=>{
+      if(!_deferredPrompt) return;
+      _deferredPrompt.prompt();
+      const {outcome}=await _deferredPrompt.userChoice;
+      _deferredPrompt=null; b.remove();
+      if(outcome==="accepted" && typeof toast==="function") toast("تم تثبيت اللوحة ✅");
+    };
+    document.body.appendChild(b);
+  }
+
+  window.addEventListener("appinstalled",()=>{
+    const b=document.getElementById("pwaInstall"); if(b) b.remove();
+    if(typeof toast==="function") toast("📲 اللوحة مثبّتة على شاشتك");
+  });
+})();
 </script>
 </body>
 </html>
