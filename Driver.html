@@ -1194,6 +1194,10 @@ function nP(p){
 
 /* ══════════════ الحالة ══════════════ */
 let drv=null, curOrder=null, active=[], isOnline=false, isReg=false;
+/* 🛡️[ازدواج الطلب] معرّفات يكتبها acceptOrder في هذه اللحظة. مسار
+   الاسترجاع يتخطّاها، وإلا أضاف الطلب بينما finalizeAccept في الطريق
+   لإضافته أيضاً — فتظهر نسختان لطلبٍ واحد. */
+const securing = new Set();
 let cdTimer, hbTimer=null, shTimer=null, tokTimer=null, waitTimer=null;
 let lastLat=0, lastLng=0, lastHtml="";
 let readySet=new Set(), rejToday=0, doneToday=0, earnToday=0, lifetime=0, debtNow=0;
@@ -1516,7 +1520,17 @@ function checkSession(){
     if(sp)fbAuth(d.phone,atob(sp));
     showDash();
     const sv=localStorage.getItem('suf_orders');
-    if(sv){active=JSON.parse(sv);active.forEach(o=>{if(!o.acceptedTime)o.acceptedTime=Date.now();});}
+    if(sv){
+      active=JSON.parse(sv);
+      /* 🧹[ازدواج الطلب] تنظيف لمرة واحدة: هواتف الكباتن قد تحمل نسخاً
+         مكرّرة كُتبت في localStorage قبل هذا الإصلاح، ولا يزيلها النشر
+         وحده. نُبقي أول نسخة ونُسقط ما بعدها عند كل إقلاع. */
+      const seen=new Set();
+      active=active.filter(o=>{const k=String(o&&o.id);
+        if(!k||k==='undefined'||seen.has(k))return false; seen.add(k); return true;});
+      active.forEach(o=>{if(!o.acceptedTime)o.acceptedTime=Date.now();});
+      localStorage.setItem('suf_orders',JSON.stringify(active));
+    }
     if(d.shiftEnd&&new Date(d.shiftEnd)>new Date()){document.getElementById('onlineTog').checked=true;toggleOnline();}
     else{document.getElementById('onlineTog').checked=false;toggleOnline();}
     return true;
@@ -1891,6 +1905,7 @@ function listenOrders(){
         if(st==='pending_driver'||st==='manual_pending')return;        /* يرنّ — تتولّاه كتلة العرض */
         if(nP(f.driverPhone)!==myId)return;                            /* ليس لي */
         const oid=String(f.id||k);
+        if(securing.has(oid))return;                                   /* يؤمّنه acceptOrder الآن */
         if(active.find(o=>String(o.id)===oid))return;                  /* موجود أصلاً */
         active.push({id:oid,resName:f.restaurant||'',resArea:f.resArea||null,
           details:String(f.details||''),price:parseFloat(f.price)||0,area:f.area||'غير محدد',
@@ -1980,8 +1995,18 @@ window.acceptOrder=async function(){
     toast('انتهى شفتك — أكمل طلباتك الحالية فقط.','warn');
     document.getElementById('alertOv').classList.add('dn');
     clearInterval(cdTimer); stopAlarm(); curOrder=null;
+    window.__accepting=false;
     return;
   }
+  /* 🛡️[ازدواج البطاقة] حارس إعادة الدخول — الجذر المُثبَت:
+     b.disabled=true وحدها لا تكفي. حدثُ نقرٍ ثانٍ يكون قد دخل الطابور قبل
+     تعطيل الزر (نقرة شبح على أندرويد، أو ضغطة ثانية من كابتن لم يرَ استجابة
+     خلال صمت الـ1.2ث)، والدالة لا تفحص أنها تعمل أصلاً — فتُنفَّذ مرّتين
+     ويُدفع الطلب نفسه مرّتين إلى active. وحين يتكرّر المعرّف، تتولّد بطاقتان
+     بمُعرّف DOM واحد، فتُحدِّث getElementById ساعة الأولى فقط وتبقى الثانية
+     على «--:--» — وهي البصمة التي ظهرت في شكاوى الكباتن. */
+  if(window.__accepting) return;
+  window.__accepting = true;
   const b=document.getElementById('btnAccept');
   b.innerHTML='<div class="spin" style="border-top-color:#fff;"></div> جاري تأمين الطلب...'; b.disabled=true;
   /* 🩹[سباق القبول] الترتيب القديم كان: أَلغِ العدّاد ← انتظر 1.2ث ← نداء شبكة
@@ -1991,37 +2016,64 @@ window.acceptOrder=async function(){
      الترتيب الجديد: **أمِّن الطلب أولاً**، وبعد تأكيد ملكيتك له أثرِ وأضِف.
      ويبقى العدّاد يعمل أثناء التأمين — فإن فشل عاد الطلب قابلاً للعرض. */
   stopAlarm();
-  const oid=curOrder&&curOrder.id;
-  if(!oid){b.disabled=false;return;}
+  /* 🎯[ازدواج البطاقة — الجذر] كان الكود يقرأ curOrder العام **بعد** كل
+     await. والرخاء جعل طلباً ثانياً يصل للكابتن نفسه أثناء التأمين، فيدهس
+     المستمعُ curOrder بالطلب الجديد، فتُنهي finalizeAccept الطلبَ **الخطأ**
+     ثم يقبله الكابتن ثانيةً فيتكرّر. نلتقطه هنا مرّة واحدة ونمرّره صراحةً. */
+  const ord=curOrder;
+  const oid=ord&&ord.id;
+  if(!oid){window.__accepting=false;b.disabled=false;return;}
+  securing.add(String(oid));
   const secured=await guaranteeAccept(oid);
   if(!secured){
+    securing.delete(String(oid));
     clearInterval(cdTimer); stopAlarm();
-    document.getElementById('alertOv').classList.add('dn');
-    curOrder=null;
+    if(curOrder&&String(curOrder.id)===String(oid)){
+      document.getElementById('alertOv').classList.add('dn'); curOrder=null;
+    }
     b.innerHTML='<svg class="si si-l" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>قبول الطلب فوراً'; b.disabled=false;
     play('cancel');
     toast('⚠️ تعذّر تأمين الطلب — قد يكون أُسنِد لكابتن آخر أو سُحب.<br><b>لا تذهب للمطعم.</b>','warn');
+    window.__accepting=false;
     return;
   }
   clearInterval(cdTimer);
   try{
-    enrichOrder(curOrder);
-    if(curOrder.resPhone && (!curOrder.resLat || !curOrder.resArea)){
-      const L=await fetchResLoc(curOrder.resPhone);
-      if(L){ if(!curOrder.resLat){curOrder.resLat=parseFloat(L.lat);curOrder.resLng=parseFloat(L.lng);} if(!curOrder.resArea)curOrder.resArea=L.area; }
+    enrichOrder(ord);
+    if(ord.resPhone && (!ord.resLat || !ord.resArea)){
+      const L=await fetchResLoc(ord.resPhone);
+      if(L){ if(!ord.resLat){ord.resLat=parseFloat(L.lat);ord.resLng=parseFloat(L.lng);} if(!ord.resArea)ord.resArea=L.area; }
     }
   }catch(e){}
-  if(!curOrder.resPhone) curOrder.resPhone='غير متوفر';
-  finalizeAccept();
+  if(!ord.resPhone) ord.resPhone='غير متوفر';
+  finalizeAccept(ord);
 };
-function finalizeAccept(){
-  document.getElementById('alertOv').classList.add('dn');
-  const o={id:curOrder.id,resName:curOrder.resName,resArea:curOrder.resArea||null,details:String(curOrder.details),
-    price:parseFloat(curOrder.price)||0,area:curOrder.area,state:'heading',photoUrl:curOrder.photoUrl,
-    resPhone:curOrder.resPhone,resLat:curOrder.resLat,resLng:curOrder.resLng,
-    comm:curOrder.comm||0,payType:curOrder.payType||'المطعم يدفع',
-    acceptedTime:Date.now(),is_sovereign:curOrder.is_sovereign||false,readyForPickup:false};
-  active.push(o); localStorage.setItem('suf_orders',JSON.stringify(active));
+function finalizeAccept(ord){
+  /* 🎯 الطلب يصل وسيطاً الآن. والاحتياط للنداءات القديمة إن بقيت. */
+  const c=ord||curOrder;
+  if(!c||!c.id){window.__accepting=false;return;}
+  /* لا نُخفي النافذة إن كان الظاهر فيها طلباً **آخر** وصل أثناء التأمين —
+     وإلا ابتلعناه ولم يره الكابتن أبداً. */
+  if(curOrder&&String(curOrder.id)===String(c.id)){
+    document.getElementById('alertOv').classList.add('dn'); curOrder=null;
+  } else if(!curOrder){
+    document.getElementById('alertOv').classList.add('dn');
+  }
+  const o={id:c.id,resName:c.resName,resArea:c.resArea||null,details:String(c.details),
+    price:parseFloat(c.price)||0,area:c.area,state:'heading',photoUrl:c.photoUrl,
+    resPhone:c.resPhone,resLat:c.resLat,resLng:c.resLng,
+    comm:c.comm||0,payType:c.payType||'المطعم يدفع',
+    acceptedTime:Date.now(),is_sovereign:c.is_sovereign||false,readyForPickup:false};
+  /* 🩹[ازدواج الطلب] الدفع الأعمى كان يُنتج نسخة ثانية متى سبقه مسار
+     الاسترجاع أثناء انتظار enrichOrder/fetchResLoc. الآن: دمج لا تكرار. */
+  const ix=active.findIndex(x=>String(x.id)===String(o.id));
+  if(ix>=0) active[ix]=Object.assign({},active[ix],o,{
+      state:active[ix].state||o.state,
+      readyForPickup:active[ix].readyForPickup||o.readyForPickup});
+  else active.push(o);
+  securing.delete(String(o.id));
+  window.__accepting=false;
+  localStorage.setItem('suf_orders',JSON.stringify(active));
   adjustHB(); renderOrders();   /* 🩹 الكتابة تمّت وتأكّدت في acceptOrder */
   const b=document.getElementById('btnAccept');
   b.innerHTML='<svg class="si si-l" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>قبول الطلب فوراً'; b.disabled=false;
