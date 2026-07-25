@@ -957,6 +957,29 @@
     /* إرسال إلى بوّابة الذكاء. لا ينتظره الكاشير في مسارَي الصوت والوصل —
        لذلك أي فشل يُحفظ محلياً ويُعاد لاحقاً، فلا يضيع طلب بصمت. */
     async function sendToAI(payload, { queueOnFail = true } = {}) {
+        /* ═══════════════════════════════════════════════════════════════════
+           🔑 مفتاح التعريف (Idempotency Key) — النصف المكمّل لحماية السيرفر
+           ───────────────────────────────────────────────────────────────────
+           يُولَّد **مرة واحدة لكل نيّة** ويبقى ملتصقاً بالحمولة داخل الطابور،
+           فكل إعادة إرسال تحمل المفتاح نفسه ويتعرّف عليها aiOrderIntake
+           فيعيد النتيجة الأولى بلا إنشاء طلب جديد.
+
+           الجذر الذي يعالجه: catch أدناه يلتقط **أي** فشل — بما فيه ضياع
+           الجواب بعد نجاح السيرفر تماماً (النداء قد يستغرق 90 ثانية: 45 لمسار
+           Gemini السريع ثم 45 للاحتياطي). فالعميل لا يعرف إن كان الانقطاع وقع
+           قبل إنشاء الطلب أم بعده، فيُعيد في الحالتين — وبلا مفتاح، كل إعادة
+           ناجحة كانت تُنشئ buildOrderId جديداً = طلباً حقيقياً جديداً
+           ⇒ ثلاثة كباتن على وصل واحد، أو بطاقتان في شاشة كابتن واحد.
+
+           ⚠️ لا تنقل هذا السطر إلى flushAIQueue وإلا وُلّد مفتاح جديد لكل
+              محاولة وضاع الغرض كلياً.
+           ⚠️ يتطلّب index.js بإصدار CF-7.0 الذي يقرأ body.cid.
+           ═══════════════════════════════════════════════════════════════════ */
+        if (!payload.cid) {
+            payload.cid = (window.crypto && crypto.randomUUID)
+                ? crypto.randomUUID()
+                : (Date.now() + "-" + Math.random().toString(36).slice(2) + Math.random().toString(36).slice(2));
+        }
         try {
             const ok = await requireCloudAuth();
             if (!ok) throw new Error("NO_AUTH");
@@ -1016,6 +1039,14 @@
         localStorage.setItem(AI_QUEUE_KEY, JSON.stringify(q));
         const fail = [];
         for (const item of batch) {
+            /* ⏳ لا تُرسل وصل الأمس. الطابور يعيش في localStorage فينجو من إغلاق
+               التطبيق، وflushAIQueue تعمل بعد 4 ثوانٍ من كل إقلاع — فوصلٌ فشل
+               ليلاً كان يُنشئ طلباً جديداً صباح الغد لطعامٍ سُلّم بالأمس،
+               بعيداً كل البعد عن نافذة كشف التكرار. */
+            if (Date.now() - (item.ts || 0) > 20 * 60 * 1000) {
+                console.warn("⏳ أُسقطت حمولة قديمة من طابور الذكاء:", new Date(item.ts || 0).toISOString());
+                continue;
+            }
             try { await sendToAI(item.payload, { queueOnFail: false }); }
             catch (e) {
                 item.tries = (item.tries || 0) + 1;
@@ -2340,6 +2371,8 @@
             showSuccessMessage(`<div style="background: var(--success); width: 48px; height: 48px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-bottom: 8px; box-shadow: 0 4px 15px rgba(16,185,129,0.3);"><i data-lucide="check" size="24" color="white"></i></div><div class="fw-black" style="font-size: 1rem;">تم إرسال الطلب عبر خوادم الحوت بنجاح! 🚀</div>`);
         } catch (e) { 
             btn.innerHTML = originalBtnHtml; btn.disabled = false; 
+            /* إلغاء التكرار قرارُ الكاشير نفسه — لا يُعرض كخطأ في النظام */
+            if (e && e.message === 'DUPLICATE_CANCELLED') return;
             alert(e && e.message === 'NO_PHONE' ? "⚠️ رقم المنشأة غير متوفر — سجّل خروجاً ثم دخولاً." : "حدث خطأ غير متوقع."); 
         }
     }
@@ -2389,6 +2422,36 @@
                 resName = sName;
             }
         } catch (e) {}
+
+        /* ═══════════════════════════════════════════════════════════════════
+           🛡️ حارس التكرار للمسار المباشر (اليدوي و«الطلب السريع»)
+           ───────────────────────────────────────────────────────────────────
+           هذا المسار لا يمرّ ببوّابة الذكاء ولا بطابورها، بل يكتب set() مباشرةً
+           بمعرّف جديد في كل نداء. فحين يبدو للكاشير أن الإرسال فشل (بينما نجح
+           على السيرفر) ويضغط ثانيةً، يُنشأ سجلّان لطلبٍ واحد — وهما متطابقان
+           تماماً فيمرّان كل بوّابات الدمج ويقعان على كابتن واحد كبطاقتين، أو
+           على كابتنين عند باب المطعم نفسه.
+           و«الطلب السريع» بلا هاتف زبون أصلاً، فكشف التكرار في CF لا يملك
+           عليه مطابقة قوية. هنا نمنعه من المنبع: بصمة الطلب الأخير محفوظة،
+           وأي تكرار حرفيّ خلال ثلاث دقائق يُرفض بسؤال صريح.
+           ═══════════════════════════════════════════════════════════════════ */
+        try {
+            const sig = [normResPhone, String(price), String(area).trim(), String(details).trim()].join('|');
+            const last = JSON.parse(sessionStorage.getItem('nahla_last_order') || 'null');
+            if (last && last.sig === sig && (Date.now() - last.ts) < 3 * 60 * 1000) {
+                const mins = Math.max(1, Math.round((Date.now() - last.ts) / 60000));
+                const goOn = confirm(
+                    '⚠️ أرسلتَ طلباً مطابقاً تماماً قبل ' + mins + ' دقيقة.\n\n' +
+                    'المطعم: نفسه · المنطقة: نفسها · السعر: نفسه\n\n' +
+                    'إن كان الأول قد وصل فسيذهب كابتنان لطلب واحد.\n' +
+                    'راجع قائمة طلباتك أولاً.\n\n' +
+                    'هل هذا طلب مختلف فعلاً؟');
+                if (!goOn) throw new Error('DUPLICATE_CANCELLED');
+            }
+            sessionStorage.setItem('nahla_last_order', JSON.stringify({ sig: sig, ts: Date.now() }));
+        } catch (e) {
+            if (e && e.message === 'DUPLICATE_CANCELLED') throw e;
+        }
 
         // 🔒 القواعد الجديدة ترفض الكتابة بلا مصادقة — نضمنها قبل set
         const authed = await requireCloudAuth();
