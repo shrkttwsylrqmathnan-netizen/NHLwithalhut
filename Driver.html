@@ -1279,6 +1279,7 @@ async function procQueue(){
   const batch=queue.splice(0,queue.length);   /* ذرّي: لا await قبله */
   const fail=[];
   for(const a of batch){
+    if(a.nextTry&&Date.now()<a.nextTry){ fail.push(a); continue; }
     try{
       if(a.type==='multi'&&a.updates){ await withTimeout(update(ref(db),a.updates)); }
       else if(a.url){ await withTimeout(fetch(a.url,{method:'GET',mode:'no-cors',cache:'no-store'})); }
@@ -1287,14 +1288,39 @@ async function procQueue(){
       a.tries=(a.tries||0)+1;
       /* رفض القواعد أو فشل متكرّر: لا تُعِد المحاولة إلى الأبد — اعزله
          للمراجعة بدل استنزاف البطارية بمحاولة محكومة بالفشل كل 5 ثوانٍ */
-      if(code.includes('permission')||code.includes('denied')||a.tries>=QUEUE_MAX_TRIES){
+      /* ⏳ [الطابور] العمر زمني لا عددي. ثماني محاولات كل خمس ثوانٍ = **أربعون
+         ثانية** — وهي مدّة عبور مرآب أو مصعد لا «عودة شبكة». والوعد المعروض
+         للكابتن («سيُرسل تلقائياً عند عودة الشبكة») كان يُخلَف بعد أقل من
+         دقيقة، ويسقط التسليم في nahla_dead_queue التي **لا يقرؤها أحد**:
+         لا الكابتن ولا الليدر ولا السيرفر. صندوق أسود مغلق.
+         ست ساعات بتراجع أُسّي تغطّي كل حالة واقعية بلا استنزاف بطارية. */
+      const ageMs=Date.now()-(a.ts||Date.now());
+      const hardDead=code.includes('permission')||code.includes('denied');
+      if(hardDead||ageMs>6*3600*1000){
         try{
           const dead=JSON.parse(localStorage.getItem('nahla_dead_queue')||'[]');
           dead.push({...a,deadAt:Date.now(),reason:code.slice(0,60)});
           localStorage.setItem('nahla_dead_queue',JSON.stringify(dead.slice(-40)));
         }catch(_){}
+        /* 🔔 أثر على السيرفر — كان الإسقاط صامتاً تماماً. العقدة مسموحة
+           للكابتن على نفسه (كما في logEarly)، فتراها لوحة الليدر. */
+        try{
+          const pth=(a.updates&&Object.keys(a.updates)[0])||'';
+          const oid=(pth.split('/')[1]||'unknown').replace(/[.#$\[\]]/g,'_');
+          if(drv&&drv.phone){
+            update(ref(db,`security_flags/${drv.phone}/wq_${oid}`),{
+              driver:drv.phone, orderId:oid, kind:'write_failed_dropped',
+              reason:String(code).slice(0,60), attempts:increment(1),
+              last_attempt:new Date().toISOString()
+            }).catch(()=>{});
+          }
+        }catch(_){}
+        try{ modal('⚠️','لم يُسجَّل إجراء',
+          'تعذّر تسجيل أحد إجراءاتك على الخادم بعد محاولات متكرّرة. راجع الليدر وتأكّد من حالة طلبك قبل المتابعة.','warn'); }catch(_){}
         continue;
       }
+      /* تراجع أُسّي: 5ث · 10 · 20 · 40 · 80 · 160 … بسقف 5 دقائق */
+      a.nextTry=Date.now()+Math.min(300000,5000*Math.pow(2,Math.min(a.tries,6)));
       fail.push(a);
     }
   }
@@ -1324,6 +1350,21 @@ function pushTokenToNative(tok){
 }
 
 /* ══════════════ المصادقة + الشفاء الذاتي ══════════════ */
+/* ═══════════════════════════════════════════════════════════════════════
+   🔑 [نجاة الجلسة] كانت كلمة المرور في sessionStorage وحدها — وهي تُمحى مع
+   موت عملية التطبيق (انطفاء الهاتف · قتل النظام للتطبيق · إعادة تشغيل).
+   وأربعة مسارات مصادقة تعتمد عليها: checkSession · healAuth · schedTok ·
+   onAuthStateChanged. فبعد الانطفاء: checkSession تجد الجلسة في localStorage
+   فتفتح لوحة **تبدو سليمة تماماً**، وكلمة المرور غائبة ⇒ لا رمز فايربيس ⇒
+   القواعد ترفض الاستعلام ⇒ healAuth تعود false أبداً ⇒ إعادة محاولة كل 15
+   ثانية إلى ما لا نهاية. الكابتن يرى صفر طلبات وبلا أي رسالة يراها أحد.
+   localStorage ليست أضعف: الجلسة والهاتف مخزّنان فيها أصلاً، ومن يصل
+   sessionStorage يصل الأخرى بالضبط.
+   ═══════════════════════════════════════════════════════════════════════ */
+function setPass(p){ try{ const v=btoa(p); localStorage.setItem('suf_pass_p',v); sessionStorage.setItem('suf_pass',v); }catch(e){} }
+function getPass(){ try{ return sessionStorage.getItem('suf_pass')||localStorage.getItem('suf_pass_p')||null; }catch(e){ return null; } }
+function clearPass(){ try{ localStorage.removeItem('suf_pass_p'); sessionStorage.removeItem('suf_pass'); }catch(e){} }
+
 async function fbAuth(phone,pass){
   try{
     const ph=nP(phone);
@@ -1334,7 +1375,7 @@ async function fbAuth(phone,pass){
   }catch(e){return{ok:false,data:null};}
 }
 function schedTok(phone,pass){if(tokTimer)clearTimeout(tokTimer);
-tokTimer=setTimeout(async()=>{const sp=sessionStorage.getItem('suf_pass');const p=pass||(sp?atob(sp):'');
+tokTimer=setTimeout(async()=>{const sp=getPass();const p=pass||(sp?atob(sp):'');
 if(p&&drv&&drv.phone)await fbAuth(drv.phone,p);},50*60*1000);}
 
 /* 🩹 شفاء المصادقة — نداء واحد جارٍ مهما تعددت المستمعات */
@@ -1344,7 +1385,7 @@ function healAuth(){
   _reauthInFlight=(async()=>{
     let ok=false;
     try{
-      const sp=sessionStorage.getItem('suf_pass');
+      const sp=getPass();
       if(sp&&drv&&drv.phone){ const r=await fbAuth(drv.phone,atob(sp)); ok=!!(r&&r.ok); }
     }catch(e){}
     _reauthInFlight=null; return ok;
@@ -1355,18 +1396,37 @@ async function reAuth(){ return await healAuth(); }
 
 /* 🩹 مستمع ذاتي الشفاء: فايربيس يفصل المرفوض نهائياً — نشفي ونعيد الربط.
    mkRef دالة تعيد ref/query (لدعم الاستعلام المفهرس عند إعادة الربط). */
+/* 🚨 [رفع الصمت] كان الرفض console.warn فقط — لا يراه كابتن قط. فيجلس أمام
+   لوحة سليمة الشكل وفارغة، وطلباته على السيرفر باسمه، ولا يعلم أن الخلل في
+   المصادقة لا في الطلبات. من يرى خطأً صريحاً أحسن حالاً ممّن يرى صمتاً. */
+let _denyStreak=0;
+function showAuthBanner(on){
+  let el=document.getElementById('authBanner');
+  if(!on){ if(el)el.remove(); return; }
+  if(el) return;
+  el=document.createElement('div'); el.id='authBanner';
+  el.style.cssText='position:fixed;top:0;left:0;right:0;z-index:99999;background:#dc2626;color:#fff;'+
+    'padding:11px 14px;font-weight:800;text-align:center;font-size:.9rem;line-height:1.5;'+
+    'box-shadow:0 4px 14px rgba(0,0,0,.28);';
+  el.innerHTML='⚠️ انقطع الاتصال الآمن — قد لا تظهر طلباتك.'+
+    '<br><span style="font-weight:600;font-size:.8rem;opacity:.95;">سجّل خروجاً ثم دخولاً، ولا تعتمد على ما تراه الآن.</span>';
+  document.body.appendChild(el);
+}
 function listen(mkRef,cb){
   const r=mkRef();
   const onErr=async(err)=>{
     console.warn("🔒 رُفضت القراءة:", err&&err.message);
+    _denyStreak++;
+    if(_denyStreak>=3) showAuthBanner(true);
     const ok=await healAuth();
+    if(ok){ _denyStreak=0; showAuthBanner(false); }
     setTimeout(()=>listen(mkRef,cb), ok?1200:15000);
   };
-  onValue(r,cb,onErr);
+  onValue(r,(s)=>{ if(_denyStreak){ _denyStreak=0; showAuthBanner(false); } cb(s); },onErr);
 }
 
 onAuthStateChanged(auth,u=>{
-  if(!u&&drv&&drv.phone){const sp=sessionStorage.getItem('suf_pass');if(sp)fbAuth(drv.phone,atob(sp));}
+  if(!u&&drv&&drv.phone){const sp=getPass();if(sp)fbAuth(drv.phone,atob(sp));}
   else if(u&&drv&&drv.phone){try{if(window.AndroidRadar&&AndroidRadar.subscribeToDriverTopic)AndroidRadar.subscribeToDriverTopic(drv.phone);}catch(e){}}
 });
 
@@ -1470,7 +1530,7 @@ function onLogin(d,phone,pass){
   if(d.status==='active'||d.status==='inactive'){
     drv={phone,name:d.name,shiftHours:d.shift||10,ts:Date.now()};
     localStorage.setItem('suf_session',JSON.stringify(drv));
-    localStorage.setItem('suf_phone',phone); sessionStorage.setItem('suf_pass',btoa(pass));
+    localStorage.setItem('suf_phone',phone); setPass(pass);
     if(d.firebase_token)signInWithCustomToken(auth,d.firebase_token).then(()=>{pushTokenToNative(d.firebase_token);schedTok(phone,pass);}).catch(()=>{});
     try{if(window.AndroidRadar&&AndroidRadar.subscribeToDriverTopic)AndroidRadar.subscribeToDriverTopic(phone);}catch(e){}
     showDash(); document.getElementById('onlineTog').checked=false; toggleOnline();
@@ -1503,7 +1563,7 @@ window.checkWait=function(manual){
       if(d.status==='active'||d.status==='inactive'){
         clearInterval(waitTimer); localStorage.removeItem('suf_pending'); sessionStorage.removeItem('suf_pend_pass');
         drv={phone,name:d.name,shiftHours:d.shift||10,ts:Date.now()};
-        localStorage.setItem('suf_session',JSON.stringify(drv)); sessionStorage.setItem('suf_pass',btoa(pass));
+        localStorage.setItem('suf_session',JSON.stringify(drv)); setPass(pass);
         if(d.firebase_token)signInWithCustomToken(auth,d.firebase_token).then(()=>{pushTokenToNative(d.firebase_token);schedTok(phone,pass);}).catch(()=>{});
         play('welcome'); document.getElementById('waitBox').classList.add('dn'); showDash();
       } else if(d.status==='banned'){clearInterval(waitTimer);localStorage.removeItem('suf_pending');alert('حسابك محظور.');location.reload();}
@@ -1513,7 +1573,7 @@ window.checkWait=function(manual){
 function checkSession(){
   const s=localStorage.getItem('suf_session'), p=localStorage.getItem('suf_pending');
   if(s){try{
-    const d=JSON.parse(s); const sp=sessionStorage.getItem('suf_pass');
+    const d=JSON.parse(s); const sp=getPass();
     if(sp)document.getElementById('pass').value=atob(sp);
     d.phone=nP(d.phone); /* 🔧[خ٧] جلسات قديمة قد تحمل صيغة غير مطبَّعة */
     drv=d; document.getElementById('phone').value=d.phone;
@@ -1556,6 +1616,9 @@ window.logout=function(){
   try{if(window.AndroidRadar&&AndroidRadar.unsubscribeFromDriverTopic)AndroidRadar.unsubscribeFromDriverTopic(drv.phone);}catch(e){}
   try{if(window.AndroidRadar&&AndroidRadar.stopLocationService)AndroidRadar.stopLocationService();}catch(e){}
   unawake(); fbStatus('inactive'); if(tokTimer)clearTimeout(tokTimer);
+  /* 🔑 clearPass إلزامية بعد نقل كلمة المرور إلى localStorage: sessionStorage.clear()
+     وحدها كانت تكفي سابقاً، أمّا الآن فـ suf_pass_p ستبقى بعد الخروج لولا هذا. */
+  clearPass();
   signOut(auth).catch(()=>{}); localStorage.removeItem('suf_session'); sessionStorage.clear(); location.reload();
 };
 function friday(){if(new Date().getDay()===5){const k='suf_fri',t=new Date().toISOString().split('T')[0];
@@ -1759,7 +1822,7 @@ function startListeners(){
   const today=new Date().toISOString().split('T')[0];
 
   listen(()=>ref(db,`drivers_locations/${drv.phone}/account_status`),s=>{
-    if(s.val()==='banned'){alert('⚠️ تم حظر حسابك.');localStorage.removeItem('suf_session');sessionStorage.clear();location.reload();}
+    if(s.val()==='banned'){alert('⚠️ تم حظر حسابك.');clearPass();localStorage.removeItem('suf_session');sessionStorage.clear();location.reload();}
   });
   listen(()=>ref(db,`ledgers/drivers/${drv.phone}`),s=>{
     const l=s.val()||{}; lifetime=Number(l.completed_orders||0); debtNow=Number(l.debt||0); refreshDash();
@@ -1869,8 +1932,21 @@ function listenOrders(){
       const mo=active[i], f=fb[mo.id];
       /* 🩹[سباق القبول] مهلة سماح 6ث: استعلام الفهرس قد يتأخّر لحظات بعد
          الكتابة، فكان الطلب المؤمَّن للتوّ يُحذف بـ«انتهى أو سُحب منك». */
+      /* 🛡️ [غياب الدليل ليس دليل الغياب] — الجذر المشترك لثلاث شكاوى.
+         !f تعني أمرين مختلفين تماماً: «لم يعد لك» أو «لم أستطع قراءته الآن».
+         والتطبيق كان يعامل الثاني معاملة الأول فيحذف عمل الكابتن على أضعف
+         دليل ممكن — بمهلة 6 ثوانٍ فقط وللطلبات المقبولة للتوّ حصراً.
+         الآن: لا حذف إلا بثلاث لقطات فارغة متتالية **ومع** مصادقة قائمة.
+         وإن كانت المصادقة ساقطة فالغياب لا يدلّ على شيء أصلاً. */
       if(!f && mo.acceptedTime && (Date.now()-mo.acceptedTime)<6000) continue;
-      if(!f){rm.push({id:mo.id,m:'انتهى هذا الطلب أو سُحب منك.'});continue;}
+      if(!f){
+        if(!auth.currentUser) continue;                    /* لا مصادقة ⇒ لا استنتاج */
+        mo._missStreak=(mo._missStreak||0)+1;
+        if(mo._missStreak<3) continue;                     /* اصبر لقطتين */
+        rm.push({id:mo.id,m:'انتهى هذا الطلب أو سُحب منك.'});
+        continue;
+      }
+      if(mo._missStreak) mo._missStreak=0;
       const st=String(f.status||'').toLowerCase();
       const DONE=['completed','مكتمل','settled','delivered','done','تم التسليم','تم','deleted'];
       if(DONE.includes(st)||DONE.includes(f.status)){rm.push({id:mo.id,m:'تم إنهاء الطلب.'});continue;}
@@ -1979,6 +2055,12 @@ function countdown(){
    الرفض في daily_metrics دون أي خصم من daily_count. */
 window.declineOrder=function(){
   if(curOrder?.is_sovereign)return alert('⚠️ تعيين إداري لا يمكن تجاهله.');
+  /* 🛡️ [الرفض الشبح] لا تُرسل رفضاً لطلبٍ يجري تأمينه الآن. curOrder لا
+     يُصفَّر إلا في finalizeAccept، فيبقى قائماً طوال نافذة التأمين — وبلا
+     هذا الحارس يرفض العدّادُ ما قَبِله الكابتن قبل ثوانٍ.
+     (خط دفاع ثانٍ فوق حارس handleDeclineOrder السيرفري.) */
+  if(window.__accepting) return;
+  if(curOrder && securing.has(String(curOrder.id))) return;
   clearInterval(cdTimer); document.getElementById('alertOv').classList.add('dn'); stopAlarm();
   if(!curOrder)return;
   const id=curOrder.id;
@@ -2007,6 +2089,12 @@ window.acceptOrder=async function(){
      على «--:--» — وهي البصمة التي ظهرت في شكاوى الكباتن. */
   if(window.__accepting) return;
   window.__accepting = true;
+  /* ⏱️ [الرفض الشبح — الجذر] كان الإيقاف يقع **بعد** guaranteeAccept، وهي قد
+     تستغرق 20 ثانية على شبكة ضعيفة (مهلة 6ث + reAuth + مهلة 6ث + نداء GAS +
+     تحقّق 6ث). فمن يضغط «قبول» وقد بقيت 5 ثوانٍ يُطلق عدّادُه declineOrder
+     على الطلب نفسه الذي يقبله ⇒ يعود للرادار ويُوزَّع لغيره، وهو في طريقه
+     إلى المطعم. الإيقاف الآن قبل أي await. */
+  clearInterval(cdTimer);
   const b=document.getElementById('btnAccept');
   b.innerHTML='<div class="spin" style="border-top-color:#fff;"></div> جاري تأمين الطلب...'; b.disabled=true;
   /* 🩹[سباق القبول] الترتيب القديم كان: أَلغِ العدّاد ← انتظر 1.2ث ← نداء شبكة
@@ -2037,7 +2125,6 @@ window.acceptOrder=async function(){
     window.__accepting=false;
     return;
   }
-  clearInterval(cdTimer);
   try{
     enrichOrder(ord);
     if(ord.resPhone && (!ord.resLat || !ord.resArea)){
@@ -2218,12 +2305,25 @@ window.orderAction=function(id,act,btn){
   const orig=btn.innerHTML; btn.innerHTML='<div class="spin" style="border-top-color:#fff;"></div>'; btn.disabled=true;
 
   if(act==='arrive'){
-    o.state='arrived'; update(ref(db,`active_orders/${id}`),{status:'arrived_at_res'}).catch(()=>{});
+    o.state='arrived';
+    /* 🔔 كان .catch(()=>{}) — صمت مطلق، والحالة المحلية تتقدّم مهما كان الرد.
+       فيمشي الكابتن المسار كاملاً والسيرفر عند accepted منذ البداية. هذا هو
+       الإنذار المبكر الذي أُهدر: لو ظهر عند باب المطعم لاكتُشفت المشكلة قبل
+       عشرين دقيقة من الوصول للزبون. */
+    update(ref(db,`active_orders/${id}`),{status:'arrived_at_res'}).catch(()=>{
+      try{ queue.push({type:'multi',updates:{[`active_orders/${id}/status`]:'arrived_at_res'},ts:Date.now()});
+        localStorage.setItem('nahla_offline_queue',JSON.stringify(queue)); }catch(e){}
+      toast('ℹ️ لم يُسجَّل وصولك بعد — سيُعاد الإرسال تلقائياً.','info');
+    });
     localStorage.setItem('suf_orders',JSON.stringify(active)); renderOrders();
   }
   else if(act==='pickup'){
     o.state='picked_up'; o.pickupTime=Date.now();
-    update(ref(db,`active_orders/${id}`),{status:'picked_up'}).catch(()=>{});
+    update(ref(db,`active_orders/${id}`),{status:'picked_up'}).catch(()=>{
+      try{ queue.push({type:'multi',updates:{[`active_orders/${id}/status`]:'picked_up'},ts:Date.now()});
+        localStorage.setItem('nahla_offline_queue',JSON.stringify(queue)); }catch(e){}
+      toast('ℹ️ لم يُسجَّل استلامك بعد — سيُعاد الإرسال تلقائياً.','info');
+    });
     localStorage.setItem('suf_orders',JSON.stringify(active)); renderOrders();
   }
   else if(act==='finish'){
@@ -2279,7 +2379,23 @@ window.orderAction=function(id,act,btn){
       uB[`daily_metrics/${drv.phone}/${ts}/total_delivery_minutes`]=increment(dmin);
       uB[`daily_ledgers/${drv.phone}/${ts}/${id}`]={orderId:id,resName:o.resName,area:o.area,price:o.price,comm:o.comm||0,timestamp:Date.now()};
 
-      const ok=await guaranteedWrite(uA,`active_orders/${id}/status`,'completed');
+      let ok=await guaranteedWrite(uA,`active_orders/${id}/status`,'completed');
+      /* 🚚 [المسار الثالث] القبول كان يملك احتياطياً سيرفرياً (ACCEPT_ORDER)
+         يتجاوز قواعد فايربيس، والتسليم لم يملك شيئاً — فكابتن ترفض القواعد
+         كتابته (driverPhone المخزّن لا يطابق auth.uid حرفاً بحرف) يقبل طلباً
+         لا يستطيع إنهاءه أبداً، فيبقى باسمه حتى يموت بعد 24 ساعة بلا محاسبة.
+         GAS يكتب بحساب الخدمة فينجح حتى حين تنهار مصادقة الكابتن.
+         ⚠️ يتطلّب handleCompleteOrder منشورة في Code.gs (V17.0). */
+      if(!ok){
+        try{
+          const rr=await withTimeout(
+            fetch(`${API_URL}?action=COMPLETE_ORDER&orderId=${encodeURIComponent(id)}&driverPhone=${drv.phone}&token=${API_TOKEN}`),
+            12000,'gas_timeout');
+          const dd=await rr.json();
+          if(dd&&dd.success){ ok=true; toast('✅ سُجّل التسليم عبر الخادم البديل.','ok'); }
+          else if(dd&&dd.msg){ toast('⚠️ '+dd.msg,'bad'); }
+        }catch(e){}
+      }
       if(!ok){
         btn.innerHTML=orig; btn.disabled=false;
         try{queue.push({type:'multi',updates:uA,ts:Date.now()});queue.push({type:'multi',updates:uB,ts:Date.now()});
