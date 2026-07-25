@@ -66,16 +66,25 @@ self.addEventListener('fetch', event => {
   const url = new URL(event.request.url);
 
   // 🔴 ب. طلبات قاعدة البيانات (جوجل سكريبت) + Firebase اللحظي -> إنترنت فقط (تُمنع من الكاش نهائياً)
-  if (url.hostname.includes('script.google.com') || 
-      url.hostname.includes('firebasedatabase.app') || 
-      url.hostname.includes('googleapis.com') ||
-      url.hostname.includes('imgbb.com')) {
+  /* 🔧 [ترتيب] كانت includes('googleapis.com') تلتقط fonts.googleapis.com أيضاً،
+     فيخرج ملف الخط من هنا «شبكة فقط» ولا يصل القاعدة (ج) المكتوبة خصّيصاً
+     لتخزينه — أي أن الخط الحاجب للعرض لم يكن يُخزَّن أبداً، فبقي في المسار
+     الحرج لشاشة التحميل مهما تكرّر الفتح. الآن الاستثناء صريح. */
+  const isFontCss = url.hostname === 'fonts.googleapis.com';
+  if (!isFontCss && (
+      url.hostname === 'script.google.com' ||
+      url.hostname.endsWith('firebasedatabase.app') ||
+      url.hostname.endsWith('googleapis.com') ||
+      url.hostname.includes('imgbb.com'))) {
     event.respondWith(fetch(event.request));
     return;
   }
 
   // 🔵 ج. ملفات الـ CDNs والأصوات والخرائط -> Cache First
-  if (url.hostname.includes('unpkg.com') || 
+  /* 🔧 www.gstatic.com (حزم Firebase الثلاث) كانت تسقط للقاعدة (د) بالصدفة.
+     إدراجها صريحاً هنا يضمن تخزينها — وهي ثلاثة موارد حاجبة لاكتمال التحميل. */
+  if (url.hostname.includes('www.gstatic.com') ||
+      url.hostname.includes('unpkg.com') || 
       url.hostname.includes('cdn.jsdelivr.net') || 
       url.hostname.includes('fonts.googleapis.com') || 
       url.hostname.includes('fonts.gstatic.com') ||
