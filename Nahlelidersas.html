@@ -1498,7 +1498,7 @@ function updateMap() {
                    ⏱️ تحديث الموقع: منذ ${idleMins} دقيقة
                </div>
                <div style="display:flex; gap:6px;">
-                  <button onclick="window.open('tel:${cleanP}')" style="flex:1; background:#eaf1fe; color:#1a5fd4; border:1px solid #c8dbfb; padding:8px 0; border-radius:10px; font-weight:800; cursor:pointer; font-family:'Cairo';">📞 اتصال</button>
+                  <button onclick="ccWhats('${ej(cleanP)}')" style="flex:1; background:#e7f9ef; color:#048a48; border:1px solid #b6ecca; padding:8px 0; border-radius:10px; font-weight:800; cursor:pointer; font-family:'Cairo';">💬 واتساب</button>
                   <button onclick="msgCaptain('${ej(cleanP)}','${ej(nameStr)}')" style="flex:1; background:#e7f9ef; color:#048a48; border:1px solid #b6ecca; padding:8px 0; border-radius:10px; font-weight:800; cursor:pointer; font-family:'Cairo';">💬 رسالة</button>
                </div>
             </div>`;
@@ -1812,7 +1812,7 @@ function renderWatchList(){
           <div class="watch-rs">${reason} · أنجز ${c.completed}</div>
         </div>
         <div class="watch-acts">
-          <button class="watch-b wb-call" onclick="window.open('tel:${ej(c.phone)}')" title="اتصال">📞</button>
+          <button class="watch-b wb-call" onclick="ccWhats('${ej(c.phone)}')" title="واتساب">💬</button>
           <button class="watch-b wb-msg" onclick="checkInCaptain('${ej(c.phone)}','${ej(c.name)}')" title="اطمئن عليه">💬</button>
         </div>
       </div>`;
@@ -1954,7 +1954,7 @@ function renderCrew(){
         </div>
         <div class="crew-dur">⏱️ مدة العمل اليوم: ${fmtDur(c.workedMin)}</div>
         <div class="crew-acts">
-          <button class="crew-b crew-b-call" onclick="window.open('tel:${ej(c.phone)}')">📞 اتصال</button>
+          <button class="crew-b crew-b-call" onclick="ccWhats('${ej(c.phone)}')">💬 واتساب</button>
           <button class="crew-b crew-b-msg" onclick="msgCaptain('${ej(c.phone)}','${ej(c.name)}')">💬 رسالة</button>
           ${trackBtn}
         </div>
@@ -2225,7 +2225,7 @@ function renderRadar(){
         <div class="oc-dr">
           <div class="oc-dn"><span>🛵 ${esc(dn)}</span></div>
           <div class="oc-dc">
-            ${hD?`<button class="cb-sm" onclick="window.open('tel:${jDP}')">📞</button>`:''}
+            ${hD?`<button class="cb-sm" onclick="ccWhats('${jDP}')" title="واتساب الكابتن">💬</button>`:''}
             ${msgBtn}
             ${wdBtn}
             <button class="asel" style="cursor:pointer;display:flex;align-items:center;justify-content:center;gap:5px" onclick="openAssign('${jOId}')">👑 تعيين كابتن</button>
@@ -2970,7 +2970,6 @@ function renderCtx(){
     </div>
     <div class="ctx-hd">إجراءات</div>
     <div class="ctx-acts">
-      <button class="ctx-a" onclick="ccCall('${esc(p)}')">📞 اتصال</button>
       <button class="ctx-a" onclick="ccWhats('${esc(p)}')">💬 واتساب</button>
       <button class="ctx-a" onclick="ccLocate('${esc(p)}')">📍 موقعه</button>
       <button class="ctx-a" onclick="ccPush('${esc(p)}','${esc((c.driver_name||'كابتن').replace(/'/g,''))}')">🔔 إشعار</button>
@@ -3064,8 +3063,27 @@ function _ccDrawMap(phone,orders){
 }
 
 /* أفعال شريط السياق */
-window.ccCall=function(p){location.href='tel:'+(String(p).startsWith('0')?p:'0'+p);};
-window.ccWhats=function(p){const n=String(p).startsWith('0')?'964'+String(p).slice(1):'964'+p;window.open('https://wa.me/'+n,'_blank');};
+/* ═══════════════════════════════════════════════════════════════════════
+   💬 التواصل مع الكابتن صار **واتساب** لا اتصالاً هاتفياً.
+   ───────────────────────────────────────────────────────────────────────
+   السبب: الكباتن يستعملون واتساب لا المكالمات.
+
+   ⚠️ وأُصلحت صيغة الرقم — كانت معطوبة في ثلاث حالات:
+        "9647701234567"      → 964**964**7701234567   (مفتاح مضاعف)
+        "+964 770 123 4567"  → 964+964 770 123 4567   (رابط مكسور)
+        "٧٧٠١٢٣٤٥٦٧"          → 964٧٧٠١٢٣٤٥٦٧          (أرقام عربية)
+      أي أن الزر الموجود اليوم في شريط السياق كان يفتح واتساب على رقم لا
+      وجود له متى وصله رقم بصيغة غير متوقّعة.
+      nP() تعالج الخمس صيغ كلها — وهي معرّفة في هذا الملف أصلاً.
+
+   🗑️ وحُذفت ccCall: لم يعد لها مستدعٍ بعد تحويل كل أزرار الكابتن.
+      (أزرار الزبون والمطعم تبقى هاتفية عبر ccDial — فهم ليسوا كباتنك.)
+   ═══════════════════════════════════════════════════════════════════════ */
+window.ccWhats=function(p){
+  const c=nP(p);
+  if(!c) return toast("لا يوجد رقم صالح لهذا الكابتن","e");
+  window.open('https://wa.me/964'+c,'_blank','noopener');
+};
 window.ccLocate=function(p){
   const d=drvLocs[nP(p)];
   if(!d||!d.lat||!d.lng)return toast("لا يوجد موقع محفوظ لهذا الكابتن","e");
