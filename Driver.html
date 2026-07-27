@@ -627,17 +627,17 @@ window.__SND={alert:"UklGRvaoAABXQVZFZm10IBAAAAABAAEAIlYAAESsAAACABAAZGF0YdKoAAA
   </div>
   <div class="card-auth" id="authBox">
     <label class="lbl">رقم الهاتف</label>
-    <input type="tel" id="phone" class="inp-clay phone" placeholder="07XXXXXXXXX" dir="ltr" autocomplete="off" readonly onfocus="this.removeAttribute('readonly');">
+    <input type="tel" id="phone" maxlength="15" class="inp-clay phone" placeholder="07XXXXXXXXX" dir="ltr" autocomplete="off" readonly onfocus="this.removeAttribute('readonly');">
     <div id="passBox">
       <label class="lbl">كلمة المرور</label>
-      <input type="password" id="pass" class="inp-clay" placeholder="••••••••" autocomplete="off" style="text-align:center;letter-spacing:5px;">
+      <input type="password" id="pass" maxlength="64" class="inp-clay" placeholder="••••••••" autocomplete="off" style="text-align:center;letter-spacing:5px;">
     </div>
     <div id="regBox" class="dn">
       <div class="divider">تسجيل كابتن جديد</div>
       <label class="lbl">الاسم الثلاثي</label>
-      <input type="text" id="rName" class="inp-clay" placeholder="أحمد محمد علي" autocomplete="off">
+      <input type="text" id="rName" maxlength="60" class="inp-clay" placeholder="أحمد محمد علي" autocomplete="off">
       <label class="lbl">إنشاء كلمة مرور</label>
-      <input type="password" id="rPass" class="inp-clay" placeholder="كلمة مرور قوية" autocomplete="off">
+      <input type="password" id="rPass" maxlength="64" class="inp-clay" placeholder="كلمة مرور قوية" autocomplete="off">
       <label class="lbl">مدة الشفت</label>
       <select id="rShift" class="inp-clay"><option value="6">6 ساعات</option><option value="10" selected>10 ساعات</option><option value="12">12 ساعة</option></select>
     </div>
@@ -878,7 +878,7 @@ window.__SND={alert:"UklGRvaoAABXQVZFZm10IBAAAAABAAEAIlYAAESsAAACABAAZGF0YdKoAAA
   <div id="chSt" class="ch-st cs-w">جاري إرسال طلبك للّيدرز...</div>
   <div id="chBody"></div>
   <div id="chFoot">
-    <textarea id="chIn" rows="1" placeholder="اكتب رسالتك..." oninput="this.style.height='auto';this.style.height=Math.min(this.scrollHeight,110)+'px';"></textarea>
+    <textarea id="chIn" rows="1" maxlength="500" placeholder="اكتب رسالتك..." oninput="this.style.height='auto';this.style.height=Math.min(this.scrollHeight,110)+'px';"></textarea>
     <button id="chSend" onclick="sendChat()"><svg class="si" viewBox="0 0 24 24"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg></button>
   </div>
 </div>
@@ -1188,7 +1188,12 @@ function nP(p){
   const ar=['٠','١','٢','٣','٤','٥','٦','٧','٨','٩'], fa=['۰','۱','۲','۳','۴','۵','۶','۷','۸','۹'];
   for(let i=0;i<10;i++){ s=s.split(ar[i]).join(String(i)); s=s.split(fa[i]).join(String(i)); }
   s=s.replace(/[^\d]/g,"");
-  if(s.startsWith("964")) s=s.slice(3);
+  /* 🔢 [ن] كان الحذف بلا شرط: أي نصّ يبدأ بـ964 يُبتَر ثلاثة أرقام حتى لو لم
+     يكن مفتاح دولة. رقم عراقي كامل بمفتاح الدولة طوله 13 (9647701234567)،
+     فاشتراط >10 يحمي القصير ولا يمسّ الصحيح.
+     ولم أُضِف رفضاً بالطول: قد يكسر دخول حالة حافّة قائمة، وكسرُ دخولٍ يعمل
+     أسوأ من مفتاح شاذّ نادر. */
+  if(s.length>10 && s.startsWith("964")) s=s.slice(3);
   return s.replace(/^0+/,"");
 }
 
@@ -1200,6 +1205,39 @@ let drv=null, curOrder=null, active=[], isOnline=false, isReg=false;
 const securing = new Set();
 let cdTimer, hbTimer=null, shTimer=null, tokTimer=null, waitTimer=null;
 let lastLat=0, lastLng=0, lastHtml="";
+/* ═══════════════════════════════════════════════════════════════════════
+   📍 [هـ] طزاجة الموقع — كان أخطر ما في الملف على **الأسطول كله**
+   ───────────────────────────────────────────────────────────────────────
+   lastLat/lastLng متغيّران عامّان يُحدَّثهما watchPosition. وإن توقّف التتبّع
+   (أُطفئ GPS · سُحب الإذن · جمّد أندرويد الـWebView · نفق أو مبنى) **لا
+   يُصفَّران أبداً** — فتواصل النبضة إرسال موقع الساعة الماضية **بختم زمني
+   هذه الثانية**.
+
+   فيرى المحرك كابتناً نشطاً نبضته قبل 12 ثانية عند مطعم الواسطي، وهو في
+   عرفة. ⇒ يُسنَد إليه طلب يبعد 7 كم وهو محسوب على 200 م، ويُحرم منه قريبٌ
+   فعلاً. وghostDriverSweeper لا يكنسه لأن نبضته طازجة.
+
+   المبدأ: **الموقع يحمل وقت قياسه، لا وقت إرساله.**
+   ═══════════════════════════════════════════════════════════════════════ */
+let lastFixTs = 0;                     // لحظة آخر إحداثي حقيقي
+const FIX_STALE_MS = 90000;            // بعدها لا يُوثَق به
+let lastAckTs = 0;                     // [ج] آخر كتابة أكّدها الخادم
+function markFix(lat,lng,acc){
+  lastLat=lat; lastLng=lng; lastFixTs=Date.now();
+  if(drv){ drv.currentLat=lat; drv.currentLng=lng; if(acc)drv.gpsAccuracy=acc; }
+}
+function locFresh(){ return lastFixTs>0 && (Date.now()-lastFixTs)<=FIX_STALE_MS; }
+/* [و] راية موقع صريحة — كان الفشل يُغطّى بأول قراءة مخزّنة تالية */
+function showLocBanner(on,msg){
+  let el=document.getElementById('locBanner');
+  if(!on){ if(el)el.remove(); return; }
+  if(el){ if(msg)el.querySelector('span').textContent=msg; return; }
+  el=document.createElement('div'); el.id='locBanner';
+  el.style.cssText='position:fixed;top:0;left:0;right:0;z-index:99998;background:#E8830C;color:#fff;'+
+    'padding:9px 14px;font-weight:800;text-align:center;font-size:.86rem;box-shadow:0 3px 12px rgba(0,0,0,.22);';
+  el.innerHTML='📍 <span>'+(msg||'موقعك غير محدّث — فعّل GPS')+'</span>';
+  document.body.appendChild(el);
+}
 let readySet=new Set(), rejToday=0, doneToday=0, earnToday=0, lifetime=0, debtNow=0;
 let queue=JSON.parse(localStorage.getItem('nahla_offline_queue')||'[]'), qBusy=false;
 let chatOpen=false, chatMsgs={}, chatMeta={}, chatSeen=0;
@@ -1368,7 +1406,7 @@ function clearPass(){ try{ localStorage.removeItem('suf_pass_p'); sessionStorage
 async function fbAuth(phone,pass){
   try{
     const ph=nP(phone);
-    const r=await fetch(`${API_URL}?action=checkDriver&phone=${ph}&password=${encodeURIComponent(pass||'')}&token=${API_TOKEN}`);
+    const r=await gasFetch(`${API_URL}?action=checkDriver&phone=${ph}&password=${encodeURIComponent(pass||'')}&token=${API_TOKEN}`);
     const d=await r.json();
     if(d&&d.firebase_token){await signInWithCustomToken(auth,d.firebase_token);pushTokenToNative(d.firebase_token);schedTok(phone,pass);return{ok:true,data:d};}
     return{ok:false,data:d};
@@ -1438,6 +1476,36 @@ onAuthStateChanged(auth,u=>{
    ملاحظة: التغليف يشمل get() أيضاً — وليس update() وحده — لأن قراءة
    التحقّق تعلّق بالطريقة نفسها، فيبقى باب التجمّد مفتوحاً لو غُلّف أحدهما. */
 const NET_TIMEOUT_MS=6000;
+/* ═══════════════════════════════════════════════════════════════════════
+   🌐 [أ١] gasFetch — كل نداء إلى Apps Script يمرّ من هنا.
+   ───────────────────────────────────────────────────────────────────────
+   fetch بلا AbortController **تنتظر بلا حدّ**. وكانت سبعة نداءات في هذا
+   الملف بلا مهلة إطلاقاً:
+     checkDriver (×3) · DRIVER_REG · START_SHIFT · ACCEPT_ORDER · DECLINE_ORDER
+
+   الأثر على الكابتن: يعلق على «جاري الدخول…» إلى ما لا نهاية على شبكة زاحفة.
+
+   والأخطر — DECLINE_ORDER: يُرسَل الرفض بلا مهلة، فيقطع طريقه دقيقتين على
+   شبكة ضعيفة ويصل **بعد** أن قَبِل الطلبَ كابتنٌ آخر. وhandleDeclineOrder
+   كانت تدهس بلا فحص ⇒ يُسلَب الطلب من الكابتن الثاني وهو في الطريق.
+   (الحارس السيرفري يمنع الأثر الآن، والمهلة تمنع السبب.)
+
+   AbortController يقطع النداء فعلاً — بخلاف withTimeout التي تسابق مؤقّتاً
+   وتترك النداء يعيش في الخلفية.
+   ═══════════════════════════════════════════════════════════════════════ */
+const GAS_TIMEOUT_MS = 15000;
+/* [أ] عنوان REST لقاعدة البيانات — يتجاوز كاش مكتبة RTDB بنيوياً.
+   ⚠️ يُشتقّ من إعداد فايربيس نفسه لا يُكتب يدوياً: أي عنوان مكتوب بخطّ اليد
+   ينحرف عن الإعداد يوماً بلا أن يلاحظ أحد، فيفشل كل تحقّق بصمت. */
+const DB_REST = String(fbCfg.databaseURL||"").replace(/\/+$/,"");
+async function gasFetch(url, opts, ms){
+  const ctrl = new AbortController();
+  const t = setTimeout(()=>ctrl.abort(), ms || GAS_TIMEOUT_MS);
+  try{
+    return await fetch(url, Object.assign({}, opts||{}, { signal: ctrl.signal }));
+  } finally { clearTimeout(t); }
+}
+
 function withTimeout(promise,ms=NET_TIMEOUT_MS,label='timeout'){
   let t;
   const timer=new Promise((_,rej)=>{t=setTimeout(()=>rej(new Error(label)),ms);});
@@ -1452,9 +1520,29 @@ async function guaranteedWrite(updates,vPath,vVal){
       if(i>1)await reAuth();
       await withTimeout(update(ref(db),updates),NET_TIMEOUT_MS,'write_timeout');
       if(vPath){
-        const s=await withTimeout(get(ref(db,vPath)),NET_TIMEOUT_MS,'read_timeout');
-        if(s.exists()&&String(s.val())===String(vVal))return true;
-        if(i===RETRIES)return false;
+        /* ═══════════════════════════════════════════════════════════════
+           🔴 [أ] الجذر: get() **ليست شاهداً محايداً**.
+           ───────────────────────────────────────────────────────────────
+           مكتبة RTDB تطبّق كل كتابة على الكاش المحلي فوراً (تعويض الكمون)،
+           وget ترجع من الكاش إن تعذّر الخادم. فكانت تؤكّد **تفاؤل التطبيق
+           نفسه** لا حقيقة السيرفر ⇒ تعود true ⇒ تُحذف البطاقة ⇒ والطلب باقٍ
+           accepted على السيرفر ⇒ الكابتن محسوب حاملاً له فلا يصله جديد،
+           حتى يموت بعد 24 ساعة expired بلا عمولة ولا ذمّة ولا مبيعات.
+           وهو بالضبط: «ضغطتُ إكمال، اختفى من تطبيقي، وبقي في النظام».
+
+           REST يتجاوز كاش المكتبة **بنيوياً** — لا خيار فيه.
+           وإن تعذّر النداء نعود false: الطابور والمسار الاحتياطي يتكفّلان،
+           والبطاقة تبقى في يد الكابتن. الصمت هو ما نتجنّبه.
+           ═══════════════════════════════════════════════════════════════ */
+        let confirmed=false;
+        try{
+          const tok = auth.currentUser ? await auth.currentUser.getIdToken() : '';
+          const rr  = await gasFetch(`${DB_REST}/${vPath}.json?auth=${encodeURIComponent(tok)}`, null, 8000);
+          const raw = await rr.text();
+          confirmed = (raw!==null && String(JSON.parse(raw))===String(vVal));
+        }catch(e){ confirmed=false; }
+        if(confirmed) return true;
+        if(i===RETRIES) return false;
       } else return true;
     }catch(e){
       lastErr=e;
@@ -1478,9 +1566,36 @@ async function guaranteeAccept(id){
      فتبقى الحالة accepted بينما driverPhone صار لكابتن آخر. */
   const p={status:'accepted',driverPhone:drv.phone,last_update:new Date().toISOString()};
   const path=`active_orders/${id}`;let ok=false;
-  try{await withTimeout(update(ref(db,path),p));ok=true;}catch(e){}
-  if(!ok){try{await reAuth();await withTimeout(update(ref(db,path),p));ok=true;}catch(e){}}
-  if(!ok){try{await fetch(`${API_URL}?action=ACCEPT_ORDER&orderId=${encodeURIComponent(id)}&driverPhone=${drv.phone}&token=${API_TOKEN}`);}catch(e){}}
+  /* 🔊 [أ٣] كانت المحاولات الثلاث بـcatch(e){} فارغة تماماً: إن فشلت الثلاث
+     **لا يعرف أحد لماذا** — لا الكابتن ولا الليدر ولا أنت. وهذا قلب شكوى
+     «قبلتُ ولم يُسجَّل». الآن يُسجَّل سبب كل محاولة ويُرفع علم إن فشلت كلها. */
+  const why=[];
+  try{await withTimeout(update(ref(db,path),p));ok=true;}
+  catch(e){ why.push('مباشرة: '+String(e&&e.message||e).slice(0,60)); }
+
+  if(!ok){
+    try{await reAuth();await withTimeout(update(ref(db,path),p));ok=true;}
+    catch(e){ why.push('بعد إعادة المصادقة: '+String(e&&e.message||e).slice(0,60)); }
+  }
+  if(!ok){
+    try{
+      const rr=await gasFetch(`${API_URL}?action=ACCEPT_ORDER&orderId=${encodeURIComponent(id)}&driverPhone=${drv.phone}&token=${API_TOKEN}`);
+      const dd=await rr.json().catch(()=>({}));
+      if(dd&&dd.success===false&&dd.msg) why.push('الخادم: '+String(dd.msg).slice(0,60));
+    }
+    catch(e){ why.push('الخادم البديل: '+String(e&&e.message||e).slice(0,60)); }
+  }
+  if(why.length){
+    console.warn('⚠️ guaranteeAccept #'+id+' → '+why.join(' | '));
+    /* أثر على السيرفر يراه الليدر — العقدة مسموحة للكابتن على نفسه */
+    try{
+      if(drv&&drv.phone) update(ref(db,`security_flags/${drv.phone}/acc_${String(id).replace(/[.#$\[\]]/g,'_')}`),{
+        driver:drv.phone, orderId:String(id), kind:'accept_attempts_failed',
+        reasons:why.join(' | ').slice(0,200), attempts:increment(1),
+        last_attempt:new Date().toISOString()
+      }).catch(()=>{});
+    }catch(_){}
+  }
   try{
     const s=await withTimeout(get(ref(db,path)));
     const f=s.val()||{};
@@ -1512,14 +1627,14 @@ function doAuth(){
     const n=document.getElementById('rName').value.trim(), rp=document.getElementById('rPass').value.trim(), sh=document.getElementById('rShift').value;
     if(!n)return alert('يرجى كتابة الاسم الثلاثي'); if(!rp)return alert('يرجى إنشاء كلمة مرور');
     loading(true,'جاري إنشاء الحساب...');
-    fetch(API_URL,{method:'POST',body:JSON.stringify({action:'DRIVER_REG',token:API_TOKEN,name:n,phone,password:rp,shift:sh})})
+    gasFetch(API_URL,{method:'POST',body:JSON.stringify({action:'DRIVER_REG',token:API_TOKEN,name:n,phone,password:rp,shift:sh})})
       .then(()=>{loading(false);localStorage.setItem('suf_pending',phone);sessionStorage.setItem('suf_pend_pass',btoa(rp));showWait();})
       .catch(()=>{loading(false);alert('ضعف في الاتصال.');});
     return;
   }
   if(!pass)return alert('يرجى إدخال كلمة المرور');
   loading(true,'جاري المزامنة...');
-  fetch(`${API_URL}?action=checkDriver&phone=${phone}&password=${encodeURIComponent(pass)}&token=${API_TOKEN}`)
+  gasFetch(`${API_URL}?action=checkDriver&phone=${phone}&password=${encodeURIComponent(pass)}&token=${API_TOKEN}`)
     .then(r=>r.json()).then(d=>onLogin(d,phone,pass)).catch(()=>{loading(false);alert('خطأ في الاتصال');});
 }
 function onLogin(d,phone,pass){
@@ -1557,7 +1672,7 @@ window.checkWait=function(manual){
   let pass=document.getElementById('pass').value.trim();
   if(!pass){const sp=sessionStorage.getItem('suf_pend_pass');if(sp)pass=atob(sp);}
   if(manual)document.getElementById('waitTxt').innerText='جاري التحقق...';
-  fetch(`${API_URL}?action=checkDriver&phone=${phone}&password=${encodeURIComponent(pass)}&token=${API_TOKEN}`)
+  gasFetch(`${API_URL}?action=checkDriver&phone=${phone}&password=${encodeURIComponent(pass)}&token=${API_TOKEN}`)
     .then(r=>r.json()).then(d=>{
       document.getElementById('waitTxt').innerText='جاري الاستعلام التلقائي...';
       if(d.status==='active'||d.status==='inactive'){
@@ -1634,6 +1749,9 @@ function startShift(){
       document.getElementById('shLeft').innerText='دوام حر ♾️';
       document.getElementById('shPct').innerText='';
       document.getElementById('shFill').style.width='100%';
+      /* 🔋 [ح] كان يعمل 60 مرة في الدقيقة إلى الأبد بلا غرض: يكتب النصّ
+         نفسه ويقرأ DOM ويكتبه. في الدوام الحر لا شيء يُعدّ — نوقفه. */
+      clearInterval(shTimer); shTimer=null;
       return;
     }
     const end=new Date(drv.shiftEnd).getTime(), rem=end-Date.now(), total=(drv.shiftHours||10)*3600000;
@@ -1676,7 +1794,7 @@ window.toggleOnline=async function(){
     lbl.className='tog-lbl on'; lbl.innerText='متاح للطلبات';
     if(!drv.shiftEnd||new Date(drv.shiftEnd)<=new Date()){
       try{
-        const r=await fetch(`${API_URL}?action=START_SHIFT&phone=${drv.phone}&token=${API_TOKEN}`); const d=await r.json();
+        const r=await gasFetch(`${API_URL}?action=START_SHIFT&phone=${drv.phone}&token=${API_TOKEN}`); const d=await r.json();
         if(d.success){drv.shiftEnd=d.shift_end;localStorage.setItem('suf_session',JSON.stringify(drv));}
         else{toast(d.msg||'تعذّر بدء الشفت','bad');document.getElementById('onlineTog').checked=false;isOnline=false;
           lbl.className='tog-lbl';lbl.innerText='في استراحة';return;}
@@ -1688,8 +1806,26 @@ window.toggleOnline=async function(){
     document.getElementById('radarD').innerText='جاري البحث عن طلبات قريبة...';
     startShift();
     try{if(window.AndroidRadar&&AndroidRadar.startLocationService)AndroidRadar.startLocationService();}catch(e){}
-    if(navigator.geolocation)navigator.geolocation.getCurrentPosition(p=>{lastLat=p.coords.latitude;lastLng=p.coords.longitude;fbStatus('active');},()=>fbStatus('active'),{enableHighAccuracy:true,timeout:5000});
-    else fbStatus('active');
+    /* ═══════════════════════════════════════════════════════════════════
+       ✅ [ب] المفتاح كان يخضرّ **قبل** الكتابة ويُكتب «الرادار يعمل 📡»،
+       وإن فشلت الكتابة ابتلعها catch فارغ. فيجلس الكابتن ساعات وهو مقتنع
+       أنه متاح، و status عندك inactive فلا يراه استعلام المحرك إطلاقاً.
+       الآن: لا خضرة إلا بتأكيد من الخادم، وإلا رسالة صريحة.
+       ═══════════════════════════════════════════════════════════════════ */
+    (async ()=>{
+      if(navigator.geolocation){
+        await new Promise(res=>navigator.geolocation.getCurrentPosition(
+          pp=>{markFix(pp.coords.latitude,pp.coords.longitude,pp.coords.accuracy);res();},
+          ()=>res(),{enableHighAccuracy:true,timeout:5000}));
+      }
+      const okNet = await fbStatus('active');
+      if(!okNet){
+        document.getElementById('radarT').innerText='⚠️ لم يتأكّد التفعيل';
+        document.getElementById('radarD').innerHTML='<b style="color:#DC2626">لم يصل تفعيلك للخادم — لن تصلك طلبات.</b><br>تحقّق من الشبكة وGPS ثم أعد المحاولة.';
+        rad.classList.remove('on'); rad.classList.add('off');
+        toast('⚠️ تعذّر تفعيل الرادار — أعد المحاولة','bad');
+      } else { updateLinkPill(); }
+    })();
     await awake();
     if(hbTimer)clearInterval(hbTimer); hbTimer=setInterval(heartbeat,active.length?10000:20000);
     localStorage.setItem('was_online','true');
@@ -1708,22 +1844,73 @@ window.toggleOnline=async function(){
   }
 };
 function adjustHB(){if(hbTimer)clearInterval(hbTimer);if(!isOnline||!drv)return;hbTimer=setInterval(heartbeat,active.length?10000:20000);}
-function heartbeat(){if(!isOnline||!drv)return;
-if(lastLat&&lastLng)fbStatus('active');
-else if(navigator.geolocation)navigator.geolocation.getCurrentPosition(p=>{lastLat=p.coords.latitude;lastLng=p.coords.longitude;fbStatus('active');});}
+function heartbeat(){
+  if(!isOnline||!drv)return;
+  /* [هـ] لا نبعث ختماً طازجاً فوق موقع ميت — fbStatus تتكفّل بالرفض
+     وطلب قراءة جديدة وإظهار الراية. */
+  if(lastLat&&lastLng){ fbStatus('active'); return; }
+  if(navigator.geolocation)navigator.geolocation.getCurrentPosition(
+    p=>{ markFix(p.coords.latitude,p.coords.longitude,p.coords.accuracy); fbStatus('active'); },
+    ()=>showLocBanner(true,'تعذّر تحديد موقعك — فعّل GPS'),
+    {enableHighAccuracy:true,timeout:10000,maximumAge:0});
+}
 
 /* 🔧[خ٨] كتابة حقلية فقط — القواعد تسمح للكابتن بهذه الحقول الأربعة على
    عقدته وحدها. shift_end أُزيلت: يكتبها START_SHIFT سيرفرياً، وكتابتها
    من العميل كانت سترفض وتمحو حقل name الذي يختمه GAS V16.1. */
-function fbStatus(st){
-  if(!drv||!lastLat||!lastLng)return;
+async function fbStatus(st){
+  /* [ب] كانت لا تُعيد شيئاً: المفتاح يخضرّ ويُكتب «الرادار يعمل 📡» قبل
+     الكتابة، وإن فشلت ابتلعها .catch(()=>{}) فارغ. فيجلس الكابتن ساعات
+     مقتنعاً أنه متاح، و status عندك ما زالت inactive فلا يراه المحرك.
+     الآن تُعيد true/false ليقرّر المُستدعي.
+     [هـ] ولا تكتب بإحداثي ميت: ختم طازج فوق موقع قديم يخدع المحرك. */
+  if(!drv) return false;
+  if(!lastLat||!lastLng){
+    showLocBanner(true,'لا يوجد موقع — فعّل GPS وامنح الإذن');
+    return false;
+  }
+  if(!locFresh()){
+    showLocBanner(true,'موقعك غير محدّث منذ '+Math.round((Date.now()-lastFixTs)/60000)+' دقيقة');
+    try{ navigator.geolocation?.getCurrentPosition(
+      pos=>{ markFix(pos.coords.latitude,pos.coords.longitude,pos.coords.accuracy); showLocBanner(false); },
+      ()=>{}, {enableHighAccuracy:true,timeout:8000,maximumAge:0}); }catch(e){}
+    return false;                      /* لا كتابة بإحداثي لا نثق به */
+  }
+  showLocBanner(false);
+
   const p=drv.phone, u={};
   u[`drivers_locations/${p}/lat`]=Number(lastLat);
   u[`drivers_locations/${p}/lng`]=Number(lastLng);
   u[`drivers_locations/${p}/status`]=st;
   u[`drivers_locations/${p}/last_update`]=new Date().toISOString();
-  update(ref(db),u).catch(async()=>{ const ok=await healAuth(); if(ok) update(ref(db),u).catch(()=>{}); });
+  try{
+    await withTimeout(update(ref(db),u));
+    lastAckTs=Date.now(); updateLinkPill(); return true;
+  }catch(e){
+    try{
+      const ok=await healAuth();
+      if(ok){ await withTimeout(update(ref(db),u)); lastAckTs=Date.now(); updateLinkPill(); return true; }
+    }catch(e2){}
+    updateLinkPill(); return false;
+  }
 }
+
+/* ═══════════════════════════════════════════════════════════════════════
+   🔗 [ج] مؤشّر آخر اتصال — أنفع سطر تشخيصي في الملف
+   ───────────────────────────────────────────────────────────────────────
+   النبضة كانت تفشل بصمت مطلق: يتقادم last_update ⇒ يخرج الكابتن من
+   الترشيح بعد 5 دقائق ⇒ يجعله كنّاس الأشباح inactive بعد 15 — والتطبيق
+   يعرض «الرادار يعمل 📡» طوال ذلك.
+   سطرٌ واحد يراه الكابتن بعينه يحوّل أربعة أعطال صامتة إلى شيء يُبلّغ عنه.
+   ═══════════════════════════════════════════════════════════════════════ */
+function updateLinkPill(){
+  const el=document.getElementById('radarD'); if(!el||!isOnline) return;
+  if(!lastAckTs){ el.innerHTML='⚠️ لم يتأكّد الاتصال بالخادم بعد'; el.style.color='#DC2626'; return; }
+  const sec=Math.round((Date.now()-lastAckTs)/1000);
+  if(sec<=90){ el.innerHTML='📡 متصل — آخر تأكيد قبل '+sec+' ثانية'; el.style.color=''; }
+  else { el.innerHTML='🔴 انقطع الاتصال منذ '+Math.round(sec/60)+' دقيقة — قد لا تصلك طلبات'; el.style.color='#DC2626'; }
+}
+setInterval(()=>{ if(isOnline) updateLinkPill(); }, 5000);
 /* 🔗 مستقبِل أحداث الطبقة الأصلية — يناديه MainActivity.pushEventToWeb.
    أهمّها order_revoked: يصل من FCM حتى والتطبيق في الخلفية، فيُحدَّث
    الويب فوراً بدل انتظار مستمع فايربيس (وقد يكون مجمّداً). */
@@ -1738,20 +1925,27 @@ window.__nativeEvent=function(ev){
     }
   }catch(e){}
 };
-window.__nativeLocation=function(lat,lng,acc){lastLat=lat;lastLng=lng;if(drv){drv.currentLat=lat;drv.currentLng=lng;if(acc)drv.gpsAccuracy=acc;}
+window.__nativeLocation=function(lat,lng,acc){markFix(lat,lng,acc);showLocBanner(false);
 if(isOnline)fbStatus('active');document.getElementById('permOv').classList.add('dn');};
 
 function startSystem(){
   if(isOnline){awake();adjustHB();}
   startListeners();
   if(navigator.geolocation){
-    navigator.geolocation.getCurrentPosition(p=>{lastLat=p.coords.latitude;lastLng=p.coords.longitude;
-      if(drv){drv.currentLat=p.coords.latitude;drv.currentLng=p.coords.longitude;drv.gpsAccuracy=p.coords.accuracy;}fbStatus(isOnline?'active':'inactive');},
+    navigator.geolocation.getCurrentPosition(p=>{
+        markFix(p.coords.latitude,p.coords.longitude,p.coords.accuracy);
+        showLocBanner(false); fbStatus(isOnline?'active':'inactive');},
       ()=>document.getElementById('permOv').classList.remove('dn'),{enableHighAccuracy:true,timeout:10000});
-    navigator.geolocation.watchPosition(p=>{document.getElementById('permOv').classList.add('dn');
-      lastLat=p.coords.latitude;lastLng=p.coords.longitude;
-      if(drv){drv.currentLat=p.coords.latitude;drv.currentLng=p.coords.longitude;drv.gpsAccuracy=p.coords.accuracy;}fbStatus(isOnline?'active':'inactive');},
-      ()=>document.getElementById('permOv').classList.remove('dn'),{enableHighAccuracy:true,maximumAge:5000});
+    /* [و] كانت watchPosition **بلا timeout**: إن لم يردّ المزوّد أبداً لا
+       يُنادى معالج نجاح ولا فشل، فيبقى lastLat على قيمته الأولى بلا إشارة.
+       وmaximumAge:5000 كانت تُخفي التحذير بأول قراءة مخزّنة تالية. */
+    navigator.geolocation.watchPosition(p=>{
+        document.getElementById('permOv').classList.add('dn'); showLocBanner(false);
+        markFix(p.coords.latitude,p.coords.longitude,p.coords.accuracy);
+        fbStatus(isOnline?'active':'inactive');},
+      ()=>{ document.getElementById('permOv').classList.remove('dn');
+            showLocBanner(true,'انقطع تتبّع الموقع — تحقّق من GPS'); },
+      {enableHighAccuracy:true,maximumAge:5000,timeout:25000});
   }
 }
 
@@ -1844,7 +2038,7 @@ function startListeners(){
     Object.values(d).sort((a,b)=>b.timestamp-a.timestamp).forEach(r=>{
       total+=(parseFloat(r.price)||0);
       const t=new Date(r.timestamp).toLocaleTimeString('ar-EG',{hour:'2-digit',minute:'2-digit'});
-      html+=`<div class="ldg-i"><div><div class="li-id">#${r.orderId} — ${esc(r.resName)}</div>
+      html+=`<div class="ldg-i"><div><div class="li-id">#${esc(r.orderId)} — ${esc(r.resName)}</div>
         <div class="li-in">📍 ${esc(r.area)}</div></div>
         <div style="text-align:left;"><div class="li-p">${r.price} <small style="font-size:.7rem;color:var(--muted);">د.ع</small></div>
         <div class="li-t">${t}</div></div></div>`;
@@ -1856,8 +2050,22 @@ function startListeners(){
 
   listen(()=>ref(db,'system_settings/shifts_enabled'),s=>{window._shiftsOff=(s.val()===false);});
 
-  listen(()=>ref(db,'system_broadcast'),s=>{const d=s.val();
-    if(d&&d.msg&&d.ts&&Date.now()-d.ts<10000)modal('📢','تنبيه الإدارة',d.msg,'royal');});
+  /* ═══════════════════════════════════════════════════════════════════
+     📢 [م] كانت نافذة **عشر ثوانٍ فقط** بين كتابة الرسالة وظهورها. فمن كان
+     تطبيقه في الخلفية، أو شبكته أبطأ من ذلك، أو فتح التطبيق بعد دقيقة —
+     **لا تصله**. فتنبيه «لا تستلموا من مطعم فلان» يصل بعض الأسطول وأنت
+     تظنّه وصل الجميع.
+     والمفارقة أن الرسالة الفردية (driver_messages) لها shownMsgs تمنع
+     التكرار وتصل مهما تأخّرت — والجماعية بلا أيٍّ منها.
+     الآن: المعيار «هل رأيتُه؟» لا «هل هو طازج؟» — كالفردية تماماً. */
+  let lastBcTs=Number(localStorage.getItem('suf_bc_ts')||0);
+  listen(()=>ref(db,'system_broadcast'),s=>{
+    const d=s.val(); if(!d||!d.msg||!d.ts) return;
+    if(d.ts<=lastBcTs) return;                       /* رآه من قبل */
+    if(Date.now()-d.ts > 6*3600000) return;          /* أقدم من ٦ ساعات */
+    lastBcTs=d.ts; try{localStorage.setItem('suf_bc_ts',String(d.ts));}catch(e){}
+    play('ready'); modal('📢','تنبيه الإدارة',d.msg,'royal');
+  });
 
   listen(()=>ref(db,`driver_messages/${drv.phone}`),s=>{
     const d=s.val(); if(!d||!d.msg||!d.ts)return;
@@ -1990,11 +2198,32 @@ function listenOrders(){
         const oid=String(f.id||k);
         if(securing.has(oid))return;                                   /* يؤمّنه acceptOrder الآن */
         if(active.find(o=>String(o.id)===oid))return;                  /* موجود أصلاً */
+        /* ═══════════════════════════════════════════════════════════════
+           🔴 [ط] كانت تكتب state:'heading' دائماً وتتجاهل f.status تماماً.
+           فطلبٌ حالته picked_up على السيرفر — أي الكابتن حاملٌ الطعام وواقفٌ
+           عند باب الزبون — يُسترجَع بحالة «متوجّه للمطعم»، فيعرض له التطبيق
+           «تأكيد الوصول للمطعم» ولا يستطيع التسليم إطلاقاً.
+
+           🔴 [ي] وpickupTime لم تكن تُسترجَع. وحارس الدقيقتين:
+                 secs = (Date.now() - (o.pickupTime || Date.now())) / 1000
+           فبغيابها يصير secs = 0 ⇒ «لم تمرّ دقيقتان» **ولن تمرّ أبداً**،
+           لأنها لا تُضبط إلا بضغط «استلمت» — وقد ضغطه قبل ساعة.
+
+           الاثنان معاً يُغلقان الفخّ: يُعاد إلى البداية، وحتى لو أعاد الخطوات
+           يبدأ عدّاد الدقيقتين من جديد.
+           ═══════════════════════════════════════════════════════════════ */
+        const srvSt=String(f.status||'').toLowerCase().trim();
+        const st2 = srvSt==='picked_up' ? 'picked_up'
+                  : srvSt==='arrived_at_res' ? 'arrived' : 'heading';
+        const srvMs = f.last_update ? new Date(f.last_update).getTime() : Date.now();
         active.push({id:oid,resName:f.restaurant||'',resArea:f.resArea||null,
           details:String(f.details||''),price:parseFloat(f.price)||0,area:f.area||'غير محدد',
-          state:'heading',photoUrl:f.photoUrl||'',resPhone:f.resPhone||'غير متوفر',
+          state:st2,photoUrl:f.photoUrl||'',resPhone:f.resPhone||'غير متوفر',
           resLat:f.resLat,resLng:f.resLng,comm:f.comm||0,payType:f.payType||'المطعم يدفع',
-          acceptedTime:f.last_update?new Date(f.last_update).getTime():Date.now(),
+          acceptedTime:srvMs,
+          /* استلمه على السيرفر منذ زمن — نختم لحظة الاستلام بـlast_update،
+             وبطرح المهلة كي لا يُحبَس خلف عدّاد بدأ للتوّ. */
+          pickupTime: st2==='picked_up' ? Math.min(srvMs, Date.now()-MIN_PICKUP_SECS*1000) : null,
           is_sovereign:f.is_sovereign||false,readyForPickup:f.ready_for_pickup===true});
         if(f.ready_for_pickup===true)readySet.add(oid);
         restored++;
@@ -2072,7 +2301,9 @@ window.declineOrder=function(){
   if(!curOrder)return;
   const id=curOrder.id;
   rejToday++; /* تفاؤلي — المستمع يزامن الرقم الحقيقي */
-  fetch(`${API_URL}?action=DECLINE_ORDER&orderId=${encodeURIComponent(id)}&driverPhone=${drv.phone}&token=${API_TOKEN}`)
+  /* ⏱️ [أ١] كان بلا مهلة: رفضٌ يقطع طريقه دقيقتين على شبكة ضعيفة يصل بعد
+     أن قَبِل الطلبَ كابتنٌ آخر — فيُسلَب منه وهو في الطريق. */
+  gasFetch(`${API_URL}?action=DECLINE_ORDER&orderId=${encodeURIComponent(id)}&driverPhone=${drv.phone}&token=${API_TOKEN}`)
     .catch(()=>{ /* ضعف الشبكة: حارس CF يعيد الطلب للرادار تلقائياً */ });
   curOrder=null;
 };
@@ -2172,6 +2403,26 @@ function finalizeAccept(ord){
   const b=document.getElementById('btnAccept');
   b.innerHTML='<svg class="si si-l" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>قبول الطلب فوراً'; b.disabled=false;
 }
+/* ═══════════════════════════════════════════════════════════════════════
+   ⏰ [ز] إعادة التفعيل بعد نهاية الشفت كانت في مسار **واحد**: نجاح التسليم.
+   لكن active تفرغ من خمسة مسارات أخرى: سحب الليدر · إعادة التوزيع ·
+   انتهاء الطلب · تنظيف الجلسة · order_revoked — ولا واحد منها يفحص العلم.
+
+   فإن سُحب آخر طلب بعد نهاية الشفت: يبقى _shiftOver=true والمفتاح أخضر —
+   فتصله الطلبات من السيرفر ويرفضها التطبيق: «انتهى شفتك». وكل طلب مرفوض
+   يضيع دقيقتين ونصف قبل إعادة توزيعه، **فكابتن واحد عالق يُبطئ الأسطول**.
+   ═══════════════════════════════════════════════════════════════════════ */
+function maybeEndShift(){
+  if(!window._shiftOver || active.length>0) return;
+  setTimeout(()=>{
+    try{
+      document.getElementById('onlineTog').checked=false; toggleOnline();
+      window._shiftOver=false; window._shiftEndNotified=false;
+      alert('⏰ انتهى شفتك ولا طلبات لديك. شكراً لك 🌟');
+    }catch(e){}
+  },900);
+}
+
 function removeOrdersBatch(list){
   if(!list||!list.length)return;
   play('cancel');                                  /* صوت واحد مهما كان العدد */
@@ -2190,12 +2441,14 @@ function removeOrdersBatch(list){
     }
   });
   localStorage.setItem('suf_orders',JSON.stringify(active)); adjustHB(); renderOrders();
+  maybeEndShift();
 }
 function removeOrder(msg,id){
   play('cancel');
   document.getElementById('cancelTxt').innerText=`الطلب #${id}: ${msg}`;
   document.getElementById('cancelOv').classList.remove('dn');
   active=active.filter(o=>String(o.id)!==String(id)); readySet.delete(String(id));
+  setTimeout(maybeEndShift,50);
   localStorage.setItem('suf_orders',JSON.stringify(active)); adjustHB(); renderOrders();
   if(curOrder&&String(curOrder.id)===String(id)){clearInterval(cdTimer);
     document.getElementById('alertOv').classList.add('dn');stopAlarm();curOrder=null;}
@@ -2212,7 +2465,25 @@ function modal(icon,title,body,kind){
 }
 window.openLedger=()=>document.getElementById('ledger').classList.remove('dn');
 window.closeLedger=()=>document.getElementById('ledger').classList.add('dn');
-window.openLink=function(u){if(window.AndroidRadar?.openExternalApp)window.AndroidRadar.openExternalApp(u);else window.open(u,'_blank');};
+/* 🔒 [ج١] كان يمرّر **أي** نصّ إلى الجسر الأصلي فيُطلَق كـACTION_VIEW.
+   ومصدر بعض الروابط (رابط الخريطة mp) هو بيانات الطلب — أي من تطبيق المطعم
+   أو من تحليل Gemini للوصل، وكلاهما خارج سيطرتك.
+   الآن: المخطّطات المتوقّعة وحدها. */
+const SAFE_LINK_SCHEMES=['https:','tel:','whatsapp:','geo:','mailto:','sms:'];
+window.openLink=function(u){
+  const raw=String(u||'').trim();
+  if(!raw) return;
+  let scheme='';
+  try{ scheme=new URL(raw, location.href).protocol; }
+  catch(e){ scheme=(raw.split(':')[0]||'')+':'; }
+  if(SAFE_LINK_SCHEMES.indexOf(scheme)===-1){
+    console.warn('🔒 رابط بمخطّط غير مسموح رُفض:', raw.slice(0,80));
+    toast('رابط غير صالح','bad');
+    return;
+  }
+  if(window.AndroidRadar?.openExternalApp) window.AndroidRadar.openExternalApp(raw);
+  else window.open(raw,'_blank','noopener,noreferrer');
+};
 window.smartWa=function(phone,res,area,id,price){
   if(!phone)return; const n=drv?.name||'الكابتن', a=String(area).split('(')[0].trim();
   const msg=encodeURIComponent(`مرحباً 🌹\nمعك الكابتن ${n} من فريق نحلة للتوصيل 🛵\nطلبك من (${res}) متجه إلى ${a}.\n💵 الفاتورة: ${price} د.ع\n\nأرسل موقعك 📍 لأسرع توصيل!\nشكراً لاختيارك نحلة ✨`);
@@ -2306,32 +2577,58 @@ setInterval(timers,1000);
 window.orderAction=function(id,act,btn){
   const o=active.find(x=>String(x.id)===String(id)); if(!o)return;
   if(act==='arrive'&&o.resLat&&o.resLng&&drv?.currentLat&&drv?.currentLng){
-    const d=dist(drv.currentLat,drv.currentLng,o.resLat,o.resLng);
-    if(d>150){toast(`⚠️ لا يمكنك تأكيد الوصول!<br>أنت تبعد <b>${Math.round(d)} متر</b> عن المطعم 📍`,'bad');return;}
+    /* 🩹 [ك] كان يتّهم الكابتن بالبعد اعتماداً على إحداثي قد يكون ميتاً منذ
+       نصف ساعة — فيُرفض وصولُ الواقف عند الباب برسالة «أنت تبعد 3000 متر».
+       إن لم نكن نعرف مكانه، لا نتّهمه: نطلب موقعاً حديثاً ونمرّر الفحص. */
+    if(!locFresh()){
+      showLocBanner(true,'موقعك غير محدّث — فعّل GPS');
+      try{ navigator.geolocation?.getCurrentPosition(
+        pp=>{markFix(pp.coords.latitude,pp.coords.longitude,pp.coords.accuracy);showLocBanner(false);},
+        ()=>{},{enableHighAccuracy:true,timeout:8000,maximumAge:0}); }catch(e){}
+    } else {
+      const d=dist(drv.currentLat,drv.currentLng,o.resLat,o.resLng);
+      if(d>150){toast(`⚠️ لا يمكنك تأكيد الوصول!<br>أنت تبعد <b>${Math.round(d)} متر</b> عن المطعم 📍`,'bad');return;}
+    }
   }
   const orig=btn.innerHTML; btn.innerHTML='<div class="spin" style="border-top-color:#fff;"></div>'; btn.disabled=true;
 
   if(act==='arrive'){
-    o.state='arrived';
-    /* 🔔 كان .catch(()=>{}) — صمت مطلق، والحالة المحلية تتقدّم مهما كان الرد.
-       فيمشي الكابتن المسار كاملاً والسيرفر عند accepted منذ البداية. هذا هو
-       الإنذار المبكر الذي أُهدر: لو ظهر عند باب المطعم لاكتُشفت المشكلة قبل
-       عشرين دقيقة من الوصول للزبون. */
-    update(ref(db,`active_orders/${id}`),{status:'arrived_at_res'}).catch(()=>{
-      try{ queue.push({type:'multi',updates:{[`active_orders/${id}/status`]:'arrived_at_res'},ts:Date.now()});
-        localStorage.setItem('nahla_offline_queue',JSON.stringify(queue)); }catch(e){}
-      toast('ℹ️ لم يُسجَّل وصولك بعد — سيُعاد الإرسال تلقائياً.','info');
-    });
-    localStorage.setItem('suf_orders',JSON.stringify(active)); renderOrders();
+    /* ═══════════════════════════════════════════════════════════════════
+       ⏳ [د] كانت الحالة المحلية تتقدّم **فوراً وبلا شرط**، فيرى الكابتن
+       «بالمطعم» و«استلمت» والسيرفر عند accepted منذ البداية — والليدر يرى
+       حالة مختلفة عمّا يراه الكابتن، وهو مصدر خلاف لا يعرف أيّهما سببه.
+       الآن: لا تتقدّم إلا بتأكيد، وإلا تبقى وتُطابر بإشعار صريح.
+       ═══════════════════════════════════════════════════════════════════ */
+    (async()=>{
+      const done = await guaranteedWrite({[`active_orders/${id}/status`]:'arrived_at_res'},
+                                          `active_orders/${id}/status`,'arrived_at_res');
+      if(done){
+        o.state='arrived';
+        localStorage.setItem('suf_orders',JSON.stringify(active)); renderOrders();
+      }else{
+        btn.innerHTML=orig; btn.disabled=false;
+        try{ queue.push({type:'multi',updates:{[`active_orders/${id}/status`]:'arrived_at_res'},ts:Date.now()});
+          localStorage.setItem('nahla_offline_queue',JSON.stringify(queue)); }catch(e){}
+        toast('⚠️ لم يُسجَّل وصولك — سيُعاد الإرسال. لا تتابع حتى يُسجَّل.','bad');
+      }
+    })();
+    return;
   }
   else if(act==='pickup'){
-    o.state='picked_up'; o.pickupTime=Date.now();
-    update(ref(db,`active_orders/${id}`),{status:'picked_up'}).catch(()=>{
-      try{ queue.push({type:'multi',updates:{[`active_orders/${id}/status`]:'picked_up'},ts:Date.now()});
-        localStorage.setItem('nahla_offline_queue',JSON.stringify(queue)); }catch(e){}
-      toast('ℹ️ لم يُسجَّل استلامك بعد — سيُعاد الإرسال تلقائياً.','info');
-    });
-    localStorage.setItem('suf_orders',JSON.stringify(active)); renderOrders();
+    (async()=>{
+      const done = await guaranteedWrite({[`active_orders/${id}/status`]:'picked_up'},
+                                          `active_orders/${id}/status`,'picked_up');
+      if(done){
+        o.state='picked_up'; o.pickupTime=Date.now();
+        localStorage.setItem('suf_orders',JSON.stringify(active)); renderOrders();
+      }else{
+        btn.innerHTML=orig; btn.disabled=false;
+        try{ queue.push({type:'multi',updates:{[`active_orders/${id}/status`]:'picked_up'},ts:Date.now()});
+          localStorage.setItem('nahla_offline_queue',JSON.stringify(queue)); }catch(e){}
+        toast('⚠️ لم يُسجَّل استلامك — سيُعاد الإرسال. لا تتابع حتى يُسجَّل.','bad');
+      }
+    })();
+    return;
   }
   else if(act==='finish'){
     const secs=(Date.now()-(o.pickupTime||Date.now()))/1000, mins=Math.floor(secs/60);
@@ -2345,9 +2642,14 @@ window.orderAction=function(id,act,btn){
        وزبوناً غاضباً، والعلامة لا تكلّف شيئاً وتُبقي الرقابة قائمة. */
     const acc=Number(drv?.gpsAccuracy||0);
     const slack=(acc>0&&acc<400)?Math.min(acc,250):120;
-    const far=(dm!==null&&dm>=Math.max(150,MIN_DIST_M-slack));
+    /* 🎯 [ل] dm يقيس البُعد عن **المطعم** لا القرب من **الزبون**، ولا توجد
+       إحداثيات للزبون في النظام أصلاً. فالمقياس **لا يميّز الصادق من غيره**:
+       توصيلٌ حقيقي لزبون على 100 م من المطعم = «مشتبه»، وكابتن لم يغادر لكنه
+       ابتعد 200 م = «غير مشتبه». فكان يولّد سجلّات اتهام كاذبة في
+       security_flags تُشوّش على الحقيقي.
+       أُسقط من قرار الاشتباه، وبقي **معلومة مسجَّلة بوسمها الصحيح**. */
     const timeOk=(mins>=FALLBACK_MINS), pickOk=(secs>=MIN_PICKUP_SECS);
-    const suspicious=(!far&&!timeOk);
+    const suspicious=!timeOk;   /* الزمن وحده — وهو ما نملك قياسه فعلاً */
 
     if(!pickOk){
       /* الحارس الوحيد الباقي: دقيقتان بين الاستلام والتسليم — يمنع النقر
@@ -2461,7 +2763,10 @@ window.openChat=async function(){
 };
 window.closeChat=function(){document.getElementById('chat').classList.add('dn');chatOpen=false;};
 window.sendChat=async function(){
-  const i=document.getElementById('chIn'), t=(i.value||'').trim(); if(!t)return;
+  /* ✂️ [ب٦] حزامان لا واحد: maxlength في العنصر يمنع الكتابة، وهذا يمنع
+     اللصق البرمجي وأي التفاف على الواجهة. عقدة driver_chats تنمو بلا تنظيف
+     (يعالجه purgeBloatCore في index.js)، فحدّ الطول شرط لا ترف. */
+  const i=document.getElementById('chIn'), t=(i.value||'').trim().slice(0,500); if(!t)return;
   const b=document.getElementById('chSend'); b.disabled=true;
   const k=`${Date.now()}_${Math.random().toString(36).slice(2,7)}`, u={};
   u[`${cPath()}/messages/${k}`]={from:'driver',name:drv.name||'كابتن',text:t,ts:Date.now()};
@@ -2512,7 +2817,7 @@ function startChat(){
       chatSeen=d.last_msg_at; play('ready');
       toast(`💬 ردّ من الليدر: ${esc(String(d.last_msg||'').slice(0,40))}`,'info');
     }
-    if(chatOpen){renderChat();if(un>0)update(ref(db,cPath()),{unread_driver:0}).catch(()=>{});}
+    if(chatOpen){renderChat();if(un>0)update(ref(db,cPath()),{unread_driver:0}).catch(e=>console.warn('تعذّر تصفير عدّاد الدردشة:',e&&e.message));}
   });
 }
 document.addEventListener('keydown',e=>{
