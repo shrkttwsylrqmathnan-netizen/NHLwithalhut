@@ -1,35 +1,51 @@
 <!DOCTYPE html>
+<!--
+  🛠️ لوحة الإدارة — V17.0 "Owned"
+  ═══════════════════════════════════════════════════════════════════════
+  ✅ وضع الظلّ على الأفعال السيادية الأربعة (forceComplete · delOrder ·
+     asgnDrv · wdOrder): يُنادى السيرفر بالتوازي فيُقيّم ويُسجّل حكمه
+     ولا يكتب حرفاً. الكتابة المباشرة تبقى المسؤول الوحيد.
+  ✅ إكمال قائمة الحالات المنتهية بـexpired و cancelled — كانتا ناقصتين
+     من النسخة المحلّية وحدها.
+
+  🎛️ SHADOW_ON_ADMIN = true  ← اجعله false لإيقاف نداء الظلّ فوراً
+
+  ⚠️ يتطلّب قبله: index.js CF-8.1 (فيه FORCE_DELIVER والتعيين بهدف)
+  ⚠️ ولا يُنشر ".write": false قبل أن يقرأ diagnoseCommands صفر رفض
+     لسبعة أيام متصلة على هذه الأوامر الأربعة.
+  ═══════════════════════════════════════════════════════════════════════
+-->
 <html lang="ar" dir="rtl">
 <head>
 <script>
 // 🛡️ V22.0 "Fortress" — رفع رقم الإصدار يفرض مسح الكاش على كل الأجهزة
-const V="22.0",VK="nahla_v22";
+const V="22.0",VK="hut_v22";
 try{if(localStorage.getItem(VK)!==V){localStorage.setItem(VK,V);if("caches"in window)caches.keys().then(n=>n.forEach(k=>caches.delete(k)));}}catch(e){}
 </script>
 <meta charset="UTF-8">
+<!-- 🔒 [أ١] سياسة أمان المحتوى — تُقلّص أثر أي حقن أو اختراق CDN.
+     ابدأ بـ Content-Security-Policy-Report-Only أسبوعاً، اقرأ التقارير، ثم أَلزِم.
+     'unsafe-inline' لازمٌ اليوم: الشيفرة كلها كتل سكربت مضمّنة. إزالته
+     تتطلّب نقلها إلى ملفات أو ختمها بـ nonce — مشروع لاحق موثّق. -->
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://www.gstatic.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: blob: https:; media-src 'self' data: blob: https://actions.google.com; connect-src 'self' https://*.firebasedatabase.app https://*.firebaseio.com https://script.google.com https://script.googleusercontent.com https://*.googleapis.com https://securetoken.googleapis.com; frame-ancestors 'none'; object-src 'none'; base-uri 'none'; form-action 'none'">
+<link rel="manifest" href="manifest_admin.json">
 <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no,viewport-fit=cover">
 <title>نحلة — لوحة الإدارة</title>
 <meta name="theme-color" content="#0a1628">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-
-<!-- 🐝 تطبيق ويب تقدّمي (PWA) -->
-<link rel="manifest" href="manifest_admin.json">
-<link rel="apple-touch-icon" href="admin-logo.png">
-<link rel="icon" type="image/png" href="admin-logo.png">
-<meta name="apple-mobile-web-app-title" content="إدارة نحلة">
-<meta name="mobile-web-app-capable" content="yes">
-<meta name="application-name" content="إدارة نحلة">
-<meta name="description" content="لوحة الإدارة والرقابة الميدانية — نظام نحلة كركوك">
 <!-- ⚡ الأداء: خرائط جوجل تُحمَّل كسولاً عند فتح نافذة التعديل فقط (كانت تُحمَّل
      مع كل فتح للّوحة وتُبطئها بشدّة). markercluster حُذف (كان يُحمَّل بلا استخدام). -->
 <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-database-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js" defer></script>
-<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet.heat/0.2.0/leaflet-heat.js" defer></script>
+<!-- [V17] دوال السحابة — لنداء orderCommand في وضع الظلّ -->
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-functions-compat.js"></script>
+<!-- 🗑️ [حذف] Leaflet + leaflet-heat + Chart.js — نحو 355 ك.ب و عشرات طلبات
+     بلاطات basemaps.cartocdn مع كل تحريك. الخريطة الحيّة والرسمان أُزيلا بطلبك.
+     ⚠️ خرائط جوجل (مُنتقي موقع المطعم) **باقية** — وهي تُحمَّل عند الطلب فقط
+     عبر loadGoogleMaps()، فلا تكلّف فتح اللوحة شيئاً. وحذفها يعني تعذّر ضبط
+     إحداثيات أي مطعم — ومطعمٌ بلا إحداثيات **لا تُوزَّع طلباته إطلاقاً**. -->
 <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap" rel="stylesheet">
 <style>
 :root{
@@ -154,9 +170,9 @@ button,input,select,textarea{font-family:'Cairo',sans-serif;}
   .dh-cl{background:var(--base);padding:8px 20px;border-radius:var(--rf);
     font-weight:900;font-size:.95rem;color:var(--sky);
     border:1px solid var(--line);box-shadow:var(--sh-xs);}
-  .map-wrap{width:100%;height:420px;border-radius:var(--r6);
-    overflow:hidden;box-shadow:var(--sh-md);border:3px solid var(--base);position:relative;}
-  .mob-hdr,.mob-st,.sheet-h{display:none!important;}
+  /* 🗑️ .map-wrap حُذف — كان صندوقاً بارتفاع 420px للخريطة وحدها،
+     فبقاؤه بعد حذفها يترك فراغاً ثابتاً. */
+  .mob-bar,.sheet-h{display:none!important;}
 }
 @media(max-width:768px){
   .sidebar,.dh,.desk-only{display:none!important;}
@@ -183,25 +199,22 @@ button,input,select,textarea{font-family:'Cairo',sans-serif;}
     -webkit-overflow-scrolling:touch;}
   .pg::-webkit-scrollbar{display:none;}
   #pg-live.on{display:flex!important;flex-direction:column;overflow:hidden;}
-  .map-wrap{position:relative;width:100%;flex:1;min-height:42vh;}
-  #amap{width:100%;height:100%;}
-  .mob-hdr{position:absolute;top:max(14px,env(safe-area-inset-top));
-    left:14px;right:14px;z-index:20;display:flex;
-    justify-content:space-between;align-items:center;pointer-events:none;}
-  .mob-hdr>*{pointer-events:auto;}
+  /* 📱 شريط علوي ثابت بدل ما كان يطفو فوق الخريطة */
+  .mob-bar{display:flex;align-items:center;justify-content:space-between;gap:8px;
+    padding:calc(max(10px,env(safe-area-inset-top))) 12px 10px;
+    background:var(--base2);border-bottom:1px solid var(--line);flex:0 0 auto;}
   .pill{background:rgba(255,255,255,.96);
     padding:7px 14px;border-radius:var(--rf);display:flex;
     align-items:center;gap:8px;box-shadow:var(--sh-sm);}
   .pill-t{font-size:.82rem;font-weight:900;color:var(--sky-d);}
-  .mob-st{position:absolute;top:calc(max(14px,env(safe-area-inset-top)) + 54px);
-    right:14px;z-index:20;display:flex;flex-direction:column;gap:6px;}
+  .mob-st{display:flex;flex-direction:row;gap:6px;}
   .mst{background:rgba(255,255,255,.96);
     padding:6px 12px;border-radius:var(--rf);font-weight:800;font-size:.82rem;
     box-shadow:var(--sh-xs);display:flex;align-items:center;gap:6px;color:var(--ink);}
-  .b-sheet{position:absolute;bottom:0;left:0;right:0;
-    background:var(--base2);border-radius:24px 24px 0 0;z-index:15;
-    display:flex;flex-direction:column;box-shadow:0 -8px 32px rgba(10,22,40,.09);
-    height:46%;overflow:hidden;}
+  /* 📱 كان يشغل 46% أسفل الخريطة. وبعد حذفها يملأ ما تبقّى كاملاً —
+     فالرادار الميداني هو ما يحمل قرار العمل فعلاً. */
+  .b-sheet{position:relative;background:var(--base2);
+    display:flex;flex-direction:column;flex:1;min-height:0;overflow:hidden;}
   .sheet-h{width:36px;height:4px;background:var(--line);
     border-radius:99px;margin:10px auto 0;flex-shrink:0;}
   .sheet-sc{overflow-y:auto;flex:1;padding:12px 14px 14px;
@@ -556,19 +569,9 @@ button,input,select,textarea{font-family:'Cairo',sans-serif;}
   transition:all .18s;display:flex;align-items:center;gap:8px;
   font-family:'Cairo',sans-serif;}
 .bc-btn:hover{background:var(--sky-l);color:var(--sky);}
-.fab{position:absolute;right:12px;width:44px;height:44px;border-radius:12px;
-  background:var(--base);color:var(--ink);display:flex;align-items:center;
-  justify-content:center;box-shadow:var(--sh-md);cursor:pointer;z-index:1200;
-  border:1px solid var(--line);transition:transform .12s;font-size:18px;}
-.fab:active{transform:scale(.85);}
-.fab-exp{top:14px;}
-.fab-cxl{top:66px;background:var(--rose-l);color:var(--rose);
-  border-color:#fecaca;display:none;}
-.map-wrap.fs{position:fixed!important;inset:0!important;width:100vw!important;
-  height:100vh!important;z-index:9998!important;border-radius:0!important;
-  border:none!important;margin:0!important;}
-.map-wrap.fs .fab-exp{top:max(16px,env(safe-area-inset-top));}
-.map-wrap.fs .fab-cxl{top:calc(max(16px,env(safe-area-inset-top)) + 52px);}
+/* 🗑️ حُذفت قواعد أزرار الخريطة: .fab · .fab-exp · .fab-cxl · .map-wrap.fs
+   (ملء الشاشة · إلغاء المسار). زرّ البثّ .fab-bc أدناه **باقٍ** — فهو مستقلّ
+   عن الخريطة ويفتح نافذة الرسالة الجماعية. */
 .fab-bc{position:fixed;bottom:calc(var(--nav)+16px);left:16px;
   width:48px;height:48px;border-radius:50%;
   background:linear-gradient(135deg,var(--fire),var(--fire-d));
@@ -585,7 +588,6 @@ button,input,select,textarea{font-family:'Cairo',sans-serif;}
 @keyframes fl{0%{background:var(--sky-l)}100%{background:var(--base)}}
 .path-anim{}
 @keyframes da{to{stroke-dashoffset:-1000}}
-.leaflet-container{font-family:'Cairo',sans-serif;}
 .dm{width:31px;height:31px;border-radius:50%;border:2.5px solid #fff;
   display:flex;align-items:center;justify-content:center;font-size:13px;box-shadow:var(--sh-xs);}
 .dm-on{background:linear-gradient(135deg,var(--sky),var(--sky-d));color:#fff;}
@@ -848,21 +850,20 @@ button,input,select,textarea{font-family:'Cairo',sans-serif;}
         <div class="kc ko"><div class="kc-ic" style="background:var(--fire-l)">🍽</div><div><div class="kc-v v-res">0</div><div class="kc-l">مطاعم متصلة</div></div></div>
         <div class="kc kv"><div class="kc-ic" style="background:var(--violet-l)">✅</div><div><div class="kc-v" id="vDone">0</div><div class="kc-l">منجزة اليوم</div></div></div>
       </div>
-      <div class="map-wrap" id="mapWrap">
-        <div class="mob-hdr">
-          <div class="pill">🏢<span class="pill-t">مكتب نحلة</span></div>
-          <div class="pill" id="clkM">00:00</div>
-        </div>
+      <!-- 🗑️ حُذف إطار الخريطة (.map-wrap) — كان حاويةً للخريطة نفسها لا أكثر.
+           والعناصر الثلاثة التي كانت **تطفو فوقها** على الجوال (اسم المكتب ·
+           الساعة · عدّادات 📦🛵🍽) نُقلت إلى شريط ثابت يعلو الرادار، فبقيت
+           المعلومة وذهب الفراغ. -->
+      <div class="mob-bar">
+        <div class="pill">🏢<span class="pill-t">مكتب نحلة</span></div>
         <div class="mob-st">
           <div class="mst">📦 <span class="v-ord">0</span></div>
           <div class="mst">🛵 <span class="v-drv">0</span></div>
           <div class="mst">🍽 <span class="v-res">0</span></div>
         </div>
-        <div id="amap" style="width:100%;height:100%"></div>
-        <div class="fab fab-exp" onclick="togFS()"><span id="fsI">⛶</span></div>
-        <div class="fab fab-cxl" id="btnCxl" onclick="cxlTrack()">✕</div>
-        <button class="fab-bc" onclick="opMod('bcModal')">📣</button>
+        <div class="pill" id="clkM">00:00</div>
       </div>
+      <button class="fab-bc" onclick="opMod('bcModal')">📣</button>
       <div class="b-sheet">
         <div class="sheet-h"></div>
         <div class="sheet-sc">
@@ -898,8 +899,8 @@ button,input,select,textarea{font-family:'Cairo',sans-serif;}
         <div class="ak akr"><div class="ak-ic r">💵</div><div class="ak-n"><span id="akCm">0</span><span class="ku" style="font-size:.78rem;color:var(--ink4)"> د.ع</span></div><div class="ak-l">إجمالي العمولات</div></div>
         <div class="ak akg"><div class="ak-ic g">📈</div><div class="ak-n"><span id="akRv">0</span><span class="ku" style="font-size:.78rem;color:var(--ink4)"> د.ع</span></div><div class="ak-l">إيرادات المطاعم</div></div>
       </div>
-      <div class="chart-bx"><div class="chart-tt">📊 أداء اليوم</div><div style="height:220px;position:relative"><canvas id="dchart"></canvas></div></div>
-      <div class="chart-bx"><div class="chart-tt">🥧 نسبة الإكمال</div><div style="height:200px;position:relative"><canvas id="pchart"></canvas></div></div>
+      <!-- 🗑️ حُذف الرسمان (Chart.js). الأرقام نفسها معروضة في بطاقات الإحصاء أعلاه
+           بصفر مكتبة وصفر canvas. -->
       <div class="tb-box">
         <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:9px">
           <div><label class="el">بحث</label><input type="text" id="arcSch" class="fc" placeholder="رقم، مطعم..." oninput="renderArch()"></div>
@@ -1020,7 +1021,7 @@ button,input,select,textarea{font-family:'Cairo',sans-serif;}
            (ADMIN_API_TOKEN) المنفصل — لا يوجد إلا في هذه اللوحة.
            ملاحظة: أعمدة كلمات المرور تصل الآن معمّاة "•••" — اللوحة
            لا تعرضها أصلاً فلا شيء ينكسر.
-   🔧[خ٣]  التوكن المحروق NAHLA_SECURE_TOKEN_2026 استُبدل بموضعَي التوكنين.
+   🔧[خ٣]  التوكن المحروق HUT_SECURE_99 استُبدل بموضعَي التوكنين.
    🩹      كل مستمعات فايربيس صارت ذاتية الشفاء عبر listen():
            عند أي رفض قراءة (انتهاء توكن الساعة، انقطاع) تُعاد
            المصادقة بـ VERIFY_MASTER_PASS ويُعاد الربط تلقائياً —
@@ -1040,7 +1041,7 @@ const D={ID:0,NAME:1,PHONE:2,AREA:3,STATUS:4,LAT:5,LNG:6,PASS:12,SHIFT:13};
 /* ⚠️ بعد إعادة نشر سكربت GAS V16.0 قد يتغيّر رابط النشر — حدّثه هنا. */
 const API="https://script.google.com/macros/s/AKfycbyiFprfbDKMwOG75eZl-V5_M7XmqLkmK49YBQjhHKr_Gka77Gmdgt6uU6K5KeXilMViDw/exec";
 /* 🔧[خ٣] توكن التطبيقات العام (API_TOKEN من Script Properties). */
-const TOK="NAHLA_SECURE_TOKEN_2026";
+const TOK="NAHLA_APP_4E9C71B8A6D3F250E1AC8B37D94F6021";
 /* 🩹 [① تسريب البيانات] أُزيل ATOK نهائياً من مصدر اللوحة: كان توكن الإدارة
    مكتوباً هنا فيُستخرَج من "عرض المصدر" بلا كلمة مرور، ثم يُنادى getGlobalData
    فتتسرّب كل البيانات. الآن getGlobalData تُنادى عبر POST بكلمة المرور فقط
@@ -1050,7 +1051,8 @@ const TITLES={live:"الرصد الميداني",orders:"سجل اليوم",rest
 let MP="",gD=null;
 let liveOrd=[],archOrd=[],compArch=[],compByDay={};
 let liveLed={drivers:{},restaurants:{}},liveMet={},liveResLoc={};
-let drvMk={},resMk={},actDrv=new Set();
+/* 🗑️ drvMk و resMk حُذفا مع الخريطة الحيّة. actDrv باقٍ — عدّاد النشطين. */
+let actDrv=new Set();
 let ovr={o:{},d:{},r:{}};
 let rfilt="all",resSF="mostOrders",drvSF="mostOrders";
 let arcSC="date",arcSD="desc";
@@ -1059,7 +1061,8 @@ let fbL=[],shiftsOn=true;
 let auData=[],alData=[];
 let eType=null,ePh=null,eCT="fixed";
 let gMap=null,gMarker=null,gAutoComplete=null;
-let dc=null,pc=null,archHtml="",drvSelOpts="";
+/* 🗑️ dc و pc (كائنا Chart.js) حُذفا مع الرسمين. */
+let archHtml="",drvSelOpts="";
 let _auInit=false,_alInit=false;
 
 /* ─── حالة نظام الموظفين ─── */
@@ -1146,7 +1149,7 @@ function dN(p){
 function toast(m,t="s"){
   const c=document.getElementById("toasts"),el=document.createElement("div");
   el.className=`ti t${t}`;
-  el.innerHTML=`<div class="ti-ico">${t==="s"?"✅":"❌"}</div><span style="flex:1">${m}</span>`;
+  el.innerHTML=`<div class="ti-ico">/*safe-html*/${t==="s"?"✅":"❌"}</div><span style="flex:1">${esc(m)}</span>`;
   c.appendChild(el);
   setTimeout(()=>{el.style.opacity="0";el.style.transition=".3s";setTimeout(()=>el.remove(),320);},3200);
 }
@@ -1168,8 +1171,8 @@ function scheduleDerived(){
   if(_derivedT)return;
   _derivedT=setTimeout(()=>{
     _derivedT=null;
-    if(document.getElementById("pg-live").classList.contains("on")){renderRadar();updHeat();updResMk();}
-    if(document.getElementById("pg-orders").classList.contains("on")){renderArch();renderCharts();}
+    if(document.getElementById("pg-live").classList.contains("on")){renderRadar();}
+    if(document.getElementById("pg-orders").classList.contains("on")){renderArch();}
   },250);
 }
 const _drvListDebounced=debounce(()=>{if(gD&&document.getElementById("pg-drivers").classList.contains("on"))filtEnt("DRV");},600);
@@ -1238,7 +1241,7 @@ window.doAuth=async function(){
       document.getElementById("app").classList.remove("dn");
       const a=document.getElementById("snd");
       a.volume=0;a.play().then(()=>{a.pause();a.currentTime=0;a.volume=1;}).catch(()=>{});
-      startClk();initMap();loadData();setupFB();
+      startClk();loadData();setupFB();
     }else{MP="";toast("رمز المرور غير صحيح","e");}
   }catch(e){MP="";toast("فشل الاتصال بالخادم","e");}
   finally{btn.classList.remove("loading");btn.disabled=false;}
@@ -1267,10 +1270,6 @@ async function loadData(){
     data.drivers.forEach(d=>{const ov=ovr.d[d[D.PHONE]];if(ov&&now-ov.ts<120000)d[D.STATUS]=ov.status;else if(ov)delete ovr.d[d[D.PHONE]];});
     data.restaurants.forEach(r=>{const ov=ovr.r[r[R.PHONE]];if(ov&&now-ov.ts<120000)r[R.STATUS]=ov.status;else if(ov)delete ovr.r[r[R.PHONE]];});
     gD=data;
-    Object.keys(drvMk).forEach(phone=>{
-      const nm=esc(dN(phone));
-      if(drvMk[phone]._dnm!==nm){drvMk[phone].setIcon(makeDrvIcon(nm));drvMk[phone]._dnm=nm;}
-    });
     if(document.getElementById("arcRS").options.length===1){
       data.restaurants.slice(1).forEach(r=>document.getElementById("arcRS").innerHTML+=`<option value="${esc(r[R.NAME])}">${esc(r[R.NAME])}</option>`);
       data.drivers.slice(1).forEach(d=>document.getElementById("arcDS").innerHTML+=`<option value="${esc(String(d[D.PHONE]))}">${esc(d[D.NAME])}</option>`);
@@ -1342,25 +1341,12 @@ function setupFB(){
     Object.keys(locs).forEach(phone=>{
       const d=locs[phone];
       const stale=(d.last_update?(now-new Date(d.last_update).getTime()):999999)>420000;
-      if(d.status==="active"&&d.lat&&d.lng&&!stale){
-        actDrv.add(nP(phone));
-        const dnm=esc(dN(phone));
-        if(drvMk[phone]){
-          drvMk[phone].setLatLng([parseFloat(d.lat),parseFloat(d.lng)]);
-          drvMk[phone].setIcon(makeDrvIcon(dnm));
-          drvMk[phone]._dnm=dnm;
-        }else if(typeof map!=="undefined"){
-          const m=L.marker([parseFloat(d.lat),parseFloat(d.lng)],{icon:makeDrvIcon(dnm)});
-          m._dnm=dnm;
-          drvCluster.addLayer(m);
-          drvMk[phone]=m;
-        }
-      }else if(drvMk[phone]){
-        if(typeof drvCluster!=="undefined")drvCluster.removeLayer(drvMk[phone]);
-        delete drvMk[phone];
-      }
+      /* ⚡ [حذف] كان هنا تحريك علامة كل كابتن على الخريطة مع **كل نبضة**:
+         setLatLng + setIcon (وsetIcon تُعيد بناء عنصر DOM كاملاً). بأسطول
+         عشرين كابتناً ينبضون كل 10–20 ثانية = 60–120 عملية DOM في الدقيقة،
+         وهي أثقل مصدر تقطيع في اللوحة. الآن: عدٌّ فقط. */
+      if(d.status==="active"&&d.lat&&d.lng&&!stale) actDrv.add(nP(phone));
     });
-    Object.keys(drvMk).forEach(p=>{if(!locs[p]){if(typeof drvCluster!=="undefined")drvCluster.removeLayer(drvMk[p]);delete drvMk[p];}});
     document.querySelectorAll(".v-drv").forEach(e=>e.textContent=actDrv.size);
     if(gD){updBadges("DRV",gD.drivers);}
     updTicker();
@@ -1403,7 +1389,9 @@ function setupFB(){
     };
     listen(()=>db.ref("completed_orders/"+day),cCb);
   });
-  const rlCb=snap=>{liveResLoc=snap.val()||{};updResMk();};
+  /* 🗑️ كان يُعيد بناء **كل** علامات المطاعم على الخريطة مع كل لقطة
+     (removeLayer + L.marker لكل مطعم). الآن: تخزين فقط. */
+  const rlCb=snap=>{liveResLoc=snap.val()||{};};
   listen(()=>db.ref("restaurants_locations"),rlCb);
   if(!_alInit){_alInit=true;listen(()=>db.ref("system_alerts").limitToLast(60),snap=>{alData=[];const v=snap.val();if(v)Object.keys(v).forEach(k=>alData.unshift({id:k,...v[k]}));updTicker();if(document.getElementById("pg-aiops").classList.contains("on"))renderAlerts();});}
   if(!_auInit){_auInit=true;listen(()=>db.ref("admin_audit_trail").limitToLast(120),snap=>{auData=[];const v=snap.val();if(v)Object.keys(v).forEach(k=>auData.unshift(v[k]));if(document.getElementById("pg-audit").classList.contains("on"))renderAudit();});}
@@ -1739,71 +1727,21 @@ window.svEdit=async function(){
   finally{btn.disabled=false;btn.classList.remove("loading");}
 };
 
-let map,heatL,drvCluster,trkPoly=null;
-function makeDrvIcon(name){
-  return L.divIcon({className:"drv-marker-wrap",html:`<div class="dm dm-on">🛵</div><div class="dm-label">${name||"?"}</div>`,iconSize:[80,52],iconAnchor:[40,16]});
-}
-function initMap(){
-  map=L.map("amap",{zoomControl:false,attributionControl:false}).setView([35.468,44.392],13);
-  L.control.zoom({position:"bottomright"}).addTo(map);
-  L.tileLayer("https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png",{maxZoom:19,subdomains:"abcd"}).addTo(map);
-  heatL=L.heatLayer([],{radius:28,blur:18,maxZoom:14,gradient:{0.3:"#fed7aa",0.6:"#fb923c",0.85:"#f97316",1.0:"#ea580c"}}).addTo(map);
-  drvCluster=L.layerGroup().addTo(map);
-  setTimeout(()=>map.invalidateSize(),400);
-}
-window.togFS=function(){
-  const w=document.getElementById("mapWrap"),s=document.querySelector(".b-sheet"),ic=document.getElementById("fsI");
-  isFS=!isFS;
-  if(isFS){w.classList.add("fs");if(s)s.style.display="none";ic.textContent="⊡";}
-  else{w.classList.remove("fs");if(s)s.style.display="";ic.textContent="⛶";}
-  setTimeout(()=>map.invalidateSize(),100);
-  setTimeout(()=>map.invalidateSize(),400);
-};
-window.cxlTrack=function(){
-  if(trkPoly){map.removeLayer(trkPoly);trkPoly=null;}
-  Object.values(drvMk).forEach(m=>m.setOpacity(1));
-  Object.values(resMk).forEach(m=>m.setOpacity(1));
-  document.getElementById("btnCxl").style.display="none";
-  map.setView([35.468,44.392],13,{animate:true});
-};
-window.trackDriver=function(dPhone,rNm){
-  if(!map||!gD)return;
-  let dLat,dLng;
-  if(drvMk[String(dPhone)]){const p=drvMk[String(dPhone)].getLatLng();dLat=p.lat;dLng=p.lng;}
-  else{const d=gD.drivers.find(x=>nP(x[D.PHONE])===nP(dPhone));if(d){dLat=parseFloat(d[D.LAT]);dLng=parseFloat(d[D.LNG]);}}
-  if(!dLat||isNaN(dLat)||isNaN(dLng))return toast("📍 لا يوجد موقع حي للكابتن","e");
-  Object.values(drvMk).forEach(m=>m.setOpacity(.3));
-  Object.values(resMk).forEach(m=>m.setOpacity(.3));
-  if(drvMk[String(dPhone)])drvMk[String(dPhone)].setOpacity(1);
-  if(trkPoly){map.removeLayer(trkPoly);trkPoly=null;}
-  const r=findResByName(rNm);
-  const co=rCoords(r);const rLat=co?co[0]:NaN,rLng=co?co[1]:NaN;
-  let bounds=[[dLat,dLng]];
-  if(!isNaN(rLat)&&!isNaN(rLng)){
-    bounds.push([rLat,rLng]);
-    if(resMk[rNm])resMk[rNm].setOpacity(1);
-    trkPoly=L.polyline([[dLat,dLng],[rLat,rLng]],{color:"#f97316",weight:5,dashArray:"12,12",className:"path-anim"}).addTo(map);
-    map.fitBounds(bounds,{padding:[44,44],maxZoom:16,animate:true});
-  }else map.flyTo([dLat,dLng],16,{duration:1.1});
-  document.getElementById("btnCxl").style.display="flex";
-  goTab("live");
-  setTimeout(()=>map.invalidateSize(),350);
-};
-function updHeat(){
-  if(!heatL||!gD)return;
-  const pts=[];liveOrd.forEach(o=>{const r=findRes(o);const co=rCoords(r);if(co)pts.push([co[0],co[1],1]);});
-  heatL.setLatLngs(pts);
-}
-function updResMk(){
-  if(!map||!gD)return;
-  Object.keys(resMk).forEach(k=>{map.removeLayer(resMk[k]);delete resMk[k];});
-  [...new Set(liveOrd.map(o=>o[O.RES]))].forEach(rNm=>{
-    const r=findResByName(rNm);
-    const co=rCoords(r);
-    if(co){const ico=L.divIcon({className:"",html:'<div class="rp">🍽</div>',iconSize:[21,21],iconAnchor:[10,10]});
-      resMk[rNm]=L.marker(co,{icon:ico}).addTo(map);}
-  });
-}
+/* ═══════════════════════════════════════════════════════════════════════
+   🗑️ [حُذفت] كتلة الخريطة الحيّة بالكامل
+   ───────────────────────────────────────────────────────────────────────
+   كانت: initMap · makeDrvIcon · togFS · cxlTrack · trackDriver · updHeat
+         · updResMk  ومعها drvMk/resMk/heatL/drvCluster/trkPoly.
+
+   ولماذا كانت أثقل ممّا تبدو: كل كابتن يكتب نبضته كل 10–20 ثانية، وlCb
+   كانت تُحرّك علامته على الخريطة مع **كل** لقطة — أي 60–120 عملية DOM في
+   الدقيقة بأسطول عشرين كابتناً، فوق بلاطات cartocdn التي تُطلب مع كل تحريك.
+
+   ⚠️ trackDriver كان يناديها زر «📍 مسار» في بطاقة الطلب — أُزيل الزر.
+   ⚠️ خرائط جوجل (loadGoogleMaps · gMap · gMarker · Autocomplete) **باقية**
+      كما هي: هي أداة إدخال إحداثيات المطعم لا ميزة عرض، وبدونها يتوقّف
+      توزيع طلبات أي مطعم بلا موقع.
+   ═══════════════════════════════════════════════════════════════════════ */
 
 window.goTab=function(name){
   document.querySelectorAll(".pg").forEach(t=>t.classList.remove("on"));
@@ -1813,10 +1751,10 @@ window.goTab=function(name){
     b.classList.toggle("on",oc.includes("'"+name+"'"));
   });
   const dh=document.getElementById("dhT");if(dh)dh.textContent=TITLES[name]||"لوحة التحكم";
-  if(name==="live"&&typeof map!=="undefined"){setTimeout(()=>map.invalidateSize(),320);renderRadar();updHeat();updResMk();}
+  if(name==="live"){renderRadar();}
   if(name==="audit")renderAudit();
   if(name==="aiops")renderAlerts();
-  if(name==="orders"){renderArch();renderCharts();}
+  if(name==="orders"){renderArch();}
   if(name==="restaurants"&&gD)filtEnt("RES");
   if(name==="drivers"&&gD)filtEnt("DRV");
   if(name==="staff"){loadStaffRoster();renderStaffOnline();renderStaffList();renderStaffLog();updStaffKPIs();startStaffIdleTimer();}
@@ -1916,7 +1854,7 @@ function bBtns(hD,jOId,jDP,jRN,jPU,isReady,sbCls,sbTxt){
   if(isReady)h+=`<span class="rdy-badge" style="font-size:.58rem;flex-shrink:0">✔ جاهز</span>`;
   h+=`</div>`;
   h+=`<div style="display:flex;align-items:center;gap:4px;margin-top:5px">`;
-  if(hD)h+=`<button class="b-tr" onclick="trackDriver('${jDP}','${jRN}')">📍 مسار</button>`;
+  /* 🗑️ زر «📍 مسار» أُزيل مع الخريطة الحيّة — لم يعد له ما يفتحه. */
   if(jPU)h+=`<button class="ob b-img" onclick="opImg('${jPU}')" title="صورة">🖼</button>`;
   h+=`<button class="ob b-ok" onclick="forceComplete('${jOId}',this)" title="إكمال">✓</button>`;
   h+=`<button class="ob b-del" onclick="delOrder('${jOId}',this)" title="إلغاء">✕</button>`;
@@ -1946,6 +1884,53 @@ function updRadarCnts(){
 
 /* الكتابات المباشرة أدناه (إكمال/إلغاء/تعيين/سحب) متوافقة مع قواعد V2.0:
    توكن اللوحة يحمل دور admin والدور الإداري مستثنى من قيود الحقول. */
+/* ═══════════════════════════════════════════════════════════════════════
+   🆕 [V17] وضع الظلّ للأفعال السيادية الأربعة
+   ─────────────────────────────────────────────────────────────────────
+   الأزرار الأربعة أدناه تكتب في active_orders **مباشرةً**، ومعها
+   restaurant.html و driver.html = أربعة كتّاب لنفس الحالة. ومن هنا
+   السباقات: كلٌّ يقرأ حالةً ويكتب بناءً عليها وقد تغيّرت بينهما.
+
+   الحلّ النهائي أن يملك السيرفر التحوّل (orderCommand). لكن التبديل
+   يُقاس قبل أن يُعتمد: نُنادي السيرفر **بالتوازي**، فيُقيّم ويُسجّل
+   حكمه ولا يكتب حرفاً، ونقارن أسبوعاً. الكتابة المباشرة أدناه تبقى
+   المسؤول الوحيد حتى ذلك الحين.
+
+   ⚠️ وراجعتُ جدول الحالات على هذه الأزرار الأربعة تحديداً فوجدته ناقصاً
+      ثلاثة تحوّلات مشروعة (الإكمال القسري · الإلغاء بعد الاستلام ·
+      التعيين السيادي الذي يسلب من كابتن) — فأُضيفت في CF-8.1. بلا ذلك
+      لكان الظلّ يرفض أفعالك المشروعة فيضيع السيجنال في ضجيج كاذب.
+   ═══════════════════════════════════════════════════════════════════════ */
+const SHADOW_ON_ADMIN = true;
+
+function _shOpId(){
+  try{ if(crypto&&crypto.randomUUID) return crypto.randomUUID(); }catch(e){}
+  return 'sh-'+Date.now().toString(36)+'-'+Math.random().toString(36).slice(2,12);
+}
+
+/* fire-and-forget: لا تُنتظَر ولا تُعيد شيئاً، فلا تستطيع تعليق زرّ ولا
+   تعطيل فعلٍ إداري. هذا شرط وضع الظلّ — وإلا صار الظلّ خطراً بنفسه. */
+function shadowCmd(command, orderId, targetDriver){
+  if(!SHADOW_ON_ADMIN || !orderId) return;
+  try{
+    const payload = { opId:_shOpId(), orderId:String(orderId), command:String(command), shadow:true };
+    if(targetDriver) payload.targetDriver = String(targetDriver);
+    firebase.app().functions('europe-west1').httpsCallable('orderCommand')(payload)
+      .then(r=>{
+        const v = (r && r.data && r.data.verdict) || '?';
+        if(v!=='allow'){
+          console.warn('🕯️ [ظلّ] رفض السيرفر '+command+' للطلب '+orderId+' : '+v);
+          try{ logAudit('shadow_reject', command+' #'+orderId+' → '+v); }catch(e){}
+        }
+      })
+      .catch(e=>{
+        const c = String((e&&(e.code||e.message))||'').slice(0,50);
+        /* not-found = الدالة غير منشورة بعد. لا ضجيج. */
+        if(c.indexOf('not-found')===-1) console.warn('🕯️ [ظلّ] تعذّر النداء: '+c);
+      });
+  }catch(e){}
+}
+
 window.forceComplete=function(oId,el){
   if(!MP)return toast("انتهت الجلسة","e");
   if(!confirm("تأكيد إكمال الطلب؟ ستُحتسب المحاسبة تلقائياً في التقرير الليلي."))return;
@@ -1960,6 +1945,7 @@ window.forceComplete=function(oId,el){
   upd[`active_orders/${oId}/completed_at`]=new Date().toISOString();
   upd[`active_orders/${oId}/comm`]=cr.isMonthly?"شهري":(cr.res||0);
   upd[`active_orders/${oId}/payType`]=rD?String(rD[R.PAY]||""):"";
+  shadowCmd("FORCE_DELIVER",oId);   /* [V17] قياس في الظلّ */
   db.ref().update(upd).then(()=>{
     toast("✅ تم إكمال الطلب");logAudit("forceComplete","إكمال يدوي #"+oId);
     const card=el?.closest(".oc");if(card){card.style.opacity="0";setTimeout(()=>card.remove(),260);}
@@ -1970,6 +1956,7 @@ window.forceComplete=function(oId,el){
 window.delOrder=function(oId,el){
   if(!confirm("إلغاء الطلب؟"))return;
   if(el){el.disabled=true;el.classList.add("loading");}
+  shadowCmd("CANCEL",oId);   /* [V17] قياس في الظلّ */
   db.ref(`active_orders/${oId}`).update({status:"deleted"}).then(()=>{
     toast("تم النقل للملغية");logAudit("deleteOrder","إلغاء #"+oId);
     const card=el?.closest(".oc");if(card){card.style.opacity="0";setTimeout(()=>card.remove(),260);}
@@ -1979,6 +1966,7 @@ window.asgnDrv=function(oId,dPhone,el){
   if(!dPhone||!MP)return;el.disabled=true;
   const now=new Date().toISOString();
   ovr.o[String(oId)]={status:"manual_pending",dp:dPhone,ts:Date.now()};
+  shadowCmd("OFFER",oId,dPhone);   /* [V17] قياس في الظلّ — مع الكابتن الهدف */
   db.ref(`active_orders/${oId}`).update({status:"manual_pending",driverPhone:dPhone,last_update:now,is_sovereign:true});
   fetch(API,{method:"POST",headers:{"Content-Type":"text/plain"},body:JSON.stringify({action:"ASSIGN_DRIVER",orderId:oId,driverPhone:dPhone,token:TOK,pass:MP})})
     .then(r=>r.json()).then(d=>{if(d.success){toast("تم التعيين السيادي 👑");logAudit("assignDriver",`طلب #${oId} ← ${dN(dPhone)}`);}else toast("خطأ","e");})
@@ -1992,15 +1980,28 @@ window.wdOrder=function(oId,dPhone,el){
   // 🩹 [③ سباق الحالة] لا تسحب طلباً اكتمل/أُلغي للتوّ: الكتابة المباشرة كانت
   //   تعيد المكتمل للرادار متجاوزةً الحارس السيرفري. نفحص الحالة الحيّة أولاً.
   const cur=liveOrd.find(o=>String(o[O.ID])===String(oId));
-  const DONE=["completed","مكتمل","settled","delivered","done","تم التسليم","تم","finished","complete","deleted"];
+  /* 🔧 [V17] هذه النسخة المحلّية من قائمة الحالات المنتهية هي **العَرَض**
+     لا العطب: الحالة نصٌّ حرّ لا قيمة من مجموعة، فتُنسخ القائمة في كل
+     طبقة (هنا · القواعد · DONE_STATUSES_GAS · isDoneStatus في CF).
+     أربع نسخ تنحرف عن بعضها يوماً بلا أن يلاحظ أحد.
+     تُحذف يوم يملك السيرفر التحوّل — ويومها تصير الحالة قيمةً واحدة. */
+  const DONE=["completed","مكتمل","settled","delivered","done","تم التسليم","تم","finished","complete","deleted","expired","cancelled"];
   if(cur&&DONE.includes(String(cur[O.STATUS]||"").toLowerCase().trim())){
     return toast("الطلب اكتمل أو أُلغي — لا يمكن سحبه","e");
   }
   if(el)el.disabled=true;
   const now=new Date().toISOString();
   ovr.o[String(oId)]={status:"pending_driver",dp:"system_routing",ts:Date.now()};
+  shadowCmd("REVOKE",oId);   /* [V17] قياس في الظلّ */
   db.ref(`active_orders/${oId}`).update({status:"pending_driver",driverPhone:"system_routing",last_update:now,last_offered_to:dPhone,is_sovereign:false}).then(()=>toast("تم السحب")).catch(()=>toast("خطأ","e"));
-  fetch(`${API}?action=DECLINE_ORDER&orderId=${oId}&driverPhone=${dPhone}&token=${TOK}`).catch(()=>{});
+  /* 🔧 [أ٥] حُذف نداء DECLINE_ORDER — ولثلاثة أسباب مجتمعة:
+     ① بعد تبويب المسار بـentityGate_ لا تملك اللوحة جلسةَ كابتن أصلاً،
+        فالنداء يصير no_token دائماً ويمنع AUDIT_LegacyUsage من بلوغ الصفر.
+     ② سحبُ الإدارة ليس رفضاً من الكابتن — و handleDeclineOrder يزيد
+        daily_metrics/<كابتن>/rejected_orders، فيُحمَّل الكابتن رفضاً لم يفعله.
+     ③ الكتابة أعلاه (db.ref().update) هي الفعل الحقيقي، وقواعد RTDB تأذن
+        بها لدور admin وحده. فالنداء كان زائداً وسباقياً في آنٍ معاً.
+     ولو لزم مسارٌ إداريّ عبر GAS مستقبلاً فليكن STAFF_* بجلسة موظّف. */
   logAudit("withdrawOrder",`سحب #${oId} من ${dN(dPhone)}`);
 };
 
@@ -2106,24 +2107,9 @@ window.expCSV=function(){
   setTimeout(()=>URL.revokeObjectURL(url),900);
   toast(`✅ تم تصدير ${rows.length} طلب`);
 };
-function renderCharts(){
-  if(typeof Chart==="undefined")return;
-  const seen=new Set();const all=[];
-  [].concat(archOrd,compArch).forEach(o=>{const k=String(o[O.ID]);if(k&&seen.has(k))return;if(k)seen.add(k);all.push(o);});
-  const comp=all.filter(o=>!["deleted"].includes(o[O.STATUS])).length;
-  const canc=all.filter(o=>o[O.STATUS]==="deleted").length;
-  // ⚡ تحديث البيانات مكانها إن وُجد الرسم (كان destroy+new مع كل تحديث = بطء)
-  const c1=document.getElementById("dchart");
-  if(c1){
-    if(dc){dc.data.datasets[0].data=[comp,canc];dc.update("none");}
-    else dc=new Chart(c1,{type:"bar",data:{labels:["مكتمل","ملغي"],datasets:[{data:[comp,canc],backgroundColor:["rgba(5,150,105,.8)","rgba(239,68,68,.8)"],borderRadius:8,borderSkipped:false}]},options:{responsive:true,maintainAspectRatio:false,animation:false,plugins:{legend:{display:false}},scales:{y:{beginAtZero:true,ticks:{stepSize:1,font:{family:"Cairo"}},grid:{color:"rgba(37,99,235,.04)"}},x:{ticks:{font:{family:"Cairo"}}}}}});
-  }
-  const c2=document.getElementById("pchart");
-  if(c2){
-    if(pc){pc.data.datasets[0].data=[comp,canc];pc.update("none");}
-    else pc=new Chart(c2,{type:"doughnut",data:{labels:["مكتمل","ملغي"],datasets:[{data:[comp,canc],backgroundColor:["rgba(5,150,105,.85)","rgba(239,68,68,.85)"],borderWidth:3,borderColor:"#fff"}]},options:{responsive:true,maintainAspectRatio:false,animation:false,plugins:{legend:{position:"bottom",labels:{font:{family:"Cairo",size:11},padding:16}}}}});
-  }
-}
+/* 🗑️ [حُذفت] renderCharts — كانت تُنشئ رسمَي Chart.js («مكتمل مقابل ملغي»).
+   المعلومة نفسها معروضة في بطاقات الإحصاء أعلى الصفحة بصفر مكتبة. */
+
 function updTicker(){
   const el=document.getElementById("tickTx");if(!el)return;
   let msg;
@@ -2477,59 +2463,6 @@ function startStaffIdleTimer(){
   },30000);
 }
 function stopStaffIdleTimer(){if(_stIdleTimer){clearInterval(_stIdleTimer);_stIdleTimer=null;}}
-
-</script>
-
-<!-- 📲 PWA في سكربت مستقل: لا يُسقطه أي استثناء في السكربت الرئيسي
-     (مثل فشل تحميل فايربيس من CDN) — التثبيت يجب أن يعمل دائماً. -->
-<script>
-/* ══════════════════════════════════════════════════════════════════════════
-   📲 تطبيق ويب تقدّمي (PWA) — تثبيت لوحة الإدارة على الشاشة الرئيسية
-   ──────────────────────────────────────────────────────────────────────────
-   الفائدة: أيقونة مستقلة · شاشة كاملة بلا شريط المتصفّح · فتحٌ أسرع ·
-   وعملٌ محدود دون اتصال (الواجهة تُحمَّل، والبيانات تحتاج شبكة بطبيعتها).
-   ══════════════════════════════════════════════════════════════════════════ */
-(function initPWA(){
-  /* تسجيل عامل الخدمة — بمسار نسبي كي يعمل تحت /NHLwithalhut/
-     ملاحظة: لا ننتظر حدث load، لأن الصفحة قد تتعلّق بانتظار موارد خارجية
-     (فايربيس مثلاً) فلا يقع الحدث ولا يُسجَّل العامل إطلاقاً. */
-  if("serviceWorker" in navigator){
-    const reg = () => navigator.serviceWorker.register("./sw_admin.js")
-      .catch(err=>console.warn("SW لم يُسجَّل:", err && err.message));
-    if(document.readyState === "complete") reg();
-    else { window.addEventListener("load", reg, {once:true}); setTimeout(reg, 3000); }
-  }
-
-  /* زر التثبيت — يظهر فقط حين يسمح المتصفّح فعلاً */
-  let _deferredPrompt=null;
-  window.addEventListener("beforeinstallprompt",e=>{
-    e.preventDefault(); _deferredPrompt=e; _showInstallBtn();
-  });
-
-  function _showInstallBtn(){
-    if(document.getElementById("pwaInstall")) return;
-    const b=document.createElement("button");
-    b.id="pwaInstall"; b.textContent="📲 تثبيت اللوحة";
-    b.style.cssText="position:fixed;bottom:20px;right:20px;z-index:9999;"
-      +"background:linear-gradient(145deg,#FFB300,#FF8F00);color:#0a1628;"
-      +"border:0;border-radius:16px;padding:13px 20px;font-family:inherit;"
-      +"font-weight:900;font-size:.9rem;cursor:pointer;"
-      +"box-shadow:0 10px 26px rgba(255,143,0,.45)";
-    b.onclick=async()=>{
-      if(!_deferredPrompt) return;
-      _deferredPrompt.prompt();
-      const {outcome}=await _deferredPrompt.userChoice;
-      _deferredPrompt=null; b.remove();
-      if(outcome==="accepted" && typeof toast==="function") toast("تم تثبيت اللوحة ✅");
-    };
-    document.body.appendChild(b);
-  }
-
-  window.addEventListener("appinstalled",()=>{
-    const b=document.getElementById("pwaInstall"); if(b) b.remove();
-    if(typeof toast==="function") toast("📲 اللوحة مثبّتة على شاشتك");
-  });
-})();
 </script>
 </body>
 </html>
