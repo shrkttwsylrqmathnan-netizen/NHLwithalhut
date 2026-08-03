@@ -6,7 +6,7 @@
      ابدأ بـ Content-Security-Policy-Report-Only أسبوعاً، اقرأ التقارير، ثم أَلزِم.
      'unsafe-inline' لازمٌ اليوم: الشيفرة كلها كتل سكربت مضمّنة. إزالته
      تتطلّب نقلها إلى ملفات أو ختمها بـ nonce — مشروع لاحق موثّق. -->
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://*.firebasedatabase.app https://*.firebaseio.com https://unpkg.com https://www.gstatic.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://unpkg.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: blob: https:; media-src 'self' data: blob:; connect-src 'self' https://*.firebasedatabase.app https://*.firebaseio.com wss://*.firebasedatabase.app wss://*.firebaseio.com https://script.google.com https://script.googleusercontent.com https://*.googleapis.com https://securetoken.googleapis.com; frame-ancestors 'none'; object-src 'none'; base-uri 'none'; form-action 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://*.firebasedatabase.app https://*.firebaseio.com https://unpkg.com https://www.gstatic.com https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://unpkg.com https://cdn.jsdelivr.net; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: blob: https:; media-src 'self' data: blob:; connect-src 'self' https://*.firebasedatabase.app https://*.firebaseio.com wss://*.firebasedatabase.app wss://*.firebaseio.com https://script.google.com https://script.googleusercontent.com https://*.googleapis.com https://securetoken.googleapis.com https://*.cloudfunctions.net https://*.run.app https://unpkg.com; object-src 'none'; base-uri 'none'; form-action 'none'">
 <link rel="manifest" href="manifest_leader.json">
 <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no,viewport-fit=cover">
 <title>نحلة — لوحة الموظفين</title>
@@ -18,8 +18,8 @@
 <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
 <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
 <!-- مكتبة الخرائط -->
-<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" defer></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.css" />
+<script src="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.js" defer></script>
 
 <style>
 /* ═══════════════════════════════════════════
@@ -1256,7 +1256,7 @@ function fmtHM(v){
   _hmCache.set(v,out);
   return out;
 }
-function toast(m,t="s"){const c=document.getElementById("toasts"),el=document.createElement("div");el.className=`ti t${t}`;el.innerHTML=`<div class="ti-ico">/*safe-html*/${t==="s"?"✅":"❌"}</div><span style="flex:1">${esc(m)}</span>`;c.appendChild(el);setTimeout(()=>{el.style.opacity="0";el.style.transition=".3s";setTimeout(()=>el.remove(),320);},3000);}
+function toast(m,t="s"){const c=document.getElementById("toasts"),el=document.createElement("div");el.className=`ti t${t}`;el.innerHTML=`<div class="ti-ico">${t==="s"?"✅":"❌"}</div><span style="flex:1">${esc(m)}</span>`;c.appendChild(el);setTimeout(()=>{el.style.opacity="0";el.style.transition=".3s";setTimeout(()=>el.remove(),320);},3000);}
 function opImg(u){if(!u)return;document.getElementById("imgFull").src=u;document.getElementById("imgModal").style.display="flex";}
 function clImg(){document.getElementById("imgModal").style.display="none";document.getElementById("imgFull").src="";}
 function today(){return new Date().toISOString().split('T')[0];}
@@ -2326,7 +2326,7 @@ function renderAssignList(){
   });
 
   if(!avail.length){
-    box.innerHTML=`<div class="asn-empty">/*safe-html*/${q?`🔍 لا يوجد كابتن متاح يطابق "${esc(_assignSearch)}"`:"🌙 لا يوجد كباتن نشطون بالميدان حالياً"}</div>`;
+    box.innerHTML=`<div class="asn-empty">${q?`🔍 لا يوجد كابتن متاح يطابق "${esc(_assignSearch)}"`:"🌙 لا يوجد كباتن نشطون بالميدان حالياً"}</div>`;
     return;
   }
 
