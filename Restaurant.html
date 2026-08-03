@@ -31,7 +31,7 @@
         //          القاعدة الجديدة ترفض القراءة الكاملة لغير الإدارة.
         //  🔒 ضمان مصادقة فايربيس قبل أي كتابة (القواعد لم تعد تقبل مجهولاً).
         //  🛵 اسم الكابتن من drivers_locations/{phone}/name بدل شيت السائقين.
-        const CURRENT_APP_VERSION = "39.6.Nahla-Gold";   /* 🔧 V2.2 */
+        const CURRENT_APP_VERSION = "39.7.Nahla-Gold";   /* 🔧 V2.2 */
         const RES_VERSION_KEY = 'hut_res_app_version';
         try {
             if (localStorage.getItem(RES_VERSION_KEY) !== CURRENT_APP_VERSION) {
@@ -59,7 +59,7 @@
      ابدأ بـ Content-Security-Policy-Report-Only أسبوعاً، اقرأ التقارير، ثم أَلزِم.
      'unsafe-inline' لازمٌ اليوم: الشيفرة كلها كتل سكربت مضمّنة. إزالته
      تتطلّب نقلها إلى ملفات أو ختمها بـ nonce — مشروع لاحق موثّق. -->
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://unpkg.com; style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://fonts.googleapis.com https://unpkg.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: blob: https:; media-src 'self' data: blob: https://actions.google.com; connect-src 'self' https://*.firebasedatabase.app https://*.firebaseio.com https://script.google.com https://script.googleusercontent.com https://*.googleapis.com https://securetoken.googleapis.com; frame-ancestors 'none'; object-src 'none'; base-uri 'none'; form-action 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://*.firebasedatabase.app https://*.firebaseio.com https://unpkg.com https://www.gstatic.com; style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://fonts.googleapis.com https://unpkg.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: blob: https:; media-src 'self' data: blob: https://actions.google.com; connect-src 'self' https://*.firebasedatabase.app https://*.firebaseio.com wss://*.firebasedatabase.app wss://*.firebaseio.com https://script.google.com https://script.googleusercontent.com https://*.googleapis.com https://securetoken.googleapis.com; frame-ancestors 'none'; object-src 'none'; base-uri 'none'; form-action 'none'">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     
     <title>مطاعم نحلة | منصة الحوت</title>
@@ -2908,11 +2908,3 @@ function escAttr(x){ return esc(x).replace(/"/g,'&quot;').replace(/'/g,'&#39;');
         // الماوس (سطح المكتب — للاختبار)
         btn.addEventListener('mousedown', (e) => { e.preventDefault(); startVoiceRecording(); });
         btn.addEventListener('mouseup', (e) => { e.preventDefault(); stopVoiceRecording(); });
-        btn.addEventListener('mouseleave', () => { if (voiceIsRecording) stopVoiceRecording(); });
-    }
-
-    // نربط الزر بعد تحميل الصفحة
-    bindVoiceButton();
-</script>
-</body>
-</html>
