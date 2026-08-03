@@ -31,8 +31,7 @@
         //          القاعدة الجديدة ترفض القراءة الكاملة لغير الإدارة.
         //  🔒 ضمان مصادقة فايربيس قبل أي كتابة (القواعد لم تعد تقبل مجهولاً).
         //  🛵 اسم الكابتن من drivers_locations/{phone}/name بدل شيت السائقين.
-        const CURRENT_APP_VERSION = "39.12.Nahla-Gold";
-  window.APP_VER = "39.12.Nahla-Gold";   /* 🔧 V2.2 */
+        const CURRENT_APP_VERSION = "39.13.Nahla-Gold";   /* 🔧 V2.2 */
         const RES_VERSION_KEY = 'hut_res_app_version';
         try {
             if (localStorage.getItem(RES_VERSION_KEY) !== CURRENT_APP_VERSION) {
@@ -61,52 +60,6 @@
      'unsafe-inline' لازمٌ اليوم: الشيفرة كلها كتل سكربت مضمّنة. إزالته
      تتطلّب نقلها إلى ملفات أو ختمها بـ nonce — مشروع لاحق موثّق. -->
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://*.firebasedatabase.app https://*.firebaseio.com https://unpkg.com https://www.gstatic.com; style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://fonts.googleapis.com https://unpkg.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: blob: https:; media-src 'self' data: blob: https://actions.google.com; connect-src 'self' https://*.firebasedatabase.app https://*.firebaseio.com wss://*.firebasedatabase.app wss://*.firebaseio.com https://script.google.com https://script.googleusercontent.com https://*.googleapis.com https://securetoken.googleapis.com https://*.cloudfunctions.net https://*.run.app https://nominatim.openstreetmap.org https://unpkg.com https://cdn.jsdelivr.net; object-src 'none'; base-uri 'none'; form-action 'none'">
-<script>
-/* 🔍 لوحة تشخيص مدمجة — مخفيّة خلف زر. تُلتقط الأخطاء منذ أول سطر. */
-window.__NAHLA_DIAG__={csp:[],err:[],rej:[],res:[]};
-(function(){var D=window.__NAHLA_DIAG__;
- document.addEventListener('securitypolicyviolation',function(e){
-   D.csp.push('CSP منع: '+(e.blockedURI||'?')+'\n   التوجيه: '+(e.violatedDirective||'?')+'\n   السطر: '+(e.lineNumber||'?'));});
- window.addEventListener('error',function(e){
-   if(e.target&&e.target!==window&&(e.target.src||e.target.href)) D.res.push('فشل تحميل: '+(e.target.src||e.target.href));
-   else D.err.push('خطأ: '+(e.message||'?')+'\n   '+(e.filename||'')+':'+(e.lineno||'?'));},true);
- window.addEventListener('unhandledrejection',function(e){
-   D.rej.push('وعد مرفوض: '+((e.reason&&(e.reason.message||e.reason))||'?'));});
- function box(){var b=document.getElementById('nDiag');if(b)return b;
-   b=document.createElement('div');b.id='nDiag';
-   b.style.cssText='position:fixed;inset:8px;z-index:2147483647;background:#0d1117;color:#e6edf3;font:12px/1.7 monospace;direction:ltr;text-align:left;padding:14px;overflow:auto;border:2px solid #FFB300;border-radius:12px;white-space:pre-wrap;display:none';
-   document.body.appendChild(b);return b;}
- window.nahlaDiag=async function(){var b=box();b.style.display='block';
-   var V=(typeof window.APP_VER!=='undefined')?window.APP_VER:'?';
-   var L=['نحلة — تشخيص لوحة المطاعم','النسخة العاملة الآن: '+V,'─────────────────────────────','',
-     'authAction  : '+(typeof window.authAction==='function'?'OK':'مفقودة — الوحدة لم تُنفَّذ'),
-     'showLoading : '+(typeof window.showLoading==='function'?'OK':'مفقودة'),
-     'lucide      : '+(typeof window.lucide!=='undefined'?'OK':'غائبة (غير حرجة)'),
-     'leaflet     : '+(typeof window.L!=='undefined'?'OK':'غائبة'),''];
-   b.textContent=L.join('\n')+'\nجارٍ الاختبار…';
-   var x=[];
-   try{var m=await import('https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js');
-       x.push('استيراد فايربيس : OK ('+Object.keys(m).length+')');}
-   catch(e){x.push('استيراد فايربيس : فشل → '+(e&&e.message));}
-   try{var r=await fetch(document.location.href,{cache:'no-store'});
-       var t=await r.text();var mm=t.match(/CURRENT_APP_VERSION = "([^"]+)"/);
-       x.push('نسخة الملف على الخادم: '+(mm?mm[1]:'?'));}
-   catch(e){x.push('تعذّر قراءة الملف من الخادم: '+(e&&e.message));}
-   L=L.concat(x,['','── CSP ──']).concat(D.csp.length?D.csp:['صفر'])
-     .concat(['','── موارد فشلت ──']).concat(D.res.length?D.res:['صفر'])
-     .concat(['','── أخطاء JS ──']).concat(D.err.length?D.err:['صفر'])
-     .concat(['','── وعود مرفوضة ──']).concat(D.rej.length?D.rej:['صفر'])
-     .concat(['','اضغط لإغلاق اللوحة.']);
-   b.textContent=L.join('\n');b.onclick=function(){b.style.display='none';};};
- window.addEventListener('load',function(){
-   var f=document.createElement('button');f.textContent='🔍';f.title='تشخيص';
-   f.style.cssText='position:fixed;bottom:10px;left:10px;z-index:2147483646;background:#FFB300;color:#3A2A18;border:0;border-radius:50%;width:42px;height:42px;font-size:18px;box-shadow:0 3px 10px rgba(0,0,0,.25);cursor:pointer;opacity:.55';
-   f.onclick=window.nahlaDiag;document.body.appendChild(f);
-   setTimeout(function(){if(typeof window.authAction!=='function'){f.style.opacity='1';f.style.background='#EF4444';f.textContent='!';window.nahlaDiag();}},2500);});
-})();
-</script>
-
-
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     
     <title>مطاعم نحلة | منصة الحوت</title>
