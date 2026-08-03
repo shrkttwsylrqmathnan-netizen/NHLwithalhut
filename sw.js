@@ -3,8 +3,8 @@
 // تحديث: حماية Firebase اللحظي + تمرير رفع الصور (POST) + تسريع الأوفلاين 🚀
 // =========================================================
 
-const CACHE_NAME = 'AlHut-Core-V13.0'; 
-const CDN_CACHE_NAME = 'AlHut-CDNs-V13.0';
+const CACHE_NAME = 'Nahla-Core-V14.8'; 
+const CDN_CACHE_NAME = 'Nahla-CDNs-V14.8';
 
 // قائمة الملفات الأساسية للنظام
 // 🩹 [كاش الأوفلاين] تصحيح حالة الأحرف: GitHub Pages حسّاس لها، وكانت القائمة
@@ -18,9 +18,11 @@ const ASSETS_TO_CACHE = [
   './Driver.html',
   './Restaurant.html',
   './Nhleman.html',
-  './Driver-manifest.json',
+  './Nahlelidersas.html',
+  './Monitor.html',
   './manifest_rest.json',
   './manifest_admin.json',
+  './manifest_leader.json',
   './driver-logo.png',
   './rest-logo.png',
   './admin-logo.png'
