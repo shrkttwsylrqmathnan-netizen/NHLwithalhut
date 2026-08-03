@@ -1,12 +1,65 @@
 <!DOCTYPE html>
+<!--
+  🐝 تطبيق الكابتن — V16.0 "Owned"   ← النسخة الحالية (CURRENT_APP_VERSION)
+  ═══════════════════════════════════════════════════════════════════════
+  رقع هذه الدفعة (كلها أُصلحت من تشخيص مؤكَّد لا من تخمين):
+    🔴 [١] fbStatus: حارسا الموقع كانا يمنعان **الانصراف** أيضاً — فالكابتن
+           يضغط «استراحة» في مبنى فتبقى حالته active خمس دقائق = خمس دورات
+           توزيع، وهو مقتنع أنه مستريح.
+    🔴 [٢] acceptOrder: قراءة بلا مهلة على المسار الحرج **قبل** الكتابة،
+           فيدور الزر حتى يختفي الطلب — ولا يعمل حتى المسار الاحتياطي لأنه
+           كله بعد نقطة التعليق. عُكس الترتيب: القبول أولاً.
+    🔴 [٣] logout: fbStatus بلا await ثم location.reload() — الصفحة تُهدم
+           قبل وصول الكتابة. شبه مؤكّد لا محتمل.
+    🔴 [٤] مضاعفة عدّادات اليوم: المهلة ليست فشلاً بل عدمَ علم، وincrement
+           ليست صامدة للتكرار.
+    🔴 [٥] getIdToken بلا مهلة داخل guaranteedWrite — تعلّق أزرار التسليم.
+    🔴 [٦] resByPhone لم يكن يُحفظ — يفرغ في كل تشغيل.
+    🔴 [٧] today مجمّد: لوحة الكابتن الليلي تتوقّف عند منتصف الليل.
+    🛡️ [٨] مهلة على القراءتين العاريتين (fetchResLoc · الدردشة).
+
+  والجديد بنيوياً:
+    ✅ onDisconnect  — الحضور الأصلي في فايربيس (كان غائباً كلياً)
+    ✅ track         — الرصد المنظّم (كان غائباً كلياً)
+    ✅ shadowCommand — قياس نقطة الأمر بلا اعتمادها
+    ✅ stoken        — توكن الجلسة لبوّابة Code.gs V18
+
+  ⚠️ يتطلّب قبله: database.rules.json V3.0 (عقدة client_events)
+  ⚠️ ويجب نسخ هذا الملف أيضاً إلى android/.../assets/index.html
+  ═══════════════════════════════════════════════════════════════════════
+-->
 <html lang="ar" dir="rtl">
 <head>
 <script>
-  const CURRENT_APP_VERSION = "14.1-Clay-Fortress";
+  /* ═══════════════════════════════════════════════════════════════════════
+     🏷️ [V15.7] **مصدر واحد لرقم النسخة** — وكان ثلاثة متناقضة.
+     ───────────────────────────────────────────────────────────────────────
+     كان في الملف:
+        ① CURRENT_APP_VERSION = "14.1-Clay-Fortress"   ← يقود مسح الكاش
+        ② شاشة الدخول تعرض      "V14.0"                 ← نصٌّ مكتوب بيده
+        ③ تعليق الترويسة يقول    "V15.6"                 ← ما نُحدّثه نحن
+
+     وكلٌّ يكذب على الآخر. والأخطر ① : آلية مسح الكاش تقارن هذا النصّ بما في
+     localStorage، فإن لم يتغيّر **لا تُمسح الأصول ولا يُحدَّث الـService
+     Worker**. فكل ما سلّمناه من V15.0 إلى V15.6 كان يصل الكابتن — أو لا
+     يصل — بحسب حظّه مع الكاش، لأن الرقم لم يتحرّك منذ 14.1.
+
+     ⇒ هذا يفسّر «ما زال يقرأ 14.0»: النصّ الظاهر لم يُلمس، والآلية لم تعمل.
+
+     الآن: رقمٌ واحد يُشتقّ منه كل شيء — الشاشة والإعدادات ومسح الكاش.
+     **وأي تسليم جديد يجب أن يرفعه، وإلا لم يصل.**
+     ═══════════════════════════════════════════════════════════════════════ */
+  const CURRENT_APP_VERSION = "16.4-Nahla-Gold";   /* 🔧 V2.2 — لا تنسَ رفعه مع كل تسليم يمسّ هذا الملف */
+  window.APP_VERSION = CURRENT_APP_VERSION;
+  /* اطبعه في شاشة الدخول فور جهوز الصفحة — نصّاً واحداً لا نسختين. */
+  document.addEventListener('DOMContentLoaded', function(){
+    try{ const b=document.getElementById('brandVer');
+         if(b) b.innerHTML='<span class="dot-live"></span> V'+CURRENT_APP_VERSION+' · كركوك'; }catch(e){}
+  });
   try {
-    if (localStorage.getItem('nahla_app_version') !== CURRENT_APP_VERSION) {
-      localStorage.setItem('nahla_app_version', CURRENT_APP_VERSION);
-      if (localStorage.getItem('nahla_app_version') === CURRENT_APP_VERSION) {
+    if (localStorage.getItem('hut_app_version') !== CURRENT_APP_VERSION) {
+      localStorage.setItem('hut_app_version', CURRENT_APP_VERSION);
+      if (localStorage.getItem('hut_app_version') === CURRENT_APP_VERSION) {
         if ('caches' in window) caches.keys().then(ns => ns.forEach(n => caches.delete(n)));
         if ('serviceWorker' in navigator) navigator.serviceWorker.getRegistrations().then(rs => rs.forEach(r => r.unregister()));
         window.location.reload();
@@ -15,6 +68,11 @@
   } catch(e) {}
 </script>
 <meta charset="UTF-8">
+<!-- 🔒 [أ١] سياسة أمان المحتوى — تُقلّص أثر أي حقن أو اختراق CDN.
+     ابدأ بـ Content-Security-Policy-Report-Only أسبوعاً، اقرأ التقارير، ثم أَلزِم.
+     'unsafe-inline' لازمٌ اليوم: الشيفرة كلها كتل سكربت مضمّنة. إزالته
+     تتطلّب نقلها إلى ملفات أو ختمها بـ nonce — مشروع لاحق موثّق. -->
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: blob: https:; media-src 'self' data: blob:; connect-src 'self' https://*.firebasedatabase.app https://*.firebaseio.com https://script.google.com https://script.googleusercontent.com https://*.googleapis.com https://securetoken.googleapis.com; frame-ancestors 'none'; object-src 'none'; base-uri 'none'; form-action 'none'">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 <title>كباتن نحلة | V14</title>
 <meta name="theme-color" content="#FFB300">
@@ -23,14 +81,12 @@
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="نحلة">
 <link rel="manifest" href="data:application/manifest+json;base64,eyJuYW1lIjogItmD2KjYp9iq2YYg2YbYrdmE2KkgfCDYp9mE2YbYuNin2YUg2KfZhNiz2K3Yp9io2YoiLCAic2hvcnRfbmFtZSI6ICLZg9io2KfYqtmGINmG2K3ZhNipIiwgImRlc2NyaXB0aW9uIjogItiq2LfYqNmK2YIg2KfZhNmD2KjYp9iq2YYg2KfZhNix2LPZhdmKIOKAlCDZhdmD2KrYqCDZhtit2YTYqSIsICJzdGFydF91cmwiOiAiLi9Ecml2ZXIuaHRtbCIsICJzY29wZSI6ICIuLyIsICJkaXNwbGF5IjogInN0YW5kYWxvbmUiLCAiYmFja2dyb3VuZF9jb2xvciI6ICIjRkZGREY1IiwgInRoZW1lX2NvbG9yIjogIiNGRkIzMDAiLCAib3JpZW50YXRpb24iOiAicG9ydHJhaXQtcHJpbWFyeSIsICJsYW5nIjogImFyIiwgImRpciI6ICJydGwiLCAiaWNvbnMiOiBbeyJzcmMiOiAiZGF0YTppbWFnZS9zdmcreG1sO2Jhc2U2NCxQSE4yWnlCNGJXeHVjejBpYUhSMGNEb3ZMM2QzZHk1M015NXZjbWN2TWpBd01DOXpkbWNpSUhkcFpIUm9QU0kxTVRJaUlHaGxhV2RvZEQwaU5URXlJaUIyYVdWM1FtOTRQU0l3SURBZ05URXlJRFV4TWlJK1BISmxZM1FnZDJsa2RHZzlJalV4TWlJZ2FHVnBaMmgwUFNJMU1USWlJSEo0UFNJeE1USWlJR1pwYkd3OUlpTkdSRU13TVRnaUx6NDhaeUIwY21GdWMyWnZjbTA5SW5SeVlXNXpiR0YwWlNneU5UWWdNalUyS1NCelkyRnNaU2cwTGpFcElIUnlZVzV6YkdGMFpTZ3ROVEFnTFRVd0tTSStQSEJoZEdnZ1pEMGlUVFV3SURnZ1REZzJJREk1SUV3NE5pQTNNU0JNTlRBZ09USWdUREUwSURjeElFd3hOQ0F5T1NCYUlpQm1hV3hzUFNKdWIyNWxJaUJ6ZEhKdmEyVTlJaU16UVRKQk1UZ2lJSE4wY205clpTMTNhV1IwYUQwaU5pNDFJaUJ6ZEhKdmEyVXRiR2x1WldwdmFXNDlJbkp2ZFc1a0lpOCtQR1ZzYkdsd2MyVWdZM2c5SWpVd0lpQmplVDBpTlRVaUlISjRQU0l4TlNJZ2NuazlJakU1SWlCbWFXeHNQU0lqTTBFeVFURTRJaTgrUEhCaGRHZ2daRDBpVFRNMUlEVXdJR2d6TUNCTk16VWdOVGdnYURNd0lFMHpPQ0EyTmlCb01qUWlJSE4wY205clpUMGlJMFpFUXpBeE9DSWdjM1J5YjJ0bExYZHBaSFJvUFNJekxqUWlJSE4wY205clpTMXNhVzVsWTJGd1BTSnliM1Z1WkNJdlBqeGphWEpqYkdVZ1kzZzlJalV3SWlCamVUMGlNelFpSUhJOUlqa2lJR1pwYkd3OUlpTXpRVEpCTVRnaUx6NDhjR0YwYUNCa1BTSk5ORFVnTWpjZ1VUUXhJREl3SURReklERTNJRTAxTlNBeU55QlJOVGtnTWpBZ05UY2dNVGNpSUhOMGNtOXJaVDBpSXpOQk1rRXhPQ0lnYzNSeWIydGxMWGRwWkhSb1BTSXlMallpSUhOMGNtOXJaUzFzYVc1bFkyRndQU0p5YjNWdVpDSWdabWxzYkQwaWJtOXVaU0l2UGp4amFYSmpiR1VnWTNnOUlqUXpJaUJqZVQwaU1UWWlJSEk5SWpJdU5DSWdabWxzYkQwaUl6TkJNa0V4T0NJdlBqeGphWEpqYkdVZ1kzZzlJalUzSWlCamVUMGlNVFlpSUhJOUlqSXVOQ0lnWm1sc2JEMGlJek5CTWtFeE9DSXZQand2Wno0OEwzTjJaejQ9IiwgInNpemVzIjogIjE5MngxOTIiLCAidHlwZSI6ICJpbWFnZS9zdmcreG1sIiwgInB1cnBvc2UiOiAiYW55IG1hc2thYmxlIn0sIHsic3JjIjogImRhdGE6aW1hZ2Uvc3ZnK3htbDtiYXNlNjQsUEhOMlp5QjRiV3h1Y3owaWFIUjBjRG92TDNkM2R5NTNNeTV2Y21jdk1qQXdNQzl6ZG1jaUlIZHBaSFJvUFNJMU1USWlJR2hsYVdkb2REMGlOVEV5SWlCMmFXVjNRbTk0UFNJd0lEQWdOVEV5SURVeE1pSStQSEpsWTNRZ2QybGtkR2c5SWpVeE1pSWdhR1ZwWjJoMFBTSTFNVElpSUhKNFBTSXhNVElpSUdacGJHdzlJaU5HUkVNd01UZ2lMejQ4WnlCMGNtRnVjMlp2Y20wOUluUnlZVzV6YkdGMFpTZ3lOVFlnTWpVMktTQnpZMkZzWlNnMExqRXBJSFJ5WVc1emJHRjBaU2d0TlRBZ0xUVXdLU0krUEhCaGRHZ2daRDBpVFRVd0lEZ2dURGcySURJNUlFdzROaUEzTVNCTU5UQWdPVElnVERFMElEY3hJRXd4TkNBeU9TQmFJaUJtYVd4c1BTSnViMjVsSWlCemRISnZhMlU5SWlNelFUSkJNVGdpSUhOMGNtOXJaUzEzYVdSMGFEMGlOaTQxSWlCemRISnZhMlV0YkdsdVpXcHZhVzQ5SW5KdmRXNWtJaTgrUEdWc2JHbHdjMlVnWTNnOUlqVXdJaUJqZVQwaU5UVWlJSEo0UFNJeE5TSWdjbms5SWpFNUlpQm1hV3hzUFNJak0wRXlRVEU0SWk4K1BIQmhkR2dnWkQwaVRUTTFJRFV3SUdnek1DQk5NelVnTlRnZ2FETXdJRTB6T0NBMk5pQm9NalFpSUhOMGNtOXJaVDBpSTBaRVF6QXhPQ0lnYzNSeWIydGxMWGRwWkhSb1BTSXpMalFpSUhOMGNtOXJaUzFzYVc1bFkyRndQU0p5YjNWdVpDSXZQanhqYVhKamJHVWdZM2c5SWpVd0lpQmplVDBpTXpRaUlISTlJamtpSUdacGJHdzlJaU16UVRKQk1UZ2lMejQ4Y0dGMGFDQmtQU0pOTkRVZ01qY2dVVFF4SURJd0lEUXpJREUzSUUwMU5TQXlOeUJSTlRrZ01qQWdOVGNnTVRjaUlITjBjbTlyWlQwaUl6TkJNa0V4T0NJZ2MzUnliMnRsTFhkcFpIUm9QU0l5TGpZaUlITjBjbTlyWlMxc2FXNWxZMkZ3UFNKeWIzVnVaQ0lnWm1sc2JEMGlibTl1WlNJdlBqeGphWEpqYkdVZ1kzZzlJalF6SWlCamVUMGlNVFlpSUhJOUlqSXVOQ0lnWm1sc2JEMGlJek5CTWtFeE9DSXZQanhqYVhKamJHVWdZM2c5SWpVM0lpQmplVDBpTVRZaUlISTlJakl1TkNJZ1ptbHNiRDBpSXpOQk1rRXhPQ0l2UGp3dlp6NDhMM04yWno0PSIsICJzaXplcyI6ICI1MTJ4NTEyIiwgInR5cGUiOiAiaW1hZ2Uvc3ZnK3htbCIsICJwdXJwb3NlIjogImFueSBtYXNrYWJsZSJ9XX0=">
-<link rel="icon" type="image/svg+xml" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI1MTIiIGhlaWdodD0iNTEyIiB2aWV3Qm94PSIwIDAgNTEyIDUxMiI+PHJlY3Qgd2lkdGg9IjUxMiIgaGVpZ2h0PSI1MTIiIHJ4PSIxMTIiIGZpbGw9IiNGREMwMTgiLz48ZyB0cmFuc2Zvcm09InRyYW5zbGF0ZSgyNTYgMjU2KSBzY2FsZSg0LjEpIHRyYW5zbGF0ZSgtNTAgLTUwKSI+PHBhdGggZD0iTTUwIDggTDg2IDI5IEw4NiA3MSBMNTAgOTIgTDE0IDcxIEwxNCAyOSBaIiBmaWxsPSJub25lIiBzdHJva2U9IiMzQTJBMTgiIHN0cm9rZS13aWR0aD0iNi41IiBzdHJva2UtbGluZWpvaW49InJvdW5kIi8+PGVsbGlwc2UgY3g9IjUwIiBjeT0iNTUiIHJ4PSIxNSIgcnk9IjE5IiBmaWxsPSIjM0EyQTE4Ii8+PHBhdGggZD0iTTM1IDUwIGgzMCBNMzUgNTggaDMwIE0zOCA2NiBoMjQiIHN0cm9rZT0iI0ZEQzAxOCIgc3Ryb2tlLXdpZHRoPSIzLjQiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIvPjxjaXJjbGUgY3g9IjUwIiBjeT0iMzQiIHI9IjkiIGZpbGw9IiMzQTJBMTgiLz48cGF0aCBkPSJNNDUgMjcgUTQxIDIwIDQzIDE3IE01NSAyNyBRNTkgMjAgNTcgMTciIHN0cm9rZT0iIzNBMkExOCIgc3Ryb2tlLXdpZHRoPSIyLjYiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgZmlsbD0ibm9uZSIvPjxjaXJjbGUgY3g9IjQzIiBjeT0iMTYiIHI9IjIuNCIgZmlsbD0iIzNBMkExOCIvPjxjaXJjbGUgY3g9IjU3IiBjeT0iMTYiIHI9IjIuNCIgZmlsbD0iIzNBMkExOCIvPjwvZz48L3N2Zz4=">
-<link rel="apple-touch-icon" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI1MTIiIGhlaWdodD0iNTEyIiB2aWV3Qm94PSIwIDAgNTEyIDUxMiI+PHJlY3Qgd2lkdGg9IjUxMiIgaGVpZ2h0PSI1MTIiIHJ4PSIxMTIiIGZpbGw9IiNGREMwMTgiLz48ZyB0cmFuc2Zvcm09InRyYW5zbGF0ZSgyNTYgMjU2KSBzY2FsZSg0LjEpIHRyYW5zbGF0ZSgtNTAgLTUwKSI+PHBhdGggZD0iTTUwIDggTDg2IDI5IEw4NiA3MSBMNTAgOTIgTDE0IDcxIEwxNCAyOSBaIiBmaWxsPSJub25lIiBzdHJva2U9IiMzQTJBMTgiIHN0cm9rZS13aWR0aD0iNi41IiBzdHJva2UtbGluZWpvaW49InJvdW5kIi8+PGVsbGlwc2UgY3g9IjUwIiBjeT0iNTUiIHJ4PSIxNSIgcnk9IjE5IiBmaWxsPSIjM0EyQTE4Ii8+PHBhdGggZD0iTTM1IDUwIGgzMCBNMzUgNTggaDMwIE0zOCA2NiBoMjQiIHN0cm9rZT0iI0ZEQzAxOCIgc3Ryb2tlLXdpZHRoPSIzLjQiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIvPjxjaXJjbGUgY3g9IjUwIiBjeT0iMzQiIHI9IjkiIGZpbGw9IiMzQTJBMTgiLz48cGF0aCBkPSJNNDUgMjcgUTQxIDIwIDQzIDE3IE01NSAyNyBRNTkgMjAgNTcgMTciIHN0cm9rZT0iIzNBMkExOCIgc3Ryb2tlLXdpZHRoPSIyLjYiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgZmlsbD0ibm9uZSIvPjxjaXJjbGUgY3g9IjQzIiBjeT0iMTYiIHI9IjIuNCIgZmlsbD0iIzNBMkExOCIvPjxjaXJjbGUgY3g9IjU3IiBjeT0iMTYiIHI9IjIuNCIgZmlsbD0iIzNBMkExOCIvPjwvZz48L3N2Zz4=">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI1MTIiIGhlaWdodD0iNTEyIiB2aWV3Qm94PSIwIDAgNTEyIDUxMiI+PGRlZnM+PGxpbmVhckdyYWRpZW50IGlkPSJiZyIgeDE9IjAlIiB5MT0iMCUiIHgyPSIxMDAlIiB5Mj0iMTAwJSI+PHN0b3Agb2Zmc2V0PSIwJSIgc3RvcC1jb2xvcj0iI2U4ZjBmZSIvPjxzdG9wIG9mZnNldD0iMTAwJSIgc3RvcC1jb2xvcj0iI2RiZWFmZSIvPjwvbGluZWFyR3JhZGllbnQ+PGxpbmVhckdyYWRpZW50IGlkPSJnIiB4MT0iMCUiIHkxPSIwJSIgeDI9IjYwJSIgeTI9IjEwMCUiPjxzdG9wIG9mZnNldD0iMCUiIHN0b3AtY29sb3I9IiMxZTNhOGEiLz48c3RvcCBvZmZzZXQ9IjQwJSIgc3RvcC1jb2xvcj0iIzI1NjNlYiIvPjxzdG9wIG9mZnNldD0iNzAlIiBzdG9wLWNvbG9yPSIjM2I4MmY2Ii8+PHN0b3Agb2Zmc2V0PSIxMDAlIiBzdG9wLWNvbG9yPSIjMWU0MGFmIi8+PC9saW5lYXJHcmFkaWVudD48ZmlsdGVyIGlkPSJzaCI+PGZlRHJvcFNoYWRvdyBkeD0iMCIgZHk9IjQiIHN0ZERldmlhdGlvbj0iOCIgZmxvb2QtY29sb3I9IiMxZTQwYWYiIGZsb29kLW9wYWNpdHk9IjAuNCIvPjwvZmlsdGVyPjwvZGVmcz48cmVjdCB3aWR0aD0iNTEyIiBoZWlnaHQ9IjUxMiIgcng9IjExMiIgZmlsbD0idXJsKCNiZykiLz48cGF0aCBkPSJNIDMxOCAxMDAgQyA0MDAgMTAwIDQyNCAxNTQgNDI0IDE5MiBDIDQyNCAyNjggMjU2IDI1NiAyNTYgMjU2IEMgMjU2IDI1NiA4OCAyNTYgODggMzIwIEMgODggMzkyIDE0OCA0MTAgMTk0IDQxMCIgc3Ryb2tlPSJ1cmwoI2cpIiBzdHJva2Utd2lkdGg9IjcyIiBmaWxsPSJub25lIiBzdHJva2UtbGluZWNhcD0icm91bmQiIGZpbHRlcj0idXJsKCNzaCkiLz48Y2lyY2xlIGN4PSIzMTgiIGN5PSIxNDAiIHI9IjgwIiBmaWxsPSJ1cmwoI2cpIiBmaWx0ZXI9InVybCgjc2gpIi8+PGNpcmNsZSBjeD0iMzE4IiBjeT0iMTQwIiByPSIzNSIgZmlsbD0iI2U4ZjRmZCIvPjxjaXJjbGUgY3g9IjE5NCIgY3k9IjM3MCIgcj0iODAiIGZpbGw9InVybCgjZykiIGZpbHRlcj0idXJsKCNzaCkiLz48Y2lyY2xlIGN4PSIxOTQiIGN5PSIzNzAiIHI9IjM1IiBmaWxsPSIjZThmNGZkIi8+PC9zdmc+">
+<link rel="apple-touch-icon" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI1MTIiIGhlaWdodD0iNTEyIiB2aWV3Qm94PSIwIDAgNTEyIDUxMiI+PGRlZnM+PGxpbmVhckdyYWRpZW50IGlkPSJiZyIgeDE9IjAlIiB5MT0iMCUiIHgyPSIxMDAlIiB5Mj0iMTAwJSI+PHN0b3Agb2Zmc2V0PSIwJSIgc3RvcC1jb2xvcj0iI2U4ZjBmZSIvPjxzdG9wIG9mZnNldD0iMTAwJSIgc3RvcC1jb2xvcj0iI2RiZWFmZSIvPjwvbGluZWFyR3JhZGllbnQ+PGxpbmVhckdyYWRpZW50IGlkPSJnIiB4MT0iMCUiIHkxPSIwJSIgeDI9IjYwJSIgeTI9IjEwMCUiPjxzdG9wIG9mZnNldD0iMCUiIHN0b3AtY29sb3I9IiMxZTNhOGEiLz48c3RvcCBvZmZzZXQ9IjQwJSIgc3RvcC1jb2xvcj0iIzI1NjNlYiIvPjxzdG9wIG9mZnNldD0iNzAlIiBzdG9wLWNvbG9yPSIjM2I4MmY2Ii8+PHN0b3Agb2Zmc2V0PSIxMDAlIiBzdG9wLWNvbG9yPSIjMWU0MGFmIi8+PC9saW5lYXJHcmFkaWVudD48ZmlsdGVyIGlkPSJzaCI+PGZlRHJvcFNoYWRvdyBkeD0iMCIgZHk9IjQiIHN0ZERldmlhdGlvbj0iOCIgZmxvb2QtY29sb3I9IiMxZTQwYWYiIGZsb29kLW9wYWNpdHk9IjAuNCIvPjwvZmlsdGVyPjwvZGVmcz48cmVjdCB3aWR0aD0iNTEyIiBoZWlnaHQ9IjUxMiIgcng9IjExMiIgZmlsbD0idXJsKCNiZykiLz48cGF0aCBkPSJNIDMxOCAxMDAgQyA0MDAgMTAwIDQyNCAxNTQgNDI0IDE5MiBDIDQyNCAyNjggMjU2IDI1NiAyNTYgMjU2IEMgMjU2IDI1NiA4OCAyNTYgODggMzIwIEMgODggMzkyIDE0OCA0MTAgMTk0IDQxMCIgc3Ryb2tlPSJ1cmwoI2cpIiBzdHJva2Utd2lkdGg9IjcyIiBmaWxsPSJub25lIiBzdHJva2UtbGluZWNhcD0icm91bmQiIGZpbHRlcj0idXJsKCNzaCkiLz48Y2lyY2xlIGN4PSIzMTgiIGN5PSIxNDAiIHI9IjgwIiBmaWxsPSJ1cmwoI2cpIiBmaWx0ZXI9InVybCgjc2gpIi8+PGNpcmNsZSBjeD0iMzE4IiBjeT0iMTQwIiByPSIzNSIgZmlsbD0iI2U4ZjRmZCIvPjxjaXJjbGUgY3g9IjE5NCIgY3k9IjM3MCIgcj0iODAiIGZpbGw9InVybCgjZykiIGZpbHRlcj0idXJsKCNzaCkiLz48Y2lyY2xlIGN4PSIxOTQiIGN5PSIzNzAiIHI9IjM1IiBmaWxsPSIjZThmNGZkIi8+PC9zdmc+">
 <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&display=swap" rel="stylesheet">
 <style>
 /* ══════════════════════════════════════════════════════════════════
-   🐝 نحلة — هوية العسل (Honey palette) + توقيع خلية النحل
-   ملاحظة: أسماء المتغيّرات محفوظة (--royal…) كي لا ينكسر أي عنصر،
-   لكن قيمها صارت ذهبيةً. فكل ما كان أزرق ملكياً صار عسلاً تلقائياً.
+   🎨 نحلة — نظام Claymorphism (الطين الناعم) | الأزرق الملكي
    ══════════════════════════════════════════════════════════════════ */
 :root{
   /* الذهبي محلّ الأزرق الملكي — نفس الأسماء، قيم العسل */
@@ -113,13 +169,7 @@ select.inp-clay{appearance:none;-webkit-appearance:none;cursor:pointer;
 .p-bad{background:rgba(250,82,82,.12);color:var(--bad-dp);}
 .si{width:20px;height:20px;stroke:currentColor;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round;fill:none;flex-shrink:0;}
 .si-s{width:16px;height:16px;} .si-xs{width:13px;height:13px;} .si-l{width:26px;height:26px;}
-.login-wrap{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px;padding-bottom:max(24px,env(safe-area-inset-bottom));position:relative;overflow:hidden;background:linear-gradient(165deg,#FFF3CD 0%,#FFFDF5 48%,#FFF8E1 100%);}
-/* 🐝 توقيع خلية النحل خلف شاشة الدخول */
-.login-wrap::before{content:'';position:absolute;inset:0;background-image:var(--hc-gold);background-size:44px 76px;opacity:.5;mask-image:radial-gradient(ellipse 78% 72% at 50% 32%,#000 30%,transparent 100%);-webkit-mask-image:radial-gradient(ellipse 78% 72% at 50% 32%,#000 30%,transparent 100%);pointer-events:none;}
-/* هالة عسل تنبض بهدوء */
-.login-wrap::after{content:'';position:absolute;top:-14%;left:50%;width:560px;height:560px;background:radial-gradient(circle,rgba(255,179,0,.20) 0%,transparent 66%);pointer-events:none;transform:translateX(-50%);animation:auraDrift 9s ease-in-out infinite;}
-@keyframes auraDrift{0%,100%{transform:translateX(-50%) scale(1);opacity:1}50%{transform:translateX(-46%) scale(1.08);opacity:.82}}
-.login-wrap > *{position:relative;z-index:1;}
+.login-wrap{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px;padding-bottom:max(24px,env(safe-area-inset-bottom));}
 .brand{text-align:center;margin-bottom:30px;}
 .brand-logo{
   width:92px;height:92px;margin:0 auto 18px;
@@ -142,13 +192,10 @@ select.inp-clay{appearance:none;-webkit-appearance:none;cursor:pointer;
 @keyframes spin{to{transform:rotate(360deg)}}
 .hero{
   margin:12px 12px 0;padding:20px 20px 24px;border-radius:var(--r-xl);
-  background:var(--hc),radial-gradient(140% 120% at 85% -10%,rgba(255,255,255,.22),transparent 55%),var(--grad-honey-deep);
-  background-size:44px 76px,auto,auto;
-  box-shadow:var(--clay-royal); position:relative;overflow:hidden;color:#111827;
+  background:linear-gradient(150deg,var(--royal-lt) 0%,var(--royal) 42%,var(--royal-dp) 100%);
+  box-shadow:none; position:relative;overflow:hidden;color:#fff;
   padding-top:max(24px,calc(env(safe-area-inset-top) + 12px));
 }
-/* 🐝 نحلة طافية باهتة توقيعاً في زاوية اللوحة */
-.hero::after{content:'🐝';position:absolute;left:-26px;bottom:-30px;font-size:11rem;opacity:0.09;pointer-events:none;line-height:1;transform:rotate(-8deg);}
 .hero-top{display:flex;justify-content:space-between;align-items:flex-start;position:relative;z-index:2;}
 .hero-id{display:flex;align-items:center;gap:11px;}
 .hero-av{width:44px;height:44px;border-radius:12px;background:rgba(255,255,255,.16);
@@ -608,7 +655,7 @@ window.__SND={alert:"UklGRvaoAABXQVZFZm10IBAAAAABAAEAIlYAAESsAAACABAAZGF0YdKoAAA
 <!-- ══════════════ تسجيل الدخول ══════════════ -->
 <div id="login" class="login-wrap">
   <div class="brand">
-    <div class="brand-logo"><svg width="72" height="72" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <div class="brand-logo"><svg width="62" height="62" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
 <defs><linearGradient id="hga" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FFD54F"/><stop offset=".5" stop-color="#FFB300"/><stop offset="1" stop-color="#FF8F00"/></linearGradient></defs>
 <!-- خلية سداسية -->
 <path d="M50 8 L86 29 L86 71 L50 92 L14 71 L14 29 Z" fill="url(#hga)" stroke="#E65100" stroke-width="3" stroke-linejoin="round"/>
@@ -623,7 +670,7 @@ window.__SND={alert:"UklGRvaoAABXQVZFZm10IBAAAAABAAEAIlYAAESsAAACABAAZGF0YdKoAAA
 </svg></div>
     <div class="brand-t">كباتن نحلة</div>
     <div class="brand-s">المنصة الرسمية للتوصيل</div>
-    <div class="brand-v"><span class="dot-live"></span> V14.0 · كركوك</div>
+    <div class="brand-v" id="brandVer"><span class="dot-live"></span> كركوك</div>
   </div>
   <div class="card-auth" id="authBox">
     <label class="lbl">رقم الهاتف</label>
@@ -1148,13 +1195,14 @@ window.addEventListener('popstate',()=>{
 </script>
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-import { getDatabase, ref, onValue, update, get, increment, query, orderByChild, equalTo } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+import { getDatabase, ref, onValue, update, set, get, increment, onDisconnect, query, orderByChild, equalTo } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+import { getFunctions, httpsCallable } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-functions.js";
 import { getAuth, signInWithCustomToken, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 
 /* ═══════════════════════════════════════════════════════════════
    🛡️ تطبيق الكابتن V14.1 "Clay Fortress"
    تصميم Claymorphism الجديد + كامل تحصينات V14.0 Fortress:
-   🔧[خ٣]  التوكن المحروق NAHLA_SECURE_TOKEN_2026 استُبدل بالتوكن الجديد.
+   🔧[خ٣]  التوكن المحروق HUT_SECURE_99 استُبدل بالتوكن الجديد.
    🔧[خ١]  أُزيل getGlobalData نهائياً (كان يسحب كل المطاعم بكلمات
            مرورها لأي كابتن!). منطقة المطعم وإحداثياته تصل الآن من
            الطلب نفسه (يختمها CF-6.0/GAS V16.1) أو من
@@ -1169,7 +1217,7 @@ import { getAuth, signInWithCustomToken, signOut, onAuthStateChanged } from "htt
    💬      الدردشة تطابق لوحة الليدر V3.0 حرفياً.
    ═══════════════════════════════════════════════════════════════ */
 const API_URL   = "https://script.google.com/macros/s/AKfycbyiFprfbDKMwOG75eZl-V5_M7XmqLkmK49YBQjhHKr_Gka77Gmdgt6uU6K5KeXilMViDw/exec";
-const API_TOKEN = "NAHLA_SECURE_TOKEN_2026";
+const API_TOKEN = "NAHLA_APP_4E9C71B8A6D3F250E1AC8B37D94F6021";
 const fbCfg = {
   apiKey:"AIzaSyAsmQKlCCZpCgfJG8AZM7fWmYPWVZkpjSQ", authDomain:"nahla-delivery-6b06f.firebaseapp.com",
   databaseURL:"https://nahla-delivery-6b06f-default-rtdb.europe-west1.firebasedatabase.app",
@@ -1189,45 +1237,31 @@ function nP(p){
   for(let i=0;i<10;i++){ s=s.split(ar[i]).join(String(i)); s=s.split(fa[i]).join(String(i)); }
   s=s.replace(/[^\d]/g,"");
   /* 🔢 [ن] كان الحذف بلا شرط: أي نصّ يبدأ بـ964 يُبتَر ثلاثة أرقام حتى لو لم
-     يكن مفتاح دولة. رقم عراقي كامل بمفتاح الدولة طوله 13 (9647701234567)،
-     فاشتراط >10 يحمي القصير ولا يمسّ الصحيح.
-     ولم أُضِف رفضاً بالطول: قد يكسر دخول حالة حافّة قائمة، وكسرُ دخولٍ يعمل
-     أسوأ من مفتاح شاذّ نادر. */
+     يكن مفتاح دولة. الرقم العراقي بمفتاح الدولة طوله 13، فاشتراط >10 يحمي
+     القصير ولا يمسّ الصحيح. */
   if(s.length>10 && s.startsWith("964")) s=s.slice(3);
   return s.replace(/^0+/,"");
 }
 
 /* ══════════════ الحالة ══════════════ */
 let drv=null, curOrder=null, active=[], isOnline=false, isReg=false;
-/* 🛡️[ازدواج الطلب] معرّفات يكتبها acceptOrder في هذه اللحظة. مسار
-   الاسترجاع يتخطّاها، وإلا أضاف الطلب بينما finalizeAccept في الطريق
-   لإضافته أيضاً — فتظهر نسختان لطلبٍ واحد. */
-const securing = new Set();
 let cdTimer, hbTimer=null, shTimer=null, tokTimer=null, waitTimer=null;
-let lastLat=0, lastLng=0, lastHtml="";
-/* ═══════════════════════════════════════════════════════════════════════
-   📍 [هـ] طزاجة الموقع — كان أخطر ما في الملف على **الأسطول كله**
-   ───────────────────────────────────────────────────────────────────────
-   lastLat/lastLng متغيّران عامّان يُحدَّثهما watchPosition. وإن توقّف التتبّع
-   (أُطفئ GPS · سُحب الإذن · جمّد أندرويد الـWebView · نفق أو مبنى) **لا
-   يُصفَّران أبداً** — فتواصل النبضة إرسال موقع الساعة الماضية **بختم زمني
-   هذه الثانية**.
-
-   فيرى المحرك كابتناً نشطاً نبضته قبل 12 ثانية عند مطعم الواسطي، وهو في
-   عرفة. ⇒ يُسنَد إليه طلب يبعد 7 كم وهو محسوب على 200 م، ويُحرم منه قريبٌ
-   فعلاً. وghostDriverSweeper لا يكنسه لأن نبضته طازجة.
-
-   المبدأ: **الموقع يحمل وقت قياسه، لا وقت إرساله.**
-   ═══════════════════════════════════════════════════════════════════════ */
-let lastFixTs = 0;                     // لحظة آخر إحداثي حقيقي
+let lastFixTs = 0;                     // [هـ] لحظة آخر إحداثي حقيقي
 const FIX_STALE_MS = 90000;            // بعدها لا يُوثَق به
 let lastAckTs = 0;                     // [ج] آخر كتابة أكّدها الخادم
+/* ═══════════════════════════════════════════════════════════════════════
+   📍 [هـ] lastLat/lastLng لا يُصفَّران أبداً إن توقّف التتبّع (أُطفئ GPS ·
+   سُحب الإذن · جمّد أندرويد الـWebView · نفق). فتواصل النبضة إرسال موقع
+   الساعة الماضية **بختم زمني هذه الثانية** — فيرى المحرك كابتناً نشطاً عند
+   مطعم وهو في حيّ آخر، ويُسنِد إليه طلباً يبعد 7 كم ويُحرم منه قريبٌ فعلاً.
+   وghostDriverSweeper لا يكنسه لأن نبضته طازجة.
+   المبدأ: **الموقع يحمل وقت قياسه، لا وقت إرساله.**
+   ═══════════════════════════════════════════════════════════════════════ */
 function markFix(lat,lng,acc){
   lastLat=lat; lastLng=lng; lastFixTs=Date.now();
   if(drv){ drv.currentLat=lat; drv.currentLng=lng; if(acc)drv.gpsAccuracy=acc; }
 }
 function locFresh(){ return lastFixTs>0 && (Date.now()-lastFixTs)<=FIX_STALE_MS; }
-/* [و] راية موقع صريحة — كان الفشل يُغطّى بأول قراءة مخزّنة تالية */
 function showLocBanner(on,msg){
   let el=document.getElementById('locBanner');
   if(!on){ if(el)el.remove(); return; }
@@ -1238,8 +1272,18 @@ function showLocBanner(on,msg){
   el.innerHTML='📍 <span>'+(msg||'موقعك غير محدّث — فعّل GPS')+'</span>';
   document.body.appendChild(el);
 }
+function updateLinkPill(){
+  const el=document.getElementById('radarD'); if(!el||!isOnline) return;
+  if(!lastAckTs){ el.innerHTML='⚠️ لم يتأكّد الاتصال بالخادم بعد'; el.style.color='#DC2626'; return; }
+  const sec=Math.round((Date.now()-lastAckTs)/1000);
+  if(sec<=90){ el.innerHTML='📡 متصل — آخر تأكيد قبل '+sec+' ثانية'; el.style.color=''; }
+  else { el.innerHTML='🔴 انقطع الاتصال منذ '+Math.round(sec/60)+' دقيقة — قد لا تصلك طلبات'; el.style.color='#DC2626'; }
+}
+setInterval(()=>{ if(isOnline) updateLinkPill(); }, 5000);
+
+let lastLat=0, lastLng=0, lastHtml="";
 let readySet=new Set(), rejToday=0, doneToday=0, earnToday=0, lifetime=0, debtNow=0;
-let queue=JSON.parse(localStorage.getItem('nahla_offline_queue')||'[]'), qBusy=false;
+let queue=JSON.parse(localStorage.getItem('hut_offline_queue')||'[]'), qBusy=false;
 let chatOpen=false, chatMsgs={}, chatMeta={}, chatSeen=0;
 let shownMsgs=JSON.parse(localStorage.getItem('suf_shown_msgs')||'[]');
 
@@ -1287,7 +1331,7 @@ function toast(msg,type='ok'){
   const c=document.getElementById('toasts'),t=document.createElement('div');
   const ico={ok:'✅',bad:'⚠️',info:'ℹ️',warn:'🔔'};
   t.className='toast t-'+type;
-  t.innerHTML=`<div class="t-ico">${ico[type]||'📢'}</div><div class="t-txt">${msg}</div>`;
+  t.innerHTML=`<div class="t-ico">/*safe-html*/${ico[type]||'📢'}</div><div class="t-txt">${esc(msg)}</div>`;
   c.appendChild(t);
   setTimeout(()=>{t.style.opacity='0';t.style.transform='translateY(-14px)';setTimeout(()=>t.remove(),320);},5200);
 }
@@ -1329,26 +1373,26 @@ async function procQueue(){
       /* ⏳ [الطابور] العمر زمني لا عددي. ثماني محاولات كل خمس ثوانٍ = **أربعون
          ثانية** — وهي مدّة عبور مرآب أو مصعد لا «عودة شبكة». والوعد المعروض
          للكابتن («سيُرسل تلقائياً عند عودة الشبكة») كان يُخلَف بعد أقل من
-         دقيقة، ويسقط التسليم في nahla_dead_queue التي **لا يقرؤها أحد**:
-         لا الكابتن ولا الليدر ولا السيرفر. صندوق أسود مغلق.
+         دقيقة، ويسقط التسليم في hut_dead_queue التي **لا يقرؤها أحد**: لا
+         الكابتن ولا الليدر ولا السيرفر. صندوق أسود مغلق.
          ست ساعات بتراجع أُسّي تغطّي كل حالة واقعية بلا استنزاف بطارية. */
       const ageMs=Date.now()-(a.ts||Date.now());
       const hardDead=code.includes('permission')||code.includes('denied');
       if(hardDead||ageMs>6*3600*1000){
         try{
-          const dead=JSON.parse(localStorage.getItem('nahla_dead_queue')||'[]');
+          const dead=JSON.parse(localStorage.getItem('hut_dead_queue')||'[]');
           dead.push({...a,deadAt:Date.now(),reason:code.slice(0,60)});
-          localStorage.setItem('nahla_dead_queue',JSON.stringify(dead.slice(-40)));
+          localStorage.setItem('hut_dead_queue',JSON.stringify(dead.slice(-40)));
         }catch(_){}
         /* 🔔 أثر على السيرفر — كان الإسقاط صامتاً تماماً. العقدة مسموحة
-           للكابتن على نفسه (كما في logEarly)، فتراها لوحة الليدر. */
+           للكابتن على نفسه، فتراها لوحة الليدر. */
         try{
           const pth=(a.updates&&Object.keys(a.updates)[0])||'';
           const oid=(pth.split('/')[1]||'unknown').replace(/[.#$\[\]]/g,'_');
           if(drv&&drv.phone){
             update(ref(db,`security_flags/${drv.phone}/wq_${oid}`),{
               driver:drv.phone, orderId:oid, kind:'write_failed_dropped',
-              reason:String(code).slice(0,60), attempts:increment(1),
+              reason:String(code).slice(0,60), attempts:1,   /* [V15.8] لا increment: القاعدة تسمح بالإنشاء فقط (!data.exists) فلا يتراكم */
               last_attempt:new Date().toISOString()
             }).catch(()=>{});
           }
@@ -1363,7 +1407,7 @@ async function procQueue(){
     }
   }
   queue.unshift(...fail);   /* الفاشل يعود للمقدّمة، والجديد يبقى خلفه */
-  try{localStorage.setItem('nahla_offline_queue',JSON.stringify(queue));}catch(e){}
+  try{localStorage.setItem('hut_offline_queue',JSON.stringify(queue));}catch(e){}
   if(bar)bar.style.display=queue.length?'flex':'none';
   qBusy=false;
 }
@@ -1387,31 +1431,54 @@ function pushTokenToNative(tok){
   }catch(e){}
 }
 
-/* ══════════════ المصادقة + الشفاء الذاتي ══════════════ */
-/* ═══════════════════════════════════════════════════════════════════════
-   🔑 [نجاة الجلسة] كانت كلمة المرور في sessionStorage وحدها — وهي تُمحى مع
-   موت عملية التطبيق (انطفاء الهاتف · قتل النظام للتطبيق · إعادة تشغيل).
-   وأربعة مسارات مصادقة تعتمد عليها: checkSession · healAuth · schedTok ·
-   onAuthStateChanged. فبعد الانطفاء: checkSession تجد الجلسة في localStorage
-   فتفتح لوحة **تبدو سليمة تماماً**، وكلمة المرور غائبة ⇒ لا رمز فايربيس ⇒
-   القواعد ترفض الاستعلام ⇒ healAuth تعود false أبداً ⇒ إعادة محاولة كل 15
-   ثانية إلى ما لا نهاية. الكابتن يرى صفر طلبات وبلا أي رسالة يراها أحد.
-   localStorage ليست أضعف: الجلسة والهاتف مخزّنان فيها أصلاً، ومن يصل
-   sessionStorage يصل الأخرى بالضبط.
-   ═══════════════════════════════════════════════════════════════════════ */
-function setPass(p){ try{ const v=btoa(p); localStorage.setItem('suf_pass_p',v); sessionStorage.setItem('suf_pass',v); }catch(e){} }
-function getPass(){ try{ return sessionStorage.getItem('suf_pass')||localStorage.getItem('suf_pass_p')||null; }catch(e){ return null; } }
-function clearPass(){ try{ localStorage.removeItem('suf_pass_p'); sessionStorage.removeItem('suf_pass'); }catch(e){} }
+/* [V15] قارئ توكن الجلسة — يبقى فارغاً حتى أول دخول بعد نشر Code.gs V18،
+   وبوّابة السيرفر في وضع الرصد حتى تُشغّل ENFORCE_ENTITY_STOKEN، فلا ينكسر
+   شيء في الفترة الانتقالية. */
+function getStoken(){ try{ return localStorage.getItem('suf_stoken')||''; }catch(e){ return ''; } }
 
+/* ══════════════ المصادقة + الشفاء الذاتي ══════════════ */
 async function fbAuth(phone,pass){
   try{
     const ph=nP(phone);
     const r=await gasFetch(`${API_URL}?action=checkDriver&phone=${ph}&password=${encodeURIComponent(pass||'')}&token=${API_TOKEN}`);
     const d=await r.json();
-    if(d&&d.firebase_token){await signInWithCustomToken(auth,d.firebase_token);pushTokenToNative(d.firebase_token);schedTok(phone,pass);return{ok:true,data:d};}
+    if(d&&d.firebase_token){
+      /* 🛡️ [V15.1] كانت عارية — ونداء identitytoolkit على مقبس نصف مفتوح
+         لا يستقرّ، وtry المحيطة لا تلتقط وعداً لا يستقرّ. فيدور زرّ الدخول
+         أبداً والكابتن لا يدخل التطبيق أصلاً. نفس صنف عطب القبول، لكن على
+         أول باب يطرقه. */
+      await withTimeout(signInWithCustomToken(auth,d.firebase_token), 12000, 'signin');
+      pushTokenToNative(d.firebase_token);
+      schedTok(phone,pass);
+      /* 🔐 [V15] توكن الجلسة — يفحصه Code.gs V18 في DRIVER_UPDATE و
+         START_SHIFT. كانا يكتفيان بـAPI_TOKEN المضمّن في هذا الملف نفسه،
+         فمن يفتح مصدر الصفحة يبدأ شفت أي كابتن ويزوّر موقعه. */
+      try{ if(d.session_token) localStorage.setItem('suf_stoken', String(d.session_token)); }catch(e){}
+      armDisconnect(true);
+      return{ok:true,data:d};
+    }
     return{ok:false,data:d};
   }catch(e){return{ok:false,data:null};}
 }
+/* ═══════════════════════════════════════════════════════════════════════
+   🔑 [نجاة الجلسة] كانت كلمة المرور في sessionStorage وحدها — وهي تُمحى مع
+   موت عملية التطبيق (انطفاء الهاتف · قتل النظام للتطبيق · إعادة تشغيل).
+   وأربعة مسارات مصادقة تعتمد عليها: checkSession · healAuth · schedTok ·
+   onAuthStateChanged.
+
+   فبعد الانطفاء: checkSession تجد الجلسة في localStorage فتفتح لوحة **تبدو
+   سليمة تماماً**، وكلمة المرور غائبة ⇒ لا رمز فايربيس ⇒ القواعد ترفض
+   الاستعلام ⇒ healAuth تعود false أبداً ⇒ إعادة محاولة كل 15 ثانية إلى ما
+   لا نهاية. الكابتن يرى صفر طلبات وبلا أي رسالة يراها أحد.
+
+   localStorage ليست أضعف: الجلسة والهاتف مخزّنان فيها أصلاً، ومن يصل
+   sessionStorage يصل الأخرى بالضبط.
+   ⚠️ وclearPass إلزامية عند الخروج والحظر — وإلا بقيت كلمة المرور بعدهما.
+   ═══════════════════════════════════════════════════════════════════════ */
+function setPass(p){ try{ const v=btoa(p); localStorage.setItem('suf_pass_p',v); sessionStorage.setItem('suf_pass',v); }catch(e){} }
+function getPass(){ try{ return sessionStorage.getItem('suf_pass')||localStorage.getItem('suf_pass_p')||null; }catch(e){ return null; } }
+function clearPass(){ try{ localStorage.removeItem('suf_pass_p'); sessionStorage.removeItem('suf_pass'); }catch(e){} }
+
 function schedTok(phone,pass){if(tokTimer)clearTimeout(tokTimer);
 tokTimer=setTimeout(async()=>{const sp=getPass();const p=pass||(sp?atob(sp):'');
 if(p&&drv&&drv.phone)await fbAuth(drv.phone,p);},50*60*1000);}
@@ -1460,7 +1527,7 @@ function listen(mkRef,cb){
     if(ok){ _denyStreak=0; showAuthBanner(false); }
     setTimeout(()=>listen(mkRef,cb), ok?1200:15000);
   };
-  onValue(r,(s)=>{ if(_denyStreak){ _denyStreak=0; showAuthBanner(false); } cb(s); },onErr);
+  onValue(r,(snap)=>{ if(_denyStreak){ _denyStreak=0; showAuthBanner(false); } cb(snap); },onErr);
 }
 
 onAuthStateChanged(auth,u=>{
@@ -1483,18 +1550,18 @@ const NET_TIMEOUT_MS=6000;
    الملف بلا مهلة إطلاقاً:
      checkDriver (×3) · DRIVER_REG · START_SHIFT · ACCEPT_ORDER · DECLINE_ORDER
 
-   الأثر على الكابتن: يعلق على «جاري الدخول…» إلى ما لا نهاية على شبكة زاحفة.
+   الأثر: الكابتن يعلق على «جاري الدخول…» إلى ما لا نهاية على شبكة زاحفة.
 
-   والأخطر — DECLINE_ORDER: يُرسَل الرفض بلا مهلة، فيقطع طريقه دقيقتين على
-   شبكة ضعيفة ويصل **بعد** أن قَبِل الطلبَ كابتنٌ آخر. وhandleDeclineOrder
-   كانت تدهس بلا فحص ⇒ يُسلَب الطلب من الكابتن الثاني وهو في الطريق.
-   (الحارس السيرفري يمنع الأثر الآن، والمهلة تمنع السبب.)
+   والأخطر — DECLINE_ORDER: يُرسَل بلا مهلة فيقطع طريقه دقيقتين ويصل **بعد**
+   أن قَبِل الطلبَ كابتنٌ آخر. وhandleDeclineOrder كانت تدهس بلا فحص ⇒
+   يُسلَب الطلب من الكابتن الثاني وهو في الطريق. (الحارس السيرفري يمنع
+   الأثر الآن، والمهلة تمنع السبب.)
 
    AbortController يقطع النداء فعلاً — بخلاف withTimeout التي تسابق مؤقّتاً
    وتترك النداء يعيش في الخلفية.
    ═══════════════════════════════════════════════════════════════════════ */
 const GAS_TIMEOUT_MS = 15000;
-/* [أ] عنوان REST لقاعدة البيانات — يتجاوز كاش مكتبة RTDB بنيوياً.
+/* [أ] عنوان REST — يتجاوز كاش مكتبة RTDB بنيوياً.
    ⚠️ يُشتقّ من إعداد فايربيس نفسه لا يُكتب يدوياً: أي عنوان مكتوب بخطّ اليد
    ينحرف عن الإعداد يوماً بلا أن يلاحظ أحد، فيفشل كل تحقّق بصمت. */
 const DB_REST = String(fbCfg.databaseURL||"").replace(/\/+$/,"");
@@ -1521,22 +1588,23 @@ async function guaranteedWrite(updates,vPath,vVal){
       await withTimeout(update(ref(db),updates),NET_TIMEOUT_MS,'write_timeout');
       if(vPath){
         /* ═══════════════════════════════════════════════════════════════
-           🔴 [أ] الجذر: get() **ليست شاهداً محايداً**.
-           ───────────────────────────────────────────────────────────────
-           مكتبة RTDB تطبّق كل كتابة على الكاش المحلي فوراً (تعويض الكمون)،
-           وget ترجع من الكاش إن تعذّر الخادم. فكانت تؤكّد **تفاؤل التطبيق
-           نفسه** لا حقيقة السيرفر ⇒ تعود true ⇒ تُحذف البطاقة ⇒ والطلب باقٍ
-           accepted على السيرفر ⇒ الكابتن محسوب حاملاً له فلا يصله جديد،
-           حتى يموت بعد 24 ساعة expired بلا عمولة ولا ذمّة ولا مبيعات.
+           🔴 [أ] الجذر: get() **ليست شاهداً محايداً**. مكتبة RTDB تطبّق كل
+           كتابة على الكاش المحلي فوراً (تعويض الكمون)، وget ترجع من الكاش إن
+           تعذّر الخادم. فكانت تؤكّد **تفاؤل التطبيق نفسه** لا حقيقة السيرفر
+           ⇒ تعود true ⇒ تُحذف البطاقة ⇒ والطلب باقٍ accepted على السيرفر ⇒
+           الكابتن محسوب حاملاً له فلا يصله جديد، حتى يموت بعد 24 ساعة
+           expired بلا عمولة ولا ذمّة ولا مبيعات.
            وهو بالضبط: «ضغطتُ إكمال، اختفى من تطبيقي، وبقي في النظام».
-
-           REST يتجاوز كاش المكتبة **بنيوياً** — لا خيار فيه.
-           وإن تعذّر النداء نعود false: الطابور والمسار الاحتياطي يتكفّلان،
-           والبطاقة تبقى في يد الكابتن. الصمت هو ما نتجنّبه.
-           ═══════════════════════════════════════════════════════════════ */
+           REST يتجاوز الكاش بنيوياً — لا خيار فيه. */
         let confirmed=false;
         try{
-          const tok = auth.currentUser ? await auth.currentUser.getIdToken() : '';
+          /* 🛡️ [V15] getIdToken كانت **عارية**. وهي تُجري نداءً شبكياً إلى
+         securetoken.googleapis.com كلما قارب التوكن الانتهاء. وtry/catch
+         المحيطة لا تلتقط وعداً لا يستقرّ — نفس المصيدة التي أسقطت القبول،
+         لكن هنا تُعلّق أزرار «وصلت» و«استلمت» و«سلّمت» كلها. */
+      const tok = auth.currentUser
+        ? await withTimeout(auth.currentUser.getIdToken(), 5000, 'idtoken')
+        : '';
           const rr  = await gasFetch(`${DB_REST}/${vPath}.json?auth=${encodeURIComponent(tok)}`, null, 8000);
           const raw = await rr.text();
           confirmed = (raw!==null && String(JSON.parse(raw))===String(vVal));
@@ -1561,15 +1629,29 @@ async function guaranteedWrite(updates,vPath,vVal){
 }
 /* 🛡️ قبول مضمون */
 async function guaranteeAccept(id){
-  /* 🩹[سباق القبول] تُعيد الآن true/false بدل لا شيء، والتحقق يشمل **المالك**
-     لا الحالة وحدها: antiHijackGuard قد يتراجع عن القبول ويُعيد الطلب لغيرك،
-     فتبقى الحالة accepted بينما driverPhone صار لكابتن آخر. */
+  /* ═══════════════════════════════════════════════════════════════════════
+     ثلاثة إصلاحات في دالة واحدة:
+
+     🔊 [أ٣] كانت المحاولات كلها بـcatch(e){} فارغة: إن فشلت جميعاً **لا يعرف
+        أحد لماذا** — لا الكابتن ولا الليدر ولا أنت. وهذا قلب شكوى «قبلتُ ولم
+        يُسجَّل». الآن يُسجَّل سبب كل محاولة ويُكتب أثر في security_flags.
+
+     🎯 [س١] التحقّق كان يفحص **الحالة وحدها**:
+              if(s.val()!=='accepted') ok=false;
+        فلو قَبِل الطلبَ كابتنٌ آخر لبقيت الحالة accepted والفحص يمرّ —
+        فيظنّ التطبيق أن القبول نجح والطلب لغيره. الآن نفحص **المالك** معاً.
+        (نحلة الأصلية كانت تفحص الاثنين؛ النسخة المنقولة تخلّفت عن هذا الإصلاح — وقد أُعيد هنا.)
+
+     🔁 [س٢] المسار الاحتياطي (GAS) كان **بعد** التحقّق و**بلا await** — أي
+        يُطلَق ويُنسى، ولا يُعاد التحقّق بعده. الآن قبل التحقّق ومنتظَر،
+        فنعرف نتيجته الفعلية.
+
+     وتُعيد الآن true/false — كانت لا تُعيد شيئاً، فلا يستطيع أي مستدعٍ أن
+     يعرف أنجحت أم لا.
+     ═══════════════════════════════════════════════════════════════════════ */
   const p={status:'accepted',driverPhone:drv.phone,last_update:new Date().toISOString()};
-  const path=`active_orders/${id}`;let ok=false;
-  /* 🔊 [أ٣] كانت المحاولات الثلاث بـcatch(e){} فارغة تماماً: إن فشلت الثلاث
-     **لا يعرف أحد لماذا** — لا الكابتن ولا الليدر ولا أنت. وهذا قلب شكوى
-     «قبلتُ ولم يُسجَّل». الآن يُسجَّل سبب كل محاولة ويُرفع علم إن فشلت كلها. */
-  const why=[];
+  const path=`active_orders/${id}`;let ok=false;const why=[];
+
   try{await withTimeout(update(ref(db,path),p));ok=true;}
   catch(e){ why.push('مباشرة: '+String(e&&e.message||e).slice(0,60)); }
 
@@ -1579,34 +1661,38 @@ async function guaranteeAccept(id){
   }
   if(!ok){
     try{
-      const rr=await gasFetch(`${API_URL}?action=ACCEPT_ORDER&orderId=${encodeURIComponent(id)}&driverPhone=${drv.phone}&token=${API_TOKEN}`);
+      const rr=await gasFetch(`${API_URL}?action=ACCEPT_ORDER&orderId=${encodeURIComponent(id)}&driverPhone=${drv.phone}&token=${API_TOKEN}&stoken=${encodeURIComponent(getStoken())}`);
       const dd=await rr.json().catch(()=>({}));
-      if(dd&&dd.success===false&&dd.msg) why.push('الخادم: '+String(dd.msg).slice(0,60));
+      if(dd&&dd.success) ok=true;
+      else if(dd&&dd.msg) why.push('الخادم: '+String(dd.msg).slice(0,60));
     }
     catch(e){ why.push('الخادم البديل: '+String(e&&e.message||e).slice(0,60)); }
   }
-  if(why.length){
+
+  /* [س١] التحقّق النهائي: الحالة **والمالك** معاً */
+  try{
+    const snap=await withTimeout(get(ref(db,path)));
+    const f=snap.val()||{};
+    ok=(String(f.status||'').toLowerCase()==='accepted')&&(nP(f.driverPhone)===nP(drv.phone));
+    if(!ok) why.push('التحقّق: status='+String(f.status||'?')+' · owner='+String(f.driverPhone||'?'));
+  }catch(e){ ok=false; why.push('التحقّق: '+String(e&&e.message||e).slice(0,60)); }
+
+  if(!ok && why.length){
     console.warn('⚠️ guaranteeAccept #'+id+' → '+why.join(' | '));
-    /* أثر على السيرفر يراه الليدر — العقدة مسموحة للكابتن على نفسه */
     try{
       if(drv&&drv.phone) update(ref(db,`security_flags/${drv.phone}/acc_${String(id).replace(/[.#$\[\]]/g,'_')}`),{
         driver:drv.phone, orderId:String(id), kind:'accept_attempts_failed',
-        reasons:why.join(' | ').slice(0,200), attempts:increment(1),
+        reasons:why.join(' | ').slice(0,200), attempts:1,   /* [V15.8] لا increment: القاعدة تسمح بالإنشاء فقط (!data.exists) فلا يتراكم */
         last_attempt:new Date().toISOString()
       }).catch(()=>{});
     }catch(_){}
   }
-  try{
-    const s=await withTimeout(get(ref(db,path)));
-    const f=s.val()||{};
-    ok=(String(f.status||'').toLowerCase()==='accepted')&&(nP(f.driverPhone)===nP(drv.phone));
-  }catch(e){ok=false;}
   return ok;
 }
 /* 🕵️ سجل الإنجاز المبكّر — قواعد V2.1 تسمح للكابتن بالكتابة على نفسه فقط */
 function logEarly(id,d,m){try{if(!drv||!drv.phone)return;
 update(ref(db,`security_flags/${drv.phone}/${id}`),{driver:drv.phone,orderId:id,distance_m:d===null?-1:Math.round(d),
-mins_since_pickup:m,attempts:increment(1),last_attempt:new Date().toISOString()}).catch(()=>{});}catch(e){}}
+mins_since_pickup:m,attempts:1,   /* [V15.8] لا increment: القاعدة تسمح بالإنشاء فقط (!data.exists) فلا يتراكم */last_attempt:new Date().toISOString()}).catch(()=>{});}catch(e){}}
 
 /* ══════════════ الدخول ══════════════ */
 window.initAuth=function(){unlock();
@@ -1695,19 +1781,21 @@ function checkSession(){
     if(sp)fbAuth(d.phone,atob(sp));
     showDash();
     const sv=localStorage.getItem('suf_orders');
-    if(sv){
-      active=JSON.parse(sv);
-      /* 🧹[ازدواج الطلب] تنظيف لمرة واحدة: هواتف الكباتن قد تحمل نسخاً
-         مكرّرة كُتبت في localStorage قبل هذا الإصلاح، ولا يزيلها النشر
-         وحده. نُبقي أول نسخة ونُسقط ما بعدها عند كل إقلاع. */
-      const seen=new Set();
-      active=active.filter(o=>{const k=String(o&&o.id);
-        if(!k||k==='undefined'||seen.has(k))return false; seen.add(k); return true;});
-      active.forEach(o=>{if(!o.acceptedTime)o.acceptedTime=Date.now();});
-      localStorage.setItem('suf_orders',JSON.stringify(active));
-    }
-    if(d.shiftEnd&&new Date(d.shiftEnd)>new Date()){document.getElementById('onlineTog').checked=true;toggleOnline();}
-    else{document.getElementById('onlineTog').checked=false;toggleOnline();}
+    if(sv){active=JSON.parse(sv);active.forEach(o=>{if(!o.acceptedTime)o.acceptedTime=Date.now();});}
+    /* 🪞 [V15.4] لا نشتقّ الحالة من shiftEnd ولا نفرضها — نقرؤها من حيث
+       يقرؤها المحرك، ثم نعكسها. فإن تعذّرت القراءة نُبقي المفتاح مُطفأً
+       **ونقول ذلك صراحةً** بدل الادّعاء. */
+    (async()=>{
+      try{
+        const st = await withTimeout(get(ref(db,`drivers_locations/${d.phone}/status`)),
+                                     NET_TIMEOUT_MS, 'mystatus');
+        paintToggle(String(st.val()||'') === 'active');
+      }catch(e){
+        paintToggle(false);
+        toast('⚠️ تعذّرت قراءة حالتك — حدّث الصفحة للتأكّد','warn');
+      }
+      listenMyStatus();
+    })();
     return true;
   }catch(e){}}
   else if(p){document.getElementById('phone').value=p;const pp=sessionStorage.getItem('suf_pend_pass');
@@ -1730,11 +1818,24 @@ window.logout=function(){
   if(!confirm('تأكيد تسجيل الخروج؟'))return;
   try{if(window.AndroidRadar&&AndroidRadar.unsubscribeFromDriverTopic)AndroidRadar.unsubscribeFromDriverTopic(drv.phone);}catch(e){}
   try{if(window.AndroidRadar&&AndroidRadar.stopLocationService)AndroidRadar.stopLocationService();}catch(e){}
-  unawake(); fbStatus('inactive'); if(tokTimer)clearTimeout(tokTimer);
+  /* 🔴 [V15] كان: fbStatus('inactive') بلا await ثم location.reload() في
+     نفس الدورة بعدها بأسطر — فتُهدم الصفحة قبل أن تصل الكتابة إلى السلك.
+     وهذا ليس احتمالاً كالاستراحة بل شبه مؤكّد: مستخدمو المتصفّح والـPWA
+     يبقون مرشَّحين للتوزيع خمس دقائق كاملة بعد خروجهم.
+     (الناجي الوحيد كان stopLocationService الأصلي على أندرويد.) */
+  unawake(); if(tokTimer)clearTimeout(tokTimer);
   /* 🔑 clearPass إلزامية بعد نقل كلمة المرور إلى localStorage: sessionStorage.clear()
-     وحدها كانت تكفي سابقاً، أمّا الآن فـ suf_pass_p ستبقى بعد الخروج لولا هذا. */
+     وحدها كانت تكفي سابقاً، أمّا الآن فـsuf_pass_p ستبقى بعد الخروج لولا هذا. */
   clearPass();
-  signOut(auth).catch(()=>{}); localStorage.removeItem('suf_session'); sessionStorage.clear(); location.reload();
+  try{ localStorage.removeItem('suf_stoken'); }catch(e){}   /* [V15] */
+  cancelDisconnect();
+  /* ننتظر الانصراف بمهلة قصوى ٣ ثوانٍ — فلا يعلق الخروج على شبكة ميتة،
+     ولا تُهدم الصفحة قبل وصول الكتابة. */
+  (async()=>{
+    try{ await withTimeout(fbStatus('inactive'), 3000, 'logout_off'); }catch(e){}
+    try{ signOut(auth); }catch(e){}
+    localStorage.removeItem('suf_session'); sessionStorage.clear(); location.reload();
+  })();
 };
 function friday(){if(new Date().getDay()===5){const k='suf_fri',t=new Date().toISOString().split('T')[0];
 if(localStorage.getItem(k)!==t){setTimeout(()=>{toast('جمعة مباركة 🕌✨ لا تنسَ الصلاة على النبي ﷺ','warn');localStorage.setItem(k,t);},3000);}}}
@@ -1749,8 +1850,7 @@ function startShift(){
       document.getElementById('shLeft').innerText='دوام حر ♾️';
       document.getElementById('shPct').innerText='';
       document.getElementById('shFill').style.width='100%';
-      /* 🔋 [ح] كان يعمل 60 مرة في الدقيقة إلى الأبد بلا غرض: يكتب النصّ
-         نفسه ويقرأ DOM ويكتبه. في الدوام الحر لا شيء يُعدّ — نوقفه. */
+      /* 🔋 [ح] كان يعمل 60 مرة في الدقيقة إلى الأبد بلا غرض. */
       clearInterval(shTimer); shTimer=null;
       return;
     }
@@ -1787,19 +1887,238 @@ function startShift(){
     document.getElementById('shFill').style.width=pct+'%';
   },1000);
 }
+/* ═══════════════════════════════════════════════════════════════════════
+   🆕 [V15] وحدة الحضور والرصد والظلّ
+   ─────────────────────────────────────────────────────────────────────
+   ثلاث بدائيات قياسية لم تكن في المشروع كله (صفر ذكر لأي منها):
+     ① onDisconnect  — الحضور الأصلي في فايربيس
+     ② track         — الرصد المنظّم
+     ③ shadowCommand — قياس نقطة الأمر بلا اعتمادها
+   ═══════════════════════════════════════════════════════════════════════ */
+
+const fns = getFunctions(app, 'europe-west1');
+
+/* ───────────────── ① onDisconnect — أرخص إصلاح في المشروع ─────────────────
+   فايربيس يوفّر بدائية مصمّمة **حرفياً** لمشكلة الأشباح والاستراحة، ولم
+   تُستعمل في أي ملف. السيرفر نفسه يكتب 'inactive' لحظة انقطاع المقبس:
+   بلا اعتماد على كتابة من جهاز قد تُهدم صفحته، وبلا انتظار خمس دقائق،
+   وبلا كنّاس أشباح كل ربع ساعة.
+
+   وهي تُغطّي ما لا تُغطّيه أي رقعة كتبناها: قتل النظام للتطبيق · نفاد
+   البطارية · انقطاع الشبكة · إغلاق المتصفّح · location.reload().
+   ───────────────────────────────────────────────────────────────────── */
+let _odArmedAt = 0;
+async function armDisconnect(force){
+  if(!drv||!drv.phone) return false;
+  if(!force && (Date.now()-_odArmedAt) < 4*60*1000) return true;   // لا نُثقل الشبكة
+  try{
+    await withTimeout(onDisconnect(ref(db,`drivers_locations/${drv.phone}/status`)).set('inactive'),
+                      NET_TIMEOUT_MS,'ondisc');
+    _odArmedAt = Date.now();
+    return true;
+  }catch(e){ return false; }
+}
+
+/* عمليات onDisconnect تُستهلك مرّةً واحدة عند الانقطاع، فتُعاد بعد كل
+   إعادة اتصال. نُعيدها عند التفعيل وداخل النبض بخنق أربع دقائق. */
+async function cancelDisconnect(){
+  if(!drv||!drv.phone) return;
+  try{ await onDisconnect(ref(db,`drivers_locations/${drv.phone}/status`)).cancel(); }catch(e){}
+  _odArmedAt = 0;
+}
+
+/* ─────────────────────────── ② الرصد المنظّم ───────────────────────────
+   أخطر ما في النظام لم يكن أي عطب — بل أن كل الأعطال عُرفت من شكاوى
+   الكباتن. ولا حدث واحد يُرسَل ليقول «ضغط قبول ولم يتأكّد».
+   عطب القبول كان سيظهر في هذه الأرقام قفزةً صارخة قبل أشهر من الشكوى.
+   ⚠️ يتطلّب عقدة client_events في القواعد (V3.0). بلاها يفشل بصمت.
+   ───────────────────────────────────────────────────────────────────── */
+const TRACK_ON = true;
+function track(ev, meta){
+  if(!TRACK_ON || !drv || !drv.phone) return;
+  try{
+    const id  = Date.now().toString(36)+Math.random().toString(36).slice(2,7);
+    const rec = { ev:String(ev).slice(0,40), ts:new Date().toISOString() };
+    if(meta){
+      if(meta.orderId!=null) rec.oid=String(meta.orderId).slice(0,80);
+      if(meta.command)       rec.cmd=String(meta.command).slice(0,20);
+      if(meta.ms!=null)      rec.ms=Number(meta.ms)||0;
+      if(meta.reason)        rec.why=String(meta.reason).slice(0,60);
+    }
+    try{ rec.net=String((navigator.connection&&navigator.connection.effectiveType)||'').slice(0,12); }catch(e){}
+    set(ref(db,`client_events/${drv.phone}/${id}`), rec).catch(()=>{});
+  }catch(e){}
+}
+
+/* ──────────────────── ③ نقطة الأمر — في وضع الظلّ ────────────────────
+   تُنادى **بالتوازي** مع المسار القديم الذي يبقى المسؤول الوحيد. السيرفر
+   في SHADOW_MODE يُقيّم ويُسجّل الحكم ولا يكتب حرفاً. فتقارن أسبوعاً: هل
+   يوافق الطريق الجديد القديمَ؟ ثم تبدّل — لا العكس.
+
+   fire-and-forget داخل try: لا تُنتظَر ولا تُعيد شيئاً، فلا تستطيع
+   تعليق زرّ ولا تعطيل قبول. هذا شرط وضع الظلّ.
+   ───────────────────────────────────────────────────────────────────── */
+const SHADOW_ON = true;
+function newOpId(){
+  try{ if(crypto&&crypto.randomUUID) return crypto.randomUUID(); }catch(e){}
+  return 'op-'+Date.now().toString(36)+'-'+Math.random().toString(36).slice(2,12);
+}
+function shadowCommand(command, orderId){
+  if(!SHADOW_ON || !orderId) return;
+  try{
+    httpsCallable(fns,'orderCommand')({ opId:newOpId(), orderId:String(orderId), command:String(command), shadow:true })
+      .then(r=>{ const v=(r&&r.data&&r.data.verdict)||'?';
+                 if(v!=='allow') track('shadow_reject',{command:command,orderId:orderId,reason:v}); })
+      .catch(e=>track('shadow_err',{command:command,orderId:orderId,
+                                    reason:String((e&&(e.code||e.message))||'').slice(0,50)}));
+  }catch(e){}
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   🪞 [V15.4] مرآة الحالة — المفتاح يعكس السيرفر ولا يدّعي
+   ─────────────────────────────────────────────────────────────────────
+   العطب الذي كشفه سؤالك: عند فتح التطبيق كان المفتاح يُشتقّ من shiftEnd:
+
+       if(d.shiftEnd && new Date(d.shiftEnd) > new Date()) checked=true;
+       else checked=false;
+
+   وshiftEnd يخصّ **نافذة الشفت** لا التوفّر الحالي. فكابتنٌ بلا shiftEnd
+   صالح يرى المفتاح مُطفأً — بينما الخدمة الأصلية تكتب status:"active"
+   كل تحديث موقع، والمحرك يراه حرّاً كامل الأهلية فيُرسل له.
+
+   ⇒ **واجهةٌ تدّعي حالةً لم تتحقّق منها.** والكابتن يقرّر بناءً عليها:
+     يظنّ نفسه مستريحاً فيبتعد عن هاتفه، والطلبات تصله وتموت.
+     وهذا أسوأ من غياب المفتاح: الصمت يُبقيه حذراً، والكذب يُطمئنه.
+
+   والمصدر الوحيد للحقيقة هو **ما يقرؤه المحرك نفسه**:
+       drivers_locations/{phone}/status
+
+   فنعكسه حيّاً. وأي جهة غيّرته — الخدمة الأصلية · onDisconnect · كنّاس
+   الأشباح · نهاية الشفت — تظهر في المفتاح خلال لحظة بلا تدخّل.
+   ═══════════════════════════════════════════════════════════════════════ */
+let _mirrorOn = false;      // يمنع حلقة التغذية الراجعة أثناء التطبيق
+function paintToggle(on){
+  const t=document.getElementById('onlineTog'), lbl=document.getElementById('togLbl'),
+        rad=document.getElementById('radar');
+  if(!t) return;
+  t.checked = !!on;
+  isOnline  = !!on;
+  if(lbl){ lbl.className = on ? 'tog-lbl on' : 'tog-lbl';
+           lbl.innerText = on ? 'متاح للطلبات' : 'في استراحة'; }
+  /* ═══════════════════════════════════════════════════════════════════
+     🔴 [V15.6] **أُزيل rad.style.display — كان يُخفي المفتاح نفسه.**
+     ───────────────────────────────────────────────────────────────────
+     المفتاح (#onlineTog) **داخل** صندوق #radar في بنية الصفحة. فكتابتي
+     في V15.4:   rad.style.display = on ? '' : 'none';
+     جعلت كل انتقال إلى «استراحة» يُخفي الصندوق **ومعه زرّ التفعيل** —
+     فيبقى الكابتن بلا وسيلة للعودة إلا بإعادة تحميل الصفحة.
+
+     وتصادمَ مع renderOrders التي تملك هذا الحقل أصلاً (تُخفي الرادار عند
+     وجود طلبات وتُظهره عند خلوّها). فكاتبان لخاصية واحدة بقاعدتين
+     متناقضتين ⇒ ظهورٌ واختفاء وارتعاش.
+
+     وهو الدرس نفسه الذي طاردناه في السيرفر: **كاتبان لحقل واحد.**
+     فـpaintToggle تملك المفتاح واللافتة والنبض — والتخطيط لصاحبه.
+     ═══════════════════════════════════════════════════════════════════ */
+  if(rad){ if(on){ rad.classList.remove('off'); rad.classList.add('on'); }
+           else  { rad.classList.add('off');    rad.classList.remove('on'); } }
+  /* adjustHB هي الآلية الصحيحة — تضبط الفاصل بحسب الحمولة (10 ث مع طلب،
+     20 ث بلا طلب) وتُلغي القديم أولاً. ولا نُنشئ مؤقّتاً بيدنا. */
+  if(on){ adjustHB(); awake(); }
+  else  { if(hbTimer){ clearInterval(hbTimer); hbTimer=null; } unawake(); }
+}
+
+function listenMyStatus(){
+  if(!drv||!drv.phone) return;
+  listen(()=>ref(db,`drivers_locations/${drv.phone}/status`), snap=>{
+    const on = String(snap.val()||'') === 'active';
+    if(_mirrorOn) return;                       // نحن من غيّرها للتوّ
+    if(on === isOnline) return;                 // لا تغيير
+    paintToggle(on);
+    /* أخبره حين يتغيّر بلا فعلٍ منه — فلا يُفاجَأ بطلب وهو يظنّ نفسه مستريحاً. */
+    toast(on ? 'ℹ️ حالتك عند الخادم: **متاح للطلبات**'
+             : 'ℹ️ حالتك عند الخادم: **في استراحة**', on?'ok':'info');
+    track(on?'mirror_on':'mirror_off');
+  });
+}
+
+/* ───────────── إعادة محاولة الانصراف — النبض متوقّف فلا بديل ───────────── */
+let offRetryTimer=null;
+function scheduleOffRetry(){
+  if(offRetryTimer) clearInterval(offRetryTimer);
+  offRetryTimer=setInterval(async()=>{
+    if(isOnline){ clearInterval(offRetryTimer); offRetryTimer=null; return; }
+    if(await fbStatus('inactive')){
+      clearInterval(offRetryTimer); offRetryTimer=null; unawake();
+      _mirrorOn = false; paintToggle(false);          // [V15.5]
+      track('break_ok_retry'); toast('✅ تأكّد انصرافك — لن تصلك طلبات','ok');
+      document.getElementById('radarT').innerText='الرادار متوقف';
+      document.getElementById('radarD').innerText='فعّل «متاح للطلبات» لبدء الشفت';
+    }
+  },15000);
+}
+
+/* ───────── مراقب تغيّر اليوم — يُعيد بناء مستمعات العدّادات وحدها ───────── */
+let _dayTimer=null, _dayKey='';
+function startDayRollover(initial){
+  _dayKey=initial;
+  if(_dayTimer) clearInterval(_dayTimer);
+  _dayTimer=setInterval(()=>{
+    const d=new Date().toISOString().split('T')[0];
+    if(d!==_dayKey){
+      _dayKey=d;
+      track('day_rollover');
+      /* أبسط ما يضمن الصحّة: إعادة تحميل واحدة عند تبدّل اليوم.
+         الجلسة في localStorage فيبقى الكابتن داخلاً، وactive محفوظة.
+         وهي تقع مرّة كل ٢٤ ساعة — لا كلفة عليها. */
+      if(!active.length) location.reload();
+      else toast('ℹ️ بدأ يوم جديد — أعد تحميل التطبيق بعد إنهاء طلباتك','info');
+    }
+  },60000);
+}
+
 window.toggleOnline=async function(){
   isOnline=document.getElementById('onlineTog').checked;
+  availEpoch++;            /* [V16.0] أبطل كل كتابةٍ معلّقة من قبل هذا القرار */
+  /* 🔴 [V15.6] كان الحجب بمؤقّت أعمى (٤ ث) — وعملية التفعيل قد تطول أكثر
+     (انتظار GPS حتى 5 ث + كتابة حتى 6 ث). فتنفكّ المرآة والعملية جارية،
+     فتُبدّل المفتاح وتُظهر رسائل في منتصف الطريق.
+     الآن: يُرفع الحجب **عند اكتمال العملية**، وحزامٌ أقصاه 15 ث كي لا
+     يبقى الحجب أبداً إن رُميَ استثناء. */
+  _mirrorOn = true;
+  if(window._mirTmr) clearTimeout(window._mirTmr);
+  window._mirTmr = setTimeout(()=>{ _mirrorOn = false; }, 15000);
   const lbl=document.getElementById('togLbl'), rad=document.getElementById('radar');
   if(isOnline){
     lbl.className='tog-lbl on'; lbl.innerText='متاح للطلبات';
     if(!drv.shiftEnd||new Date(drv.shiftEnd)<=new Date()){
       try{
-        const r=await gasFetch(`${API_URL}?action=START_SHIFT&phone=${drv.phone}&token=${API_TOKEN}`); const d=await r.json();
+        const r=await gasFetch(`${API_URL}?action=START_SHIFT&phone=${drv.phone}&token=${API_TOKEN}&stoken=${encodeURIComponent(getStoken())}`); const d=await r.json();
         if(d.success){drv.shiftEnd=d.shift_end;localStorage.setItem('suf_session',JSON.stringify(drv));}
-        else{toast(d.msg||'تعذّر بدء الشفت','bad');document.getElementById('onlineTog').checked=false;isOnline=false;
-          lbl.className='tog-lbl';lbl.innerText='في استراحة';return;}
-      }catch(e){toast('تعذّر الاتصال','bad');document.getElementById('onlineTog').checked=false;isOnline=false;
-        lbl.className='tog-lbl';lbl.innerText='في استراحة';return;}
+        /* ═══════════════════════════════════════════════════════════════
+           🚨 [V15.9] **فشل START_SHIFT لم يعد يمنع العمل.**
+           ───────────────────────────────────────────────────────────────
+           كان يُطفئ المفتاح ويخرج — فيبقى الكابتن عاطلاً وإن كان كل شيء
+           آخر سليماً. وفحصتُ ما تفعله فعلاً:
+               تكتب shift_end · status:"active" · last_update
+
+           و**غياب shift_end يعني «بلا انتهاء»** في المحرك:
+               if (driver.shift_end && new Date(driver.shift_end) < now) return;
+           فالشرط لا يتحقّق أصلاً، والكابتن **مرشَّح كامل الأهلية**.
+
+           و status:"active" يكتبها fbStatus مباشرةً إلى فايربيس بعد قليل —
+           بلا مرورٍ بـApps Script إطلاقاً.
+
+           ⇒ الفعل الوحيد الذي تنفرد به START_SHIFT هو **توقيت نهاية الشفت**،
+             وهو تنظيمٌ لا شرطُ عمل. فمنعُ الكابتن لأجله خسارةٌ صافية.
+
+           الآن: تحذيرٌ صريح، والعمل يمضي. والشفت بلا نهاية تلقائية حتى
+           يعود الاتصال — ينهيه الكابتن بزرّ الاستراحة كالمعتاد.
+           ═══════════════════════════════════════════════════════════════ */
+        else{ toast('⚠️ '+(d.msg||'تعذّر تسجيل الشفت')+' — تعمل بلا توقيت نهاية','warn');
+              track('shift_degraded',{why:String(d.msg||'').slice(0,60)}); }
+      }catch(e){ toast('⚠️ تعذّر تسجيل الشفت — تعمل بلا توقيت نهاية','warn');
+                 track('shift_degraded',{why:'net'}); }
     }
     rad.classList.remove('off'); rad.classList.add('on');
     document.getElementById('radarT').innerText='الرادار يعمل 📡';
@@ -1809,17 +2128,28 @@ window.toggleOnline=async function(){
     /* ═══════════════════════════════════════════════════════════════════
        ✅ [ب] المفتاح كان يخضرّ **قبل** الكتابة ويُكتب «الرادار يعمل 📡»،
        وإن فشلت الكتابة ابتلعها catch فارغ. فيجلس الكابتن ساعات وهو مقتنع
-       أنه متاح، و status عندك inactive فلا يراه استعلام المحرك إطلاقاً.
-       الآن: لا خضرة إلا بتأكيد من الخادم، وإلا رسالة صريحة.
+       أنه متاح، و status عندك ما زالت inactive فلا يراه استعلام المحرك
+       إطلاقاً — وهي إحدى الشكاوى الثلاث التي تُنتج «لا تصلني طلبات».
+       الآن: لا خضرة إلا بتأكيد من الخادم، وإلا رسالة صريحة بالأحمر.
        ═══════════════════════════════════════════════════════════════════ */
+    const ep0 = availEpoch;                 /* [V16.0] حقبة لحظة القرار */
     (async ()=>{
       if(navigator.geolocation){
         await new Promise(res=>navigator.geolocation.getCurrentPosition(
           pp=>{markFix(pp.coords.latitude,pp.coords.longitude,pp.coords.accuracy);res();},
           ()=>res(),{enableHighAccuracy:true,timeout:5000}));
       }
-      const okNet = await fbStatus('active');
+      const okNet = await fbStatus('active', ep0);   /* [V16.0] حقبة هذا القرار */
+      _mirrorOn = false;                     // [V15.6] انتهت العملية
+      if(window._mirTmr){ clearTimeout(window._mirTmr); window._mirTmr=null; }
+      if(okNet) armDisconnect(true);   /* [V15] السيرفر يُنصرِف عنك إن انقطعت */
       if(!okNet){
+        /* 🪞 [V15.5] كان صندوق الرادار وحده يتغيّر، والمفتاح واللافتة يبقيان
+           «متاح للطلبات» بينما الخادم يقول inactive. والمرآة لا تُصلحه:
+           onValue لا يُطلق حدثاً بلا **تغيّر**، والحالة لم تتغيّر (بقيت
+           inactive). فنُصحّحه صراحةً. */
+        _mirrorOn = false;
+        paintToggle(false);
         document.getElementById('radarT').innerText='⚠️ لم يتأكّد التفعيل';
         document.getElementById('radarD').innerHTML='<b style="color:#DC2626">لم يصل تفعيلك للخادم — لن تصلك طلبات.</b><br>تحقّق من الشبكة وGPS ثم أعد المحاولة.';
         rad.classList.remove('on'); rad.classList.add('off');
@@ -1837,7 +2167,27 @@ window.toggleOnline=async function(){
     document.getElementById('radarD').innerText='فعّل «متاح للطلبات» لبدء الشفت';
     if(shTimer)clearInterval(shTimer); document.getElementById('shRow').style.display='none';
     try{if(window.AndroidRadar&&AndroidRadar.stopLocationService)AndroidRadar.stopLocationService();}catch(e){}
-    fbStatus('inactive'); unawake();
+    /* ✅ [V15] لا استراحة بلا تأكيد — كما في مسار التفعيل بالضبط.
+       كان: fbStatus('inactive') بلا await وبلا فحص للنتيجة وبلا إعادة
+       محاولة. والنبض يتوقّف بعدها، فلا شيء في التطبيق كلّه يعيد الكتابة. */
+    (async()=>{
+      const off = await fbStatus('inactive');   /* الانصراف بلا حقبة — يُنفَّذ دائماً */
+      _mirrorOn = false;                       // [V15.6] انتهت العملية
+      if(window._mirTmr){ clearTimeout(window._mirTmr); window._mirTmr=null; }
+      if(off){ unawake(); track('break_ok'); _mirrorOn=false; paintToggle(false); return; }
+      track('break_fail');
+      /* 🪞 [V15.5] **المفتاح يعود مضاءً — لأنه ما زال متاحاً فعلاً.**
+         كانت الرسالة تقول «ما زلت متاحاً» بينما المفتاح مُطفأ واللافتة تقول
+         «في استراحة». فالنصّ يقول الحقيقة والمفتاح يكذب — **والكابتن يقرأ
+         المفتاح لا النصّ.** وإعادة المحاولة تعمل خلفاً، فإن نجحت أطفأته. */
+      _mirrorOn = false;
+      paintToggle(true);
+      document.getElementById('radarT').innerText='⚠️ لم يتأكّد الانصراف';
+      document.getElementById('radarD').innerHTML=
+        '<b style="color:#DC2626">ما زلت متاحاً عند الخادم — قد تصلك طلبات.</b><br>جاري إعادة المحاولة…';
+      toast('⚠️ لم يصل انصرافك — أنت ما زلت متاحاً','bad');
+      scheduleOffRetry();
+    })();
     if(hbTimer){clearInterval(hbTimer);hbTimer=null;}
     localStorage.setItem('was_online','false');
     renderOrders();
@@ -1846,11 +2196,14 @@ window.toggleOnline=async function(){
 function adjustHB(){if(hbTimer)clearInterval(hbTimer);if(!isOnline||!drv)return;hbTimer=setInterval(heartbeat,active.length?10000:20000);}
 function heartbeat(){
   if(!isOnline||!drv)return;
-  /* [هـ] لا نبعث ختماً طازجاً فوق موقع ميت — fbStatus تتكفّل بالرفض
-     وطلب قراءة جديدة وإظهار الراية. */
-  if(lastLat&&lastLng){ fbStatus('active'); return; }
+  /* [V16.0] التقط الحقبة **الآن** ومرّرها — فإن تغيّرت قبل وصول الموقع
+     أُلغيت الكتابة. وهذا هو موضع العطب بالضبط: الاستدعاء أدناه يبقى
+     معلّقاً حتى عشر ثوانٍ، والقرار قد يتغيّر خلالها. */
+  const ep = availEpoch;
+  armDisconnect(false);   /* [V15] إعادة التسليح بخنق ٤ دقائق */
+  if(lastLat&&lastLng){ fbStatus('active', ep); return; }
   if(navigator.geolocation)navigator.geolocation.getCurrentPosition(
-    p=>{ markFix(p.coords.latitude,p.coords.longitude,p.coords.accuracy); fbStatus('active'); },
+    p=>{ markFix(p.coords.latitude,p.coords.longitude,p.coords.accuracy); fbStatus('active', ep); },
     ()=>showLocBanner(true,'تعذّر تحديد موقعك — فعّل GPS'),
     {enableHighAccuracy:true,timeout:10000,maximumAge:0});
 }
@@ -1858,29 +2211,88 @@ function heartbeat(){
 /* 🔧[خ٨] كتابة حقلية فقط — القواعد تسمح للكابتن بهذه الحقول الأربعة على
    عقدته وحدها. shift_end أُزيلت: يكتبها START_SHIFT سيرفرياً، وكتابتها
    من العميل كانت سترفض وتمحو حقل name الذي يختمه GAS V16.1. */
-async function fbStatus(st){
-  /* [ب] كانت لا تُعيد شيئاً: المفتاح يخضرّ ويُكتب «الرادار يعمل 📡» قبل
-     الكتابة، وإن فشلت ابتلعها .catch(()=>{}) فارغ. فيجلس الكابتن ساعات
-     مقتنعاً أنه متاح، و status عندك ما زالت inactive فلا يراه المحرك.
-     الآن تُعيد true/false ليقرّر المُستدعي.
-     [هـ] ولا تكتب بإحداثي ميت: ختم طازج فوق موقع قديم يخدع المحرك. */
-  if(!drv) return false;
-  if(!lastLat||!lastLng){
-    showLocBanner(true,'لا يوجد موقع — فعّل GPS وامنح الإذن');
+/* ═══════════════════════════════════════════════════════════════════════════
+   🔴 [V16.0] **حقبة التوفّر — تُبطل كل كتابة تأخّرت عن قرارها.**
+   ───────────────────────────────────────────────────────────────────────────
+   العطب الذي كشفه التشغيل: «أضغط في استراحة ومع ذلك تصلني طلبات — خصوصاً
+   وقت الزخم».
+
+   والآلية سباقٌ صريح:
+       heartbeat() → navigator.geolocation.getCurrentPosition(
+           p => { markFix(...); fbStatus('active'); },     ← بلا فحص ثانٍ
+           ..., { timeout: 10000 } )                       ← معلّقة حتى 10 ث
+
+       ث 0.0  نبضة تنطلق · الموقع معلّق
+       ث 2.1  الكابتن يضغط «استراحة» · isOnline=false · hbTimer يُلغى
+       ث 2.4  fbStatus('inactive') ✅ يصل
+       ث 4.7  🔴 رجع الموقع ⇒ fbStatus('active') — والقرار تغيّر منذ ثانيتين
+       ث 60   المحرك يراه متاحاً ⇒ طلبٌ جديد
+
+   **ولماذا في الزخم أسوأ؟** الفاصل `active.length ? 10000 : 20000`:
+   مع طلبات تنبض كل عشر ثوانٍ ونافذة التعليق عشر — فنافذة الخطر تقارب
+   المئة بالمئة من الوقت. ومع طلبٍ محمول يكون الكابتن متحرّكاً فيبطؤ GPS.
+
+   ولا يكفي فحص isOnline في نداءٍ واحد: كل كتابة مؤجَّلة (النبض · الموقع
+   الأصلي · إعادة المحاولة · الطابور) تحمل الخطر نفسه.
+
+   فالعلاج **حقبة**: كل تبديل توفّر يرفع العدّاد، وكل كتابة تلتقط حقبتها
+   وقت الطلب. فإن تغيّرت قبل وصولها — تُلغى. ولا مفعول لقرارٍ عفا عليه
+   قرارٌ أحدث.
+   ═══════════════════════════════════════════════════════════════════════════ */
+let availEpoch = 0;
+
+async function fbStatus(st, epoch){
+  /* 🛡️ [V16.0] كتابةٌ من حقبةٍ ماضية تُلغى بلا ضجيج. */
+  if (epoch !== undefined && epoch !== availEpoch) {
+    try{ track('stale_status_drop',{want:st,epoch:epoch,now:availEpoch}); }catch(e){}
     return false;
   }
-  if(!locFresh()){
-    showLocBanner(true,'موقعك غير محدّث منذ '+Math.round((Date.now()-lastFixTs)/60000)+' دقيقة');
-    try{ navigator.geolocation?.getCurrentPosition(
-      pos=>{ markFix(pos.coords.latitude,pos.coords.longitude,pos.coords.accuracy); showLocBanner(false); },
-      ()=>{}, {enableHighAccuracy:true,timeout:8000,maximumAge:0}); }catch(e){}
-    return false;                      /* لا كتابة بإحداثي لا نثق به */
+  /* وحتى بلا حقبة صريحة: لا نكتب active ونحن في استراحة. */
+  if (st === 'active' && !isOnline) {
+    try{ track('stale_status_drop',{want:'active',reason:'offline'}); }catch(e){}
+    return false;
   }
-  showLocBanner(false);
+  return await _fbStatusRaw(st);
+}
 
+async function _fbStatusRaw(st){
+  /* [ب] كانت لا تُعيد شيئاً: المفتاح يخضرّ ويُكتب «الرادار يعمل 📡» قبل
+     الكتابة، وإن فشلت ابتلعها catch فارغ. فيجلس الكابتن ساعات مقتنعاً أنه
+     متاح، و status عندك inactive فلا يراه استعلام المحرك إطلاقاً.
+     [هـ] ولا تكتب بإحداثي ميت — ختم طازج فوق موقع قديم يخدع المحرك.
+
+     ═══════════════════════════════════════════════════════════════════
+     🔴 [V15] والعطب الذي أُصلح هنا: حارسا [هـ] كانا يُطبَّقان على
+     **الاتجاهين معاً**. وفي حالة 'inactive' المنطق معكوس تماماً:
+     **الانصراف لا يحتاج معرفة موقعك.**
+
+     فالكابتن الذي يضغط «استراحة» داخل مبنى، أو وGPS مطفأ، أو بشبكة
+     ضعيفة — كانت الدالة تخرج قبل أي كتابة، فتبقى حالته 'active' في
+     فايربيس مع last_update طازج، فيراه المحرك كابتناً حرّاً كامل
+     الأهلية حتى خمس دقائق (DRIVER_OFFLINE_MINS) = خمس دورات توزيع.
+     وهو مقتنع أنه مستريح لأن الشاشة تقول «في استراحة».
+
+     الآن: الحارسان لـ'active' وحدها، والإحداثيات تُكتب فقط إن كانت
+     طازجة — فلا يُختم موقع ميت، ولا يُحجب انصراف.
+     ═══════════════════════════════════════════════════════════════════ */
+  if(!drv) return false;
+  const goingOff = (st === 'inactive');
+  if(!goingOff){
+    if(!lastLat||!lastLng){ showLocBanner(true,'لا يوجد موقع — فعّل GPS وامنح الإذن'); return false; }
+    if(!locFresh()){
+      showLocBanner(true,'موقعك غير محدّث منذ '+Math.round((Date.now()-lastFixTs)/60000)+' دقيقة');
+      try{ navigator.geolocation?.getCurrentPosition(
+        pos=>{ markFix(pos.coords.latitude,pos.coords.longitude,pos.coords.accuracy); showLocBanner(false); },
+        ()=>{}, {enableHighAccuracy:true,timeout:8000,maximumAge:0}); }catch(e){}
+      return false;
+    }
+    showLocBanner(false);
+  }
   const p=drv.phone, u={};
-  u[`drivers_locations/${p}/lat`]=Number(lastLat);
-  u[`drivers_locations/${p}/lng`]=Number(lastLng);
+  if(lastLat && lastLng && locFresh()){
+    u[`drivers_locations/${p}/lat`]=Number(lastLat);
+    u[`drivers_locations/${p}/lng`]=Number(lastLng);
+  }
   u[`drivers_locations/${p}/status`]=st;
   u[`drivers_locations/${p}/last_update`]=new Date().toISOString();
   try{
@@ -1894,23 +2306,6 @@ async function fbStatus(st){
     updateLinkPill(); return false;
   }
 }
-
-/* ═══════════════════════════════════════════════════════════════════════
-   🔗 [ج] مؤشّر آخر اتصال — أنفع سطر تشخيصي في الملف
-   ───────────────────────────────────────────────────────────────────────
-   النبضة كانت تفشل بصمت مطلق: يتقادم last_update ⇒ يخرج الكابتن من
-   الترشيح بعد 5 دقائق ⇒ يجعله كنّاس الأشباح inactive بعد 15 — والتطبيق
-   يعرض «الرادار يعمل 📡» طوال ذلك.
-   سطرٌ واحد يراه الكابتن بعينه يحوّل أربعة أعطال صامتة إلى شيء يُبلّغ عنه.
-   ═══════════════════════════════════════════════════════════════════════ */
-function updateLinkPill(){
-  const el=document.getElementById('radarD'); if(!el||!isOnline) return;
-  if(!lastAckTs){ el.innerHTML='⚠️ لم يتأكّد الاتصال بالخادم بعد'; el.style.color='#DC2626'; return; }
-  const sec=Math.round((Date.now()-lastAckTs)/1000);
-  if(sec<=90){ el.innerHTML='📡 متصل — آخر تأكيد قبل '+sec+' ثانية'; el.style.color=''; }
-  else { el.innerHTML='🔴 انقطع الاتصال منذ '+Math.round(sec/60)+' دقيقة — قد لا تصلك طلبات'; el.style.color='#DC2626'; }
-}
-setInterval(()=>{ if(isOnline) updateLinkPill(); }, 5000);
 /* 🔗 مستقبِل أحداث الطبقة الأصلية — يناديه MainActivity.pushEventToWeb.
    أهمّها order_revoked: يصل من FCM حتى والتطبيق في الخلفية، فيُحدَّث
    الويب فوراً بدل انتظار مستمع فايربيس (وقد يكون مجمّداً). */
@@ -1926,32 +2321,34 @@ window.__nativeEvent=function(ev){
   }catch(e){}
 };
 window.__nativeLocation=function(lat,lng,acc){markFix(lat,lng,acc);showLocBanner(false);
-if(isOnline)fbStatus('active');document.getElementById('permOv').classList.add('dn');};
+if(isOnline)fbStatus('active', availEpoch);document.getElementById('permOv').classList.add('dn');};
 
 function startSystem(){
   if(isOnline){awake();adjustHB();}
   startListeners();
   if(navigator.geolocation){
-    navigator.geolocation.getCurrentPosition(p=>{
-        markFix(p.coords.latitude,p.coords.longitude,p.coords.accuracy);
-        showLocBanner(false); fbStatus(isOnline?'active':'inactive');},
+    navigator.geolocation.getCurrentPosition(p=>{lastLat=p.coords.latitude;lastLng=p.coords.longitude;
+      if(drv){drv.currentLat=p.coords.latitude;drv.currentLng=p.coords.longitude;drv.gpsAccuracy=p.coords.accuracy;}fbStatus(isOnline?'active':'inactive');},
       ()=>document.getElementById('permOv').classList.remove('dn'),{enableHighAccuracy:true,timeout:10000});
-    /* [و] كانت watchPosition **بلا timeout**: إن لم يردّ المزوّد أبداً لا
-       يُنادى معالج نجاح ولا فشل، فيبقى lastLat على قيمته الأولى بلا إشارة.
-       وmaximumAge:5000 كانت تُخفي التحذير بأول قراءة مخزّنة تالية. */
-    navigator.geolocation.watchPosition(p=>{
-        document.getElementById('permOv').classList.add('dn'); showLocBanner(false);
-        markFix(p.coords.latitude,p.coords.longitude,p.coords.accuracy);
-        fbStatus(isOnline?'active':'inactive');},
-      ()=>{ document.getElementById('permOv').classList.remove('dn');
-            showLocBanner(true,'انقطع تتبّع الموقع — تحقّق من GPS'); },
-      {enableHighAccuracy:true,maximumAge:5000,timeout:25000});
+    navigator.geolocation.watchPosition(p=>{document.getElementById('permOv').classList.add('dn');
+      lastLat=p.coords.latitude;lastLng=p.coords.longitude;
+      if(drv){drv.currentLat=p.coords.latitude;drv.currentLng=p.coords.longitude;drv.gpsAccuracy=p.coords.accuracy;}fbStatus(isOnline?'active':'inactive');},
+      ()=>document.getElementById('permOv').classList.remove('dn'),{enableHighAccuracy:true,maximumAge:5000});
   }
 }
 
 /* ══════════════ الإعدادات ══════════════ */
 window.openSettings=function(){
-  try{const v=document.getElementById('appVerLbl');if(v)v.textContent=CURRENT_APP_VERSION;}catch(e){}
+  /* 🔧 [V15.2] كان CURRENT_APP_VERSION غير معرَّف إطلاقاً — رصده ESLint.
+     وrefereceError كان يُبتلع في catch الفارغة، فتبقى خانة النسخة فارغة
+     أبداً بلا أن يعرف أحد. عطبٌ تجميلي، لكنه من صنف الفشل الصامت نفسه. */
+  try{ const v=document.getElementById('appVerLbl');
+       /* [V15.8] الرقمان معاً: الويب + الـAPK إن كنّا داخل التطبيق الأصلي.
+          فيعرف الدعم أيّ بناءٍ عند الكابتن بلا تخمين. */
+       let nat=''; try{ if(window.AndroidRadar&&AndroidRadar.getNativeVersion)
+                          nat=' · APK '+AndroidRadar.getNativeVersion(); }catch(e){}
+       if(v) v.textContent = 'V' + (window.APP_VERSION || '?') + nat +
+             ' · ' + (localStorage.getItem('suf_build_src')||'?'); }catch(e){}
   document.getElementById('goalStp').innerText=DAILY_GOAL;
   document.getElementById('remTog').checked=(localStorage.getItem('suf_rem')!=='off');
   document.getElementById('siHrs').innerText=(drv?.shiftHours||'--')+' س';
@@ -2000,7 +2397,7 @@ function refreshDash(){
   const r=document.getElementById('stRate');
   if(r){r.innerText=rate+'%';r.style.color=rate>=80?'var(--ok-dp)':rate>=60?'var(--warn-dp)':'var(--bad-dp)';}
   const e=document.getElementById('earnV');
-  if(e){e.innerHTML=`${earnToday.toLocaleString('ar-EG')} <small>د.ع</small>`;e.classList.add('pop');setTimeout(()=>e.classList.remove('pop'),420);}
+  if(e){e.innerHTML=`/*safe-html*/${earnToday.toLocaleString('ar-EG')} <small>د.ع</small>`;e.classList.add('pop');setTimeout(()=>e.classList.remove('pop'),420);}
 }
 
 /* ══════════════ المستمعات (كلها ذاتية الشفاء) ══════════════ */
@@ -2013,7 +2410,17 @@ function startListeners(){
     return;
   }
   _ready=true;
+  /* 🔴 [V15] كان const يُحسب مرّة واحدة، والمستمعات تُربط به ولا تُعاد.
+     فالكابتن الليلي الذي لا يغلق التطبيق يعبر منتصف الليل فتبقى لوحته
+     معلّقة على عقدة **الأمس** إلى الأبد: العدّاد لا يتحرّك والدفتر لا ينمو،
+     بينما التسليم يُكتب في عقدة اليوم الصحيحة. عطبُ عرضٍ يولّد شكوى
+     مالية المظهر.
+     ⚠️ الاتفاق يبقى UTC ولا يُمَسّ: Code.gs يكتب rejected_orders بـ
+        now.split('T')[0]، وnightlySummaryAndCleaner ينظّف على UTC-أمس
+        «كما يكتبها الكابتن والسيرفر فعلاً». تبديله هنا وحده يفصل
+        العدّادات عن بعضها ويُبقي بقايا لا تُنظَّف. */
   const today=new Date().toISOString().split('T')[0];
+  startDayRollover(today);
 
   listen(()=>ref(db,`drivers_locations/${drv.phone}/account_status`),s=>{
     if(s.val()==='banned'){alert('⚠️ تم حظر حسابك.');clearPass();localStorage.removeItem('suf_session');sessionStorage.clear();location.reload();}
@@ -2021,20 +2428,11 @@ function startListeners(){
   listen(()=>ref(db,`ledgers/drivers/${drv.phone}`),s=>{
     const l=s.val()||{}; lifetime=Number(l.completed_orders||0); debtNow=Number(l.debt||0); refreshDash();
   });
-  /* 🩹[تجمّد العدّاد] كان `today` يُحسب مرة واحدة عند فتح التطبيق ولا يُعاد
-     حسابه أبداً، بينما التسليم يحسب تاريخه لحظياً. فبعد منتصف ليل UTC
-     (= 03:00 بغداد) تُكتب التسليمات إلى تاريخ جديد والتطبيق يسمع القديم:
-     يسلّم الكابتن ولا يزيد عدّاده حتى يغلق التطبيق ويفتحه.
-     الآن نشترك على العقدة الأب ونقرأ مفتاح اليوم **لحظياً** في كل تحديث،
-     فلا حاجة لإعادة اشتراك ولا يتجمّد شيء عند تبدّل اليوم. */
-  const dayKey=()=>new Date().toISOString().split('T')[0];
-  listen(()=>ref(db,`daily_metrics/${drv.phone}`),s=>{
-    const m=(s.val()||{})[dayKey()]||{};
-    doneToday=Number(m.completed_orders||0); rejToday=Number(m.rejected_orders||0); refreshDash();
-  });
+  listen(()=>ref(db,`daily_metrics/${drv.phone}/${today}/completed_orders`),s=>{doneToday=Number(s.val()||0);refreshDash();});
+  listen(()=>ref(db,`daily_metrics/${drv.phone}/${today}/rejected_orders`),s=>{rejToday=Number(s.val()||0);refreshDash();});
 
-  listen(()=>ref(db,`daily_ledgers/${drv.phone}`),s=>{
-    const d=(s.val()||{})[dayKey()]||{}; let total=0,html='';
+  listen(()=>ref(db,`daily_ledgers/${drv.phone}/${today}`),s=>{
+    const d=s.val()||{}; let total=0,html='';
     Object.values(d).sort((a,b)=>b.timestamp-a.timestamp).forEach(r=>{
       total+=(parseFloat(r.price)||0);
       const t=new Date(r.timestamp).toLocaleTimeString('ar-EG',{hour:'2-digit',minute:'2-digit'});
@@ -2044,25 +2442,22 @@ function startListeners(){
         <div class="li-t">${t}</div></div></div>`;
     });
     earnToday=total; refreshDash();
-    document.getElementById('ldgTotal').innerHTML=`${total} <small style="font-size:1rem;">د.ع</small>`;
+    document.getElementById('ldgTotal').innerHTML=`/*safe-html*/${total} <small style="font-size:1rem;">د.ع</small>`;
     document.getElementById('ldgList').innerHTML=html||'<div style="text-align:center;padding:44px 0;color:var(--muted);font-weight:800;">لا رحلات اليوم بعد.</div>';
   });
 
   listen(()=>ref(db,'system_settings/shifts_enabled'),s=>{window._shiftsOff=(s.val()===false);});
 
-  /* ═══════════════════════════════════════════════════════════════════
-     📢 [م] كانت نافذة **عشر ثوانٍ فقط** بين كتابة الرسالة وظهورها. فمن كان
-     تطبيقه في الخلفية، أو شبكته أبطأ من ذلك، أو فتح التطبيق بعد دقيقة —
-     **لا تصله**. فتنبيه «لا تستلموا من مطعم فلان» يصل بعض الأسطول وأنت
-     تظنّه وصل الجميع.
-     والمفارقة أن الرسالة الفردية (driver_messages) لها shownMsgs تمنع
-     التكرار وتصل مهما تأخّرت — والجماعية بلا أيٍّ منها.
-     الآن: المعيار «هل رأيتُه؟» لا «هل هو طازج؟» — كالفردية تماماً. */
+  /* 📢 [م] كانت نافذة **عشر ثوانٍ فقط** بين كتابة الرسالة وظهورها. فمن كان
+     تطبيقه في الخلفية أو شبكته أبطأ **لا تصله** — فتنبيه «لا تستلموا من مطعم
+     فلان» يصل بعض الأسطول وأنت تظنّه وصل الجميع.
+     والمفارقة أن driver_messages لها shownMsgs تمنع التكرار وتصل مهما تأخّرت.
+     الآن: المعيار «هل رأيتُه؟» لا «هل هو طازج؟». */
   let lastBcTs=Number(localStorage.getItem('suf_bc_ts')||0);
   listen(()=>ref(db,'system_broadcast'),s=>{
     const d=s.val(); if(!d||!d.msg||!d.ts) return;
-    if(d.ts<=lastBcTs) return;                       /* رآه من قبل */
-    if(Date.now()-d.ts > 6*3600000) return;          /* أقدم من ٦ ساعات */
+    if(d.ts<=lastBcTs) return;
+    if(Date.now()-d.ts > 6*3600000) return;
     lastBcTs=d.ts; try{localStorage.setItem('suf_bc_ts',String(d.ts));}catch(e){}
     play('ready'); modal('📢','تنبيه الإدارة',d.msg,'royal');
   });
@@ -2086,6 +2481,7 @@ function startListeners(){
       resByPhone[nP(ph)]={lat:L.lat,lng:L.lng,area:L.area,name:nm};
     });
     try{ localStorage.setItem('suf_res_cache',JSON.stringify(resCache)); }catch(e){}
+    try{ localStorage.setItem('suf_res_by_phone',JSON.stringify(resByPhone)); }catch(e){}
     active.forEach(enrichOrder); lastHtml=''; renderOrders();
   });
 
@@ -2100,6 +2496,13 @@ function startListeners(){
    restaurants_locations للإحداثيات، ويحفظها الكاش المحلي للعرض السريع. */
 let resCache={}, resByPhone={};
 try{ resCache=JSON.parse(localStorage.getItem('suf_res_cache')||'{}'); }catch(e){ resCache={}; }
+/* 🔴 [V15] resByPhone لم يكن يُحفظ إطلاقاً — يبدأ فارغاً في كل تشغيل.
+   و fetchResLoc تفحصه وحده. فالنافذة الخطرة هي **أوّل طلب بعد فتح
+   التطبيق، قبل وصول لقطة restaurants_locations من الشبكة**. والفشلان
+   مترابطان: الشبكة التي تؤخّر اللقطة هي التي تعلّق القراءة.
+   وأصحاب الهواتف التي يقتل نظامها التطبيق يبدأون من الصفر عشرات
+   المرات يومياً — وهم الفئة المتضرّرة التي رأيتها في الشكاوى. */
+try{ resByPhone=JSON.parse(localStorage.getItem('suf_res_by_phone')||'{}'); }catch(e){ resByPhone={}; }
 
 function enrichOrder(o){
   if(!o) return o;
@@ -2121,7 +2524,12 @@ async function fetchResLoc(phone){
   const n=nP(phone); if(!n) return null;
   if(resByPhone[n]) return resByPhone[n];
   try{
-    const s=await get(ref(db,`restaurants_locations/${n}`));
+    /* 🛡️ [V15] كانت قراءة عارية. وget() في RTDB **لا يرفض سريعاً** على
+       مقبس نصف مفتوح — وهو حال الموبايل عند التنقّل بين الأبراج — بل
+       ينتظر الاتصال إلى ما لا نهاية. فيدور زر القبول حتى تنتهي مهلة
+       العرض، ولا يُكتب القبول، ولا يعمل حتى المسار الاحتياطي.
+       وwithTimeout موجودة في هذا الملف نفسه وتُستخدم في fbStatus. */
+    const s=await withTimeout(get(ref(db,`restaurants_locations/${n}`)), NET_TIMEOUT_MS, 'resloc');
     const L=s.val(); if(L){ resByPhone[n]={lat:L.lat,lng:L.lng,area:L.area,name:L.name}; return resByPhone[n]; }
   }catch(e){}
   return null;
@@ -2138,27 +2546,39 @@ function listenOrders(){
     const rm=[];
     for(let i=active.length-1;i>=0;i--){
       const mo=active[i], f=fb[mo.id];
-      /* 🩹[سباق القبول] مهلة سماح 6ث: استعلام الفهرس قد يتأخّر لحظات بعد
-         الكتابة، فكان الطلب المؤمَّن للتوّ يُحذف بـ«انتهى أو سُحب منك». */
-      /* 🛡️ [غياب الدليل] — تصحيح مهم لرقعة سابقة.
+
+      /* ⏳ [مهلة السماح بعد القبول] — كانت مفقودة في النسخة المنقولة وموجودة في نحلة الأصلية.
          ──────────────────────────────────────────────────────────────────
-         كانت هذه الكتلة تشترط **ثلاث لقطات فارغة متتالية** قبل الحذف، ظنّاً
-         أن اللقطات تتوالى. وهي لا تفعل: onValue على استعلام لا يُطلق إلا
-         حين **تتغيّر النتيجة**. فحين يسحب الليدر الطلب (staffWithdrawOrder
-         تكتب driverPhone = "system_routing") يخرج الطلب من الاستعلام فتصل
-         لقطة **واحدة**، ويقف العدّاد عند 1، ولا تصل لقطة ثانية أبداً —
-         فتبقى البطاقة في شاشة الكابتن إلى الأبد وقد سُحبت منه فعلاً.
+         finalizeAccept تُدخل البطاقة إلى active ثم تنادي guaranteeAccept:
 
-         فالغياب هنا **دليل** لا شبهة: خروج الطلب من الاستعلام يعني أن
-         driverPhone تغيّر على السيرفر (سحب الليدر أو إعادة توزيع).
+             active.push(o); … ; guaranteeAccept(o.id);
 
-         وحارس auth.currentUser احتياط رخيص فقط: مع سقوط المصادقة تُستدعى
-         onErr لا هذه الدالة أصلاً، فالحماية قائمة بآلية أخرى.
+         أي أن البطاقة تصير في القائمة **قبل** أن تبدأ الكتابة للسيرفر أصلاً.
+         وguaranteeAccept قد تستغرق ثوانيَ على شبكة ضعيفة (مهلة 6ث + reAuth
+         + مهلة 6ث + نداء GAS احتياطي).
 
-         ⚠️ لا تُعِد عدّاد لقطات هنا مهما بدا منطقياً — لن تصل لقطة ثانية. */
-      if(!f && mo.acceptedTime && (Date.now()-mo.acceptedTime)<6000) continue;
+         وخلال تلك النافذة تصل لقطة من المستمع لأسباب لا علاقة لها بهذا الطلب:
+           • المطعم يضغط «الطلبية جاهزة» على طلب آخر
+           • المحرك يقلب is_double كل دقيقة
+           • ليدر يعدّل أي طلب آخر للكابتن
+         فتجد الحلقة fb[mo.id] لم يصل بعد ⇒ تحذف البطاقة **قبل أن تكتمل
+         كتابتها**. ثم تنجح الكتابة، فيبقى الطلب باسمه على السيرفر وقد اختفى
+         من شاشته — ويقول الليدر إنه باسمه، وهو صادق.
+
+         12 ثانية تغطّي أسوأ مسار في guaranteeAccept بهامش. (نحلة تستعمل 6،
+         وهي أقصر ممّا يلزم هنا لأن ترتيب finalizeAccept مختلف.) */
+      if(!f && mo.acceptedTime && (Date.now()-mo.acceptedTime) < 12000) continue;
+
+      /* 🛡️ [غياب الدليل] بعد انقضاء المهلة يصير الغياب **دليلاً**: onValue لا
+         يُطلق إلا حين تتغيّر النتيجة، فخروج الطلب من الاستعلام يعني أن
+         driverPhone تغيّر على السيرفر فعلاً (سحب الليدر، أو إعادة توزيع).
+         وحارس auth.currentUser احتياط رخيص: مع سقوط المصادقة تُستدعى onErr
+         لا هذه الدالة أصلاً، لكنه يمنع أي استنتاج من حالة غير موثوقة.
+
+         ⚠️ لا تُضِف عدّاد لقطات هنا مهما بدا منطقياً: لن تصل لقطة ثانية،
+            فتبقى البطاقة في شاشة الكابتن بعد سحبها منه فعلاً. */
       if(!f){
-        if(!auth.currentUser) continue;                    /* لا مصادقة ⇒ لا استنتاج */
+        if(!auth.currentUser) continue;
         rm.push({id:mo.id,m:'انتهى هذا الطلب أو سُحب منك.'});
         continue;
       }
@@ -2173,56 +2593,45 @@ function listenOrders(){
        آخر رسالة ويُشغَّل صوت الإلغاء مرات متتالية. الآن: نافذة واحدة جامعة. */
     if(rm.length)removeOrdersBatch(rm);
 
-    /* ♻️[استرجاع الطلبات بعد إعادة التثبيت أو انطفاء الهاتف]
-       العلّة: هذا المستمع كان يفعل ثلاثة أشياء فقط — يحذف ما اختفى من
-       السيرفر، ويزامن راية الجهوزية لطلبات **موجودة أصلاً** في القائمة،
-       ويعرض الطلبات الرنّانة (pending_driver / manual_pending). فلم يكن
-       هناك أيّ مسار يعيد طلباً **مقبولاً** (accepted) من السيرفر إلى
-       القائمة المحلية. والقائمة تُبنى حصراً من localStorage('suf_orders')،
-       وهو يُمحى مع حذف التطبيق. فيبقى الطلب باسم الكابتن على السيرفر
-       والمطعم ينتظره، بينما شاشته فارغة إلى الأبد.
-       الحل: نبني القائمة من السيرفر — مصدر الحقيقة — لا من الذاكرة المحلية.
-       ملاحظة: الحالة المحلية (heading/arrived/picked_up) لا تُكتب للسيرفر
-       أبداً، فالمسترجَع يعود إلى «متوجّه للمطعم» ويُعاد الكابتن خطوةً
-       واحدة — وهذا خير من طلبٍ لا يراه أصلاً. ولا نقيّده بـisOnline:
-       من يحمل طلباً يجب أن يراه سواء فتح المناوبة أم لا. */
+    /* ═══════════════════════════════════════════════════════════════════
+       ♻️ [ط+ي] كتلة الاسترجاع — **لم تكن موجودة في نحلة إطلاقاً**
+       ───────────────────────────────────────────────────────────────────
+       نحلة الأصلية تملكها والنسخة المنقولة لا. والنتيجة أخطر من العطبين اللذين عالجناهما في
+       نحلة: طلبٌ باقٍ باسم الكابتن على السيرفر **لا يعود إلى شاشته أبداً**.
+
+       ومتى يقع؟ كلما فرغت active محلياً والطلب باقٍ على السيرفر:
+         • انطفأ الهاتف · أُعيد تثبيت التطبيق · مُسح تخزين المتصفّح
+         • أو حُذفت البطاقة بأحد الأعطال التي شخّصناها
+
+       فيبقى الطلب محسوباً عليه في المحرك (يحجبه عن الجديد)، وهو لا يراه
+       ولا يستطيع إنهاءه — حتى يموت بعد 24 ساعة expired بلا محاسبة.
+
+       وتفادياً لعطبَي نحلة من المنبع:
+         [ط] الحالة تُشتقّ من **status السيرفر** لا من افتراض 'heading'،
+             وإلا رأى الكابتن «تأكيد الوصول للمطعم» وهو واقف عند باب الزبون.
+         [ي] وpickupTime تُختَم من last_update مطروحاً منها المهلة، وإلا
+             حُبس خلف «لم تمرّ دقيقتان» ولن تمرّ أبداً.
+       ═══════════════════════════════════════════════════════════════════ */
     {
       const DONE_R=['completed','مكتمل','settled','delivered','done','تم التسليم','تم','deleted'];
       let restored=0;
-      Object.keys(fb).forEach(k=>{
-        const f=fb[k]; if(!f)return;
+      Object.keys(fb).forEach(kk=>{
+        const f=fb[kk]; if(!f)return;
         const st=String(f.status||'').toLowerCase().trim();
-        if(DONE_R.includes(st)||DONE_R.includes(f.status))return;      /* منتهٍ */
-        if(st==='pending_driver'||st==='manual_pending')return;        /* يرنّ — تتولّاه كتلة العرض */
-        if(nP(f.driverPhone)!==myId)return;                            /* ليس لي */
-        const oid=String(f.id||k);
-        if(securing.has(oid))return;                                   /* يؤمّنه acceptOrder الآن */
-        if(active.find(o=>String(o.id)===oid))return;                  /* موجود أصلاً */
-        /* ═══════════════════════════════════════════════════════════════
-           🔴 [ط] كانت تكتب state:'heading' دائماً وتتجاهل f.status تماماً.
-           فطلبٌ حالته picked_up على السيرفر — أي الكابتن حاملٌ الطعام وواقفٌ
-           عند باب الزبون — يُسترجَع بحالة «متوجّه للمطعم»، فيعرض له التطبيق
-           «تأكيد الوصول للمطعم» ولا يستطيع التسليم إطلاقاً.
+        if(DONE_R.includes(st)||DONE_R.includes(f.status))return;       /* منتهٍ */
+        if(st==='pending_driver'||st==='manual_pending')return;         /* يرنّ — تتولّاه كتلة العرض */
+        if(nP(f.driverPhone)!==myId)return;                             /* ليس لي */
+        const oid=String(f.id||kk);
+        if(active.find(o=>String(o.id)===oid))return;                   /* موجود أصلاً */
 
-           🔴 [ي] وpickupTime لم تكن تُسترجَع. وحارس الدقيقتين:
-                 secs = (Date.now() - (o.pickupTime || Date.now())) / 1000
-           فبغيابها يصير secs = 0 ⇒ «لم تمرّ دقيقتان» **ولن تمرّ أبداً**،
-           لأنها لا تُضبط إلا بضغط «استلمت» — وقد ضغطه قبل ساعة.
-
-           الاثنان معاً يُغلقان الفخّ: يُعاد إلى البداية، وحتى لو أعاد الخطوات
-           يبدأ عدّاد الدقيقتين من جديد.
-           ═══════════════════════════════════════════════════════════════ */
-        const srvSt=String(f.status||'').toLowerCase().trim();
-        const st2 = srvSt==='picked_up' ? 'picked_up'
-                  : srvSt==='arrived_at_res' ? 'arrived' : 'heading';
+        const st2 = st==='picked_up' ? 'picked_up'
+                  : st==='arrived_at_res' ? 'arrived' : 'heading';
         const srvMs = f.last_update ? new Date(f.last_update).getTime() : Date.now();
         active.push({id:oid,resName:f.restaurant||'',resArea:f.resArea||null,
           details:String(f.details||''),price:parseFloat(f.price)||0,area:f.area||'غير محدد',
           state:st2,photoUrl:f.photoUrl||'',resPhone:f.resPhone||'غير متوفر',
           resLat:f.resLat,resLng:f.resLng,comm:f.comm||0,payType:f.payType||'المطعم يدفع',
           acceptedTime:srvMs,
-          /* استلمه على السيرفر منذ زمن — نختم لحظة الاستلام بـlast_update،
-             وبطرح المهلة كي لا يُحبَس خلف عدّاد بدأ للتوّ. */
           pickupTime: st2==='picked_up' ? Math.min(srvMs, Date.now()-MIN_PICKUP_SECS*1000) : null,
           is_sovereign:f.is_sovereign||false,readyForPickup:f.ready_for_pickup===true});
         if(f.ready_for_pickup===true)readySet.add(oid);
@@ -2264,7 +2673,7 @@ function listenOrders(){
         document.getElementById('alSov').innerText=curOrder.is_sovereign?'⚠️ تعيين إداري مباشر — لا يمكن تجاهله':'';
         document.getElementById('alRes').innerText=f.restaurant;
         document.getElementById('alArea').innerText=f.area||'غير محدد';
-        document.getElementById('alPrice').innerHTML=`${f.price||0} <small style="font-size:.8rem;color:var(--muted);">د.ع</small>`;
+        document.getElementById('alPrice').innerHTML=`${esc(f.price||0)} <small style="font-size:.8rem;color:var(--muted);">د.ع</small>`;
         document.getElementById('alertOv').classList.remove('dn');
         if(window.AndroidRadar)window.AndroidRadar.triggerOrderAlarm();
         else startAlarm(active.length?'double':'alert');
@@ -2291,19 +2700,12 @@ function countdown(){
    الرفض في daily_metrics دون أي خصم من daily_count. */
 window.declineOrder=function(){
   if(curOrder?.is_sovereign)return alert('⚠️ تعيين إداري لا يمكن تجاهله.');
-  /* 🛡️ [الرفض الشبح] لا تُرسل رفضاً لطلبٍ يجري تأمينه الآن. curOrder لا
-     يُصفَّر إلا في finalizeAccept، فيبقى قائماً طوال نافذة التأمين — وبلا
-     هذا الحارس يرفض العدّادُ ما قَبِله الكابتن قبل ثوانٍ.
-     (خط دفاع ثانٍ فوق حارس handleDeclineOrder السيرفري.) */
-  if(window.__accepting) return;
-  if(curOrder && securing.has(String(curOrder.id))) return;
   clearInterval(cdTimer); document.getElementById('alertOv').classList.add('dn'); stopAlarm();
   if(!curOrder)return;
   const id=curOrder.id;
   rejToday++; /* تفاؤلي — المستمع يزامن الرقم الحقيقي */
-  /* ⏱️ [أ١] كان بلا مهلة: رفضٌ يقطع طريقه دقيقتين على شبكة ضعيفة يصل بعد
-     أن قَبِل الطلبَ كابتنٌ آخر — فيُسلَب منه وهو في الطريق. */
-  gasFetch(`${API_URL}?action=DECLINE_ORDER&orderId=${encodeURIComponent(id)}&driverPhone=${drv.phone}&token=${API_TOKEN}`)
+  track('decline',{orderId:id}); shadowCommand('EXPIRE',id);
+  gasFetch(`${API_URL}?action=DECLINE_ORDER&orderId=${encodeURIComponent(id)}&driverPhone=${drv.phone}&token=${API_TOKEN}&stoken=${encodeURIComponent(getStoken())}`)
     .catch(()=>{ /* ضعف الشبكة: حارس CF يعيد الطلب للرادار تلقائياً */ });
   curOrder=null;
 };
@@ -2315,102 +2717,72 @@ window.acceptOrder=async function(){
     toast('انتهى شفتك — أكمل طلباتك الحالية فقط.','warn');
     document.getElementById('alertOv').classList.add('dn');
     clearInterval(cdTimer); stopAlarm(); curOrder=null;
-    window.__accepting=false;
     return;
   }
-  /* 🛡️[ازدواج البطاقة] حارس إعادة الدخول — الجذر المُثبَت:
-     b.disabled=true وحدها لا تكفي. حدثُ نقرٍ ثانٍ يكون قد دخل الطابور قبل
-     تعطيل الزر (نقرة شبح على أندرويد، أو ضغطة ثانية من كابتن لم يرَ استجابة
-     خلال صمت الـ1.2ث)، والدالة لا تفحص أنها تعمل أصلاً — فتُنفَّذ مرّتين
-     ويُدفع الطلب نفسه مرّتين إلى active. وحين يتكرّر المعرّف، تتولّد بطاقتان
-     بمُعرّف DOM واحد، فتُحدِّث getElementById ساعة الأولى فقط وتبقى الثانية
-     على «--:--» — وهي البصمة التي ظهرت في شكاوى الكباتن. */
-  if(window.__accepting) return;
-  window.__accepting = true;
-  /* ⏱️ [الرفض الشبح — الجذر] كان الإيقاف يقع **بعد** guaranteeAccept، وهي قد
-     تستغرق 20 ثانية على شبكة ضعيفة (مهلة 6ث + reAuth + مهلة 6ث + نداء GAS +
-     تحقّق 6ث). فمن يضغط «قبول» وقد بقيت 5 ثوانٍ يُطلق عدّادُه declineOrder
-     على الطلب نفسه الذي يقبله ⇒ يعود للرادار ويُوزَّع لغيره، وهو في طريقه
-     إلى المطعم. الإيقاف الآن قبل أي await. */
-  clearInterval(cdTimer);
   const b=document.getElementById('btnAccept');
   b.innerHTML='<div class="spin" style="border-top-color:#fff;"></div> جاري تأمين الطلب...'; b.disabled=true;
-  /* 🩹[سباق القبول] الترتيب القديم كان: أَلغِ العدّاد ← انتظر 1.2ث ← نداء شبكة
-     (fetchResLoc) ← أضِف الطلب محلياً ← ثم اكتب للسيرفر. فيدخل الطلب قائمتك
-     المحلية والسيرفر لا يعرف عنه شيئاً، ومطابِق listenOrders يقارن قائمتك
-     باستعلام لا يحتويه بعدُ → «انتهى هذا الطلب أو سُحب منك» لحظة القبول.
-     الترتيب الجديد: **أمِّن الطلب أولاً**، وبعد تأكيد ملكيتك له أثرِ وأضِف.
-     ويبقى العدّاد يعمل أثناء التأمين — فإن فشل عاد الطلب قابلاً للعرض. */
-  stopAlarm();
-  /* 🎯[ازدواج البطاقة — الجذر] كان الكود يقرأ curOrder العام **بعد** كل
-     await. والرخاء جعل طلباً ثانياً يصل للكابتن نفسه أثناء التأمين، فيدهس
-     المستمعُ curOrder بالطلب الجديد، فتُنهي finalizeAccept الطلبَ **الخطأ**
-     ثم يقبله الكابتن ثانيةً فيتكرّر. نلتقطه هنا مرّة واحدة ونمرّره صراحةً. */
-  const ord=curOrder;
-  const oid=ord&&ord.id;
-  if(!oid){window.__accepting=false;b.disabled=false;return;}
-  securing.add(String(oid));
-  const secured=await guaranteeAccept(oid);
-  if(!secured){
-    securing.delete(String(oid));
-    clearInterval(cdTimer); stopAlarm();
-    if(curOrder&&String(curOrder.id)===String(oid)){
-      document.getElementById('alertOv').classList.add('dn'); curOrder=null;
-    }
-    b.innerHTML='<svg class="si si-l" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>قبول الطلب فوراً'; b.disabled=false;
-    play('cancel');
-    toast('⚠️ تعذّر تأمين الطلب — قد يكون أُسنِد لكابتن آخر أو سُحب.<br><b>لا تذهب للمطعم.</b>','warn');
-    window.__accepting=false;
-    return;
-  }
-  try{
-    enrichOrder(ord);
-    if(ord.resPhone && (!ord.resLat || !ord.resArea)){
-      const L=await fetchResLoc(ord.resPhone);
-      if(L){ if(!ord.resLat){ord.resLat=parseFloat(L.lat);ord.resLng=parseFloat(L.lng);} if(!ord.resArea)ord.resArea=L.area; }
-    }
-  }catch(e){}
-  if(!ord.resPhone) ord.resPhone='غير متوفر';
-  finalizeAccept(ord);
+  clearInterval(cdTimer); stopAlarm();
+  /* ═══════════════════════════════════════════════════════════════════════
+     🔴 [V15] الترتيب كان معكوساً: الإثراء التجميلي **يسبق** القبول ويحجبه.
+
+     والشرط `!curOrder.resArea` يتحقّق في **كل** طلب — لأن restaurant.html
+     يختم resLat/resLng ولا يختم resArea إطلاقاً. فكل قبول كان يمرّ من
+     fetchResLoc، ولا ينجّيه إلا كاش resByPhone الذي كان يفرغ في كل تشغيل.
+
+     والأخطر: guaranteeAccept — ومعه المسار الاحتياطي السيرفري ACCEPT_ORDER
+     والمسارات الثلاثة كلها — **داخل finalizeAccept**، أي بعد نقطة التعليق.
+     فأمتن جزء في النظام كان غير قابل للوصول في اللحظة التي بُني لها.
+
+     المبدأ: **القبول وجودي والإثراء تجميلي.** منطقة المطعم تُكمَّل بعد
+     ثانية؛ الطلب لا يُستعاد. وأُزيل تأخير 1200ms — انتظار بلا مقابل.
+     ═══════════════════════════════════════════════════════════════════════ */
+  const t0 = Date.now();
+  track('accept_start', { orderId: curOrder && curOrder.id });
+
+  enrichOrder(curOrder);                       // متزامنة تماماً — من الكاش، بلا شبكة
+  if(!curOrder.resPhone) curOrder.resPhone='غير متوفر';
+  const acc = curOrder;                        // احفظ المرجع قبل أي تصفير
+  finalizeAccept();                            // ① يكتب القبول ويعيد الزر فوراً
+  track('accept_local', { orderId: acc && acc.id, ms: Date.now()-t0 });
+  shadowCommand('ACCEPT', acc && acc.id);      // ② قياس في الظلّ — لا يكتب ولا يعلّق
+
+  // ③ الإثراء المتأخّر — بمهلة، وفي الخلفية، وفشله لا يكلّف الطلب شيئاً
+  (async()=>{
+    try{
+      if(acc && acc.resPhone && acc.resPhone!=='غير متوفر' && (!acc.resLat || !acc.resArea)){
+        const L = await withTimeout(fetchResLoc(acc.resPhone), NET_TIMEOUT_MS, 'resloc');
+        if(L){
+          const card = active.find(x=>String(x.id)===String(acc.id));
+          if(card){
+            if(!card.resLat){ card.resLat=parseFloat(L.lat)||0; card.resLng=parseFloat(L.lng)||0; }
+            if(!card.resArea) card.resArea=L.area;
+            localStorage.setItem('suf_orders',JSON.stringify(active));
+            lastHtml=''; renderOrders();
+          }
+        }
+      }
+    }catch(e){ track('enrich_late_fail'); }
+  })();
 };
-function finalizeAccept(ord){
-  /* 🎯 الطلب يصل وسيطاً الآن. والاحتياط للنداءات القديمة إن بقيت. */
-  const c=ord||curOrder;
-  if(!c||!c.id){window.__accepting=false;return;}
-  /* لا نُخفي النافذة إن كان الظاهر فيها طلباً **آخر** وصل أثناء التأمين —
-     وإلا ابتلعناه ولم يره الكابتن أبداً. */
-  if(curOrder&&String(curOrder.id)===String(c.id)){
-    document.getElementById('alertOv').classList.add('dn'); curOrder=null;
-  } else if(!curOrder){
-    document.getElementById('alertOv').classList.add('dn');
-  }
-  const o={id:c.id,resName:c.resName,resArea:c.resArea||null,details:String(c.details),
-    price:parseFloat(c.price)||0,area:c.area,state:'heading',photoUrl:c.photoUrl,
-    resPhone:c.resPhone,resLat:c.resLat,resLng:c.resLng,
-    comm:c.comm||0,payType:c.payType||'المطعم يدفع',
-    acceptedTime:Date.now(),is_sovereign:c.is_sovereign||false,readyForPickup:false};
-  /* 🩹[ازدواج الطلب] الدفع الأعمى كان يُنتج نسخة ثانية متى سبقه مسار
-     الاسترجاع أثناء انتظار enrichOrder/fetchResLoc. الآن: دمج لا تكرار. */
-  const ix=active.findIndex(x=>String(x.id)===String(o.id));
-  if(ix>=0) active[ix]=Object.assign({},active[ix],o,{
-      state:active[ix].state||o.state,
-      readyForPickup:active[ix].readyForPickup||o.readyForPickup});
-  else active.push(o);
-  securing.delete(String(o.id));
-  window.__accepting=false;
-  localStorage.setItem('suf_orders',JSON.stringify(active));
-  adjustHB(); renderOrders();   /* 🩹 الكتابة تمّت وتأكّدت في acceptOrder */
+function finalizeAccept(){
+  document.getElementById('alertOv').classList.add('dn');
+  const o={id:curOrder.id,resName:curOrder.resName,resArea:curOrder.resArea||null,details:String(curOrder.details),
+    price:parseFloat(curOrder.price)||0,area:curOrder.area,state:'heading',photoUrl:curOrder.photoUrl,
+    resPhone:curOrder.resPhone,resLat:curOrder.resLat,resLng:curOrder.resLng,
+    comm:curOrder.comm||0,payType:curOrder.payType||'المطعم يدفع',
+    acceptedTime:Date.now(),is_sovereign:curOrder.is_sovereign||false,readyForPickup:false};
+  active.push(o); localStorage.setItem('suf_orders',JSON.stringify(active));
+  adjustHB(); renderOrders(); guaranteeAccept(o.id);
   const b=document.getElementById('btnAccept');
   b.innerHTML='<svg class="si si-l" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>قبول الطلب فوراً'; b.disabled=false;
 }
 /* ═══════════════════════════════════════════════════════════════════════
    ⏰ [ز] إعادة التفعيل بعد نهاية الشفت كانت في مسار **واحد**: نجاح التسليم.
-   لكن active تفرغ من خمسة مسارات أخرى: سحب الليدر · إعادة التوزيع ·
-   انتهاء الطلب · تنظيف الجلسة · order_revoked — ولا واحد منها يفحص العلم.
-
-   فإن سُحب آخر طلب بعد نهاية الشفت: يبقى _shiftOver=true والمفتاح أخضر —
-   فتصله الطلبات من السيرفر ويرفضها التطبيق: «انتهى شفتك». وكل طلب مرفوض
-   يضيع دقيقتين ونصف قبل إعادة توزيعه، **فكابتن واحد عالق يُبطئ الأسطول**.
+   لكن active تفرغ من مسارات أخرى: سحب الليدر · إعادة التوزيع · انتهاء
+   الطلب · order_revoked — ولا واحد منها يفحص العلم.
+   فيبقى _shiftOver=true والمفتاح أخضر: تصله الطلبات ويرفضها التطبيق
+   «انتهى شفتك». وكل طلب مرفوض يضيع دقيقتين ونصف قبل إعادة توزيعه —
+   **فكابتن واحد عالق يُبطئ الأسطول**.
    ═══════════════════════════════════════════════════════════════════════ */
 function maybeEndShift(){
   if(!window._shiftOver || active.length>0) return;
@@ -2455,9 +2827,69 @@ function removeOrder(msg,id){
 }
 window.closeCancel=function(){document.getElementById('cancelOv').classList.add('dn');stopAlarm();};
 function esc(x){const d=document.createElement('div');d.textContent=String(x??'');return d.innerHTML;}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   🔴 [V15.2] sid — تعقيم مُعرّف الطلب قبل حقنه في HTML
+   ───────────────────────────────────────────────────────────────────────────
+   العطب: o.id **حقلٌ يكتبه تطبيق المطعم** (لا مفتاح العقدة الذي قيّدناه في
+   قواعد V3.0)، و.validate لا تذكره إطلاقاً. وكان يُحقَن خاماً في ستة مواضع
+   منها **داخل onclick**:
+       onclick="orderAction('${o.id}','accept',this)"
+   فمُعرّفٌ مثل   x');alert(document.cookie);//   يُنتج:
+       onclick="orderAction('x');alert(document.cookie);//','accept',this)"
+   ⇒ يُنفَّذ. ومع جسر AndroidRadar في التطبيق الأصلي يصير الوصول كاملاً.
+
+   و esc() **لا تكفي**: تُهرّب < > & فقط، والعلامة المفردة هي الفاصل داخل
+   onclick فتمرّ. مُثبَت بالتنفيذ.
+
+   والعلاج بالتعقيم لا بالتهريب: مُعرّفات الطلبات كلها [A-Za-z0-9-] بحكم
+   buildOrderId و uniqueId — فالإسقاط بلا خسارة على الصحيح، وقاطعٌ للخبيث.
+   ═══════════════════════════════════════════════════════════════════════════ */
+function sid(x){ return String(x??'').replace(/[^A-Za-z0-9_-]/g,'').slice(0,64); }
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   🔴 [V15.2] jss — تهريب **السياق المزدوج**: سلسلة JS داخل سمة HTML.
+   ───────────────────────────────────────────────────────────────────────────
+   في   onclick="smartWa('${x}', …)"   يمرّ النصّ بمحلّلين متتاليين:
+       ① محلّل HTML   يفكّ السمة عند  "  ويفكّ الكيانات
+       ② محلّل JS     يفكّ السلسلة عند  '
+   فـesc() وحدها لا تكفي (تُهرّب < > & فقط)، ولا الهروب بالشرطة المائلة وحده
+   (تفكّه المرحلة الأولى). نُهرّب للطبقتين معاً: الشرطة والعلامتان والسطر
+   الجديد لـJS، ثم < > & للـHTML.
+
+   ولا تُستعمل إلا في هذا السياق — للنصّ العادي esc() هي الصحيحة. */
+function jss(x){
+  return String(x??'')
+    .replace(/\\/g,'\\\\').replace(/'/g,"\\'").replace(/"/g,'&quot;')
+    .replace(/\r?\n/g,' ')
+    .replace(/&(?!quot;)/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+/* رقمٌ للعرض — لا نثق بأن price رقمٌ لأن المسار القديم يكتبه من العميل. */
+/* 🔧[م٢] قارئ المبالغ — كان يُسقط الأرقام العربية ويقرأ "15.000" على أنها 15.
+   يطابق parseAmount في السيرفر حرفياً كي لا يختلف رقمُ الشاشة عن رقم الدفتر. */
+function _ltn(x){ return String(x===null||x===undefined?'':x)
+  .replace(/[\u0660-\u0669]/g,d=>String.fromCharCode(d.charCodeAt(0)-0x0660+48))
+  .replace(/[\u06F0-\u06F9]/g,d=>String.fromCharCode(d.charCodeAt(0)-0x06F0+48)); }
+function num(x){
+  let s=_ltn(x).trim().replace(/[\s\u00A0\u066C]/g,'').replace(/د\.?ع|IQD|iqd|دينار/g,'');
+  if(!s) return 0;
+  let neg=false;
+  if(/^-/.test(s)){neg=true;s=s.slice(1);} else if(/-$/.test(s)){neg=true;s=s.slice(0,-1);}
+  if(!s||/[^0-9.,]/.test(s)) return 0;
+  const seps=s.match(/[.,]/g)||[];
+  if(seps.length){
+    const parts=s.split(/[.,]/), tail=parts.slice(1);
+    if(tail.every(t=>t.length===3)&&parts[0].length>=1) s=parts.join('');
+    else return 0;                      /* غامض — لا يُخمَّن */
+  }
+  if(!/^\d+$/.test(s)) return 0;
+  const n=Number(s);
+  return isFinite(n)?(neg?-n:n):0;
+}
 function modal(icon,title,body,kind){
   const ov=document.createElement('div'); ov.className='mod-ov';
-  ov.innerHTML=`<div class="mod"><div class="mod-i mi-${kind}">${icon}</div>
+  ov.innerHTML=`<div class="mod"><div class="mod-i mi-/*safe-html*/${kind}">/*safe-html*/${icon}</div>
     <div class="mod-t">${esc(title)}</div><div class="mod-b">${esc(body)}</div>
     <button class="btn-clay bc-royal" style="width:100%;">حسناً، فهمت</button></div>`;
   ov.querySelector('button').onclick=()=>ov.remove();
@@ -2466,9 +2898,8 @@ function modal(icon,title,body,kind){
 window.openLedger=()=>document.getElementById('ledger').classList.remove('dn');
 window.closeLedger=()=>document.getElementById('ledger').classList.add('dn');
 /* 🔒 [ج١] كان يمرّر **أي** نصّ إلى الجسر الأصلي فيُطلَق كـACTION_VIEW.
-   ومصدر بعض الروابط (رابط الخريطة mp) هو بيانات الطلب — أي من تطبيق المطعم
-   أو من تحليل Gemini للوصل، وكلاهما خارج سيطرتك.
-   الآن: المخطّطات المتوقّعة وحدها. */
+   ومصدر بعض الروابط (رابط الخريطة) هو بيانات الطلب — أي من تطبيق المطعم
+   أو من تحليل Gemini للوصل، وكلاهما خارج سيطرتك. */
 const SAFE_LINK_SCHEMES=['https:','tel:','whatsapp:','geo:','mailto:','sms:'];
 window.openLink=function(u){
   const raw=String(u||'').trim();
@@ -2525,14 +2956,14 @@ function renderOrders(){
     const photo=(o.photoUrl&&String(o.photoUrl).startsWith('http'))?`<button class="act a-img" onclick="openReceipt('${o.photoUrl}')">${ICO.img} الوصل</button>`:'';
     if(!o.resArea) enrichOrder(o);
     const pick = o.resArea ? ` (${esc(o.resArea)})` : '';
-    html+=`<div class="ord" id="o-${o.id}">
+    html+=`<div class="ord" id="o-${sid(o.id)}">
       <div class="ord-strip ${strip}"></div>
       <div class="ord-b">
         <div class="ord-hd">
-          <div><div class="ord-no">#${o.id}</div><div class="ord-tags">${tags}</div>
-            <div id="t-${o.id}" class="ord-tm tm-ok">${ICO.clk} --:--</div></div>
-          <div class="ord-pr"><div class="ord-pv">${o.price}<small> د.ع</small></div>
-            <button class="sup" onclick="openChat()" style="margin-top:9px;">${ICO.sup} ليدر<span class="sup-dot" id="d-${o.id}"></span></button></div>
+          <div><div class="ord-no">#${sid(o.id)}</div><div class="ord-tags">${tags}</div>
+            <div id="t-${sid(o.id)}" class="ord-tm tm-ok">${ICO.clk} --:--</div></div>
+          <div class="ord-pr"><div class="ord-pv">${num(o.price).toLocaleString('ar-EG')}<small> د.ع</small></div>
+            <button class="sup" onclick="openChat()" style="margin-top:9px;">${ICO.sup} ليدر<span class="sup-dot" id="d-${sid(o.id)}"></span></button></div>
         </div>
         <div class="steps">
           <div class="step ${step>=1?(step===1?'now':'done'):''}"><div class="step-d">${step>1?'✓':'1'}</div><span class="step-l">قبلت</span></div>
@@ -2551,11 +2982,11 @@ function renderOrders(){
           <div class="rp dn2"><div class="rp-t">🏠 التسليم إلى (${esc(o.area)})</div><div class="rp-n">${esc(det)}</div>
             <div class="acts">
               ${cp?`<button class="act a-call" onclick="openLink('tel:${cp}')">${ICO.call} اتصال</button>`:''}
-              ${cp?`<button class="act a-wa" onclick="smartWa('${cp}','${esc(o.resName)}','${esc(o.area)}','${o.id}','${o.price}')">${ICO.wa} رسالة الزبون</button>`:''}
+              ${cp?`<button class="act a-wa" onclick="smartWa('${jss(cp)}','${jss(o.resName)}','${jss(o.area)}','${sid(o.id)}','${num(o.price)}')">${ICO.wa} رسالة الزبون</button>`:''}
               ${photo}
             </div></div>
         </div>
-        <button class="cta ${bCls}" ${dis} onclick="orderAction('${o.id}','${act}',this)">${bTxt}</button>
+        <button class="cta ${bCls}" ${dis} onclick="orderAction('${sid(o.id)}','${sid(act)}',this)">${bTxt}</button>
       </div></div>`;
   });
   if(lastHtml!==html){box.innerHTML=html;lastHtml=html;
@@ -2567,7 +2998,7 @@ function timers(){
     const e=document.getElementById('t-'+o.id); if(!e)return;
     const el=Date.now()-(o.acceptedTime||Date.now()), rem=30*60*1000-el;
     const neg=rem<0, ab=Math.abs(rem), m=Math.floor(ab/60000), s=Math.floor((ab%60000)/1000);
-    e.innerHTML=`${ICO.clk} ${neg?'-':''}${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+    e.innerHTML=`/*safe-html*/${ICO.clk} ${neg?'-':''}${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
     e.className='ord-tm '+(rem>600000?'tm-ok':rem>0?'tm-w':'tm-b');
   });
 }
@@ -2579,7 +3010,7 @@ window.orderAction=function(id,act,btn){
   if(act==='arrive'&&o.resLat&&o.resLng&&drv?.currentLat&&drv?.currentLng){
     /* 🩹 [ك] كان يتّهم الكابتن بالبعد اعتماداً على إحداثي قد يكون ميتاً منذ
        نصف ساعة — فيُرفض وصولُ الواقف عند الباب برسالة «أنت تبعد 3000 متر».
-       إن لم نكن نعرف مكانه، لا نتّهمه: نطلب موقعاً حديثاً ونمرّر الفحص. */
+       إن لم نعرف مكانه، لا نتّهمه. */
     if(!locFresh()){
       showLocBanner(true,'موقعك غير محدّث — فعّل GPS');
       try{ navigator.geolocation?.getCurrentPosition(
@@ -2593,12 +3024,10 @@ window.orderAction=function(id,act,btn){
   const orig=btn.innerHTML; btn.innerHTML='<div class="spin" style="border-top-color:#fff;"></div>'; btn.disabled=true;
 
   if(act==='arrive'){
-    /* ═══════════════════════════════════════════════════════════════════
-       ⏳ [د] كانت الحالة المحلية تتقدّم **فوراً وبلا شرط**، فيرى الكابتن
+    /* ⏳ [د] كانت الحالة المحلية تتقدّم **فوراً وبلا شرط**، فيرى الكابتن
        «بالمطعم» و«استلمت» والسيرفر عند accepted منذ البداية — والليدر يرى
        حالة مختلفة عمّا يراه الكابتن، وهو مصدر خلاف لا يعرف أيّهما سببه.
-       الآن: لا تتقدّم إلا بتأكيد، وإلا تبقى وتُطابر بإشعار صريح.
-       ═══════════════════════════════════════════════════════════════════ */
+       الآن: لا تتقدّم إلا بتأكيد، وإلا تبقى وتُطابر بإشعار صريح. */
     (async()=>{
       const done = await guaranteedWrite({[`active_orders/${id}/status`]:'arrived_at_res'},
                                           `active_orders/${id}/status`,'arrived_at_res');
@@ -2608,7 +3037,7 @@ window.orderAction=function(id,act,btn){
       }else{
         btn.innerHTML=orig; btn.disabled=false;
         try{ queue.push({type:'multi',updates:{[`active_orders/${id}/status`]:'arrived_at_res'},ts:Date.now()});
-          localStorage.setItem('nahla_offline_queue',JSON.stringify(queue)); }catch(e){}
+          localStorage.setItem('hut_offline_queue',JSON.stringify(queue)); }catch(e){}
         toast('⚠️ لم يُسجَّل وصولك — سيُعاد الإرسال. لا تتابع حتى يُسجَّل.','bad');
       }
     })();
@@ -2624,7 +3053,7 @@ window.orderAction=function(id,act,btn){
       }else{
         btn.innerHTML=orig; btn.disabled=false;
         try{ queue.push({type:'multi',updates:{[`active_orders/${id}/status`]:'picked_up'},ts:Date.now()});
-          localStorage.setItem('nahla_offline_queue',JSON.stringify(queue)); }catch(e){}
+          localStorage.setItem('hut_offline_queue',JSON.stringify(queue)); }catch(e){}
         toast('⚠️ لم يُسجَّل استلامك — سيُعاد الإرسال. لا تتابع حتى يُسجَّل.','bad');
       }
     })();
@@ -2643,13 +3072,12 @@ window.orderAction=function(id,act,btn){
     const acc=Number(drv?.gpsAccuracy||0);
     const slack=(acc>0&&acc<400)?Math.min(acc,250):120;
     /* 🎯 [ل] dm يقيس البُعد عن **المطعم** لا القرب من **الزبون**، ولا توجد
-       إحداثيات للزبون في النظام أصلاً. فالمقياس **لا يميّز الصادق من غيره**:
-       توصيلٌ حقيقي لزبون على 100 م من المطعم = «مشتبه»، وكابتن لم يغادر لكنه
-       ابتعد 200 م = «غير مشتبه». فكان يولّد سجلّات اتهام كاذبة في
-       security_flags تُشوّش على الحقيقي.
-       أُسقط من قرار الاشتباه، وبقي **معلومة مسجَّلة بوسمها الصحيح**. */
+       إحداثيات للزبون في النظام أصلاً. فالمقياس لا يميّز الصادق من غيره:
+       توصيلٌ حقيقي لزبون على 100 م = «مشتبه»، وكابتن لم يغادر لكنه ابتعد
+       200 م = «غير مشتبه». فكان يولّد اتهامات كاذبة تُشوّش على الحقيقي.
+       أُسقط من قرار الاشتباه وبقي معلومة مسجَّلة. */
     const timeOk=(mins>=FALLBACK_MINS), pickOk=(secs>=MIN_PICKUP_SECS);
-    const suspicious=!timeOk;   /* الزمن وحده — وهو ما نملك قياسه فعلاً */
+    const suspicious=!timeOk;
 
     if(!pickOk){
       /* الحارس الوحيد الباقي: دقيقتان بين الاستلام والتسليم — يمنع النقر
@@ -2684,21 +3112,36 @@ window.orderAction=function(id,act,btn){
       uA[`active_orders/${id}/completed_at`]=now;
       uA[`active_orders/${id}/last_update`]=now;
       const uB={};
-      uB[`daily_metrics/${drv.phone}/${ts}/completed_orders`]=increment(1);
-      uB[`daily_metrics/${drv.phone}/${ts}/total_delivery_minutes`]=increment(dmin);
+      /* ═══════════════════════════════════════════════════════════════════
+         🔢 [V15.3] **أُزيلت الزيادة من هنا** — صارت في السيرفر.
+         ─────────────────────────────────────────────────────────────────
+         السبب: زرّ التطبيق واحدٌ من أربعة مسارات لإنهاء الطلب (معه
+         COMPLETE_ORDER الاحتياطي · إكمال الليدر · إكمال الإدارة)، وكان
+         **وحده** يزيد العدّاد. فكابتن أنجز 15 يقرأ 9.
+
+         الآن trackDriverCompletion في CF تزيده عند تحوّل الحالة إلى
+         «منتهٍ» **مهما كان المسار**، بختمٍ ذرّي في counted_orders.
+         ⇒ كاتبٌ واحد لا أربعة، ورقمٌ صحيح دائماً.
+
+         وسقط معها حارس suf_counted المحلي — كان مسكّناً لغياب الكاتب
+         الواحد، ولم يعد له معنى. والكلفة: العدّاد يتأخّر ثانية بدل
+         الفورية، ويظهر عبر مستمع daily_metrics نفسه.
+         ═══════════════════════════════════════════════════════════════════ */
+      /* (لا زيادة هنا — السيرفر يتولّاها) */
       uB[`daily_ledgers/${drv.phone}/${ts}/${id}`]={orderId:id,resName:o.resName,area:o.area,price:o.price,comm:o.comm||0,timestamp:Date.now()};
 
       let ok=await guaranteedWrite(uA,`active_orders/${id}/status`,'completed');
-      /* 🚚 [المسار الثالث] القبول كان يملك احتياطياً سيرفرياً (ACCEPT_ORDER)
-         يتجاوز قواعد فايربيس، والتسليم لم يملك شيئاً — فكابتن ترفض القواعد
-         كتابته (driverPhone المخزّن لا يطابق auth.uid حرفاً بحرف) يقبل طلباً
-         لا يستطيع إنهاءه أبداً، فيبقى باسمه حتى يموت بعد 24 ساعة بلا محاسبة.
+      /* 🚚 [المسار الثالث] القبول يملك احتياطياً سيرفرياً (ACCEPT_ORDER) يتجاوز
+         قواعد فايربيس، والتسليم لم يملك شيئاً — فكابتن ترفض القواعد كتابته
+         (driverPhone المخزّن لا يطابق auth.uid حرفاً بحرف، أو مصادقته سقطت)
+         يقبل طلباً لا يستطيع إنهاءه أبداً، فيبقى باسمه حتى يموت بعد 24 ساعة
+         كـexpired: بلا عمولة ولا ذمّة ولا مبيعات. والزبون دفع، والكابتن سلّم.
          GAS يكتب بحساب الخدمة فينجح حتى حين تنهار مصادقة الكابتن.
          ⚠️ يتطلّب handleCompleteOrder منشورة في Code.gs (V17.0). */
       if(!ok){
         try{
           const rr=await withTimeout(
-            fetch(`${API_URL}?action=COMPLETE_ORDER&orderId=${encodeURIComponent(id)}&driverPhone=${drv.phone}&token=${API_TOKEN}`),
+            fetch(`${API_URL}?action=COMPLETE_ORDER&orderId=${encodeURIComponent(id)}&driverPhone=${drv.phone}&token=${API_TOKEN}&stoken=${encodeURIComponent(getStoken())}`),
             12000,'gas_timeout');
           const dd=await rr.json();
           if(dd&&dd.success){ ok=true; toast('✅ سُجّل التسليم عبر الخادم البديل.','ok'); }
@@ -2708,7 +3151,7 @@ window.orderAction=function(id,act,btn){
       if(!ok){
         btn.innerHTML=orig; btn.disabled=false;
         try{queue.push({type:'multi',updates:uA,ts:Date.now()});queue.push({type:'multi',updates:uB,ts:Date.now()});
-          localStorage.setItem('nahla_offline_queue',JSON.stringify(queue));}catch(e){}
+          localStorage.setItem('hut_offline_queue',JSON.stringify(queue));}catch(e){}
         toast(window._lastWriteError==='permission'
           ? '⚠️ تعذّر تسجيل التسليم — رُفضت العملية من الخادم.<br>راجع الليدر فوراً ولا تُعد المحاولة.'
           : '⚠️ تعذّر تسجيل التسليم — ضعف الاتصال.<br>سيُرسل تلقائياً عند عودة الشبكة. لا تُغلق التطبيق.','bad');
@@ -2720,7 +3163,7 @@ window.orderAction=function(id,act,btn){
       withTimeout(update(ref(db),uB)).catch(()=>{
         try{
           queue.push({type:'multi',updates:uB,ts:Date.now()});
-          localStorage.setItem('nahla_offline_queue',JSON.stringify(queue));
+          localStorage.setItem('hut_offline_queue',JSON.stringify(queue));
         }catch(e){}
         toast('ℹ️ سُجّل التسليم — تحديث عدّادك سيكتمل عند تحسّن الشبكة.','info');
       });
@@ -2753,19 +3196,18 @@ window.openChat=async function(){
   document.getElementById('chat').classList.remove('dn'); chatOpen=true;
   document.querySelectorAll('.sup-dot,#chatDot').forEach(d=>d.classList.remove('on'));
   try{
-    const s=await get(ref(db,cPath()+'/status')); const st=s.val();
+    const s=await withTimeout(get(ref(db,cPath()+'/status')), NET_TIMEOUT_MS, 'chat'); const st=s.val();   /* 🛡️ [V15] القراءة العارية الثانية */
     if(!st||st==='closed'){
-      await update(ref(db,cPath()),{status:'open',driver_name:drv.name||'',driver_phone:drv.phone,
-        opened_at:new Date().toISOString(),claimed_by:null,claimed_by_name:null,claimed_at:null,unread_leader:0,unread_driver:0});
+      await withTimeout(update(ref(db,cPath()),{status:'open',driver_name:drv.name||'',driver_phone:drv.phone,
+        opened_at:new Date().toISOString(),claimed_by:null,claimed_by_name:null,claimed_at:null,unread_leader:0,unread_driver:0}), NET_TIMEOUT_MS, 'chatopen');
     }
     update(ref(db,cPath()),{unread_driver:0}).catch(()=>{});
   }catch(e){toast('تعذّر فتح المحادثة — تحقّق من الاتصال','bad');}
 };
 window.closeChat=function(){document.getElementById('chat').classList.add('dn');chatOpen=false;};
 window.sendChat=async function(){
-  /* ✂️ [ب٦] حزامان لا واحد: maxlength في العنصر يمنع الكتابة، وهذا يمنع
-     اللصق البرمجي وأي التفاف على الواجهة. عقدة driver_chats تنمو بلا تنظيف
-     (يعالجه purgeBloatCore في index.js)، فحدّ الطول شرط لا ترف. */
+  /* ✂️ [ب٦] حزامان: maxlength يمنع الكتابة، وهذا يمنع اللصق البرمجي.
+     وعقدة driver_chats تنمو بلا تنظيف (يعالجه purgeBloatCore في index.js). */
   const i=document.getElementById('chIn'), t=(i.value||'').trim().slice(0,500); if(!t)return;
   const b=document.getElementById('chSend'); b.disabled=true;
   const k=`${Date.now()}_${Math.random().toString(36).slice(2,7)}`, u={};
@@ -2775,7 +3217,7 @@ window.sendChat=async function(){
   u[`${cPath()}/last_from`]='driver';
   u[`${cPath()}/unread_leader`]=increment(1);
   u[`${cPath()}/driver_name`]=drv.name||'';
-  try{await update(ref(db),u); i.value=''; i.style.height='auto';}
+  try{await withTimeout(update(ref(db),u), NET_TIMEOUT_MS, 'chatsend'); i.value=''; i.style.height='auto';}
   catch(e){toast('لم تُرسل الرسالة — أعد المحاولة','bad');}
   b.disabled=false;
 };
@@ -2817,7 +3259,7 @@ function startChat(){
       chatSeen=d.last_msg_at; play('ready');
       toast(`💬 ردّ من الليدر: ${esc(String(d.last_msg||'').slice(0,40))}`,'info');
     }
-    if(chatOpen){renderChat();if(un>0)update(ref(db,cPath()),{unread_driver:0}).catch(e=>console.warn('تعذّر تصفير عدّاد الدردشة:',e&&e.message));}
+    if(chatOpen){renderChat();if(un>0)update(ref(db,cPath()),{unread_driver:0}).catch(()=>{});}
   });
 }
 document.addEventListener('keydown',e=>{
