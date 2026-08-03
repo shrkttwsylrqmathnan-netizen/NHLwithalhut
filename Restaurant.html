@@ -1,4 +1,22 @@
 <!DOCTYPE html>
+<!--
+  🍽️ تطبيق المطاعم — V40.0 "Owned"
+  ═══════════════════════════════════════════════════════════════════════
+  ✅ الإنشاء من السيرفر (createOrder) — والمسار القديم يبقى سقوطاً آمناً.
+     يُغلق ثلاثة أعطال معاً:
+       ① حقن JavaScript عبر مُعرّف طلب يختاره المطعم
+       ② ازدواج الطلب عند إعادة الإرسال (cid — اختبار القبول الرابع)
+       ③ العمولة المزوّرة من العميل
+  ✅ orderCommand('CANCEL') في وضع الظلّ — قياس بلا اعتماد
+  ✅ رصد منظّم (client_events)
+
+  🎛️ USE_SERVER_CREATE = true  ← اجعله false للتراجع الفوري بلا نشر
+
+  ⚠️ يتطلّب قبله: database.rules.json V3.0  و  index.js CF-8.0
+  ⚠️ ولا يُنشر ".write": false قبل أن يقرأ الرصد صفر create_fallback
+     و صفر create_legacy لسبعة أيام متصلة.
+  ═══════════════════════════════════════════════════════════════════════
+-->
 <html lang="ar" dir="rtl">
 <head>
     <script>
@@ -13,8 +31,8 @@
         //          القاعدة الجديدة ترفض القراءة الكاملة لغير الإدارة.
         //  🔒 ضمان مصادقة فايربيس قبل أي كتابة (القواعد لم تعد تقبل مجهولاً).
         //  🛵 اسم الكابتن من drivers_locations/{phone}/name بدل شيت السائقين.
-        const CURRENT_APP_VERSION = "39.2.Nahla-Fortress";
-        const RES_VERSION_KEY = 'nahla_res_app_version';
+        const CURRENT_APP_VERSION = "39.10.Nahla-Gold";   /* 🔧 V2.2 */
+        const RES_VERSION_KEY = 'hut_res_app_version';
         try {
             if (localStorage.getItem(RES_VERSION_KEY) !== CURRENT_APP_VERSION) {
                 localStorage.setItem(RES_VERSION_KEY, CURRENT_APP_VERSION);
@@ -37,6 +55,11 @@
         }
     </script>
     <meta charset="UTF-8">
+<!-- 🔒 [أ١] سياسة أمان المحتوى — تُقلّص أثر أي حقن أو اختراق CDN.
+     ابدأ بـ Content-Security-Policy-Report-Only أسبوعاً، اقرأ التقارير، ثم أَلزِم.
+     'unsafe-inline' لازمٌ اليوم: الشيفرة كلها كتل سكربت مضمّنة. إزالته
+     تتطلّب نقلها إلى ملفات أو ختمها بـ nonce — مشروع لاحق موثّق. -->
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://*.firebasedatabase.app https://*.firebaseio.com https://unpkg.com https://www.gstatic.com; style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://fonts.googleapis.com https://unpkg.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: blob: https:; media-src 'self' data: blob: https://actions.google.com; connect-src 'self' https://*.firebasedatabase.app https://*.firebaseio.com wss://*.firebasedatabase.app wss://*.firebaseio.com https://script.google.com https://script.googleusercontent.com https://*.googleapis.com https://securetoken.googleapis.com https://*.cloudfunctions.net https://*.run.app https://nominatim.openstreetmap.org https://unpkg.com https://cdn.jsdelivr.net; object-src 'none'; base-uri 'none'; form-action 'none'">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     
     <title>مطاعم نحلة | منصة الحوت</title>
@@ -55,7 +78,13 @@
 
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.rtl.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;700;800;900&display=swap" rel="stylesheet">
-    <script src="https://unpkg.com/lucide@latest" defer></script>
+    <!-- 🔒 [أ٣] كانت @latest — أي تحديث في المنبع يدخل الصفحة بلا مراجعة.
+     ثُبِّتت النسخة. ⚠️ لم يُضَف integrity لأن بيئة البناء لا تصل unpkg
+     لحساب البصمة. احسبها قبل النشر:
+       curl -s https://unpkg.com/lucide@0.263.1/dist/umd/lucide.min.js | openssl dgst -sha384 -binary | openssl base64 -A
+     ثم أضف: integrity="sha384-<الناتج>" crossorigin="anonymous"
+     وإن تعذّر — استضِف الملف محلياً بجوار الصفحة، وهو الأأمن. -->
+<script src="https://unpkg.com/lucide@0.263.1/dist/umd/lucide.min.js" defer></script>
     
     <style>
         /* =========================================
@@ -173,15 +202,8 @@
 
         .header-center.active .custom-s-logo svg path,
         .header-center.active .custom-s-logo svg circle {
-            stroke: url(#magicGradient);
-            /* 🐝 هالة ذهبية بدل الزرقاء */
-            filter: drop-shadow(0 2px 10px rgba(255, 179, 0, 0.65));
-        }
-        /* نبضة خفيفة تلفت النظر حين تصل طلبات */
-        .header-center.active .custom-s-logo { animation: hexGlow 2.2s ease-in-out infinite; }
-        @keyframes hexGlow {
-            0%, 100% { transform: scale(1);    filter: drop-shadow(0 0 0 rgba(255,179,0,0)); }
-            50%      { transform: scale(1.06); filter: drop-shadow(0 0 12px rgba(255,179,0,.55)); }
+            stroke: url(#magicGradient); 
+            filter: drop-shadow(0 2px 8px rgba(59, 130, 246, 0.5));
         }
 
         .nahla-brand {
@@ -290,7 +312,7 @@
             box-shadow: 0 2px 8px rgba(0,0,0,0.02);
         }
         .custom-input.phone-format { letter-spacing: 1px; font-size: 1.05rem; }
-        .custom-input:focus { background: white; border-color: rgba(255, 179, 0, 0.35); outline: none; box-shadow: 0 0 0 3px rgba(255, 179, 0, 0.14); }
+        .custom-input:focus { background: white; border-color: rgba(59, 130, 246, 0.3); outline: none; box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1); }
 
         .smart-dropdown-wrapper { position: relative; width: 100%; }
         .search-icon-inside { position: absolute; left: 15px; top: 50%; transform: translateY(-50%); color: #94a3b8; pointer-events: none; }
@@ -376,7 +398,7 @@
             color: white; border: none; border-radius: 16px;
             padding: 14px; font-weight: 800; width: 100%; font-size: 1rem;
             display: flex; align-items: center; justify-content: center; gap: 8px;
-            transition: 0.3s; box-shadow: 0 4px 15px rgba(255, 179, 0, 0.35);
+            transition: 0.3s; box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3);
             margin-top: 10px;
         }
         .magical-submit-btn:active { transform: scale(0.97); }
@@ -414,7 +436,7 @@
             justify-content: center;
             gap: 8px;
             cursor: pointer;
-            box-shadow: 0 8px 30px rgba(255, 179, 0, 0.40);
+            box-shadow: 0 8px 30px rgba(59, 130, 246, 0.35);
             transition: transform 0.15s ease, background 0.2s ease;
             user-select: none;
             -webkit-user-select: none;
@@ -713,19 +735,20 @@
                 <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                     <defs>
                         <linearGradient id="magicGradient" x1="0%" y1="100%" x2="0%" y2="0%">
-                            <stop offset="0%" stop-color="var(--nahla-yellow-deep)">
+                            <stop offset="0%" stop-color="var(--primary-blue)">
                                 <animate attributeName="offset" values="-1; 1; -1" dur="3s" repeatCount="indefinite" />
                             </stop>
                             <stop offset="50%" stop-color="var(--nahla-yellow)">
                                 <animate attributeName="offset" values="0; 2; 0" dur="3s" repeatCount="indefinite" />
                             </stop>
-                            <stop offset="100%" stop-color="var(--nahla-yellow-deep)">
+                            <stop offset="100%" stop-color="var(--primary-blue-dark)">
                                 <animate attributeName="offset" values="1; 3; 1" dur="3s" repeatCount="indefinite" />
                             </stop>
                         </linearGradient>
                     </defs>
-                    <!-- 🐝 خلية نحلة السداسية — تُضيء ذهبياً عند وجود طلبات -->
-                    <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z" />
+                    <circle cx="16" cy="5" r="2.5" />
+                    <circle cx="8" cy="19" r="2.5" />
+                    <path d="M16 8 C 16 11, 8 13, 8 16" />
                 </svg>
             </div>
             <span class="nahla-brand">نحلة</span>
@@ -740,7 +763,7 @@
     </div>
 
     <div id="friendlyMessageBanner" class="container mt-2 mb-3 hidden-section" style="animation: slideDown 0.5s ease;">
-        <div style="background: linear-gradient(135deg, #e0f2fe, #f8fafc); border: 1px solid #bae6fd; border-radius: 16px; padding: 12px 16px; display: flex; align-items: center; gap: 12px; box-shadow: 0 4px 15px rgba(255,179,0,0.07);">
+        <div style="background: linear-gradient(135deg, #e0f2fe, #f8fafc); border: 1px solid #bae6fd; border-radius: 16px; padding: 12px 16px; display: flex; align-items: center; gap: 12px; box-shadow: 0 4px 15px rgba(59,130,246,0.05);">
             <div id="friendlyIcon" style="font-size: 24px;">🌤️</div>
             <div style="flex: 1;">
                 <div id="friendlyText" style="font-size: 0.8rem; font-weight: 800; color: var(--primary-blue-dark); line-height: 1.5;"></div>
@@ -933,15 +956,22 @@
     import { getDatabase, ref, onValue, update, set, get, query, orderByChild, equalTo } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
     import { getStorage, ref as storageRef, uploadString, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-storage.js";
     import { getAuth, signInWithCustomToken, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+    import { getFunctions, httpsCallable } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-functions.js";
 
     if (typeof lucide !== 'undefined') lucide.createIcons();
 
     // ⚠️ بعد إعادة نشر سكربت GAS V16.0 قد يتغيّر رابط النشر — حدّثه هنا.
     const API_URL   = "https://script.google.com/macros/s/AKfycbyiFprfbDKMwOG75eZl-V5_M7XmqLkmK49YBQjhHKr_Gka77Gmdgt6uU6K5KeXilMViDw/exec";
-    // 🔧[خ١/خ٣] التوكن القديم NAHLA_SECURE_TOKEN_2026 محروق (كان مكشوفاً في الشيفرة المتداولة).
+    // 🔧[خ١/خ٣] التوكن القديم HUT_SECURE_99 محروق (كان مكشوفاً في الشيفرة المتداولة).
     //   ضع هنا API_TOKEN **الجديد** الذي ضبطته في Script Properties — توكن التطبيقات
     //   فقط، وليس ADMIN_API_TOKEN الذي لا يوضع في أي تطبيق أبداً.
-    const API_TOKEN = "NAHLA_SECURE_TOKEN_2026";
+    const API_TOKEN = "NAHLA_APP_4E9C71B8A6D3F250E1AC8B37D94F6021";
+
+/* 🔧[م٣] تهريب HTML — كان هذا الملف الوحيد بلا دالة تهريب رغم ٢٤ موضع innerHTML.
+   منقولة حرفياً من Driver.html كي تبقى النسخة واحدة. */
+function esc(x){ const d=document.createElement('div'); d.textContent=String(x===null||x===undefined?'':x); return d.innerHTML; }
+function escAttr(x){ return esc(x).replace(/"/g,'&quot;').replace(/'/g,'&#39;'); }
+
 
     /* ══════════════════════════════════════════════════════════════════════
        🔐 مفتاح Gemini غادر المتصفّح نهائياً.
@@ -952,7 +982,7 @@
        الذي يحمله المطعم أصلاً — بلا أي مفتاح مشترك في التطبيق (خطأ خ٢).
        ══════════════════════════════════════════════════════════════════════ */
     const AI_ENDPOINT = "https://europe-west1-nahla-delivery-6b06f.cloudfunctions.net/aiOrderIntake";
-    const AI_QUEUE_KEY = "nahla_ai_queue";
+    const AI_QUEUE_KEY = "hut_ai_queue";
 
     /* إرسال إلى بوّابة الذكاء. لا ينتظره الكاشير في مسارَي الصوت والوصل —
        لذلك أي فشل يُحفظ محلياً ويُعاد لاحقاً، فلا يضيع طلب بصمت. */
@@ -965,11 +995,10 @@
            فيعيد النتيجة الأولى بلا إنشاء طلب جديد.
 
            الجذر الذي يعالجه: catch أدناه يلتقط **أي** فشل — بما فيه ضياع
-           الجواب بعد نجاح السيرفر تماماً (النداء قد يستغرق 90 ثانية: 45 لمسار
-           Gemini السريع ثم 45 للاحتياطي). فالعميل لا يعرف إن كان الانقطاع وقع
-           قبل إنشاء الطلب أم بعده، فيُعيد في الحالتين — وبلا مفتاح، كل إعادة
-           ناجحة كانت تُنشئ buildOrderId جديداً = طلباً حقيقياً جديداً
-           ⇒ ثلاثة كباتن على وصل واحد، أو بطاقتان في شاشة كابتن واحد.
+           الجواب بعد نجاح السيرفر تماماً. فالعميل لا يعرف إن كان الانقطاع
+           وقع قبل إنشاء الطلب أم بعده، فيُعيد في الحالتين (حتى ٦ مرات) —
+           وبلا مفتاح، كل إعادة ناجحة كانت تُنشئ buildOrderId جديداً = طلباً
+           حقيقياً جديداً ⇒ ثلاثة كباتن على وصل واحد.
 
            ⚠️ لا تنقل هذا السطر إلى flushAIQueue وإلا وُلّد مفتاح جديد لكل
               محاولة وضاع الغرض كلياً.
@@ -1039,12 +1068,13 @@
         localStorage.setItem(AI_QUEUE_KEY, JSON.stringify(q));
         const fail = [];
         for (const item of batch) {
-            /* ⏳ لا تُرسل وصل الأمس. الطابور يعيش في localStorage فينجو من إغلاق
-               التطبيق، وflushAIQueue تعمل بعد 4 ثوانٍ من كل إقلاع — فوصلٌ فشل
-               ليلاً كان يُنشئ طلباً جديداً صباح الغد لطعامٍ سُلّم بالأمس،
-               بعيداً كل البعد عن نافذة كشف التكرار. */
+            /* ⏳ [عمر زمني] كان الطابور **بلا أي حدّ زمني** — وهو أخطر ممّا يبدو:
+               يعيش في localStorage فينجو من إغلاق التطبيق، وflushAIQueue تعمل
+               عند كل إقلاع. فوصلٌ فشل ليلاً كان يُنشئ **طلباً جديداً صباح الغد**
+               لطعامٍ سُلّم بالأمس — بعيداً كل البعد عن أي نافذة كشف تكرار. */
             if (Date.now() - (item.ts || 0) > 20 * 60 * 1000) {
-                console.warn("⏳ أُسقطت حمولة قديمة من طابور الذكاء:", new Date(item.ts || 0).toISOString());
+                console.warn("⏳ أُسقطت حمولة قديمة من طابور الذكاء:",
+                             new Date(item.ts || 0).toISOString());
                 continue;
             }
             try { await sendToAI(item.payload, { queueOnFail: false }); }
@@ -1163,9 +1193,9 @@
                 const el = document.getElementById('resTitle');
                 if (el) el.innerText = srvName;
                 try {
-                    const s = JSON.parse(localStorage.getItem('nahla_res_session') || '{}');
+                    const s = JSON.parse(localStorage.getItem('hut_res_session') || '{}');
                     s.name = srvName;
-                    localStorage.setItem('nahla_res_session', JSON.stringify(s));
+                    localStorage.setItem('hut_res_session', JSON.stringify(s));
                 } catch (e) {}
             }
         } catch (e) {}
@@ -1184,20 +1214,119 @@
             regLat = parseFloat(d.lat); regLng = parseFloat(d.lng);
         }
         try {
-            const s = JSON.parse(localStorage.getItem('nahla_res_session') || '{}');
+            const s = JSON.parse(localStorage.getItem('hut_res_session') || '{}');
             if (normPhone) s.phone = normPhone;
             if (d.name) s.name = d.name;
             if (d.comm !== undefined) s.comm = d.comm || '0';
             if (d.payType) s.payType = d.payType;
             if (regLat && regLng) { s.lat = regLat; s.lng = regLng; }
-            localStorage.setItem('nahla_res_session', JSON.stringify(s));
+            localStorage.setItem('hut_res_session', JSON.stringify(s));
         } catch(e) {}
     }
 
     // 🔒 حارس المصادقة: القواعد الجديدة ترفض أي كتابة بلا توكن — لا نكتب قبل التأكد
+    /* ═══════════════════════════════════════════════════════════════════════
+       🆕 [V40] وحدة الإنشاء السيرفري
+       ─────────────────────────────────────────────────────────────────────
+       لماذا يُنشئ السيرفر الطلب بدل المطعم؟ ثلاثة أعطال بإصلاح واحد:
+
+       ① **حقن JavaScript.** مفاتيح فايربيس تمنع . $ # [ ] / — ولا تمنع
+          علامة التنصيص. والمطعم هو من يختار المفتاح (uniqueId أدناه).
+          فمُعرّفٌ يحتوي " يُلصَق بلا تهريب في نصّ إشعار السحب داخل
+          NahlaMessagingService، ثم يُنفَّذ في WebView كل كابتن عبر
+          pushEventToWeb — ومعه جسر AndroidRadar كاملاً.
+          (والقواعد V3.0 تُغلقه أيضاً بتقييد المفتاح — حزامان لا واحد.)
+
+       ② **ازدواج الطلب.** cid يجعل إعادة الإرسال تعود بنفس المُعرّف —
+          وهو اختبار القبول الرابع في README عندك: «مطعم يرسل وصلاً ثم
+          يقطع الشبكة ويعيدها ⇒ طلب واحد لا اثنان».
+
+       ③ **العمولة المزوّرة.** تُقرأ من restaurants_config لا من الحمولة،
+          فيسقط الاعتماد على orderSanitizer ليدهسها بعد الإنشاء.
+
+       وسقوطٌ آمن للمسار القديم: إن كانت الدالة غير منشورة أو المصادقة
+       ناقصة — أي حين نتيقّن أن **شيئاً لم يُنشأ** — نكتب مباشرةً كما كنا.
+       أمّا عند المهلة أو العطل الداخلي فلا نسقط: قد يكون الطلب أُنشئ،
+       فننبّه المطعم ليعيد الضغط — وcid يضمن أن الإعادة لا تُنتج توأماً.
+       ═══════════════════════════════════════════════════════════════════════ */
+    const fns = getFunctions(app, 'europe-west1');
+    const USE_SERVER_CREATE = true;   // اجعله false للتراجع الفوري بلا نشر
+
+    /* مفتاح النيّة: بصمة المحتوى + نافذة ١٥ دقيقة. فالضغط مرّتين على نفس
+       الطلب يعيد نفس المفتاح، وطلبٌ مختلف يأخذ مفتاحاً جديداً.
+       (١٥ دقيقة تطابق نوافذ التكرار في CF فلا يتعارض الحارسان.) */
+    function orderFingerprint(resPhone, details, price, area) {
+        const s = [resPhone, String(details || '').trim(), String(price || ''), String(area || '').trim()].join('|');
+        let h1 = 0x811c9dc5, h2 = 0x1000193;
+        for (let i = 0; i < s.length; i++) {
+            h1 = ((h1 ^ s.charCodeAt(i)) * 16777619) >>> 0;
+            h2 = ((h2 + s.charCodeAt(i) * 31) ^ (h2 >>> 7)) >>> 0;
+        }
+        return 'f' + h1.toString(36) + h2.toString(36);
+    }
+
+    function orderCid(fp) {
+        let m = {};
+        try { m = JSON.parse(localStorage.getItem('hut_cids') || '{}'); } catch (e) { m = {}; }
+        const now = Date.now();
+        Object.keys(m).forEach(k => { if (now - (m[k].t || 0) > 20 * 60000) delete m[k]; });
+        if (!(m[fp] && (now - m[fp].t) < 15 * 60000)) {
+            m[fp] = { id: 'c' + now.toString(36) + Math.random().toString(36).slice(2, 10), t: now };
+        }
+        try { localStorage.setItem('hut_cids', JSON.stringify(m)); } catch (e) {}
+        return m[fp].id;
+    }
+
+    /* أعطالٌ نتيقّن معها أن السيرفر لم يُنشئ شيئاً ⇒ السقوط للمسار القديم آمن. */
+    function isSafeToFallback(code) {
+        const c = String(code || '').toLowerCase();
+        return c.indexOf('unauthenticated') > -1 || c.indexOf('permission-denied') > -1
+            || c.indexOf('not-found') > -1     || c.indexOf('unimplemented') > -1
+            || c.indexOf('invalid-argument') > -1;
+    }
+
+    function resTrack(ev, meta) {
+        try {
+            const ph = (window.__resPhone || '');
+            if (!ph || !auth.currentUser) return;
+            const id = Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
+            const rec = { ev: String(ev).slice(0, 40), ts: new Date().toISOString() };
+            if (meta && meta.orderId) rec.oid = String(meta.orderId).slice(0, 80);
+            if (meta && meta.reason)  rec.why = String(meta.reason).slice(0, 60);
+            set(ref(db, `client_events/${ph}/${id}`), rec).catch(() => {});
+        } catch (e) {}
+    }
+
+    /* يعيد مُعرّف الطلب، أو يرمي 'SERVER_UNSURE' إن تعذّر التيقّن. */
+    async function createOrderOnServer(payload) {
+        const fp  = orderFingerprint(payload.resPhone, payload.details, payload.price, payload.area);
+        const cid = orderCid(fp);
+        let lastCode = '';
+        for (let i = 1; i <= 3; i++) {
+            try {
+                const call = httpsCallable(fns, 'createOrder');
+                const r = await Promise.race([
+                    call(Object.assign({}, payload, { cid: cid })),
+                    new Promise((_, rej) => setTimeout(() => rej(new Error('cid_timeout')), 15000))
+                ]);
+                const oid = r && r.data && r.data.orderId;
+                if (!oid) throw new Error('no_order_id');
+                resTrack(r.data.dedup ? 'create_dedup' : 'create_server', { orderId: oid });
+                return oid;
+            } catch (e) {
+                lastCode = String((e && (e.code || e.message)) || '');
+                if (isSafeToFallback(lastCode)) { resTrack('create_fallback', { reason: lastCode }); return null; }
+                if (i === 3) break;
+                await new Promise(r => setTimeout(r, 800 * i));
+            }
+        }
+        resTrack('create_unsure', { reason: lastCode });
+        throw new Error('SERVER_UNSURE');
+    }
+
     async function requireCloudAuth() {
         if (auth.currentUser) return true;
-        const s = localStorage.getItem('nahla_res_session');
+        const s = localStorage.getItem('hut_res_session');
         if (s) {
             try {
                 const sess = JSON.parse(s);
@@ -1210,7 +1339,7 @@
     // مراقب: إن ضاعت مصادقة فايربيس فجأة، نعيدها تلقائياً من الجلسة المحفوظة
     onAuthStateChanged(auth, (user) => {
         if (!user) {
-            const s = localStorage.getItem('nahla_res_session');
+            const s = localStorage.getItem('hut_res_session');
             if (s) {
                 try {
                     const sess = JSON.parse(s);
@@ -1469,11 +1598,11 @@
             price  : document.getElementById('orderPrice').value,
             image  : base64Receipt
         };
-        sessionStorage.setItem('nahla_order_draft', JSON.stringify(draft));
+        sessionStorage.setItem('hut_order_draft', JSON.stringify(draft));
     };
 
     function restoreDraft() {
-        const draftStr = sessionStorage.getItem('nahla_order_draft');
+        const draftStr = sessionStorage.getItem('hut_order_draft');
         if (!draftStr) return;
         try {
             const draft = JSON.parse(draftStr);
@@ -1500,7 +1629,7 @@
         } catch(e) {}
     }
 
-    function clearDraft() { sessionStorage.removeItem('nahla_order_draft'); }
+    function clearDraft() { sessionStorage.removeItem('hut_order_draft'); }
 
     window.buildCustomAreaDropdown = function() {
         const listContainer = document.getElementById('smartDropdownList');
@@ -1584,13 +1713,13 @@
         priceHint.classList.remove('hidden-section');
         const price = myCustomPriceList[areaName];
         if (price) {
-            priceHint.innerHTML = `توصيل: ${price} د.ع`;
+            priceHint.textContent = `توصيل: ${price} د.ع`;   /* 🔧[م٣] textContent لا يقبل وسوماً أصلاً */
             priceHint.className = "text-success small fw-bold mt-1 px-2";
         }
     };
 
     function loadPriceListFromCache() {
-        const cached = localStorage.getItem('nahla_res_price_list');
+        const cached = localStorage.getItem('hut_res_price_list');
         if (!cached) return false;
         try {
             const data = JSON.parse(cached);
@@ -1603,7 +1732,7 @@
     }
 
     function savePriceListToCache(list) {
-        localStorage.setItem('nahla_res_price_list', JSON.stringify({ list, timestamp: Date.now() }));
+        localStorage.setItem('hut_res_price_list', JSON.stringify({ list, timestamp: Date.now() }));
     }
 
     function convertArabicNumerals(str) {
@@ -1637,8 +1766,8 @@
     }
 
     function checkSavedSession() {
-        const sessionStr = localStorage.getItem('nahla_res_session');
-        const pendingStr = localStorage.getItem('nahla_res_pending');
+        const sessionStr = localStorage.getItem('hut_res_session');
+        const pendingStr = localStorage.getItem('hut_res_pending');
         if (sessionStr) {
             try {
                 const session = JSON.parse(sessionStr);
@@ -1656,7 +1785,7 @@
             } catch(e) {}
         } else if (pendingStr) {
             document.getElementById('checkPhone').value = pendingStr;
-            const pendingPass = localStorage.getItem('nahla_res_pending_pass');
+            const pendingPass = localStorage.getItem('hut_res_pending_pass');
             if (pendingPass) document.getElementById('checkPassword').value = atob(pendingPass);
             showWaitingRoom(); return true;
         }
@@ -1665,7 +1794,7 @@
 
     window.onload = function() {
         if (!checkSavedSession()) {
-            const savedPhone = localStorage.getItem('nahla_res_phone');
+            const savedPhone = localStorage.getItem('hut_res_phone');
             if (savedPhone) {
                 document.getElementById('checkPhone').value = savedPhone.startsWith('0') ? savedPhone : '0' + savedPhone;
             }
@@ -1738,7 +1867,7 @@
             if (submitBtn) submitBtn.classList.remove('hidden-section');
         }
 
-        localStorage.setItem('nahla_res_preferred_mode', mode);
+        localStorage.setItem('hut_res_preferred_mode', mode);
         if (triggerSave) window.saveDraft();
     };
 
@@ -1846,13 +1975,13 @@
             })
         }).then(() => {
             window.showLoading(false);
-            localStorage.setItem('nahla_res_phone', phone);
-            localStorage.setItem('nahla_res_pending', phone);
-            localStorage.setItem('nahla_res_pending_pass', btoa(password));
+            localStorage.setItem('hut_res_phone', phone);
+            localStorage.setItem('hut_res_pending', phone);
+            localStorage.setItem('hut_res_pending_pass', btoa(password));
             // 📍 نحفظ إحداثيات التسجيل محلياً فوراً — تُستعمل للطلبات إلى أن
             //    يؤكدها السيرفر عبر استجابة checkRes.
             try {
-                localStorage.setItem('nahla_res_reg_coords', JSON.stringify({ lat, lng }));
+                localStorage.setItem('hut_res_reg_coords', JSON.stringify({ lat, lng }));
             } catch(e) {}
             showWaitingRoom();
         }).catch(() => { window.showLoading(false); alert("حدث خطأ أثناء الإرسال."); });
@@ -1866,8 +1995,8 @@
     }
 
     window.exitWaitingRoom = function() {
-        localStorage.removeItem('nahla_res_pending');
-        localStorage.removeItem('nahla_res_pending_pass');
+        localStorage.removeItem('hut_res_pending');
+        localStorage.removeItem('hut_res_pending_pass');
         document.getElementById('waitingBox').classList.add('hidden-section');
         document.getElementById('authBox').classList.remove('hidden-section');
         document.getElementById('checkPhone').disabled = false;
@@ -1881,14 +2010,14 @@
     };
 
     window.checkWaitingStatus = function(isManual = false) {
-        let rawPhone = document.getElementById('checkPhone').value.trim() || localStorage.getItem('nahla_res_pending');
+        let rawPhone = document.getElementById('checkPhone').value.trim() || localStorage.getItem('hut_res_pending');
         if (!rawPhone) return;
         
         const phone = normalizeSystemPhone(rawPhone);
         
         let pass  = document.getElementById('checkPassword').value.trim();
         if (!pass) {
-            const savedPass = localStorage.getItem('nahla_res_pending_pass');
+            const savedPass = localStorage.getItem('hut_res_pending_pass');
             if (savedPass) pass = atob(savedPass);
         }
 
@@ -1897,20 +2026,20 @@
             .then(data => {
                 if (data.status === "active" || data.status === "inactive") {
                     clearInterval(waitingPollingTimer);
-                    localStorage.removeItem('nahla_res_pending');
-                    localStorage.removeItem('nahla_res_pending_pass');
+                    localStorage.removeItem('hut_res_pending');
+                    localStorage.removeItem('hut_res_pending_pass');
                     currentResName = data.name;
                     regPhone = phone;
                     try { if (data.priceList) myCustomPriceList = JSON.parse(data.priceList); } catch(e) {}
                     
                     // إحداثيات التسجيل المحفوظة (إن وُجدت) ريثما يردّ السيرفر بها
                     try {
-                        const rc = JSON.parse(localStorage.getItem('nahla_res_reg_coords') || 'null');
+                        const rc = JSON.parse(localStorage.getItem('hut_res_reg_coords') || 'null');
                         if (rc && rc.lat) { regLat = parseFloat(rc.lat); regLng = parseFloat(rc.lng); }
                     } catch(e) {}
 
                     const commRaw = data.comm || '0';
-                    localStorage.setItem('nahla_res_session', JSON.stringify({
+                    localStorage.setItem('hut_res_session', JSON.stringify({
                         phone, name: data.name, payType: data.payType || 'المطعم يدفع',
                         comm: commRaw, 
                         timestamp: Date.now(),
@@ -1928,10 +2057,10 @@
                     document.getElementById('waitingBox').classList.add('hidden-section');
                     enterDashboard();
                 } else if (data.status === "banned") {
-                    clearInterval(waitingPollingTimer); localStorage.removeItem('nahla_res_pending'); localStorage.removeItem('nahla_res_pending_pass');
+                    clearInterval(waitingPollingTimer); localStorage.removeItem('hut_res_pending'); localStorage.removeItem('hut_res_pending_pass');
                     alert("⚠️ حساب محظور."); location.reload();
                 } else if (data.status === "wrong_password" || data.status === "rate_limited" || data.status === "no_password_set") {
-                    clearInterval(waitingPollingTimer); localStorage.removeItem('nahla_res_pending'); localStorage.removeItem('nahla_res_pending_pass');
+                    clearInterval(waitingPollingTimer); localStorage.removeItem('hut_res_pending'); localStorage.removeItem('hut_res_pending_pass');
                     alert("كلمة المرور تغيرت أو تم حظر الحساب مؤقتاً."); location.reload();
                 } else if (data.success === false && isManual) {
                     /* 🔧 رفض التوكن كان يمرّ صامتاً هنا فتبقى غرفة الانتظار للأبد */
@@ -1963,12 +2092,12 @@
                     .catch(e => console.error("❌ Firebase Auth Error:", e));
             }
 
-            currentResName = data.name; localStorage.setItem('nahla_res_phone', phone);
-            localStorage.removeItem('nahla_res_pending'); regPhone = phone;
+            currentResName = data.name; localStorage.setItem('hut_res_phone', phone);
+            localStorage.removeItem('hut_res_pending'); regPhone = phone;
             try { if (data.priceList) myCustomPriceList = JSON.parse(data.priceList); } catch(e) {}
             
             const commRaw = data.comm || '0';
-            localStorage.setItem('nahla_res_session', JSON.stringify({
+            localStorage.setItem('hut_res_session', JSON.stringify({
                 phone, name: data.name, payType: data.payType || 'المطعم يدفع',
                 comm: commRaw,
                 timestamp: Date.now(),
@@ -1977,9 +2106,9 @@
             applyServerProfile(data, phone);
             enterDashboard();
         } else if (data.status === "pending" || data.status === "waiting") {
-            localStorage.setItem('nahla_res_phone', phone); 
-            localStorage.setItem('nahla_res_pending', phone);
-            localStorage.setItem('nahla_res_pending_pass', btoa(passAttempt));
+            localStorage.setItem('hut_res_phone', phone); 
+            localStorage.setItem('hut_res_pending', phone);
+            localStorage.setItem('hut_res_pending_pass', btoa(passAttempt));
             showWaitingRoom();
         } else if (data.status === "banned") {
             alert("⚠️ الحساب محظور."); localStorage.clear(); sessionStorage.clear();
@@ -2011,7 +2140,7 @@
         
         if (typeof lucide !== 'undefined') lucide.createIcons();
 
-        const prefMode = localStorage.getItem('nahla_res_preferred_mode') || 'manual';
+        const prefMode = localStorage.getItem('hut_res_preferred_mode') || 'manual';
         window.switchTab(prefMode, false);
 
         // 🔧[خ١] أُزيل نداء getGlobalData نهائياً — كان يسحب شيتات كاملة (بكلمات
@@ -2060,7 +2189,7 @@
 
     function startHotDataListeners() {
         let safeResPhone = regPhone;
-        if (!safeResPhone) { const s = localStorage.getItem('nahla_res_session'); if (s) safeResPhone = JSON.parse(s).phone; }
+        if (!safeResPhone) { const s = localStorage.getItem('hut_res_session'); if (s) safeResPhone = JSON.parse(s).phone; }
         const myPhone = normalizeSystemPhone(safeResPhone);
         if (!myPhone) { console.error("❌ لا يمكن بدء المستمعات بلا رقم منشأة."); return; }
 
@@ -2085,7 +2214,7 @@
             document.getElementById('statMonthOrders').innerText = (ledger.completed_orders || 0) + globalLiveCount;
             document.getElementById('statUnpaid').innerText = (parseFloat(ledger.debt) || 0) + globalLiveDebt;
             
-            const s = localStorage.getItem('nahla_res_session');
+            const s = localStorage.getItem('hut_res_session');
             if (s) { document.getElementById('statPayType').innerText = (JSON.parse(s).payType || '').includes("مناصفة") ? "مناصفة" : "المطعم"; }
         });
     }
@@ -2132,25 +2261,25 @@
                     const orderDetails = fbOrder.details || "لا توجد تفاصيل إضافية";
 
                     todayArchiveHtml += `
-                    <div class="archive-item searchable-archive-item" data-search="${fbOrder.id} ${orderArea} ${orderDetails} ${dName} ${dPhone}">
+                    <div class="archive-item searchable-archive-item" data-search="${esc(fbOrder.id)} ${esc(orderArea)} ${esc(orderDetails)} ${esc(dName)} ${esc(dPhone)}">
                         <div class="d-flex justify-content-between align-items-start w-100">
                             <div>
-                                <span class="fw-black text-dark" style="font-size: 0.95rem;">#${fbOrder.id}</span>
+                                <span class="fw-black text-dark" style="font-size: 0.95rem;">#${esc(fbOrder.id)}</span>
                             </div>
                             <div class="text-end">
-                                <span class="fw-black text-success" style="font-size: 1.05rem;">${priceVal} <small>د.ع</small></span>
-                                <div class="small text-muted mt-1" style="font-size: 0.7rem;"><i data-lucide="clock" size="10"></i> ${orderTime}</div>
+                                <span class="fw-black text-success" style="font-size: 1.05rem;">${esc(priceVal)} <small>د.ع</small></span>
+                                <div class="small text-muted mt-1" style="font-size: 0.7rem;"><i data-lucide="clock" size="10"></i> ${esc(orderTime)}</div>
                             </div>
                         </div>
                         <div class="archive-details-box w-100 text-start" dir="rtl">
                             <div class="d-flex justify-content-between align-items-center mb-2 pb-2" style="border-bottom: 1px dashed rgba(15,23,42,0.1);">
                                 <div class="fw-bold text-dark">
-                                    <i data-lucide="bike" size="12" style="color: var(--success);"></i> الكابتن: <span class="fw-black">${dName}</span>
+                                    <i data-lucide="bike" size="12" style="color: var(--success);"></i> الكابتن: <span class="fw-black">${esc(dName)}</span>
                                 </div>
-                                ${isValidPhone ? `<a href="tel:${dPhone}" class="text-decoration-none d-flex align-items-center gap-1" style="background: #f0fdf4; color: #16a34a; padding: 4px 10px; border-radius: 8px; font-weight: 800; font-size: 0.75rem;"><i data-lucide="phone" size="12"></i> ${dPhone}</a>` : ''}
+                                ${isValidPhone ? `<a href="tel:${esc(dPhone)}" class="text-decoration-none d-flex align-items-center gap-1" style="background: #f0fdf4; color: #16a34a; padding: 4px 10px; border-radius: 8px; font-weight: 800; font-size: 0.75rem;"><i data-lucide="phone" size="12"></i> ${esc(dPhone)}</a>` : ''}
                             </div>
-                            <div class="mb-2 fw-bold text-dark"><i data-lucide="map-pin" size="12" style="color: var(--accent);"></i> المنطقة: <span class="fw-normal">${orderArea}</span></div>
-                            <div class="fw-bold text-dark"><i data-lucide="info" size="12" style="color: var(--primary-blue);"></i> التفاصيل: <span class="fw-normal" style="user-select: text;">${orderDetails}</span></div>
+                            <div class="mb-2 fw-bold text-dark"><i data-lucide="map-pin" size="12" style="color: var(--accent);"></i> المنطقة: <span class="fw-normal">${esc(orderArea)}</span></div>
+                            <div class="fw-bold text-dark"><i data-lucide="info" size="12" style="color: var(--primary-blue);"></i> التفاصيل: <span class="fw-normal" style="user-select: text;">${esc(orderDetails)}</span></div>
                         </div>
                     </div>`;
                 }
@@ -2174,7 +2303,7 @@
             }
         }
 
-        document.getElementById('todayTotalSales').innerHTML = `${todaySalesTotal} <small class="fs-6">د.ع</small>`;
+        document.getElementById('todayTotalSales').innerHTML = `${esc(todaySalesTotal)} <small class="fs-6">د.ع</small>`;
         if (lastArchiveHtml !== todayArchiveHtml) {
             document.getElementById('todayArchiveItems').innerHTML = todayArchiveHtml || `<div class="text-center text-muted fw-bold py-4 small" style="font-size:0.8rem; background: rgba(255,255,255,0.4); border-radius: 20px;">لم تكتمل أي طلبات اليوم بعد.</div>`;
             lastArchiveHtml = todayArchiveHtml;
@@ -2207,12 +2336,24 @@
     //   الملغى بأرشيف الفجر كـ"ملغى" ويبقى قابلاً للتدقيق.
     window.cancelOrderGrace = async function(orderId) {
         if (!confirm("تأكيد الإلغاء؟")) return;
-        const card = document.getElementById(`order-${orderId}`);
+        const card = document.getElementById(`order-${esc(orderId)}`);
         if (card) { card.style.opacity = '0'; setTimeout(() => card.style.display = 'none', 300); }
         actionBlacklist.push(String(orderId)); setTimeout(() => { actionBlacklist = actionBlacklist.filter(id => id !== String(orderId)); }, BLACKLIST_TTL_MS);
         
         await requireCloudAuth();
-        update(ref(db, `active_orders/${orderId}`), {
+        /* [V40] قياس في الظلّ: يُقيّم السيرفر الأمر ويُسجّل حكمه ولا يكتب
+           حرفاً. fire-and-forget داخل try — لا تُنتظَر فلا تستطيع تعليق
+           الإلغاء ولا تعطيله. المسار القديم أدناه هو المسؤول الوحيد. */
+        try {
+            httpsCallable(fns, 'orderCommand')({
+                opId: 'sh-' + Date.now().toString(36) + Math.random().toString(36).slice(2, 10),
+                orderId: String(orderId), command: 'CANCEL', shadow: true
+            }).then(r => { const v = (r && r.data && r.data.verdict) || '?';
+                           if (v !== 'allow') resTrack('shadow_reject', { orderId: orderId, reason: v }); })
+              .catch(() => {});
+        } catch (e) {}
+
+        update(ref(db, `active_orders/${esc(orderId)}`), {
             status: 'deleted',
             last_update: new Date().toISOString(),
             cancelled_by: 'restaurant'
@@ -2225,7 +2366,7 @@
     window.markOrderReady = async function(orderId, btn) {
         btn.disabled = true;
         await requireCloudAuth();
-        update(ref(db, `active_orders/${orderId}`), { ready_for_pickup: true, ready_ts: new Date().toISOString() })
+        update(ref(db, `active_orders/${esc(orderId)}`), { ready_for_pickup: true, ready_ts: new Date().toISOString() })
             .then(() => { btn.classList.add('sent'); btn.innerHTML = `<i data-lucide="check" size="12"></i> جاهز`; if (typeof lucide !== 'undefined') lucide.createIcons({ root: btn.parentElement }); })
             .catch(() => { btn.disabled = false; });
     };
@@ -2249,23 +2390,23 @@
             }
 
             const showReadyBtn = hasDriver && (status === 'accepted' || status === 'heading' || status === 'arrived_at_res');
-            const readyBtnHtml = showReadyBtn ? (readyForPickup ? `<span class="ready-pill"><i data-lucide="check-circle" size="10"></i> جاهز للاستلام</span>` : `<button class="btn-ready" onclick="markOrderReady('${orderId}', this)"><i data-lucide="package-check" size="14"></i> إبلاغ الكابتن بالجهوزية</button>`) : '';
+            const readyBtnHtml = showReadyBtn ? (readyForPickup ? `<span class="ready-pill"><i data-lucide="check-circle" size="10"></i> جاهز للاستلام</span>` : `<button class="btn-ready" onclick="markOrderReady('${esc(orderId)}', this)"><i data-lucide="package-check" size="14"></i> إبلاغ الكابتن بالجهوزية</button>`) : '';
 
             const photoUrl = o.photoUrl || o.image; 
             const imgBtnHtml = photoUrl ? `<button class="btn-call-mini" style="background:#e0f2fe; color:var(--primary-blue);" onclick="document.getElementById('fullReceiptImage').src='${photoUrl}'; document.getElementById('imageViewerModal').style.display='flex';" title="عرض الوصل"><i data-lucide="image" size="14"></i></button>` : '';
 
             activeOrdersHtml += `
-            <div class="live-order-card" id="order-${orderId}">
+            <div class="live-order-card" id="order-${esc(orderId)}">
                 <div class="order-header-row">
                     <div>
-                        <span class="order-id-text">#${orderId}</span>
-                        <div class="order-time-text"><i data-lucide="clock" size="10"></i> ${orderTime}</div>
+                        <span class="order-id-text">#${esc(orderId)}</span>
+                        <div class="order-time-text"><i data-lucide="clock" size="10"></i> ${esc(orderTime)}</div>
                     </div>
                     <div class="d-flex align-items-center gap-2">
                         ${readyBtnHtml}
-                        ${isCancelable ? `<button class="btn-cancel-grace" onclick="cancelOrderGrace('${orderId}')">إلغاء</button>` : ''}
+                        ${isCancelable ? `<button class="btn-cancel-grace" onclick="cancelOrderGrace('${esc(orderId)}')">إلغاء</button>` : ''}
                         ${imgBtnHtml}
-                        ${hasDriver ? `<button class="btn-call-mini" onclick="window.open('tel:${driverPhone}')"><i data-lucide="phone" size="14"></i></button>` : ''}
+                        ${hasDriver ? `<button class="btn-call-mini" onclick="window.open('tel:${esc(driverPhone)}')"><i data-lucide="phone" size="14"></i></button>` : ''}
                     </div>
                 </div>
                 <div class="order-details-row mt-2">
@@ -2302,7 +2443,7 @@
             let areaWithHint = finalArea;
 
             if (Math.abs(regLat - 35.468) < 0.001 && Math.abs(regLng - 44.392) < 0.001) {
-                const s = JSON.parse(localStorage.getItem('nahla_res_session') || '{}');
+                const s = JSON.parse(localStorage.getItem('hut_res_session') || '{}');
                 if (s.lat && s.lng) { regLat = parseFloat(s.lat); regLng = parseFloat(s.lng); } 
                 else { alert("⚠️ لم تصل إحداثيات مطعمك بعد — سجّل خروجاً ثم دخولاً، أو تواصل مع الإدارة لتحديث موقعك."); return; }
             }
@@ -2383,7 +2524,7 @@
         let safeResPhone  = regPhone; 
         let safeComm = '0'; 
         let safePayType = 'المطعم يدفع';
-        const sessionStr  = localStorage.getItem('nahla_res_session');
+        const sessionStr  = localStorage.getItem('hut_res_session');
         
         if (sessionStr) {
             const sData = JSON.parse(sessionStr); 
@@ -2431,13 +2572,14 @@
            على السيرفر) ويضغط ثانيةً، يُنشأ سجلّان لطلبٍ واحد — وهما متطابقان
            تماماً فيمرّان كل بوّابات الدمج ويقعان على كابتن واحد كبطاقتين، أو
            على كابتنين عند باب المطعم نفسه.
-           و«الطلب السريع» بلا هاتف زبون أصلاً، فكشف التكرار في CF لا يملك
-           عليه مطابقة قوية. هنا نمنعه من المنبع: بصمة الطلب الأخير محفوظة،
-           وأي تكرار حرفيّ خلال ثلاث دقائق يُرفض بسؤال صريح.
+
+           و«الطلب السريع» بلا هاتف زبون أصلاً، فكشف التكرار في CF لا يملك عليه
+           مطابقة قوية. هنا نمنعه من المنبع: بصمة الطلب الأخير محفوظة، وأي
+           تكرار حرفيّ خلال ثلاث دقائق يُوقَف بسؤال صريح للكاشير.
            ═══════════════════════════════════════════════════════════════════ */
         try {
             const sig = [normResPhone, String(price), String(area).trim(), String(details).trim()].join('|');
-            const last = JSON.parse(sessionStorage.getItem('nahla_last_order') || 'null');
+            const last = JSON.parse(sessionStorage.getItem('suf_last_order') || 'null');
             if (last && last.sig === sig && (Date.now() - last.ts) < 3 * 60 * 1000) {
                 const mins = Math.max(1, Math.round((Date.now() - last.ts) / 60000));
                 const goOn = confirm(
@@ -2448,10 +2590,12 @@
                     'هل هذا طلب مختلف فعلاً؟');
                 if (!goOn) throw new Error('DUPLICATE_CANCELLED');
             }
-            sessionStorage.setItem('nahla_last_order', JSON.stringify({ sig: sig, ts: Date.now() }));
+            sessionStorage.setItem('suf_last_order', JSON.stringify({ sig: sig, ts: Date.now() }));
         } catch (e) {
             if (e && e.message === 'DUPLICATE_CANCELLED') throw e;
         }
+
+        /* [V40] مُعرّف احتياطي — يُستعمل فقط إن سقطنا للمسار القديم أدناه. */
 
         // 🔒 القواعد الجديدة ترفض الكتابة بلا مصادقة — نضمنها قبل set
         const authed = await requireCloudAuth();
@@ -2461,12 +2605,42 @@
         //   (orderSanitizer) يدهسهما بالقيم الموثوقة من restaurants_config.
         //   والقواعد توجب: status='pending_driver' و driverPhone='system_routing'
         //   و timestamp موجوداً عند الإنشاء — كلها محققة أدناه.
+        window.__resPhone = normResPhone;   // [V40] للرصد
+
+        /* ═══════════════════════════════════════════════════════════════════
+           [V40] ① السيرفر أولاً. المُعرّف يولّده هو، فيسقط حقن JS من أصله،
+           وcid يضمن أن إعادة الإرسال لا تُنتج توأماً.
+           ═══════════════════════════════════════════════════════════════════ */
+        if (USE_SERVER_CREATE) {
+            let serverId = null, unsure = false;
+            try {
+                serverId = await createOrderOnServer({
+                    resPhone: normResPhone, details: details, area: area,
+                    price: price, photoUrl: imageUrl, restaurant: resName
+                });
+            } catch (e) {
+                if (String(e && e.message) === 'SERVER_UNSURE') unsure = true;
+                else serverId = null;
+            }
+
+            /* لا نسقط للمسار القديم هنا: قد يكون الطلب أُنشئ فعلاً على
+               السيرفر ولم يصلنا الردّ. إنشاء توأم أسوأ من طلب متأخّر.
+               وcid يجعل إعادة الضغط آمنة تماماً — نفس النيّة، نفس الطلب. */
+            if (unsure) throw new Error('SERVER_UNSURE');
+            if (serverId) return;                    // ✅ أُنشئ على السيرفر
+            /* serverId === null ⇒ تيقّنّا أن شيئاً لم يُنشأ ⇒ المسار القديم */
+        }
+
+        /* ② المسار القديم — يبقى كاملاً وبلا تغيير حرف واحد.
+           هذا هو ما يُحذف **آخر** شيء: لا قبل أن يقرأ الرصد صفر
+           create_fallback لأيام، ولا قبل نشر ".write": false. */
         await set(ref(db, 'active_orders/' + uniqueId), {
             id: uniqueId, restaurant: resName, area: area, details: details, status: "pending_driver",
             driverPhone: "system_routing", price: price, timestamp: tsIso, photoUrl: imageUrl,
             last_update: tsIso, resPhone: normResPhone, resLat: regLat || 0, resLng: regLng || 0,
             comm: safeComm, payType: safePayType, is_sovereign: false, ready_for_pickup: false
         });
+        resTrack('create_legacy', { orderId: uniqueId });
 
         // 🔧 أُزيل نداء NEW_ORDER إلى GAS — كان معالجه فارغاً ({success:true})
         //   ولا يفعل شيئاً سوى استهلاك حصة السكربت.
@@ -2734,11 +2908,3 @@
         // الماوس (سطح المكتب — للاختبار)
         btn.addEventListener('mousedown', (e) => { e.preventDefault(); startVoiceRecording(); });
         btn.addEventListener('mouseup', (e) => { e.preventDefault(); stopVoiceRecording(); });
-        btn.addEventListener('mouseleave', () => { if (voiceIsRecording) stopVoiceRecording(); });
-    }
-
-    // نربط الزر بعد تحميل الصفحة
-    bindVoiceButton();
-</script>
-</body>
-</html>
