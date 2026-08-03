@@ -31,7 +31,7 @@
         //          القاعدة الجديدة ترفض القراءة الكاملة لغير الإدارة.
         //  🔒 ضمان مصادقة فايربيس قبل أي كتابة (القواعد لم تعد تقبل مجهولاً).
         //  🛵 اسم الكابتن من drivers_locations/{phone}/name بدل شيت السائقين.
-        const CURRENT_APP_VERSION = "39.13.Nahla-Gold";   /* 🔧 V2.2 */
+        const CURRENT_APP_VERSION = "39.14.Nahla-Gold";   /* 🔧 V2.2 */
         const RES_VERSION_KEY = 'hut_res_app_version';
         try {
             if (localStorage.getItem(RES_VERSION_KEY) !== CURRENT_APP_VERSION) {
@@ -59,7 +59,7 @@
      ابدأ بـ Content-Security-Policy-Report-Only أسبوعاً، اقرأ التقارير، ثم أَلزِم.
      'unsafe-inline' لازمٌ اليوم: الشيفرة كلها كتل سكربت مضمّنة. إزالته
      تتطلّب نقلها إلى ملفات أو ختمها بـ nonce — مشروع لاحق موثّق. -->
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://*.firebasedatabase.app https://*.firebaseio.com https://unpkg.com https://www.gstatic.com; style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://fonts.googleapis.com https://unpkg.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: blob: https:; media-src 'self' data: blob: https://actions.google.com; connect-src 'self' https://*.firebasedatabase.app https://*.firebaseio.com wss://*.firebasedatabase.app wss://*.firebaseio.com https://script.google.com https://script.googleusercontent.com https://*.googleapis.com https://securetoken.googleapis.com https://*.cloudfunctions.net https://*.run.app https://nominatim.openstreetmap.org https://unpkg.com https://cdn.jsdelivr.net; object-src 'none'; base-uri 'none'; form-action 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://*.firebasedatabase.app https://*.firebaseio.com https://unpkg.com https://www.gstatic.com https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://fonts.googleapis.com https://unpkg.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: blob: https:; media-src 'self' data: blob: https://actions.google.com; connect-src 'self' https://*.firebasedatabase.app https://*.firebaseio.com wss://*.firebasedatabase.app wss://*.firebaseio.com https://script.google.com https://script.googleusercontent.com https://*.googleapis.com https://securetoken.googleapis.com https://*.cloudfunctions.net https://*.run.app https://nominatim.openstreetmap.org https://unpkg.com https://cdn.jsdelivr.net; object-src 'none'; base-uri 'none'; form-action 'none'">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     
     <title>مطاعم نحلة | منصة الحوت</title>
@@ -73,18 +73,18 @@
     <link rel="manifest" href="manifest_rest.json">
     <link rel="apple-touch-icon" href="rest-logo.png">
 
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" defer></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.js" defer></script>
 
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.rtl.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;700;800;900&display=swap" rel="stylesheet">
     <!-- 🔒 [أ٣] كانت @latest — أي تحديث في المنبع يدخل الصفحة بلا مراجعة.
      ثُبِّتت النسخة. ⚠️ لم يُضَف integrity لأن بيئة البناء لا تصل unpkg
      لحساب البصمة. احسبها قبل النشر:
-       curl -s https://unpkg.com/lucide@0.263.1/dist/umd/lucide.min.js | openssl dgst -sha384 -binary | openssl base64 -A
+       curl -s https://cdn.jsdelivr.net/npm/lucide@0.263.1/dist/umd/lucide.min.js | openssl dgst -sha384 -binary | openssl base64 -A
      ثم أضف: integrity="sha384-<الناتج>" crossorigin="anonymous"
      وإن تعذّر — استضِف الملف محلياً بجوار الصفحة، وهو الأأمن. -->
-<script src="https://unpkg.com/lucide@0.263.1/dist/umd/lucide.min.js" defer></script>
+<script src="https://cdn.jsdelivr.net/npm/lucide@0.263.1/dist/umd/lucide.min.js" defer></script>
     
     <style>
         /* =========================================
@@ -653,7 +653,7 @@
                             </div>
                             <div class="position-relative">
                                 <div id="pickerMap" style="height: 150px; border-radius: 12px; border: 1px solid rgba(0,0,0,0.05);"></div>
-                                <img src="https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png" class="map-crosshair" alt="Pin" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -100%); z-index: 1000; pointer-events: none; width: 25px; height: 35px;">
+                                <img src="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/images/marker-icon-2x.png" class="map-crosshair" alt="Pin" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -100%); z-index: 1000; pointer-events: none; width: 25px; height: 35px;">
                                 <button type="button" class="btn btn-sm bg-white text-primary position-absolute shadow-sm fw-bold d-flex align-items-center gap-1" style="bottom: 8px; right: 8px; z-index: 1000; border-radius: 10px; font-size: 0.7rem; border: 1px solid rgba(0,0,0,0.1);" onclick="forceLocateMe()">
                                     <i data-lucide="crosshair" size="12"></i> موقعي
                                 </button>
@@ -2513,7 +2513,18 @@ function escAttr(x){ return esc(x).replace(/"/g,'&quot;').replace(/'/g,'&#39;');
             btn.innerHTML = originalBtnHtml; btn.disabled = false; 
             /* إلغاء التكرار قرارُ الكاشير نفسه — لا يُعرض كخطأ في النظام */
             if (e && e.message === 'DUPLICATE_CANCELLED') return;
-            alert(e && e.message === 'NO_PHONE' ? "⚠️ رقم المنشأة غير متوفر — سجّل خروجاً ثم دخولاً." : "حدث خطأ غير متوقع."); 
+            /* 🩹 الرسالة كانت "حدث خطأ غير متوقع" لكل سببٍ عدا NO_PHONE — أي
+               أن الكاشير يرى نصّاً واحداً لخمسة أعطال مختلفة، ولا يعرف أيّها
+               وقع ولا ماذا يفعل. الآن: لكل سببٍ رسالته وإجراؤه. */
+            const code = (e && e.message) || '';
+            let msg;
+            if (code === 'NO_PHONE')          msg = "⚠️ رقم المنشأة غير متوفر — سجّل خروجاً ثم دخولاً.";
+            else if (code === 'NO_AUTH')      msg = "🔒 انتهت جلستك الآمنة — حدّث الصفحة ثم أعد الإرسال.";
+            else if (code === 'SERVER_UNSURE')msg = "⏳ لم يصلنا تأكيد من الخادم.\n\n**راجع قائمة طلباتك قبل إعادة الإرسال** — قد يكون الطلب أُنشئ فعلاً.";
+            else if (/permission|PERMISSION/i.test(code)) msg = "🛑 قاعدة البيانات رفضت الكتابة.\n\nالسبب غالباً انتهاء المصادقة — حدّث الصفحة.";
+            else msg = "حدث خطأ أثناء الإرسال.\n\nالسبب التقني:\n" + (code || 'غير معروف') +
+                       "\n\nصوّر هذه الرسالة إن تكرّر.";
+            alert(msg); 
         }
     }
 
@@ -2907,11 +2918,3 @@ function escAttr(x){ return esc(x).replace(/"/g,'&quot;').replace(/'/g,'&#39;');
         // الماوس (سطح المكتب — للاختبار)
         btn.addEventListener('mousedown', (e) => { e.preventDefault(); startVoiceRecording(); });
         btn.addEventListener('mouseup', (e) => { e.preventDefault(); stopVoiceRecording(); });
-        btn.addEventListener('mouseleave', () => { if (voiceIsRecording) stopVoiceRecording(); });
-    }
-
-    // نربط الزر بعد تحميل الصفحة
-    bindVoiceButton();
-</script>
-</body>
-</html>
