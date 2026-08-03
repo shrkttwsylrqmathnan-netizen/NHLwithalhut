@@ -31,7 +31,7 @@
         //          القاعدة الجديدة ترفض القراءة الكاملة لغير الإدارة.
         //  🔒 ضمان مصادقة فايربيس قبل أي كتابة (القواعد لم تعد تقبل مجهولاً).
         //  🛵 اسم الكابتن من drivers_locations/{phone}/name بدل شيت السائقين.
-        const CURRENT_APP_VERSION = "39.11-DIAG";   /* 🔧 V2.2 */
+        const CURRENT_APP_VERSION = "39.11.Nahla-Gold";   /* 🔧 V2.2 */
         const RES_VERSION_KEY = 'hut_res_app_version';
         try {
             if (localStorage.getItem(RES_VERSION_KEY) !== CURRENT_APP_VERSION) {
@@ -60,89 +60,6 @@
      'unsafe-inline' لازمٌ اليوم: الشيفرة كلها كتل سكربت مضمّنة. إزالته
      تتطلّب نقلها إلى ملفات أو ختمها بـ nonce — مشروع لاحق موثّق. -->
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://*.firebasedatabase.app https://*.firebaseio.com https://unpkg.com https://www.gstatic.com; style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://fonts.googleapis.com https://unpkg.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: blob: https:; media-src 'self' data: blob: https://actions.google.com; connect-src 'self' https://*.firebasedatabase.app https://*.firebaseio.com wss://*.firebasedatabase.app wss://*.firebaseio.com https://script.google.com https://script.googleusercontent.com https://*.googleapis.com https://securetoken.googleapis.com https://*.cloudfunctions.net https://*.run.app https://nominatim.openstreetmap.org https://unpkg.com https://cdn.jsdelivr.net; object-src 'none'; base-uri 'none'; form-action 'none'">
-<!-- ═══════════════════════════════════════════════════════════════════════
-     🔍 لوحة التشخيص — مؤقّتة. تلتقط كل خطأ ومنعِ سياسةٍ منذ أول سطر،
-     وتعرضه على الشاشة بلا حاجة إلى أدوات المطوّر. احذف هذه الكتلة بعد الإصلاح.
-     ═══════════════════════════════════════════════════════════════════════ -->
-<script>
-window.__NAHLA_DIAG__ = { csp: [], err: [], rej: [], res: [] };
-(function () {
-  var D = window.__NAHLA_DIAG__;
-  document.addEventListener('securitypolicyviolation', function (e) {
-    D.csp.push('🛑 CSP منع: ' + (e.blockedURI || '?') +
-               '\n     التوجيه: ' + (e.violatedDirective || '?') +
-               '\n     السطر: ' + (e.lineNumber || '?'));
-  });
-  window.addEventListener('error', function (e) {
-    if (e.target && e.target !== window && (e.target.src || e.target.href)) {
-      D.res.push('📡 فشل تحميل: ' + (e.target.src || e.target.href));
-    } else {
-      D.err.push('💥 ' + (e.message || '?') + '\n     ' + (e.filename || '') + ':' + (e.lineno || '?'));
-    }
-  }, true);
-  window.addEventListener('unhandledrejection', function (e) {
-    D.rej.push('⏳ وعدٌ مرفوض: ' + ((e.reason && (e.reason.message || e.reason)) || '?'));
-  });
-
-  function box() {
-    var b = document.getElementById('nahlaDiagBox');
-    if (b) return b;
-    b = document.createElement('div');
-    b.id = 'nahlaDiagBox';
-    b.style.cssText = 'position:fixed;inset:8px;z-index:2147483647;background:#0d1117;color:#e6edf3;' +
-      'font:12px/1.7 monospace;direction:ltr;text-align:left;padding:14px;overflow:auto;' +
-      'border:2px solid #f0883e;border-radius:12px;white-space:pre-wrap;display:none';
-    document.body.appendChild(b);
-    return b;
-  }
-
-  window.nahlaDiag = async function () {
-    var b = box(); b.style.display = 'block';
-    var L = ['🐝 تشخيص لوحة المطاعم', '─────────────────────────────', ''];
-    L.push('authAction معرَّفة؟  ' + (typeof window.authAction === 'function' ? '✅ نعم' : '🔴 لا — الوحدة لم تُنفَّذ'));
-    L.push('showLoading معرَّفة؟ ' + (typeof window.showLoading === 'function' ? '✅ نعم' : '🔴 لا'));
-    L.push('lucide محمّلة؟       ' + (typeof window.lucide !== 'undefined' ? '✅ نعم' : '🟡 لا (غير حرجة)'));
-    L.push('leaflet محمّلة؟      ' + (typeof window.L !== 'undefined' ? '✅ نعم' : '🟡 لا'));
-    L.push('');
-    b.textContent = L.join('\n') + '\n⏳ جارٍ اختبار الاستيراد…';
-
-    var extra = [];
-    try {
-      var m = await import('https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js');
-      extra.push('استيراد فايربيس:  ✅ نجح (' + Object.keys(m).length + ' تصدير)');
-    } catch (e) { extra.push('استيراد فايربيس:  🔴 فشل → ' + (e && e.message)); }
-    try {
-      var r = await fetch('https://unpkg.com/lucide@0.263.1/dist/umd/lucide.min.js', { method: 'GET' });
-      extra.push('unpkg:            ' + (r.ok ? '✅ ' + r.status : '🔴 ' + r.status));
-    } catch (e) { extra.push('unpkg:            🔴 فشل → ' + (e && e.message)); }
-
-    L = L.concat(extra, ['', '── منعُ سياسة الأمان (CSP) ──']);
-    L = L.concat(D.csp.length ? D.csp : ['✅ صفر']);
-    L.push('', '── موارد فشل تحميلها ──');
-    L = L.concat(D.res.length ? D.res : ['✅ صفر']);
-    L.push('', '── أخطاء JavaScript ──');
-    L = L.concat(D.err.length ? D.err : ['✅ صفر']);
-    L.push('', '── وعودٌ مرفوضة ──');
-    L = L.concat(D.rej.length ? D.rej : ['✅ صفر']);
-    L.push('', '─────────────────────────────', 'صوّر هذه الشاشة وأرسلها.');
-    b.textContent = L.join('\n');
-    b.onclick = function () { b.style.display = 'none'; };
-  };
-
-  window.addEventListener('load', function () {
-    var f = document.createElement('button');
-    f.textContent = '🔍 لماذا لا يعمل؟';
-    f.style.cssText = 'position:fixed;bottom:12px;left:12px;z-index:2147483646;background:#f0883e;' +
-      'color:#0d1117;border:0;border-radius:10px;padding:10px 14px;font:bold 13px sans-serif;' +
-      'box-shadow:0 4px 14px rgba(0,0,0,.3);cursor:pointer';
-    f.onclick = window.nahlaDiag;
-    document.body.appendChild(f);
-    setTimeout(function () {
-      if (typeof window.authAction !== 'function') { f.textContent = '🔴 اضغط: العطل مُشخَّص'; window.nahlaDiag(); }
-    }, 2500);
-  });
-})();
-</script>
 
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     
@@ -819,20 +736,19 @@ window.__NAHLA_DIAG__ = { csp: [], err: [], rej: [], res: [] };
                 <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                     <defs>
                         <linearGradient id="magicGradient" x1="0%" y1="100%" x2="0%" y2="0%">
-                            <stop offset="0%" stop-color="var(--primary-blue)">
+                            <stop offset="0%" stop-color="var(--nahla-yellow-deep)">
                                 <animate attributeName="offset" values="-1; 1; -1" dur="3s" repeatCount="indefinite" />
                             </stop>
                             <stop offset="50%" stop-color="var(--nahla-yellow)">
                                 <animate attributeName="offset" values="0; 2; 0" dur="3s" repeatCount="indefinite" />
                             </stop>
-                            <stop offset="100%" stop-color="var(--primary-blue-dark)">
+                            <stop offset="100%" stop-color="var(--nahla-yellow-deep)">
                                 <animate attributeName="offset" values="1; 3; 1" dur="3s" repeatCount="indefinite" />
                             </stop>
                         </linearGradient>
                     </defs>
-                    <circle cx="16" cy="5" r="2.5" />
-                    <circle cx="8" cy="19" r="2.5" />
-                    <path d="M16 8 C 16 11, 8 13, 8 16" />
+                    <!-- 🐝 خلية نحلة السداسية — تُضيء ذهبياً عند وجود طلبات -->
+                    <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z" />
                 </svg>
             </div>
             <span class="nahla-brand">نحلة</span>
@@ -2992,11 +2908,3 @@ function escAttr(x){ return esc(x).replace(/"/g,'&quot;').replace(/'/g,'&#39;');
         // الماوس (سطح المكتب — للاختبار)
         btn.addEventListener('mousedown', (e) => { e.preventDefault(); startVoiceRecording(); });
         btn.addEventListener('mouseup', (e) => { e.preventDefault(); stopVoiceRecording(); });
-        btn.addEventListener('mouseleave', () => { if (voiceIsRecording) stopVoiceRecording(); });
-    }
-
-    // نربط الزر بعد تحميل الصفحة
-    bindVoiceButton();
-</script>
-</body>
-</html>
