@@ -31,7 +31,7 @@
         //          القاعدة الجديدة ترفض القراءة الكاملة لغير الإدارة.
         //  🔒 ضمان مصادقة فايربيس قبل أي كتابة (القواعد لم تعد تقبل مجهولاً).
         //  🛵 اسم الكابتن من drivers_locations/{phone}/name بدل شيت السائقين.
-        const CURRENT_APP_VERSION = "39.15.Nahla-Gold";   /* 🔧 V2.2 */
+        const CURRENT_APP_VERSION = "39.16.Nahla-Gold";   /* 🔧 V2.2 */
         const RES_VERSION_KEY = 'hut_res_app_version';
         try {
             if (localStorage.getItem(RES_VERSION_KEY) !== CURRENT_APP_VERSION) {
@@ -1282,7 +1282,7 @@ function escAttr(x){ return esc(x).replace(/"/g,'&quot;').replace(/'/g,'&#39;');
        فننبّه المطعم ليعيد الضغط — وcid يضمن أن الإعادة لا تُنتج توأماً.
        ═══════════════════════════════════════════════════════════════════════ */
     const fns = getFunctions(app, 'europe-west1');
-    const USE_SERVER_CREATE = true;   // اجعله false للتراجع الفوري بلا نشر
+    const USE_SERVER_CREATE = false;   // اجعله false للتراجع الفوري بلا نشر
 
     /* مفتاح النيّة: بصمة المحتوى + نافذة ١٥ دقيقة. فالضغط مرّتين على نفس
        الطلب يعيد نفس المفتاح، وطلبٌ مختلف يأخذ مفتاحاً جديداً.
