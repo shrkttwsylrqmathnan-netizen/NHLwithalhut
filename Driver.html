@@ -49,7 +49,7 @@
      الآن: رقمٌ واحد يُشتقّ منه كل شيء — الشاشة والإعدادات ومسح الكاش.
      **وأي تسليم جديد يجب أن يرفعه، وإلا لم يصل.**
      ═══════════════════════════════════════════════════════════════════════ */
-  const CURRENT_APP_VERSION = "16.5-Nahla-Gold";   /* 🔧 V2.2 — لا تنسَ رفعه مع كل تسليم يمسّ هذا الملف */
+  const CURRENT_APP_VERSION = "16.8-Nahla-Gold";   /* 🔧 V2.2 — لا تنسَ رفعه مع كل تسليم يمسّ هذا الملف */
   window.APP_VERSION = CURRENT_APP_VERSION;
   /* اطبعه في شاشة الدخول فور جهوز الصفحة — نصّاً واحداً لا نسختين. */
   document.addEventListener('DOMContentLoaded', function(){
@@ -72,7 +72,7 @@
      ابدأ بـ Content-Security-Policy-Report-Only أسبوعاً، اقرأ التقارير، ثم أَلزِم.
      'unsafe-inline' لازمٌ اليوم: الشيفرة كلها كتل سكربت مضمّنة. إزالته
      تتطلّب نقلها إلى ملفات أو ختمها بـ nonce — مشروع لاحق موثّق. -->
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://*.firebasedatabase.app https://*.firebaseio.com https://www.gstatic.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: blob: https:; media-src 'self' data: blob:; connect-src 'self' https://*.firebasedatabase.app https://*.firebaseio.com wss://*.firebasedatabase.app wss://*.firebaseio.com https://script.google.com https://script.googleusercontent.com https://*.googleapis.com https://securetoken.googleapis.com; frame-ancestors 'none'; object-src 'none'; base-uri 'none'; form-action 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://*.firebasedatabase.app https://*.firebaseio.com https://www.gstatic.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: blob: https:; media-src 'self' data: blob:; connect-src 'self' https://*.firebasedatabase.app https://*.firebaseio.com wss://*.firebasedatabase.app wss://*.firebaseio.com https://script.google.com https://script.googleusercontent.com https://*.googleapis.com https://securetoken.googleapis.com https://*.cloudfunctions.net https://*.run.app; object-src 'none'; base-uri 'none'; form-action 'none'">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 <title>كباتن نحلة | V14</title>
 <meta name="theme-color" content="#FFB300">
@@ -1331,7 +1331,7 @@ function toast(msg,type='ok'){
   const c=document.getElementById('toasts'),t=document.createElement('div');
   const ico={ok:'✅',bad:'⚠️',info:'ℹ️',warn:'🔔'};
   t.className='toast t-'+type;
-  t.innerHTML=`<div class="t-ico">/*safe-html*/${ico[type]||'📢'}</div><div class="t-txt">${esc(msg)}</div>`;
+  t.innerHTML=`<div class="t-ico">${ico[type]||'📢'}</div><div class="t-txt">${esc(msg)}</div>`;
   c.appendChild(t);
   setTimeout(()=>{t.style.opacity='0';t.style.transform='translateY(-14px)';setTimeout(()=>t.remove(),320);},5200);
 }
@@ -2397,7 +2397,7 @@ function refreshDash(){
   const r=document.getElementById('stRate');
   if(r){r.innerText=rate+'%';r.style.color=rate>=80?'var(--ok-dp)':rate>=60?'var(--warn-dp)':'var(--bad-dp)';}
   const e=document.getElementById('earnV');
-  if(e){e.innerHTML=`/*safe-html*/${earnToday.toLocaleString('ar-EG')} <small>د.ع</small>`;e.classList.add('pop');setTimeout(()=>e.classList.remove('pop'),420);}
+  if(e){e.innerHTML=`${earnToday.toLocaleString('ar-EG')} <small>د.ع</small>`;e.classList.add('pop');setTimeout(()=>e.classList.remove('pop'),420);}
 }
 
 /* ══════════════ المستمعات (كلها ذاتية الشفاء) ══════════════ */
@@ -2442,7 +2442,7 @@ function startListeners(){
         <div class="li-t">${t}</div></div></div>`;
     });
     earnToday=total; refreshDash();
-    document.getElementById('ldgTotal').innerHTML=`/*safe-html*/${total} <small style="font-size:1rem;">د.ع</small>`;
+    document.getElementById('ldgTotal').innerHTML=`${total} <small style="font-size:1rem;">د.ع</small>`;
     document.getElementById('ldgList').innerHTML=html||'<div style="text-align:center;padding:44px 0;color:var(--muted);font-weight:800;">لا رحلات اليوم بعد.</div>';
   });
 
@@ -2889,7 +2889,7 @@ function num(x){
 }
 function modal(icon,title,body,kind){
   const ov=document.createElement('div'); ov.className='mod-ov';
-  ov.innerHTML=`<div class="mod"><div class="mod-i mi-/*safe-html*/${kind}">/*safe-html*/${icon}</div>
+  ov.innerHTML=`<div class="mod"><div class="mod-i mi-${kind}">${icon}</div>
     <div class="mod-t">${esc(title)}</div><div class="mod-b">${esc(body)}</div>
     <button class="btn-clay bc-royal" style="width:100%;">حسناً، فهمت</button></div>`;
   ov.querySelector('button').onclick=()=>ov.remove();
@@ -2998,7 +2998,7 @@ function timers(){
     const e=document.getElementById('t-'+o.id); if(!e)return;
     const el=Date.now()-(o.acceptedTime||Date.now()), rem=30*60*1000-el;
     const neg=rem<0, ab=Math.abs(rem), m=Math.floor(ab/60000), s=Math.floor((ab%60000)/1000);
-    e.innerHTML=`/*safe-html*/${ICO.clk} ${neg?'-':''}${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+    e.innerHTML=`${ICO.clk} ${neg?'-':''}${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
     e.className='ord-tm '+(rem>600000?'tm-ok':rem>0?'tm-w':'tm-b');
   });
 }
