@@ -31,7 +31,7 @@
         //          القاعدة الجديدة ترفض القراءة الكاملة لغير الإدارة.
         //  🔒 ضمان مصادقة فايربيس قبل أي كتابة (القواعد لم تعد تقبل مجهولاً).
         //  🛵 اسم الكابتن من drivers_locations/{phone}/name بدل شيت السائقين.
-        const CURRENT_APP_VERSION = "39.5.Nahla-Wired";   /* 🔧 V2.2 */
+        const CURRENT_APP_VERSION = "39.6.Nahla-Gold";   /* 🔧 V2.2 */
         const RES_VERSION_KEY = 'hut_res_app_version';
         try {
             if (localStorage.getItem(RES_VERSION_KEY) !== CURRENT_APP_VERSION) {
@@ -64,7 +64,7 @@
     
     <title>مطاعم نحلة | منصة الحوت</title>
 
-    <meta name="theme-color" content="#0f172a"> 
+    <meta name="theme-color" content="#FFB300"> 
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="نظام الحوت">
@@ -91,16 +91,24 @@
            🐳 الهوية البصرية - شركة نحلة (منصة الحوت)
            ========================================= */
         :root {
+            /* 🐝 هوية نحلة — العسل الذهبي */
             --primary: #1e293b;
-            --accent: #f97316; 
+            --accent: #FFB300;
             --success: #10b981;
-            --primary-blue: #3b82f6; 
-            --primary-blue-dark: #0f172a; 
-            
-            --bg-color: #f8fafc; 
-            --glass-bg: rgba(255, 255, 255, 0.7);
-            --glass-border: rgba(255, 255, 255, 0.8);
-            --glass-shadow: 0 8px 32px rgba(15, 23, 42, 0.04);
+
+            /* السداسية المضيئة: الأصفر هو نجم الهوية */
+            --nahla-yellow: #FFC107;          /* ⬅️ كان مفقوداً — سبب انطفاء السداسية */
+            --nahla-yellow-deep: #FF8F00;
+            --nahla-honey: #FFB300;
+
+            /* أسماء --primary-blue محفوظة كي لا ينكسر شيء، لكن قيمها ذهبية */
+            --primary-blue: #FFB300;
+            --primary-blue-dark: #7C4A03;
+
+            --bg-color: #FFFDF5;
+            --glass-bg: rgba(255, 255, 255, 0.72);
+            --glass-border: rgba(255, 179, 0, 0.28);
+            --glass-shadow: 0 8px 32px rgba(120, 80, 0, 0.06);
         }
 
         body { 
@@ -730,7 +738,7 @@
                             <stop offset="0%" stop-color="var(--primary-blue)">
                                 <animate attributeName="offset" values="-1; 1; -1" dur="3s" repeatCount="indefinite" />
                             </stop>
-                            <stop offset="50%" stop-color="#93c5fd">
+                            <stop offset="50%" stop-color="var(--nahla-yellow)">
                                 <animate attributeName="offset" values="0; 2; 0" dur="3s" repeatCount="indefinite" />
                             </stop>
                             <stop offset="100%" stop-color="var(--primary-blue-dark)">
