@@ -27,7 +27,7 @@ try{if(localStorage.getItem(VK)!==V){localStorage.setItem(VK,V);if("caches"in wi
      ابدأ بـ Content-Security-Policy-Report-Only أسبوعاً، اقرأ التقارير، ثم أَلزِم.
      'unsafe-inline' لازمٌ اليوم: الشيفرة كلها كتل سكربت مضمّنة. إزالته
      تتطلّب نقلها إلى ملفات أو ختمها بـ nonce — مشروع لاحق موثّق. -->
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://*.firebasedatabase.app https://*.firebaseio.com https://www.gstatic.com https://maps.googleapis.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: blob: https:; media-src 'self' data: blob: https://actions.google.com; connect-src 'self' https://*.firebasedatabase.app https://*.firebaseio.com wss://*.firebasedatabase.app wss://*.firebaseio.com https://script.google.com https://script.googleusercontent.com https://*.googleapis.com https://securetoken.googleapis.com; frame-ancestors 'none'; object-src 'none'; base-uri 'none'; form-action 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://*.firebasedatabase.app https://*.firebaseio.com https://www.gstatic.com https://maps.googleapis.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: blob: https:; media-src 'self' data: blob: https://actions.google.com; connect-src 'self' https://*.firebasedatabase.app https://*.firebaseio.com wss://*.firebasedatabase.app wss://*.firebaseio.com https://script.google.com https://script.googleusercontent.com https://*.googleapis.com https://securetoken.googleapis.com https://*.cloudfunctions.net https://*.run.app; object-src 'none'; base-uri 'none'; form-action 'none'">
 <link rel="manifest" href="manifest_admin.json">
 <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no,viewport-fit=cover">
 <title>نحلة — لوحة الإدارة</title>
@@ -1149,7 +1149,7 @@ function dN(p){
 function toast(m,t="s"){
   const c=document.getElementById("toasts"),el=document.createElement("div");
   el.className=`ti t${t}`;
-  el.innerHTML=`<div class="ti-ico">/*safe-html*/${t==="s"?"✅":"❌"}</div><span style="flex:1">${esc(m)}</span>`;
+  el.innerHTML=`<div class="ti-ico">${t==="s"?"✅":"❌"}</div><span style="flex:1">${esc(m)}</span>`;
   c.appendChild(el);
   setTimeout(()=>{el.style.opacity="0";el.style.transition=".3s";setTimeout(()=>el.remove(),320);},3200);
 }
@@ -1290,6 +1290,37 @@ function setupFB(){
     if(cs)cs.textContent=fbConn?"🟢 متصل":"🔴 منقطع";
     updTicker();
   });
+  /* ═══════════════════════════════════════════════════════════════════════
+     📊 [N-9.2] عدّادا اليوم — من المصدرين معاً لا من active_orders وحدها
+     ───────────────────────────────────────────────────────────────────────
+     كان vDone = arch.length و wdT = active.length+arch.length، وكلاهما
+     مشتقّ من active_orders حصراً. وكان ذلك صحيحاً ما دامت العقدة تحمل
+     اليوم كلّه حتى الثالثة فجراً.
+
+     ومع terminalOrderSweeper صار الطلب المنتهي يغادرها خلال ٤٥ دقيقة
+     ⇒ العدّادان ينهاران بعد الظهر بينما الأرشيف نفسه سليم.
+     (جدول الأرشيف كان يدمج archOrd+compArch أصلاً — السطران وحدهما لم
+      يفعلا. لهذا اختفت الأرقام ولم تختفِ الصفوف.)
+
+     الآن: المنتهي المتبقّي في active_orders + المنتهي المنقول إلى
+     completed_orders/{اليوم}، بإزالة التكرار بالمُعرّف — فالطلب المحسوب
+     مرّة واحدة سواء أُدرِك قبل الكنس أو بعده.
+     ═══════════════════════════════════════════════════════════════════════ */
+  function updDayCounts(){
+    const today=new Date().toISOString().split("T")[0];
+    const seen=new Set();let done=0,total=0;
+    const take=o=>{
+      const k=String(o[O.ID]||"");
+      if(k){if(seen.has(k))return;seen.add(k);}
+      total++;
+      if(o[O.STATUS]!=="deleted")done++;
+    };
+    archOrd.forEach(take);                 // منتهٍ لم يُكنس بعد
+    (compByDay[today]||[]).forEach(take);  // منتهٍ كُنس إلى الأرشيف
+    const vd=document.getElementById("vDone");if(vd)vd.textContent=done;
+    const wd=document.getElementById("wdT");if(wd)wd.textContent=liveOrd.length+total;
+  }
+
   const oCb=snap=>{
     const obj=snap.val();let active=[],arch=[];const now=Date.now();
     if(obj){Object.values(obj).forEach(o=>{
@@ -1327,9 +1358,7 @@ function setupFB(){
     pendCnt=np;
     document.querySelectorAll(".v-ord").forEach(e=>e.textContent=active.length);
     document.querySelectorAll(".v-res").forEach(e=>e.textContent=[...new Set(active.map(o=>o[O.RES]))].length);
-    const done=arch.filter(o=>o[O.STATUS]!=="deleted").length;
-    const vd=document.getElementById("vDone");if(vd)vd.textContent=done;
-    const wd=document.getElementById("wdT");if(wd)wd.textContent=active.length+arch.length;
+    updDayCounts();   /* [N-9.2] كان يعدّ من active_orders وحدها */
     const nb=document.getElementById("nbO");if(nb){nb.textContent=np;nb.style.display=np>0?"":"none";}
     const bd=document.getElementById("bnDot");if(bd)bd.classList.toggle("on",np>0);
     updRadarCnts();updTicker();scheduleDerived();
@@ -1386,6 +1415,7 @@ function setupFB(){
       compByDay[day]=arr;
       compArch=[].concat.apply([],Object.values(compByDay));
       renderArch();
+      updDayCounts();   /* [N-9.2] وصول أرشيف اليوم يغيّر العدّ أيضاً */
     };
     listen(()=>db.ref("completed_orders/"+day),cCb);
   });
