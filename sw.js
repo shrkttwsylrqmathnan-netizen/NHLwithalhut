@@ -3,8 +3,8 @@
 // تحديث: حماية Firebase اللحظي + تمرير رفع الصور (POST) + تسريع الأوفلاين 🚀
 // =========================================================
 
-const CACHE_NAME = 'Nahla-Core-V14.8'; 
-const CDN_CACHE_NAME = 'Nahla-CDNs-V14.8';
+const CACHE_NAME = 'Nahla-Core-V15.6'; 
+const CDN_CACHE_NAME = 'Nahla-CDNs-V15.6';
 
 // قائمة الملفات الأساسية للنظام
 // 🩹 [كاش الأوفلاين] تصحيح حالة الأحرف: GitHub Pages حسّاس لها، وكانت القائمة
