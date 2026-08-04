@@ -1801,7 +1801,7 @@ function escAttr(x){ return esc(x).replace(/"/g,'&quot;').replace(/'/g,'&#39;');
         let html = '';
         Object.keys(myCustomPriceList).sort().forEach(area => {
             const price = myCustomPriceList[area];
-            html += `<div class="dropdown-item-area" onclick="selectDropdownArea('${area}', ${price})">
+            html += `<div class="dropdown-item-area" onclick="selectDropdownArea('${jss(area)}', ${Number(price)||0})">
                         <span>${area}</span>
                         <span class="area-price-tag">${price} د.ع</span>
                      </div>`;
@@ -2420,6 +2420,28 @@ function escAttr(x){ return esc(x).replace(/"/g,'&quot;').replace(/'/g,'&#39;');
         });
     }
 
+    /* ═══════════════════════════════════════════════════════════════════════
+       🔴 [N-9.4] sid و jss — **منقولتان حرفياً من Driver.html**
+       ───────────────────────────────────────────────────────────────────────
+       ولم تُكتَبا من جديد عمداً: النمط واحد وتعليقهما هناك يشرح السبب.
+
+       ⚠️ **وescAttr الموجودة في هذا الملف لا تكفي داخل onclick.** في
+          onclick="f('${x}')" يمرّ النصّ بمحلّلين: محلّل HTML يفكّ السمة
+          **ويفكّ الكيانات**، ثم محلّل JS يفكّ السلسلة عند العلامة المفردة.
+          فـescAttr تحوّل ' إلى &#39; ثم **يفكّها محلّل HTML قبل أن يصل الدور
+          إلى JS** ⇒ منطقة اسمها حي's تُنتج f('حي's') ⇒ SyntaxError.
+
+       ⇒ esc للنصّ الظاهر · escAttr لقيمة سمة عادية · jss داخل onclick ·
+         sid للمُعرّفات.
+       ═══════════════════════════════════════════════════════════════════════ */
+    function sid(x){ return String(x??'').replace(/[^A-Za-z0-9_-]/g,'').slice(0,64); }
+    function jss(x){
+      return String(x??'')
+        .replace(/\\/g,'\\\\').replace(/'/g,"\\'").replace(/"/g,'&quot;')
+        .replace(/\r?\n/g,' ')
+        .replace(/&(?!quot;)/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+    }
+
     function archiveRowHtml(o) {
         const orderTime = o.ts ? new Date(o.ts).toLocaleTimeString('ar-EG', { hour: '2-digit', minute: '2-digit' }) : '';
         const dPhone = o.drv || "";
@@ -2622,7 +2644,7 @@ function escAttr(x){ return esc(x).replace(/"/g,'&quot;').replace(/'/g,'&#39;');
             const readyBtnHtml = showReadyBtn ? (readyForPickup ? `<span class="ready-pill"><i data-lucide="check-circle" size="10"></i> جاهز للاستلام</span>` : `<button class="btn-ready" onclick="markOrderReady('${esc(orderId)}', this)"><i data-lucide="package-check" size="14"></i> إبلاغ الكابتن بالجهوزية</button>`) : '';
 
             const photoUrl = o.photoUrl || o.image; 
-            const imgBtnHtml = photoUrl ? `<button class="btn-call-mini" style="background:#e0f2fe; color:var(--primary-blue);" onclick="document.getElementById('fullReceiptImage').src='${photoUrl}'; document.getElementById('imageViewerModal').style.display='flex';" title="عرض الوصل"><i data-lucide="image" size="14"></i></button>` : '';
+            const imgBtnHtml = photoUrl ? `<button class="btn-call-mini" style="background:#e0f2fe; color:var(--primary-blue);" onclick="document.getElementById('fullReceiptImage').src='${jss(photoUrl)}'; document.getElementById('imageViewerModal').style.display='flex';" title="عرض الوصل"><i data-lucide="image" size="14"></i></button>` : '';
 
             activeOrdersHtml += `
             <div class="live-order-card" id="order-${esc(orderId)}">
@@ -2639,7 +2661,7 @@ function escAttr(x){ return esc(x).replace(/"/g,'&quot;').replace(/'/g,'&#39;');
                     </div>
                 </div>
                 <div class="order-details-row mt-2">
-                    <div class="detail-item"><i data-lucide="map-pin" size="14" style="color: var(--accent);"></i> ${orderArea || 'غير محددة'}</div>
+                    <div class="detail-item"><i data-lucide="map-pin" size="14" style="color: var(--accent);"></i> ${esc(orderArea || 'غير محددة')}</div>
                     <div class="detail-item"><i data-lucide="bike" size="14" style="color: var(--success);"></i> الكابتن: ${driverName}</div>
                 </div>
                 <div class="progress-tracker mt-3">
@@ -2896,400 +2918,3 @@ function escAttr(x){ return esc(x).replace(/"/g,'&quot;').replace(/'/g,'&#39;');
                 if (String(e && e.message) === 'SERVER_DEDUP') throw e;
                 if (String(e && e.message) === 'SERVER_UNSURE') unsure = true;
                 else serverId = null;
-            }
-
-            /* لا نسقط للمسار القديم هنا: قد يكون الطلب أُنشئ فعلاً على
-               السيرفر ولم يصلنا الردّ. إنشاء توأم أسوأ من طلب متأخّر.
-               وcid يجعل إعادة الضغط آمنة تماماً — نفس النيّة، نفس الطلب. */
-            if (unsure) throw new Error('SERVER_UNSURE');
-            if (serverId) return;                    // ✅ أُنشئ على السيرفر
-            /* serverId === null ⇒ تيقّنّا أن شيئاً لم يُنشأ ⇒ المسار القديم */
-        }
-
-        /* ② المسار القديم — يبقى كاملاً وبلا تغيير حرف واحد.
-           هذا هو ما يُحذف **آخر** شيء: لا قبل أن يقرأ الرصد صفر
-           create_fallback لأيام، ولا قبل نشر ".write": false. */
-        await set(ref(db, 'active_orders/' + uniqueId), {
-            id: uniqueId, restaurant: resName, area: area, details: details, status: "pending_driver",
-            driverPhone: "system_routing", price: price, timestamp: tsIso, photoUrl: imageUrl,
-            last_update: tsIso, resPhone: normResPhone, resLat: regLat || 0, resLng: regLng || 0,
-            comm: safeComm, payType: safePayType, is_sovereign: false, ready_for_pickup: false
-        });
-        resTrack('create_legacy', { orderId: uniqueId });
-
-        // 🔧 أُزيل نداء NEW_ORDER إلى GAS — كان معالجه فارغاً ({success:true})
-        //   ولا يفعل شيئاً سوى استهلاك حصة السكربت.
-    }
-
-    function showSuccessMessage(customHTML) {
-        if (navigator.vibrate) navigator.vibrate([100, 50, 100]); 
-        
-        document.getElementById('orderStatusBox').classList.remove('hidden-section');
-        document.getElementById('successToastContent').innerHTML = customHTML;
-        if (typeof lucide !== 'undefined') lucide.createIcons();
-        
-        document.getElementById('customerPhone').value = ""; document.getElementById('customerDetails').value = "";
-        document.getElementById('orderPrice').value = ""; document.getElementById('customAreaName').value = ""; document.getElementById('customAreaPrice').value = "";
-        document.getElementById('customerPhoneWrap').classList.remove('cleaned'); document.getElementById('priceHint').classList.add('hidden-section');
-        document.getElementById('customerArea').value = ""; document.getElementById('areaDisplayInput').value = ""; document.getElementById('customAreaSection').classList.add('hidden-section');
-        
-        window.removePhoto(); clearDraft();
-        setTimeout(() => document.getElementById('orderStatusBox').classList.add('hidden-section'), 4500);
-    }
-
-    // نظام الرسائل الإنسانية الذكي
-    function showFriendlyMessage() {
-        const banner = document.getElementById('friendlyMessageBanner');
-        const textEl = document.getElementById('friendlyText');
-        const iconEl = document.getElementById('friendlyIcon');
-        
-        const hour = new Date().getHours();
-        const month = new Date().getMonth() + 1; // 1-12
-        const isSummer = month >= 6 && month <= 9;
-        const isWinter = month === 12 || month <= 2;
-        
-        let messages = [];
-        let icon = "🌤️";
-
-        // رسائل الصباح (من 6 صباحاً إلى 3 عصراً)
-        if (hour >= 6 && hour < 15) {
-            icon = isSummer ? "🔥" : (isWinter ? "🌧️" : "☕");
-            messages = [
-                "صباح الخير! بداية يوم جديد ورزق وفير إن شاء الله. 🤍",
-                "الكباتن هم شركاء النجاح، استقبلوهم بابتسامة لتسهيل يومهم ويومكم. 🤝",
-                isSummer ? "الجو حار جداً اليوم، الكباتن يبذلون جهداً مضاعفاً، كلمة طيبة أو قدح ماء بارد يصنع فارقاً كبيراً! 🧊" : "صباح الهمة!",
-                isWinter ? "صباح الخير.. الأجواء باردة، تجهيز الطلب بسرعة يساعد الكابتن على توصيله حاراً للزبون ويريحه من الوقوف بالبرد. 🧣" : "يوم موفق!"
-            ];
-        } 
-        // رسائل المساء والليل (من 3 عصراً فما فوق)
-        else {
-            icon = "🌙";
-            messages = [
-                "مساء الخير! نحن في أوقات الذروة، التعاون وسرعة التجهيز يصنعان تقييماً ممتازاً لمطعمكم. 🌟",
-                "أبطال التوصيل في الشوارع الآن لخدمة زبائنكم، شكراً لتعاونكم المستمر معهم. 🛵",
-                "نظام الحوت السحابي يراقب الأداء لضمان وصول طلباتكم بأسرع وقت. عمل موفق! 🐳"
-            ];
-        }
-
-        // اختيار رسالة عشوائية من القائمة المناسبة
-        const randomMsg = messages[Math.floor(Math.random() * messages.length)];
-        textEl.innerText = randomMsg;
-        iconEl.innerText = icon;
-        
-        banner.classList.remove('hidden-section');
-    }
-
-    /* ════════════════════════════════════════════════════════════
-       🎙️ ميزة الرسالة الصوتية — تسجيل + تحليل ذكي + إرسال فوري
-       تعمل بمنطق المسح الذكي للوصل تماماً (بلا مراجعة).
-    ════════════════════════════════════════════════════════════ */
-    let voiceMediaRecorder = null;
-    let voiceChunks = [];
-    let voiceStream = null;
-    let voiceMimeType = 'audio/webm';
-    let voiceTimerInterval = null;
-    let voiceStartTime = 0;
-    let voiceIsRecording = false;
-
-    // اختيار نوع صوت مدعوم (توافق Android/iOS)
-    function pickSupportedAudioMime() {
-        const candidates = ['audio/webm;codecs=opus', 'audio/webm', 'audio/mp4', 'audio/ogg'];
-        if (typeof MediaRecorder === 'undefined' || !MediaRecorder.isTypeSupported) return 'audio/webm';
-        for (const c of candidates) {
-            if (MediaRecorder.isTypeSupported(c)) return c;
-        }
-        return 'audio/webm';
-    }
-
-    async function startVoiceRecording() {
-        if (voiceIsRecording) return;
-        try {
-            /* 🎚️ الكلام يكفيه أحادي بـ16kHz. الافتراضي غالباً ستيريو 48kHz —
-               أي حِمل أضعافاً بلا فائدة، ويُحسّ على شبكة خلوية. */
-            voiceStream = await navigator.mediaDevices.getUserMedia({
-                audio: {
-                    channelCount: 1,
-                    sampleRate: 16000,
-                    echoCancellation: true,
-                    noiseSuppression: true,
-                    autoGainControl: true
-                }
-            }).catch(() => navigator.mediaDevices.getUserMedia({ audio: true }));
-        } catch (e) {
-            alert("⚠️ لا يمكن الوصول للميكروفون. تأكد من منح إذن التسجيل للتطبيق من إعدادات المتصفح.");
-            return;
-        }
-        voiceMimeType = pickSupportedAudioMime();
-        voiceChunks = [];
-        try {
-            voiceMediaRecorder = new MediaRecorder(voiceStream, { mimeType: voiceMimeType, audioBitsPerSecond: 24000 });
-        } catch (e) {
-            // بعض الأجهزة ترفض تمرير mimeType — نتركه افتراضياً
-            voiceMediaRecorder = new MediaRecorder(voiceStream);
-            voiceMimeType = voiceMediaRecorder.mimeType || 'audio/webm';
-        }
-
-        voiceMediaRecorder.ondataavailable = (ev) => {
-            if (ev.data && ev.data.size > 0) voiceChunks.push(ev.data);
-        };
-        voiceMediaRecorder.onstop = () => {
-            // إيقاف مسارات الميكروفون (إطفاء المؤشر الأحمر)
-            if (voiceStream) { voiceStream.getTracks().forEach(t => t.stop()); voiceStream = null; }
-            const blob = new Blob(voiceChunks, { type: voiceMimeType });
-            handleVoiceBlob(blob);
-        };
-
-        voiceMediaRecorder.start();
-        voiceIsRecording = true;
-        voiceStartTime = Date.now();
-
-        // واجهة التسجيل
-        const btn = document.getElementById('voiceBtn');
-        const icon = document.getElementById('voiceIcon');
-        const label = document.getElementById('voiceLabel');
-        const hint = document.getElementById('voiceHint');
-        btn.classList.add('recording');
-        icon.innerHTML = `<div class="voice-wave"><span></span><span></span><span></span><span></span><span></span></div>`;
-        label.textContent = 'يسجّل... ارفع إصبعك للإرسال';
-        hint.innerHTML = 'تكلّم الآن بوضوح 🎙️';
-        if (navigator.vibrate) navigator.vibrate(40);
-
-        // مؤقّت
-        const timerEl = document.getElementById('voiceTimer');
-        voiceTimerInterval = setInterval(() => {
-            const sec = Math.floor((Date.now() - voiceStartTime) / 1000);
-            const m = String(Math.floor(sec / 60)).padStart(2, '0');
-            const s = String(sec % 60).padStart(2, '0');
-            timerEl.textContent = `${m}:${s}`;
-            // حد أقصى 60 ثانية للأمان
-            if (sec >= 60) stopVoiceRecording();
-        }, 250);
-    }
-
-    function stopVoiceRecording() {
-        if (!voiceIsRecording) return;
-        voiceIsRecording = false;
-        if (voiceTimerInterval) { clearInterval(voiceTimerInterval); voiceTimerInterval = null; }
-
-        const recordedSec = (Date.now() - voiceStartTime) / 1000;
-
-        // تسجيل قصير جداً = إلغاء (ضغطة خاطئة)
-        if (recordedSec < 0.6) {
-            if (voiceMediaRecorder && voiceMediaRecorder.state !== 'inactive') {
-                voiceMediaRecorder.onstop = null; // لا نعالج التسجيل الملغى
-                try { voiceMediaRecorder.stop(); } catch(e) {}
-            }
-            if (voiceStream) { voiceStream.getTracks().forEach(t => t.stop()); voiceStream = null; }
-            resetVoiceUI();
-            document.getElementById('voiceHint').innerHTML = '⚠️ التسجيل قصير جداً، اضغط مطولاً وتكلّم.';
-            setTimeout(() => { if (currentOrderMode === 'voice') resetVoiceUI(); }, 2000);
-            return;
-        }
-
-        if (voiceMediaRecorder && voiceMediaRecorder.state !== 'inactive') {
-            try { voiceMediaRecorder.stop(); } catch(e) {}
-        }
-        if (navigator.vibrate) navigator.vibrate([30, 30]);
-    }
-
-    // تحويل Blob إلى base64 ثم تحليل وإرسال (مثل الوصل)
-    function handleVoiceBlob(blob) {
-        // واجهة المعالجة
-        const btn = document.getElementById('voiceBtn');
-        const icon = document.getElementById('voiceIcon');
-        const label = document.getElementById('voiceLabel');
-        const hint = document.getElementById('voiceHint');
-        const timerEl = document.getElementById('voiceTimer');
-        btn.classList.remove('recording');
-        btn.classList.add('processing');
-        icon.innerHTML = `<div class="spinner-border" role="status" style="width:2rem;height:2rem;"></div>`;
-        label.textContent = 'يُحلّل الطلب...';
-        hint.innerHTML = 'ذكاء الحوت يستمع ويستخرج تفاصيل الطلب ✨';
-        timerEl.textContent = '';
-
-        const reader = new FileReader();
-        reader.onloadend = async () => {
-            const dataUrl = reader.result;
-            const base64Content = (typeof dataUrl === 'string' && dataUrl.includes(',')) ? dataUrl.split(',')[1] : '';
-            if (!base64Content) {
-                alert("تعذّر قراءة التسجيل، حاول مجدداً.");
-                resetVoiceUI();
-                return;
-            }
-            // نمرّر نوع الصوت الأساسي (بدون codecs) لـ Gemini
-            const baseMime = voiceMimeType.split(';')[0];
-            await processVoiceOrder(base64Content, baseMime, currentResName);
-        };
-        reader.readAsDataURL(blob);
-    }
-
-    /* ══════════════════════════════════════════════════════════════════════
-       🎙️ الصوت — هنا كان البطء المحسوس كلّه.
-       ──────────────────────────────────────────────────────────────────────
-       كان الترتيب: سجّل ← **انتظر Gemini** ← أظهر النجاح ← أرسل الطلب.
-       والكاشير لا يراجع شيئاً في هذا المسار — يُرسَل الطلب بما فهمه الذكاء
-       مهما كان. فالانتظار كان محض هدر: ثوانٍ يقفها الكاشير بلا فائدة.
-
-       صار: سجّل ← **نجاح فوري** ← ينتقل للزبون التالي، والتحليل وبناء
-       الطلب يجريان في السيرفر. وأي فشل إرسال يُحفظ في طابور يُعاد تلقائياً.
-       ══════════════════════════════════════════════════════════════════════ */
-    /* ═══════════════════════════════════════════════════════════════════════
-       ↩︎ [V41-ب] مهلة التراجع — الطلب الصوتي لم يعد بلا رجعة
-       ───────────────────────────────────────────────────────────────────────
-       كان: رفع الإصبع ⇒ إرسال فوري. والمخرج الوحيد شرطٌ أعمى (أقلّ من ٠.٦
-       ثانية) — أي أن الإلغاء ممكن فقط لمن لم يتكلّم أصلاً. ومن أخطأ في
-       نطق العنوان بعد ثماني ثوانٍ كان عليه إرسال الطلب ثم حذفه.
-
-       الآن: النجاح يبقى فورياً (فلسفة السرعة صحيحة)، والحمولة تُحفظ في
-       الطابور بمهلة VOICE_UNDO_MS. فإن ضغط «تراجع» حُذفت قبل أن تُرسَل،
-       وإن لم يفعل خرجت وحدها. ولو أُغلق التطبيق في الأثناء فهي في
-       localStorage — تخرج عند أول تفريغ، فلا يضيع طلب.
-       ═══════════════════════════════════════════════════════════════════════ */
-    const VOICE_UNDO_MS = 6000;
-    let _undoTimer = null;
-
-    function showUndoBar(id) {
-        const box = document.getElementById('voiceUndoBar');
-        const cnt = document.getElementById('voiceUndoCount');
-        if (!box) return;
-        box.style.display = 'flex';
-        box.dataset.qid = id;
-        let left = Math.round(VOICE_UNDO_MS / 1000);
-        if (cnt) cnt.textContent = left;
-        if (_undoTimer) clearInterval(_undoTimer);
-        _undoTimer = setInterval(() => {
-            left--;
-            if (cnt) cnt.textContent = left > 0 ? left : '';
-            if (left <= 0) { clearInterval(_undoTimer); _undoTimer = null; box.style.display = 'none'; flushAIQueue(); }
-        }, 1000);
-    }
-
-    window.undoVoiceOrder = function() {
-        const box = document.getElementById('voiceUndoBar');
-        if (!box) return;
-        const id = box.dataset.qid;
-        if (_undoTimer) { clearInterval(_undoTimer); _undoTimer = null; }
-        box.style.display = 'none';
-        const removed = cancelQueuedAI(id);
-        resTrack('voice_undo', { reason: removed ? 'ok' : 'too_late' });
-        if (navigator.vibrate) navigator.vibrate(60);
-        document.getElementById('orderStatusBox').classList.add('hidden-section');
-        const hint = document.getElementById('voiceHint');
-        if (hint) hint.innerHTML = removed
-            ? '↩︎ أُلغي الطلب الصوتي — لم يُرسَل. سجّل من جديد.'
-            : '⚠️ فات الأوان، الطلب أُرسل بالفعل — ألغِه من قائمة طلباتك.';
-    };
-
-    async function processVoiceOrder(base64Content, mimeType, resName) {
-        // ① النجاح أولاً — هذا هو الفرق الذي يشعر به الكاشير
-        showSuccessMessage(`<div style="background: var(--success); width: 48px; height: 48px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 12px;"><i data-lucide="mic" style="color:#fff;width:26px;height:26px;"></i></div>
-            <div style="font-weight:900;font-size:1.05rem;">تم إرسال الطلب الصوتي ✅</div>
-            <div style="font-size:.85rem;opacity:.8;margin-top:4px;">يجري تحليله وإدخاله للرادار الآن</div>`);
-        resetVoiceUI();
-
-        // ② الطابور بمهلة تراجع — لا إرسال مباشر
-        const qid = 'v' + Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
-        queueAI({ kind: "voice", data: base64Content, mime: mimeType, resName: resName },
-                { id: qid, holdUntil: Date.now() + VOICE_UNDO_MS });
-        showUndoBar(qid);
-    }
-
-    function resetVoiceUI() {
-        const btn = document.getElementById('voiceBtn');
-        const icon = document.getElementById('voiceIcon');
-        const label = document.getElementById('voiceLabel');
-        const hint = document.getElementById('voiceHint');
-        const timerEl = document.getElementById('voiceTimer');
-        if (!btn) return;
-        btn.classList.remove('recording', 'processing');
-        icon.textContent = '🎙️';
-        label.textContent = 'اضغط مطولاً وتكلّم';
-        hint.innerHTML = 'اضغط الزر باستمرار وقل تفاصيل الطلب:<br><b>المنطقة، السعر، رقم الزبون</b><br>ثم ارفع إصبعك ليُرسَل ويُحلَّل تلقائياً ✨';
-        timerEl.textContent = '';
-    }
-
-    /* ═══════════════════════════════════════════════════════════════════════
-       ⬆️ [V41-ب] اسحب لأعلى للإلغاء — نمط مألوف لكل كاشير من الواتساب
-       صفر ثانية إضافية على المسار السليم: من لم يسحب لا يشعر بشيء.
-       ═══════════════════════════════════════════════════════════════════════ */
-    const VOICE_CANCEL_PX = 60;
-    let _voiceStartY = 0, _voiceCancelArmed = false;
-
-    function armVoiceCancel(on) {
-        if (_voiceCancelArmed === on) return;
-        _voiceCancelArmed = on;
-        const btn = document.getElementById('voiceBtn');
-        const label = document.getElementById('voiceLabel');
-        const hint = document.getElementById('voiceHint');
-        if (!btn) return;
-        if (on) {
-            btn.style.background = '#64748b';
-            if (label) label.textContent = 'أفلت للإلغاء ✕';
-            if (hint) hint.innerHTML = '<b style="color:#ef4444;">✕ سيُلغى التسجيل عند رفع إصبعك</b>';
-            if (navigator.vibrate) navigator.vibrate(30);
-        } else {
-            btn.style.background = '';
-            if (label) label.textContent = 'يسجّل... ارفع إصبعك للإرسال';
-            if (hint) hint.innerHTML = 'تكلّم الآن بوضوح 🎙️';
-        }
-    }
-
-    function discardVoiceRecording() {
-        if (!voiceIsRecording) return;
-        voiceIsRecording = false;
-        if (voiceTimerInterval) { clearInterval(voiceTimerInterval); voiceTimerInterval = null; }
-        if (voiceMediaRecorder && voiceMediaRecorder.state !== 'inactive') {
-            voiceMediaRecorder.onstop = null;          // لا تُعالَج الحمولة الملغاة
-            try { voiceMediaRecorder.stop(); } catch (_) {}   /* مسجّل ميت أصلاً */
-        }
-        if (voiceStream) { voiceStream.getTracks().forEach(t => t.stop()); voiceStream = null; }
-        voiceChunks = [];
-        armVoiceCancel(false);
-        resetVoiceUI();
-        const hint = document.getElementById('voiceHint');
-        if (hint) hint.innerHTML = '✕ أُلغي التسجيل — لم يُرسَل شيء.';
-        resTrack('voice_slide_cancel', {});
-        if (navigator.vibrate) navigator.vibrate([20, 40, 20]);
-    }
-
-    function bindVoiceButton() {
-        const btn = document.getElementById('voiceBtn');
-        if (!btn) return;
-
-        // اللمس (الجوال)
-        btn.addEventListener('touchstart', (e) => {
-            e.preventDefault();
-            _voiceStartY = (e.touches && e.touches[0]) ? e.touches[0].clientY : 0;
-            armVoiceCancel(false);
-            startVoiceRecording();
-        }, { passive: false });
-
-        btn.addEventListener('touchmove', (e) => {
-            if (!voiceIsRecording) return;
-            const y = (e.touches && e.touches[0]) ? e.touches[0].clientY : 0;
-            armVoiceCancel((_voiceStartY - y) > VOICE_CANCEL_PX);
-        }, { passive: true });
-
-        btn.addEventListener('touchend', (e) => {
-            e.preventDefault();
-            if (_voiceCancelArmed) { discardVoiceRecording(); return; }
-            stopVoiceRecording();
-        }, { passive: false });
-
-        btn.addEventListener('touchcancel', (e) => { e.preventDefault(); discardVoiceRecording(); }, { passive: false });
-
-        // الماوس (سطح المكتب — للاختبار)
-        btn.addEventListener('mousedown', (e) => { e.preventDefault(); _voiceStartY = e.clientY; armVoiceCancel(false); startVoiceRecording(); });
-        btn.addEventListener('mousemove', (e) => { if (voiceIsRecording) armVoiceCancel((_voiceStartY - e.clientY) > VOICE_CANCEL_PX); });
-        btn.addEventListener('mouseup', (e) => { e.preventDefault(); if (_voiceCancelArmed) { discardVoiceRecording(); return; } stopVoiceRecording(); });
-        btn.addEventListener('mouseleave', () => { if (voiceIsRecording) { if (_voiceCancelArmed) discardVoiceRecording(); else stopVoiceRecording(); } });
-    }
-
-    // نربط الزر بعد تحميل الصفحة
-    bindVoiceButton();
-
-/* ⏳ الوحدة جاهزة — افتح زرّ الدخول (انظر السكربت المبكّر في الرأس). */
-try { if (typeof window.__nahlaUnlockBtn === 'function') window.__nahlaUnlockBtn(); } catch (_) {}
-</script>
-</body>
-</html>
