@@ -31,7 +31,7 @@
         //          القاعدة الجديدة ترفض القراءة الكاملة لغير الإدارة.
         //  🔒 ضمان مصادقة فايربيس قبل أي كتابة (القواعد لم تعد تقبل مجهولاً).
         //  🛵 اسم الكابتن من drivers_locations/{phone}/name بدل شيت السائقين.
-        const CURRENT_APP_VERSION = "42.0.Nahla-Full";   /* 🔧 V2.2 */
+        const CURRENT_APP_VERSION = "43.0.Nahla-Full";   /* 🔧 V2.2 */
         const RES_VERSION_KEY = 'hut_res_app_version';
         try {
             if (localStorage.getItem(RES_VERSION_KEY) !== CURRENT_APP_VERSION) {
@@ -62,50 +62,29 @@
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://*.firebasedatabase.app https://*.firebaseio.com https://unpkg.com https://www.gstatic.com https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://fonts.googleapis.com https://unpkg.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: blob: https:; media-src 'self' data: blob: https://actions.google.com; connect-src 'self' https://*.firebasedatabase.app https://*.firebaseio.com wss://*.firebasedatabase.app wss://*.firebaseio.com https://script.google.com https://script.googleusercontent.com https://*.googleapis.com https://securetoken.googleapis.com https://*.cloudfunctions.net https://*.run.app https://nominatim.openstreetmap.org https://unpkg.com https://cdn.jsdelivr.net; object-src 'none'; base-uri 'none'; form-action 'none'">
 <script>
 /* ═══════════════════════════════════════════════════════════════════════════
-   🔴 [عاجل] أُزيل قفل الزرّ — واستُبدل بمُبلِّغ خطأ مرئي.
+   🔦 مُسجِّل أعطال التحميل — **بلا أي ظهور على الشاشة**
    ───────────────────────────────────────────────────────────────────────────
-   الحارس القديم كان يعطّل الزرّ ويكتب فيه «⏳ جارٍ التحميل…» حتى تنتهي
-   الوحدة. وهو **عَرَضٌ لا سبب**: حين تفشل الوحدة يبقى القفل إلى الأبد،
-   فيبدو أن الزرّ هو العطب بينما العطب في التحميل.
+   أُزيل الشريط الأحمر بناءً على طلبك. والتسجيل في الطرفية باقٍ: لا يراه
+   الكاشير ولا يشغله، لكنه يوفّر يوماً كاملاً من المطاردة إن تكرّر عطبٌ
+   كالذي مررنا به — يكفي فتح الصفحة على حاسوب وقراءة Console.
 
-   وقفلٌ لا يُفتح أسوأ من زرٍّ يعمل: الأول يمنع الكاشير من كل شيء، والثاني
-   يعمل فور اكتمال الوحدة (وهو ما يقع في الأحوال السليمة كلها).
-
-   الآن: الزرّ يبقى «دخول المنصة» كما كان، وإن فشل التحميل **يُعرض سبب
-   الفشل الحرفي على الشاشة** — فلا نحتاج طرفية ولا تخميناً.
+   وأُزيل معه قفل الزرّ القديم نهائياً: زرٌّ يعمل خيرٌ من قفلٍ لا يُفتح.
    ═══════════════════════════════════════════════════════════════════════════ */
 (function () {
-  var errs = [];
-  function note(m){ if (m && errs.indexOf(m) === -1) errs.push(String(m).slice(0, 300)); }
-
-  /* أخطاء تحميل الموارد (وحدات ES · سكربتات) تُلتقط في طور الالتقاط وحده */
+  function tag(m){ try { console.warn('[AlHut] ' + String(m).slice(0, 300)); } catch (_) {} }
   window.addEventListener('error', function (e) {
-    if (e && e.target && (e.target.src || e.target.href)) note('فشل تحميل: ' + (e.target.src || e.target.href));
-    else if (e && e.message) note(e.message + (e.filename ? ('  @' + e.filename.split('/').pop() + ':' + e.lineno) : ''));
+    if (e && e.target && (e.target.src || e.target.href)) tag('فشل تحميل: ' + (e.target.src || e.target.href));
+    else if (e && e.message) tag(e.message);
   }, true);
   window.addEventListener('unhandledrejection', function (e) {
-    note('وعد مرفوض: ' + ((e.reason && (e.reason.message || e.reason)) || ''));
+    tag('وعد مرفوض: ' + ((e.reason && (e.reason.message || e.reason)) || ''));
   });
   document.addEventListener('securitypolicyviolation', function (e) {
-    note('سياسة الأمان منعت: ' + e.violatedDirective + ' ← ' + (e.blockedURI || '').slice(0, 90));
+    tag('سياسة الأمان منعت: ' + e.violatedDirective + ' ← ' + (e.blockedURI || ''));
   });
-
-  function report() {
-    if (typeof window.authAction === 'function') return;   // الوحدة اكتملت ✅
-    var box = document.createElement('div');
-    box.setAttribute('dir', 'rtl');
-    box.style.cssText = 'position:fixed;inset:auto 0 0 0;z-index:99999;background:#7f1d1d;color:#fff;' +
-      'padding:14px;font:600 13px/1.7 system-ui,sans-serif;max-height:55vh;overflow:auto;box-shadow:0 -4px 20px rgba(0,0,0,.4)';
-    box.innerHTML = '<b style="font-size:15px">🔴 لم تكتمل وحدة التطبيق</b>' +
-      '<div style="opacity:.85;margin:6px 0">زرّ الدخول لن يعمل حتى تُحلّ هذه. صوّر هذه الرسالة:</div>' +
-      '<pre style="white-space:pre-wrap;word-break:break-all;background:#450a0a;padding:8px;border-radius:8px;font-size:11px">' +
-      (errs.length ? errs.join('\n───\n') : 'لم يُلتقط خطأ صريح — غالباً استيراد مُعلَّق (شبكة أو حجب).') +
-      '</pre>' +
-      '<div style="opacity:.8;font-size:11px">متصل: ' + (navigator.onLine ? 'نعم' : 'لا') +
-      ' · العامل: ' + (('serviceWorker' in navigator) ? 'مُتاح' : 'غير مُتاح') + '</div>';
-    document.body.appendChild(box);
-  }
-  setTimeout(report, 9000);
+  setTimeout(function () {
+    if (typeof window.authAction !== 'function') tag('⚠️ لم تكتمل وحدة التطبيق خلال 9 ثوانٍ.');
+  }, 9000);
 })();
 </script>
 
@@ -133,7 +112,18 @@
        curl -s https://cdn.jsdelivr.net/npm/lucide@0.263.1/dist/umd/lucide.min.js | openssl dgst -sha384 -binary | openssl base64 -A
      ثم أضف: integrity="sha384-<الناتج>" crossorigin="anonymous"
      وإن تعذّر — استضِف الملف محلياً بجوار الصفحة، وهو الأأمن. -->
-<script src="https://cdn.jsdelivr.net/npm/lucide@0.263.1/dist/umd/lucide.min.js" defer></script>
+<!-- 🎨 [استعادة الأيقونات] سقطت lucide لأن مدخلها في كاش الـCDN كان فاسداً
+     (ظهر صراحةً في تقرير الأعطال: «فشل تحميل … lucide.min.js»).
+     ① عنوان جديد 0.279.0 ⇒ لا يطابق أي مدخل مخزَّن ⇒ جلبٌ نظيف.
+        ومسار dist/umd/lucide.min.js مؤكَّد في حزمة npm لهذه النسخة.
+     ② وبديل تلقائي على unpkg (مسموح في script-src) إن فشل الأول لأي سبب.
+        فالأيقونات لا تسقط ثانيةً بعطب مصدرٍ واحد. -->
+<script src="https://cdn.jsdelivr.net/npm/lucide@0.279.0/dist/umd/lucide.min.js" defer
+        onerror="(function(){var s=document.createElement('script');
+                  s.src='https://unpkg.com/lucide@0.279.0/dist/umd/lucide.min.js';
+                  s.defer=true;
+                  s.onload=function(){try{lucide.createIcons();}catch(_){}};
+                  document.head.appendChild(s);})()"></script>
     
     <style>
         /* =========================================
