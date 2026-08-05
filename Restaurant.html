@@ -31,56 +31,23 @@
         //          القاعدة الجديدة ترفض القراءة الكاملة لغير الإدارة.
         //  🔒 ضمان مصادقة فايربيس قبل أي كتابة (القواعد لم تعد تقبل مجهولاً).
         //  🛵 اسم الكابتن من drivers_locations/{phone}/name بدل شيت السائقين.
-        const CURRENT_APP_VERSION = "40.0.Nahla-Swept";   /* 🔧 V2.2 */
+        const CURRENT_APP_VERSION = "41.0.Nahla-Rollback"   /* ⚠️ نسخة تراجع: المحتوى هو V2.12 الأصلي، والرقم مرفوع كي يتجاوز الكاش */;   /* 🔧 V2.2 */
         const RES_VERSION_KEY = 'hut_res_app_version';
-        /* ═══════════════════════════════════════════════════════════════════
-           🔴 [إصلاح عاجل] كان: caches.delete() و r.update() **وعدان غير
-           منتظَرين** ثم location.reload() فوراً في السطر التالي.
-           ───────────────────────────────────────────────────────────────────
-           وعامل الخدمة يعمل بـ Stale-While-Revalidate: يُرجع المخزَّن فوراً
-           ويحدّث في الخلفية. فيقع سباق:
-
-             ① الصفحة الجديدة تُحمَّل ⇒ الرقم تغيّر ⇒ يُحفظ الجديد
-             ② يبدأ المسح (لم يكتمل) ثم reload() فوراً
-             ③ عامل الخدمة يُرجع النسخة **القديمة** المخزَّنة بعد
-             ④ القديمة ترى رقمها ≠ المحفوظ ⇒ تحفظ القديم ⇒ تمسح ⇒ reload
-             ⑤ ... ⇒ **حلقة إعادة تحميل لا تنتهي**
-
-           والمستخدم يرى صفحة تُعيد تحميل نفسها، فيضغط الزر ولا يحدث شيء —
-           لأن الصفحة تُهدم تحته. «تعطّل زر تسجيل الدخول» بالضبط.
-
-           الآن: ننتظر اكتمال المسح **فعلاً** قبل إعادة التحميل، وحارس
-           زمني يمنع أكثر من إعادة تحميل واحدة كل ٦٠ ثانية مهما حدث،
-           وحزام يُعيد التحميل بعد ٤ ثوانٍ إن تعلّق وعد.
-           ═══════════════════════════════════════════════════════════════════ */
         try {
             if (localStorage.getItem(RES_VERSION_KEY) !== CURRENT_APP_VERSION) {
-                const RELOAD_TS_KEY = RES_VERSION_KEY + '_reload_ts';
-                const lastReload = Number(localStorage.getItem(RELOAD_TS_KEY) || 0);
                 localStorage.setItem(RES_VERSION_KEY, CURRENT_APP_VERSION);
-
-                if (Date.now() - lastReload < 60000) {
-                    /* 🛡️ حارس الحلقة: أُعيد التحميل قبل أقل من دقيقة.
-                       نكتفي بتحديث الرقم ونمضي — صفحة تعمل بأصول قديمة
-                       أفضل ألف مرّة من صفحة تُعيد تحميل نفسها أبداً. */
-                    console.warn('⏭️ تخطّي إعادة التحميل — حارس الحلقة');
-                } else {
-                    localStorage.setItem(RELOAD_TS_KEY, String(Date.now()));
-                    var jobs = [];
+                if (localStorage.getItem(RES_VERSION_KEY) === CURRENT_APP_VERSION) {
                     if ('caches' in window) {
-                        jobs.push(caches.keys().then(function(names) {
-                            return Promise.all(names.map(function(n) { return caches.delete(n); }));
-                        }));
+                        caches.keys().then(function(names) {
+                            for (let name of names) caches.delete(name);
+                        });
                     }
                     if ('serviceWorker' in navigator) {
-                        jobs.push(navigator.serviceWorker.getRegistrations().then(function(regs) {
-                            return Promise.all(regs.map(function(r) { return r.update(); }));
-                        }));
+                        navigator.serviceWorker.getRegistrations().then(function(regs) {
+                            for (let r of regs) r.update();
+                        });
                     }
-                    var done = false;
-                    var go = function() { if (!done) { done = true; window.location.reload(); } };
-                    Promise.all(jobs).then(go, go);
-                    setTimeout(go, 4000);   /* حزام: لا نعلق إن تعلّق وعد */
+                    window.location.reload();
                 }
             }
         } catch(e) {
@@ -890,7 +857,6 @@
                                 <input type="hidden" id="customerArea" value="">
 
                                 <div id="priceHint" class="text-success small fw-bold mt-1 hidden-section px-2" style="font-size: 0.75rem;"></div>
-                                <div id="areaLiveCount" class="hidden-section mt-2 px-3 py-2" style="font-size:0.75rem; font-weight:700; color:#92400e; background:#fffbeb; border:1px solid #fde68a; border-radius:12px;"></div>
                                 
                                 <div id="customAreaSection" class="hidden-section mt-2 p-3 rounded-4" style="background: rgba(15, 23, 42, 0.03);">
                                     <div class="row g-2">
@@ -955,10 +921,6 @@
                                     <b>المنطقة، السعر، رقم الزبون</b><br>
                                     ثم ارفع إصبعك ليُرسَل ويُحلَّل تلقائياً ✨
                                 </div>
-                                <div id="voiceUndoBar" style="display:none; align-items:center; justify-content:space-between; gap:10px; width:100%; max-width:300px; background:rgba(239,68,68,0.08); border:1px solid rgba(239,68,68,0.25); border-radius:16px; padding:10px 14px;">
-                                    <span style="font-size:0.8rem; font-weight:800; color:#b91c1c;">سيُرسَل خلال <span id="voiceUndoCount">6</span> ثوانٍ</span>
-                                    <button type="button" onclick="undoVoiceOrder()" style="background:#ef4444; color:#fff; border:none; border-radius:12px; padding:8px 16px; font-weight:800; font-size:0.8rem; font-family:'Cairo'; cursor:pointer;">↩︎ تراجع</button>
-                                </div>
                             </div>
                         </div>
 
@@ -995,10 +957,6 @@
                     </div>
 
                     <div id="todayArchiveList" class="hidden-section">
-                        <div class="d-flex justify-content-between align-items-center mb-3 px-2">
-                            <span class="fw-bold text-muted" style="font-size: 0.8rem;">طلبات اليوم:</span>
-                            <span class="fw-black" style="font-size: 1.25rem; color: var(--primary-blue-dark);" id="todayOrdersCount">0</span>
-                        </div>
                         <div class="d-flex justify-content-between align-items-center mb-3 px-2">
                             <span class="fw-bold text-muted" style="font-size: 0.8rem;">إجمالي الفواتير المكتملة:</span>
                             <span class="fw-black text-success" style="font-size: 1.1rem;" id="todayTotalSales">0 <small class="fs-6">د.ع</small></span>
@@ -1122,61 +1080,16 @@ function escAttr(x){ return esc(x).replace(/"/g,'&quot;').replace(/'/g,'&#39;');
         }
     }
 
-    function queueAI(payload, opts) {
+    function queueAI(payload) {
         try {
             const q = JSON.parse(localStorage.getItem(AI_QUEUE_KEY) || "[]");
-            const item = { payload, ts: Date.now(), tries: 0 };
-            /* [V41-ب] id للإلغاء · holdUntil لمهلة التراجع.
-               الحمولة تُحفظ في localStorage فوراً — فلو أُغلق التطبيق أو
-               انطفأت الشاشة أثناء الثواني الستّ، الطلب **لا يضيع**: يخرج
-               عند أول تفريغ بعد انقضاء المهلة. وهذا ما يجعل التراجع أأمن
-               من setTimeout بسيط يموت مع الصفحة ويأخذ الطلب معه. */
-            if (opts && opts.id) item.id = opts.id;
-            if (opts && opts.holdUntil) item.holdUntil = opts.holdUntil;
-            q.push(item);
+            q.push({ payload, ts: Date.now(), tries: 0 });
             localStorage.setItem(AI_QUEUE_KEY, JSON.stringify(q.slice(-12)));
         } catch (e) {}
     }
 
-    /* يحذف حمولة محجوزة من الطابور. يعيد true إن أدركها قبل الإرسال. */
-    function cancelQueuedAI(id) {
-        try {
-            const q = JSON.parse(localStorage.getItem(AI_QUEUE_KEY) || "[]");
-            const keep = q.filter(it => it.id !== id);
-            const removed = keep.length !== q.length;
-            localStorage.setItem(AI_QUEUE_KEY, JSON.stringify(keep));
-            return removed;
-        } catch (e) { return false; }
-    }
-
     /* إعادة إرسال ما فشل — عند الإقلاع وكل دقيقة وعند عودة الشبكة */
     let aiQueueBusy = false;
-    /* ═══════════════════════════════════════════════════════════════════════
-       📢 [V41-ب] الطابور لم يعد يُسقط بصمت
-       ───────────────────────────────────────────────────────────────────────
-       مسارا الصورة والصوت يعرضان النجاح **قبل** الإرسال (وهذا صحيح — الكاشير
-       لا يراجع شيئاً فيهما، فانتظاره هدر). لكن ما يفشل يدخل الطابور، وما
-       يُسقطه الطابور كان يذهب إلى console.warn — أي إلى لا مكان على جوال
-       أندرويد. ⇒ انقطاع شبكة ٢٥ دقيقة = طلبات تتبخّر والكاشير مطمئنّ.
-       ═══════════════════════════════════════════════════════════════════════ */
-    function reportLostIntake(item, why) {
-        try {
-            const kind = (item && item.payload && item.payload.kind) || "";
-            const label = kind === "voice" ? "الطلب الصوتي" : (kind === "receipt" ? "طلب الوصل" : "الطلب");
-            const t = item && item.ts ? new Date(item.ts).toLocaleTimeString('ar-EG', { hour: '2-digit', minute: '2-digit' }) : "";
-            resTrack('intake_lost', { reason: (why || '') + '|' + kind });
-            setTimeout(() => {
-                try {
-                    alert("🛑 لم يصل " + label + " المُرسَل الساعة " + t + ".\n\n" +
-                          (why === 'expired'
-                              ? "بقي في الانتظار أكثر من ٢٠ دقيقة بلا شبكة، فأُسقط كي لا يدخل الرادار متأخراً بعد أن سُلّم الطعام.\n\n"
-                              : "فشل الإرسال بعد ستّ محاولات.\n\n") +
-                          "⚠️ هذا الطلب غير موجود في النظام. أعد إدخاله.");
-                } catch (_) {}   /* alert محجوب في بعض المتصفّحات — السجلّ كُتب أصلاً */
-            }, 400);
-        } catch (e) {}
-    }
-
     async function flushAIQueue() {
         if (aiQueueBusy || !navigator.onLine) return;
         let q = [];
@@ -1187,12 +1100,6 @@ function escAttr(x){ return esc(x).replace(/"/g,'&quot;').replace(/'/g,'&#39;');
         localStorage.setItem(AI_QUEUE_KEY, JSON.stringify(q));
         const fail = [];
         for (const item of batch) {
-            /* ⏱️ [V41-ب] مهلة التراجع: الحمولة المحجوزة تعود للطابور بلا
-               إرسال ولا استهلاك محاولة — حتى تنقضي ثوانيها أو تُحذف بالإلغاء. */
-            if (item.holdUntil && Date.now() < item.holdUntil) {
-                fail.push(item);
-                continue;
-            }
             /* ⏳ [عمر زمني] كان الطابور **بلا أي حدّ زمني** — وهو أخطر ممّا يبدو:
                يعيش في localStorage فينجو من إغلاق التطبيق، وflushAIQueue تعمل
                عند كل إقلاع. فوصلٌ فشل ليلاً كان يُنشئ **طلباً جديداً صباح الغد**
@@ -1200,22 +1107,17 @@ function escAttr(x){ return esc(x).replace(/"/g,'&quot;').replace(/'/g,'&#39;');
             if (Date.now() - (item.ts || 0) > 20 * 60 * 1000) {
                 console.warn("⏳ أُسقطت حمولة قديمة من طابور الذكاء:",
                              new Date(item.ts || 0).toISOString());
-                reportLostIntake(item, 'expired');   // [V41-ب] لم يعد صامتاً
                 continue;
             }
             try { await sendToAI(item.payload, { queueOnFail: false }); }
             catch (e) {
                 item.tries = (item.tries || 0) + 1;
                 if (item.tries < 6) fail.push(item);
-                else reportLostIntake(item, 'max_tries');   // [V41-ب]
             }
         }
         try {
             const cur = JSON.parse(localStorage.getItem(AI_QUEUE_KEY) || "[]");
-            /* 🔧 [V41-ب] كان [...fail, ...cur] — وslice(-12) يأخذ الأخيرة اثنتي
-               عشرة، فالمقدّمة هي التي تُطرد. أي أن المحاولات الفاشلة (وهي
-               بالضبط ما يجب إنقاذه) كانت تُضحّى بها لصالح الجديدة. عُكس. */
-            localStorage.setItem(AI_QUEUE_KEY, JSON.stringify([...cur, ...fail].slice(-12)));
+            localStorage.setItem(AI_QUEUE_KEY, JSON.stringify([...fail, ...cur].slice(-12)));
         } catch (e) {}
         aiQueueBusy = false;
     }
@@ -1385,54 +1287,34 @@ function escAttr(x){ return esc(x).replace(/"/g,'&quot;').replace(/'/g,'&#39;');
     /* مفتاح النيّة: بصمة المحتوى + نافذة ١٥ دقيقة. فالضغط مرّتين على نفس
        الطلب يعيد نفس المفتاح، وطلبٌ مختلف يأخذ مفتاحاً جديداً.
        (١٥ دقيقة تطابق نوافذ التكرار في CF فلا يتعارض الحارسان.) */
-    /* ═══════════════════════════════════════════════════════════════════════
-       🔑 [V41] cid — مفتاح **محاولة**، لا بصمة **محتوى**
-       ───────────────────────────────────────────────────────────────────────
-       كان يُشتقّ من (الهاتف|التفاصيل|السعر|المنطقة) ويُحفظ ١٥ دقيقة. وفي
-       «الطلب السريع» تنهار هذه البصمة تماماً:
-
-           finalDetails = "⚡ طلب سريع (التفاصيل والفاتورة مع المطعم)"  ← ثابت
-           finalPrice   = myCustomPriceList[finalArea]                  ← من المنطقة
-
-       ⇒ كل طلب سريع لنفس المنطقة له البصمة ذاتها حرفياً ⇒ نفس cid ⇒
-         claimOp يردّه replay ⇒ createOrder يعيد مُعرّف الطلب **الأول**
-         بـ dedup:true ⇒ عشرة طلبات في الذروة تصير طلباً واحداً، وعشر
-         رسائل نجاح كاذبة.
-
-       والوضع السريع بلا هاتف زبون ولا تفاصيل ⇒ **لا يملك أي بيانات تميّز
-       طلباً عن آخر** ⇒ إلغاء التكرار بالمحتوى مستحيل فيه بنيوياً.
-
-       الغرض الأصلي — كما في تعليق sendToAI — «مفتاح يُولَّد مرّة واحدة لكل
-       نيّة». فليكن كذلك: يُولَّد عند بدء محاولة إرسال، ويُعاد استعماله في
-       إعادات المحاولة التلقائية وفي إعادة الضغط بعد SERVER_UNSURE (وهي
-       الحالة التي وُجد cid لأجلها)، ويُمسح عند نجاح مؤكَّد.
-
-       ✅ اختبار القبول الرابع يبقى محققاً: قطع الشبكة وإعادتها ⇒ نفس
-          المحاولة ⇒ نفس المفتاح ⇒ طلب واحد.
-       ✅ والضغط المزدوج مغطّى أصلاً بـ btn.disabled أثناء الإرسال.
-       ⚠️ لا تُعِد اشتقاقه من المحتوى مهما بدا ذلك «أذكى».
-       ═══════════════════════════════════════════════════════════════════════ */
-    let _attemptCid = null;
-
-    function beginAttemptCid() {
-        if (!_attemptCid) {
-            _attemptCid = (window.crypto && crypto.randomUUID)
-                ? crypto.randomUUID()
-                : ('a' + Date.now().toString(36) + Math.random().toString(36).slice(2, 12));
+    function orderFingerprint(resPhone, details, price, area) {
+        const s = [resPhone, String(details || '').trim(), String(price || ''), String(area || '').trim()].join('|');
+        let h1 = 0x811c9dc5, h2 = 0x1000193;
+        for (let i = 0; i < s.length; i++) {
+            h1 = ((h1 ^ s.charCodeAt(i)) * 16777619) >>> 0;
+            h2 = ((h2 + s.charCodeAt(i) * 31) ^ (h2 >>> 7)) >>> 0;
         }
-        return _attemptCid;
+        return 'f' + h1.toString(36) + h2.toString(36);
     }
-    function endAttemptCid() { _attemptCid = null; }
 
-    /* أعطالٌ نتيقّن معها أن السيرفر لم يُنشئ شيئاً ⇒ السقوط للمسار القديم آمن.
-       🔻 [V41] أُخرجت invalid-argument: معناها أن createOrder **فحص الحمولة
-          ورفضها عمداً**. والسقوط عندها يكتب set() مباشرةً بلا أي فحص —
-          فيدخل الطلب المرفوض من الباب الخلفي ويبطل نصف غرض الإنشاء
-          السيرفري. الرفض المتعمَّد يُعرض على الكاشير، لا يُلتفّ عليه. */
+    function orderCid(fp) {
+        let m = {};
+        try { m = JSON.parse(localStorage.getItem('hut_cids') || '{}'); } catch (e) { m = {}; }
+        const now = Date.now();
+        Object.keys(m).forEach(k => { if (now - (m[k].t || 0) > 20 * 60000) delete m[k]; });
+        if (!(m[fp] && (now - m[fp].t) < 15 * 60000)) {
+            m[fp] = { id: 'c' + now.toString(36) + Math.random().toString(36).slice(2, 10), t: now };
+        }
+        try { localStorage.setItem('hut_cids', JSON.stringify(m)); } catch (e) {}
+        return m[fp].id;
+    }
+
+    /* أعطالٌ نتيقّن معها أن السيرفر لم يُنشئ شيئاً ⇒ السقوط للمسار القديم آمن. */
     function isSafeToFallback(code) {
         const c = String(code || '').toLowerCase();
         return c.indexOf('unauthenticated') > -1 || c.indexOf('permission-denied') > -1
-            || c.indexOf('not-found') > -1     || c.indexOf('unimplemented') > -1;
+            || c.indexOf('not-found') > -1     || c.indexOf('unimplemented') > -1
+            || c.indexOf('invalid-argument') > -1;
     }
 
     function resTrack(ev, meta) {
@@ -1449,7 +1331,8 @@ function escAttr(x){ return esc(x).replace(/"/g,'&quot;').replace(/'/g,'&#39;');
 
     /* يعيد مُعرّف الطلب، أو يرمي 'SERVER_UNSURE' إن تعذّر التيقّن. */
     async function createOrderOnServer(payload) {
-        const cid = beginAttemptCid();   // [V41] مفتاح المحاولة لا بصمة المحتوى
+        const fp  = orderFingerprint(payload.resPhone, payload.details, payload.price, payload.area);
+        const cid = orderCid(fp);
         let lastCode = '';
         for (let i = 1; i <= 3; i++) {
             try {
@@ -1460,23 +1343,9 @@ function escAttr(x){ return esc(x).replace(/"/g,'&quot;').replace(/'/g,'&#39;');
                 ]);
                 const oid = r && r.data && r.data.orderId;
                 if (!oid) throw new Error('no_order_id');
-
-                /* ⚠️ [V41] dedup:true معناها أن السيرفر **لم يُنشئ شيئاً** —
-                   بل أعاد مُعرّف طلبٍ سابق بنفس المفتاح. وكان يُعامَل كنجاح
-                   كامل فتُعرض «تم إرسال الطلب بنجاح 🚀» — وهذا هو الضياع
-                   الصامت بعينه: الطلب لم يوجد قط والكاشير مطمئنّ.
-                   الآن يُرفع كحالة مميّزة يعرضها المسار الأعلى صراحةً. */
-                if (r.data.dedup) {
-                    resTrack('create_dedup', { orderId: oid });
-                    const err = new Error('SERVER_DEDUP');
-                    err.orderId = oid;
-                    throw err;
-                }
-                resTrack('create_server', { orderId: oid });
-                endAttemptCid();          // نجاح مؤكَّد ⇒ النيّة التالية مفتاحها الخاص
+                resTrack(r.data.dedup ? 'create_dedup' : 'create_server', { orderId: oid });
                 return oid;
             } catch (e) {
-                if (e && e.message === 'SERVER_DEDUP') throw e;   // لا تُعامَل كعطل شبكة
                 lastCode = String((e && (e.code || e.message)) || '');
                 if (isSafeToFallback(lastCode)) { resTrack('create_fallback', { reason: lastCode }); return null; }
                 if (i === 3) break;
@@ -1484,7 +1353,6 @@ function escAttr(x){ return esc(x).replace(/"/g,'&quot;').replace(/'/g,'&#39;');
             }
         }
         resTrack('create_unsure', { reason: lastCode });
-        /* المفتاح **يبقى** — فإعادة الضغط تحمل النيّة نفسها ولا تُنتج توأماً. */
         throw new Error('SERVER_UNSURE');
     }
 
@@ -1751,28 +1619,6 @@ function escAttr(x){ return esc(x).replace(/"/g,'&quot;').replace(/'/g,'&#39;');
         }
     };
 
-    /* ═══════════════════════════════════════════════════════════════════════
-       🖼️ [V41-ب] الصورة غادرت المسودّة النصّية
-       ───────────────────────────────────────────────────────────────────────
-       saveDraft تُنادى من أحد عشر موضعاً، منها oninput على أربعة حقول —
-       أي مع **كل حرف** يكتبه الكاشير. وكانت تُسلسِل base64Receipt كاملاً
-       معها: صورة ٩٥٠ بكسل بجودة ٠.٨٥ تعطي base64 بحدود ٣٠٠–٥٥٠ كيلوبايت.
-
-       ⇒ نصف ميغابايت يُكتب في sessionStorage مع كل ضغطة حرف بعد التقاط
-         صورة. على جوال رخيص هذا تهنيج محسوس في أكثر لحظة ازدحاماً.
-
-       الآن: الصورة في مفتاح مستقلّ يُكتب **مرّة واحدة** عند الالتقاط أو
-       الحذف، والمسودّة النصّية تبقى بضع مئات من البايتات.
-       ═══════════════════════════════════════════════════════════════════════ */
-    const DRAFT_IMG_KEY = 'hut_order_draft_img';
-
-    window.saveDraftImage = function() {
-        try {
-            if (base64Receipt) sessionStorage.setItem(DRAFT_IMG_KEY, base64Receipt);
-            else sessionStorage.removeItem(DRAFT_IMG_KEY);
-        } catch (e) { /* تجاوز الحصة: المسودّة النصّية أهمّ من الصورة */ }
-    };
-
     window.saveDraft = function() {
         const draft = {
             mode: currentOrderMode,
@@ -1782,7 +1628,7 @@ function escAttr(x){ return esc(x).replace(/"/g,'&quot;').replace(/'/g,'&#39;');
             phone  : document.getElementById('customerPhone').value,
             details: document.getElementById('customerDetails').value,
             price  : document.getElementById('orderPrice').value,
-            hasImage: !!base64Receipt
+            image  : base64Receipt
         };
         sessionStorage.setItem('hut_order_draft', JSON.stringify(draft));
     };
@@ -1806,10 +1652,8 @@ function escAttr(x){ return esc(x).replace(/"/g,'&quot;').replace(/'/g,'&#39;');
             if (draft.phone) document.getElementById('customerPhone').value = draft.phone;
             if (draft.details) document.getElementById('customerDetails').value = draft.details;
             if (draft.price) document.getElementById('orderPrice').value = draft.price;
-            if (draft.hasImage) {
-                base64Receipt = sessionStorage.getItem(DRAFT_IMG_KEY) || null;
-            }
-            if (base64Receipt) {
+            if (draft.image) {
+                base64Receipt = draft.image;
                 document.getElementById('photoPreview').src = base64Receipt;
                 document.getElementById('cameraBtn').classList.add('hidden-section');
                 document.getElementById('photoPreviewContainer').classList.remove('hidden-section');
@@ -1817,10 +1661,7 @@ function escAttr(x){ return esc(x).replace(/"/g,'&quot;').replace(/'/g,'&#39;');
         } catch(e) {}
     }
 
-    function clearDraft() {
-        sessionStorage.removeItem('hut_order_draft');
-        try { sessionStorage.removeItem(DRAFT_IMG_KEY); } catch (_) {}   /* تنظيف تجميلي */
-    }
+    function clearDraft() { sessionStorage.removeItem('hut_order_draft'); }
 
     window.buildCustomAreaDropdown = function() {
         const listContainer = document.getElementById('smartDropdownList');
@@ -1834,7 +1675,7 @@ function escAttr(x){ return esc(x).replace(/"/g,'&quot;').replace(/'/g,'&#39;');
         let html = '';
         Object.keys(myCustomPriceList).sort().forEach(area => {
             const price = myCustomPriceList[area];
-            html += `<div class="dropdown-item-area" onclick="selectDropdownArea('${jss(area)}', ${Number(price)||0})">
+            html += `<div class="dropdown-item-area" onclick="selectDropdownArea('${area}', ${price})">
                         <span>${area}</span>
                         <span class="area-price-tag">${price} د.ع</span>
                      </div>`;
@@ -1868,35 +1709,11 @@ function escAttr(x){ return esc(x).replace(/"/g,'&quot;').replace(/'/g,'&#39;');
         });
     };
 
-    /* ═══════════════════════════════════════════════════════════════════════
-       🔢 [V41-ب] عدّاد المنطقة — بديل حارس التكرار في الوضع السريع
-       ───────────────────────────────────────────────────────────────────────
-       أُزيل الحارس بالمحتوى من السريع لأنه بلا معنى بنيوياً هناك (تفاصيل
-       ثابتة وسعر مشتقّ من المنطقة ⇒ كل الطلبات بصمة واحدة). وبديله ليس
-       اعتراضاً بل **معلومة**: كم طلباً نشطاً لديك الآن إلى هذه المنطقة.
-
-       فالكاشير يقرّر بنفسه — والمعلومة صحيحة دائماً، بعكس بصمة تخمّن.
-       ═══════════════════════════════════════════════════════════════════════ */
-    window.updAreaLiveCount = function() {
-        const el = document.getElementById('areaLiveCount');
-        if (!el) return;
-        const sel = String(document.getElementById('customerArea').value || '').trim();
-        if (!sel || sel === 'أخرى') { el.classList.add('hidden-section'); return; }
-        const base = sel.split('(')[0].trim();
-        const n = (liveActiveOrders || []).filter(o =>
-            String(o.area || '').split('(')[0].trim() === base).length;
-        if (n <= 0) { el.classList.add('hidden-section'); return; }
-        el.classList.remove('hidden-section');
-        el.innerHTML = '🛵 لديك <b>' + n + '</b> ' + (n === 1 ? 'طلب نشط' : 'طلبات نشطة') +
-                       ' إلى ' + esc(base) + ' — راجعها قبل الإرسال.';
-    };
-
     window.selectDropdownArea = function(areaName, price = null) {
         document.getElementById('customerArea').value = areaName;
         document.getElementById('areaDisplayInput').value = areaName;
         document.getElementById('smartDropdownList').classList.remove('show');
         window.showSelectedPrice();
-        window.updAreaLiveCount();
         window.saveDraft();
     };
 
@@ -2125,7 +1942,6 @@ function escAttr(x){ return esc(x).replace(/"/g,'&quot;').replace(/'/g,'&#39;');
                     document.getElementById('cameraBtn').classList.add('hidden-section');
                     document.getElementById('photoPreviewContainer').classList.remove('hidden-section');
                     
-                    window.saveDraftImage();   // [N-9.2] مرّة واحدة، لا مع كل حرف
                     window.saveDraft();
                     window.showLoading(false);
                 };
@@ -2350,18 +2166,6 @@ function escAttr(x){ return esc(x).replace(/"/g,'&quot;').replace(/'/g,'&#39;');
     }
 
     async function enterDashboard() {
-        /* 🔭 [V41] كان __resPhone يُضبَط داخل مسار الإنشاء وحده — فمطعمٌ
-           يفتح التطبيق ويلغي طلباً دون أن يُنشئ واحداً في تلك الجلسة لا
-           يُسجَّل عنه shadow_reject إطلاقاً. وشرط تشديد القواعد في README
-           هو «سبعة أيام نظيفة» — فكانت النظافة قد تكون عمى القياس لا
-           سلامة المسار. الضبط هنا يغطّي كل جلسة منذ لحظتها الأولى. */
-        try {
-            let p = regPhone;
-            if (!p) { const s = localStorage.getItem('hut_res_session'); if (s) p = JSON.parse(s).phone; }
-            const np = normalizeSystemPhone(p);
-            if (np) window.__resPhone = np;
-        } catch (e) {}
-
         document.getElementById('loginSection').classList.add('hidden-section');
         document.getElementById('orderSection').classList.remove('hidden-section');
         document.getElementById('resTitle').innerText = currentResName;
@@ -2414,7 +2218,6 @@ function escAttr(x){ return esc(x).replace(/"/g,'&quot;').replace(/'/g,'&#39;');
     }
 
     let lastOrdersSnapshot = {};
-    let mirrorToday = {};   // 🪞 [N-9.2] ledgers/restaurants/{هاتف}/today/{يوم}/{طلب}
 
     function startHotDataListeners() {
         let safeResPhone = regPhone;
@@ -2439,91 +2242,34 @@ function escAttr(x){ return esc(x).replace(/"/g,'&quot;').replace(/'/g,'&#39;');
         onValue(ref(db, `ledgers/restaurants/${myPhone}`), (snapshot) => {
             const ledger = snapshot.val() || { completed_orders: 0, debt: 0 };
             window.currentLedgerData = ledger; 
-
-            /* 🪞 [V41] مرآة اليوم — الأرشيف الذي حجبته القواعد
-               completed_orders ممنوعة على المطعم (admin/staff فقط)، وكان
-               يقرأ منجزاته من active_orders لأنها تحمل اليوم كلّه حتى
-               الفجر. ومع terminalOrderSweeper تغادرها خلال ٤٥ دقيقة.
-               السيرفر يكتب نسخة نحيفة هنا في نفس التحديث الذرّي للنقل. */
-            mirrorToday = (ledger.today && typeof ledger.today === 'object') ? ledger.today : {};
-            rebuildOrderLists();
-
+            
+            document.getElementById('statMonthOrders').innerText = (ledger.completed_orders || 0) + globalLiveCount;
+            document.getElementById('statUnpaid').innerText = (parseFloat(ledger.debt) || 0) + globalLiveDebt;
+            
             const s = localStorage.getItem('hut_res_session');
             if (s) { document.getElementById('statPayType').innerText = (JSON.parse(s).payType || '').includes("مناصفة") ? "مناصفة" : "المطعم"; }
         });
     }
 
-    /* ═══════════════════════════════════════════════════════════════════════
-       🔴 [N-9.4] sid و jss — **منقولتان حرفياً من Driver.html**
-       ───────────────────────────────────────────────────────────────────────
-       ولم تُكتَبا من جديد عمداً: النمط واحد وتعليقهما هناك يشرح السبب.
-
-       ⚠️ **وescAttr الموجودة في هذا الملف لا تكفي داخل onclick.** في
-          onclick="f('${x}')" يمرّ النصّ بمحلّلين: محلّل HTML يفكّ السمة
-          **ويفكّ الكيانات**، ثم محلّل JS يفكّ السلسلة عند العلامة المفردة.
-          فـescAttr تحوّل ' إلى &#39; ثم **يفكّها محلّل HTML قبل أن يصل الدور
-          إلى JS** ⇒ منطقة اسمها حي's تُنتج f('حي's') ⇒ SyntaxError.
-
-       ⇒ esc للنصّ الظاهر · escAttr لقيمة سمة عادية · jss داخل onclick ·
-         sid للمُعرّفات.
-       ═══════════════════════════════════════════════════════════════════════ */
-    function sid(x){ return String(x??'').replace(/[^A-Za-z0-9_-]/g,'').slice(0,64); }
-    function jss(x){
-      return String(x??'')
-        .replace(/\\/g,'\\\\').replace(/'/g,"\\'").replace(/"/g,'&quot;')
-        .replace(/\r?\n/g,' ')
-        .replace(/&(?!quot;)/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
-    }
-
-    function archiveRowHtml(o) {
-        const orderTime = o.ts ? new Date(o.ts).toLocaleTimeString('ar-EG', { hour: '2-digit', minute: '2-digit' }) : '';
-        const dPhone = o.drv || "";
-        const dName  = esc(driverDisplayName(dPhone));
-        const isValidPhone = dPhone && !["system_routing", "pending_driver", "manual_pending"].includes(dPhone);
-        const orderArea = esc(o.area || "غير محددة");
-        const orderDetails = esc(o.details || "لا توجد تفاصيل إضافية");
-        return `
-                    <div class="archive-item searchable-archive-item" data-search="${escAttr(o.id)} ${escAttr(orderArea)} ${escAttr(orderDetails)} ${escAttr(dName)} ${escAttr(dPhone)}">
-                        <div class="d-flex justify-content-between align-items-start w-100">
-                            <div>
-                                <span class="fw-black text-dark" style="font-size: 0.95rem;">#${esc(o.id)}</span>
-                            </div>
-                            <div class="text-end">
-                                <span class="fw-black text-success" style="font-size: 1.05rem;">${esc(o.price)} <small>د.ع</small></span>
-                                <div class="small text-muted mt-1" style="font-size: 0.7rem;"><i data-lucide="clock" size="10"></i> ${esc(orderTime)}</div>
-                            </div>
-                        </div>
-                        <div class="archive-details-box w-100 text-start" dir="rtl">
-                            <div class="d-flex justify-content-between align-items-center mb-2 pb-2" style="border-bottom: 1px dashed rgba(15,23,42,0.1);">
-                                <div class="fw-bold text-dark">
-                                    <i data-lucide="bike" size="12" style="color: var(--success);"></i> الكابتن: <span class="fw-black">${dName}</span>
-                                </div>
-                                ${isValidPhone ? `<a href="tel:${escAttr(dPhone)}" class="text-decoration-none d-flex align-items-center gap-1" style="background: #f0fdf4; color: #16a34a; padding: 4px 10px; border-radius: 8px; font-weight: 800; font-size: 0.75rem;"><i data-lucide="phone" size="12"></i> ${esc(dPhone)}</a>` : ''}
-                            </div>
-                            <div class="mb-2 fw-bold text-dark"><i data-lucide="map-pin" size="12" style="color: var(--accent);"></i> المنطقة: <span class="fw-normal">${orderArea}</span></div>
-                            <div class="fw-bold text-dark"><i data-lucide="info" size="12" style="color: var(--primary-blue);"></i> التفاصيل: <span class="fw-normal" style="user-select: text;">${orderDetails}</span></div>
-                        </div>
-                    </div>`;
-    }
-
     function rebuildOrderLists() {
         const activeFbOrders = lastOrdersSnapshot;
-        let newLiveOrders = [];
-        const todayISO = new Date().toISOString().split('T')[0];
+        let newLiveOrders    = []; let todaySalesTotal  = 0;
+        let todayArchiveHtml = ''; const todayISO       = new Date().toISOString().split('T')[0];
 
         globalLiveDebt = 0;
         globalLiveCount = 0;
 
-        // ① المنتهي اليوم — خريطة بالمُعرّف تمنع الازدواج بين المصدرين
-        const doneToday = new Map();
-
         Object.values(activeFbOrders).forEach(fbOrder => {
             if (!fbOrder) return;
+            // الاستعلام أصلاً يقيّد على resPhone — لا حاجة لفلترة بالاسم بعد اليوم
             if (fbOrder.status === 'deleted') return;
 
             if (fbOrder.status === 'completed' || fbOrder.status === 'مكتمل') {
                 const orderISO = new Date(fbOrder.timestamp).toISOString().split('T')[0];
                 if (orderISO === todayISO) {
+                    const priceVal = parseFloat(fbOrder.price) || 0;
+                    todaySalesTotal += priceVal;
+                    
                     globalLiveCount++;
                     let commStr = String(fbOrder.comm || '0');
                     let payType = String(fbOrder.payType || '');
@@ -2538,39 +2284,45 @@ function escAttr(x){ return esc(x).replace(/"/g,'&quot;').replace(/'/g,'&#39;');
                     }
                     globalLiveDebt += resComm;
 
-                    doneToday.set(String(fbOrder.id), {
-                        id: fbOrder.id, area: fbOrder.area, details: fbOrder.details,
-                        price: parseFloat(fbOrder.price) || 0,
-                        drv: fbOrder.driverPhone || "", ts: fbOrder.timestamp
-                    });
+                    const orderTime = new Date(fbOrder.timestamp).toLocaleTimeString('ar-EG', { hour: '2-digit', minute: '2-digit' });
+                    const dPhone = fbOrder.driverPhone || "";
+                    const dName = driverDisplayName(dPhone);
+                    
+                    const isValidPhone = dPhone && !["system_routing", "pending_driver", "manual_pending"].includes(dPhone);
+                    const orderArea = fbOrder.area || "غير محددة";
+                    const orderDetails = fbOrder.details || "لا توجد تفاصيل إضافية";
+
+                    todayArchiveHtml += `
+                    <div class="archive-item searchable-archive-item" data-search="${esc(fbOrder.id)} ${esc(orderArea)} ${esc(orderDetails)} ${esc(dName)} ${esc(dPhone)}">
+                        <div class="d-flex justify-content-between align-items-start w-100">
+                            <div>
+                                <span class="fw-black text-dark" style="font-size: 0.95rem;">#${esc(fbOrder.id)}</span>
+                            </div>
+                            <div class="text-end">
+                                <span class="fw-black text-success" style="font-size: 1.05rem;">${esc(priceVal)} <small>د.ع</small></span>
+                                <div class="small text-muted mt-1" style="font-size: 0.7rem;"><i data-lucide="clock" size="10"></i> ${esc(orderTime)}</div>
+                            </div>
+                        </div>
+                        <div class="archive-details-box w-100 text-start" dir="rtl">
+                            <div class="d-flex justify-content-between align-items-center mb-2 pb-2" style="border-bottom: 1px dashed rgba(15,23,42,0.1);">
+                                <div class="fw-bold text-dark">
+                                    <i data-lucide="bike" size="12" style="color: var(--success);"></i> الكابتن: <span class="fw-black">${esc(dName)}</span>
+                                </div>
+                                ${isValidPhone ? `<a href="tel:${esc(dPhone)}" class="text-decoration-none d-flex align-items-center gap-1" style="background: #f0fdf4; color: #16a34a; padding: 4px 10px; border-radius: 8px; font-weight: 800; font-size: 0.75rem;"><i data-lucide="phone" size="12"></i> ${esc(dPhone)}</a>` : ''}
+                            </div>
+                            <div class="mb-2 fw-bold text-dark"><i data-lucide="map-pin" size="12" style="color: var(--accent);"></i> المنطقة: <span class="fw-normal">${esc(orderArea)}</span></div>
+                            <div class="fw-bold text-dark"><i data-lucide="info" size="12" style="color: var(--primary-blue);"></i> التفاصيل: <span class="fw-normal" style="user-select: text;">${esc(orderDetails)}</span></div>
+                        </div>
+                    </div>`;
                 }
             } else {
                 newLiveOrders.push({ id: fbOrder.id, status: fbOrder.status, driverPhone: fbOrder.driverPhone || "system_routing", timestamp: fbOrder.timestamp, area: fbOrder.area, readyForPickup: fbOrder.ready_for_pickup || false, photoUrl: fbOrder.photoUrl });
             }
         });
 
-        // ② المرآة — ما كنسه السيرفر إلى الأرشيف (st:'c' منجز · 'x' ملغى/منتهٍ)
-        const mir = mirrorToday[todayISO] || {};
-        Object.keys(mir).forEach(k => {
-            const m = mir[k];
-            if (!m || m.st !== 'c') return;
-            const id = String(m.id || k);
-            if (doneToday.has(id)) return;   // ما زال في active_orders — لا تكرّره
-            doneToday.set(id, {
-                id: id, area: m.area, details: m.details,
-                price: parseFloat(m.price) || 0, drv: m.drv || "", ts: m.ts
-            });
-        });
-
-        // ③ العرض
-        const rows = Array.from(doneToday.values()).sort((a, b) => new Date(b.ts) - new Date(a.ts));
-        let todaySalesTotal = 0, todayArchiveHtml = '';
-        rows.forEach(o => { todaySalesTotal += o.price; todayArchiveHtml += archiveRowHtml(o); });
-
         newLiveOrders.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
         liveActiveOrders = newLiveOrders; renderActiveOrdersUI();
-        try { window.updAreaLiveCount(); } catch (_) {}   /* لافتة إرشادية لا تُوقف توزيعاً */   // [V41-ب]
-
+        
         const routingIcon = document.getElementById('headerRoutingIcon');
         const centerContainer = document.getElementById('headerCenterContainer');
         if (routingIcon && centerContainer) {
@@ -2583,17 +2335,13 @@ function escAttr(x){ return esc(x).replace(/"/g,'&quot;').replace(/'/g,'&#39;');
             }
         }
 
-        // 🔢 [V41] عدّاد اليوم — كان مفقوداً تماماً فكان الكاشير يعدّ بإصبعه
-        const tc = document.getElementById('todayOrdersCount');
-        if (tc) tc.innerText = rows.length;
         document.getElementById('todayTotalSales').innerHTML = `${esc(todaySalesTotal)} <small class="fs-6">د.ع</small>`;
-
         if (lastArchiveHtml !== todayArchiveHtml) {
             document.getElementById('todayArchiveItems').innerHTML = todayArchiveHtml || `<div class="text-center text-muted fw-bold py-4 small" style="font-size:0.8rem; background: rgba(255,255,255,0.4); border-radius: 20px;">لم تكتمل أي طلبات اليوم بعد.</div>`;
             lastArchiveHtml = todayArchiveHtml;
             if (typeof lucide !== 'undefined') lucide.createIcons();
         }
-
+        
         if (window.currentLedgerData) {
             document.getElementById('statMonthOrders').innerText = (window.currentLedgerData.completed_orders || 0) + globalLiveCount;
             document.getElementById('statUnpaid').innerText = (parseFloat(window.currentLedgerData.debt) || 0) + globalLiveDebt;
@@ -2677,7 +2425,7 @@ function escAttr(x){ return esc(x).replace(/"/g,'&quot;').replace(/'/g,'&#39;');
             const readyBtnHtml = showReadyBtn ? (readyForPickup ? `<span class="ready-pill"><i data-lucide="check-circle" size="10"></i> جاهز للاستلام</span>` : `<button class="btn-ready" onclick="markOrderReady('${esc(orderId)}', this)"><i data-lucide="package-check" size="14"></i> إبلاغ الكابتن بالجهوزية</button>`) : '';
 
             const photoUrl = o.photoUrl || o.image; 
-            const imgBtnHtml = photoUrl ? `<button class="btn-call-mini" style="background:#e0f2fe; color:var(--primary-blue);" onclick="document.getElementById('fullReceiptImage').src='${jss(photoUrl)}'; document.getElementById('imageViewerModal').style.display='flex';" title="عرض الوصل"><i data-lucide="image" size="14"></i></button>` : '';
+            const imgBtnHtml = photoUrl ? `<button class="btn-call-mini" style="background:#e0f2fe; color:var(--primary-blue);" onclick="document.getElementById('fullReceiptImage').src='${photoUrl}'; document.getElementById('imageViewerModal').style.display='flex';" title="عرض الوصل"><i data-lucide="image" size="14"></i></button>` : '';
 
             activeOrdersHtml += `
             <div class="live-order-card" id="order-${esc(orderId)}">
@@ -2694,7 +2442,7 @@ function escAttr(x){ return esc(x).replace(/"/g,'&quot;').replace(/'/g,'&#39;');
                     </div>
                 </div>
                 <div class="order-details-row mt-2">
-                    <div class="detail-item"><i data-lucide="map-pin" size="14" style="color: var(--accent);"></i> ${esc(orderArea || 'غير محددة')}</div>
+                    <div class="detail-item"><i data-lucide="map-pin" size="14" style="color: var(--accent);"></i> ${orderArea || 'غير محددة'}</div>
                     <div class="detail-item"><i data-lucide="bike" size="14" style="color: var(--success);"></i> الكابتن: ${driverName}</div>
                 </div>
                 <div class="progress-tracker mt-3">
@@ -2805,21 +2553,7 @@ function escAttr(x){ return esc(x).replace(/"/g,'&quot;').replace(/'/g,'&#39;');
             let msg;
             if (code === 'NO_PHONE')          msg = "⚠️ رقم المنشأة غير متوفر — سجّل خروجاً ثم دخولاً.";
             else if (code === 'NO_AUTH')      msg = "🔒 انتهت جلستك الآمنة — حدّث الصفحة ثم أعد الإرسال.";
-            /* 🆕 [N-9.2] الازدواج الصامت: dedup:true معناها أن السيرفر **لم
-               يُنشئ شيئاً** بل أعاد مُعرّف طلبٍ سابق. وكان يُعامَل نجاحاً
-               كاملاً فتُعرض «تم الإرسال بنجاح 🚀» — والطلب لم يوجد قط. */
-            else if (code === 'SERVER_DEDUP') {
-                msg = "⚠️ لم يُنشأ طلب جديد.\n\n" +
-                      "هذا الإرسال طابق طلباً أُرسل قبل قليل، فأعاد النظام رقمه:\n" +
-                      "#" + ((e && e.orderId) || '—') + "\n\n" +
-                      "راجع «طلبات نشطة». وإن كان طلباً مختلفاً فعلاً فأعد الإرسال الآن.";
-                endAttemptCid();   // نيّة جديدة ⇒ مفتاح جديد ⇒ لن يُبتلع مرّتين
-            }
-            /* 🔧 [N-9.2] كانت «راجع قائمة طلباتك **قبل** إعادة الإرسال» —
-               وهي نصيحة ما قبل cid. والآن المفتاح يبقى للمحاولة نفسها، فإعادة
-               الضغط آمنة تماماً. النصيحة القديمة تجعل الكاشير يتردّد بلا سبب
-               ويتصل بالإدارة، أو يترك الزبون. */
-            else if (code === 'SERVER_UNSURE')msg = "⏳ انقطع الاتصال قبل أن يصل الردّ.\n\nقد يكون الطلب أُنشئ وقد لا يكون.\n\n✅ اضغط «إرسال» مرّة أخرى — الإعادة آمنة تماماً ولن تُنتج طلبين.";
+            else if (code === 'SERVER_UNSURE')msg = "⏳ لم يصلنا تأكيد من الخادم.\n\n**راجع قائمة طلباتك قبل إعادة الإرسال** — قد يكون الطلب أُنشئ فعلاً.";
             else if (/permission|PERMISSION/i.test(code)) msg = "🛑 قاعدة البيانات رفضت الكتابة.\n\nالسبب غالباً انتهاء المصادقة — حدّث الصفحة.";
             else msg = "حدث خطأ أثناء الإرسال.\n\nالسبب التقني:\n" + (code || 'غير معروف') +
                        "\n\nصوّر هذه الرسالة إن تكرّر.";
@@ -2886,22 +2620,6 @@ function escAttr(x){ return esc(x).replace(/"/g,'&quot;').replace(/'/g,'&#39;');
            مطابقة قوية. هنا نمنعه من المنبع: بصمة الطلب الأخير محفوظة، وأي
            تكرار حرفيّ خلال ثلاث دقائق يُوقَف بسؤال صريح للكاشير.
            ═══════════════════════════════════════════════════════════════════ */
-        /* ═══════════════════════════════════════════════════════════════════
-           🛡️ حارس التكرار — **للوضع اليدوي وحده** بعد [V41]
-           ───────────────────────────────────────────────────────────────────
-           في اليدوي للبصمة معنى: نفس هاتف الزبون + نفس السعر + نفس
-           التفاصيل خلال ٣ دقائق = خطأ شبه مؤكّد.
-
-           وفي «السريع» لا معنى لها إطلاقاً: التفاصيل نصّ ثابت والسعر
-           مشتقّ من المنطقة ⇒ عشرة طلبات مشروعة لحي واحد في الذروة كلها
-           بصمة واحدة ⇒ نافذة تحذير على كل طلب، وts يتجدّد مع كل قبول
-           فلا تنتهي النافذة أبداً ما دام الضغط مستمراً.
-
-           والضغط المزدوج — وهو الخطر الحقيقي هنا — مغطّى بـ btn.disabled.
-           وبدلاً من الاعتراض، يرى الكاشير عدّاد «طلبات نشطة لهذه المنطقة»
-           في قائمته فيراجع بنفسه.
-           ═══════════════════════════════════════════════════════════════════ */
-        if (currentOrderMode === 'manual') {
         try {
             const sig = [normResPhone, String(price), String(area).trim(), String(details).trim()].join('|');
             const last = JSON.parse(sessionStorage.getItem('suf_last_order') || 'null');
@@ -2909,7 +2627,7 @@ function escAttr(x){ return esc(x).replace(/"/g,'&quot;').replace(/'/g,'&#39;');
                 const mins = Math.max(1, Math.round((Date.now() - last.ts) / 60000));
                 const goOn = confirm(
                     '⚠️ أرسلتَ طلباً مطابقاً تماماً قبل ' + mins + ' دقيقة.\n\n' +
-                    'نفس رقم الزبون · نفس المنطقة · نفس السعر\n\n' +
+                    'المطعم: نفسه · المنطقة: نفسها · السعر: نفسه\n\n' +
                     'إن كان الأول قد وصل فسيذهب كابتنان لطلب واحد.\n' +
                     'راجع قائمة طلباتك أولاً.\n\n' +
                     'هل هذا طلب مختلف فعلاً؟');
@@ -2918,7 +2636,6 @@ function escAttr(x){ return esc(x).replace(/"/g,'&quot;').replace(/'/g,'&#39;');
             sessionStorage.setItem('suf_last_order', JSON.stringify({ sig: sig, ts: Date.now() }));
         } catch (e) {
             if (e && e.message === 'DUPLICATE_CANCELLED') throw e;
-        }
         }
 
         /* [V40] مُعرّف احتياطي — يُستعمل فقط إن سقطنا للمسار القديم أدناه. */
@@ -2945,9 +2662,303 @@ function escAttr(x){ return esc(x).replace(/"/g,'&quot;').replace(/'/g,'&#39;');
                     price: price, photoUrl: imageUrl, restaurant: resName
                 });
             } catch (e) {
-                /* ⚠️ [V41] SERVER_DEDUP **يجب** أن يمرّ للأعلى. لو عومل
-                   كفشل عادي لسقط إلى set() القديم أدناه وأنشأ توأماً
-                   حقيقياً — أي أن كشف الازدواج نفسه يصير مصدره! */
-                if (String(e && e.message) === 'SERVER_DEDUP') throw e;
                 if (String(e && e.message) === 'SERVER_UNSURE') unsure = true;
                 else serverId = null;
+            }
+
+            /* لا نسقط للمسار القديم هنا: قد يكون الطلب أُنشئ فعلاً على
+               السيرفر ولم يصلنا الردّ. إنشاء توأم أسوأ من طلب متأخّر.
+               وcid يجعل إعادة الضغط آمنة تماماً — نفس النيّة، نفس الطلب. */
+            if (unsure) throw new Error('SERVER_UNSURE');
+            if (serverId) return;                    // ✅ أُنشئ على السيرفر
+            /* serverId === null ⇒ تيقّنّا أن شيئاً لم يُنشأ ⇒ المسار القديم */
+        }
+
+        /* ② المسار القديم — يبقى كاملاً وبلا تغيير حرف واحد.
+           هذا هو ما يُحذف **آخر** شيء: لا قبل أن يقرأ الرصد صفر
+           create_fallback لأيام، ولا قبل نشر ".write": false. */
+        await set(ref(db, 'active_orders/' + uniqueId), {
+            id: uniqueId, restaurant: resName, area: area, details: details, status: "pending_driver",
+            driverPhone: "system_routing", price: price, timestamp: tsIso, photoUrl: imageUrl,
+            last_update: tsIso, resPhone: normResPhone, resLat: regLat || 0, resLng: regLng || 0,
+            comm: safeComm, payType: safePayType, is_sovereign: false, ready_for_pickup: false
+        });
+        resTrack('create_legacy', { orderId: uniqueId });
+
+        // 🔧 أُزيل نداء NEW_ORDER إلى GAS — كان معالجه فارغاً ({success:true})
+        //   ولا يفعل شيئاً سوى استهلاك حصة السكربت.
+    }
+
+    function showSuccessMessage(customHTML) {
+        if (navigator.vibrate) navigator.vibrate([100, 50, 100]); 
+        
+        document.getElementById('orderStatusBox').classList.remove('hidden-section');
+        document.getElementById('successToastContent').innerHTML = customHTML;
+        if (typeof lucide !== 'undefined') lucide.createIcons();
+        
+        document.getElementById('customerPhone').value = ""; document.getElementById('customerDetails').value = "";
+        document.getElementById('orderPrice').value = ""; document.getElementById('customAreaName').value = ""; document.getElementById('customAreaPrice').value = "";
+        document.getElementById('customerPhoneWrap').classList.remove('cleaned'); document.getElementById('priceHint').classList.add('hidden-section');
+        document.getElementById('customerArea').value = ""; document.getElementById('areaDisplayInput').value = ""; document.getElementById('customAreaSection').classList.add('hidden-section');
+        
+        window.removePhoto(); clearDraft();
+        setTimeout(() => document.getElementById('orderStatusBox').classList.add('hidden-section'), 4500);
+    }
+
+    // نظام الرسائل الإنسانية الذكي
+    function showFriendlyMessage() {
+        const banner = document.getElementById('friendlyMessageBanner');
+        const textEl = document.getElementById('friendlyText');
+        const iconEl = document.getElementById('friendlyIcon');
+        
+        const hour = new Date().getHours();
+        const month = new Date().getMonth() + 1; // 1-12
+        const isSummer = month >= 6 && month <= 9;
+        const isWinter = month === 12 || month <= 2;
+        
+        let messages = [];
+        let icon = "🌤️";
+
+        // رسائل الصباح (من 6 صباحاً إلى 3 عصراً)
+        if (hour >= 6 && hour < 15) {
+            icon = isSummer ? "🔥" : (isWinter ? "🌧️" : "☕");
+            messages = [
+                "صباح الخير! بداية يوم جديد ورزق وفير إن شاء الله. 🤍",
+                "الكباتن هم شركاء النجاح، استقبلوهم بابتسامة لتسهيل يومهم ويومكم. 🤝",
+                isSummer ? "الجو حار جداً اليوم، الكباتن يبذلون جهداً مضاعفاً، كلمة طيبة أو قدح ماء بارد يصنع فارقاً كبيراً! 🧊" : "صباح الهمة!",
+                isWinter ? "صباح الخير.. الأجواء باردة، تجهيز الطلب بسرعة يساعد الكابتن على توصيله حاراً للزبون ويريحه من الوقوف بالبرد. 🧣" : "يوم موفق!"
+            ];
+        } 
+        // رسائل المساء والليل (من 3 عصراً فما فوق)
+        else {
+            icon = "🌙";
+            messages = [
+                "مساء الخير! نحن في أوقات الذروة، التعاون وسرعة التجهيز يصنعان تقييماً ممتازاً لمطعمكم. 🌟",
+                "أبطال التوصيل في الشوارع الآن لخدمة زبائنكم، شكراً لتعاونكم المستمر معهم. 🛵",
+                "نظام الحوت السحابي يراقب الأداء لضمان وصول طلباتكم بأسرع وقت. عمل موفق! 🐳"
+            ];
+        }
+
+        // اختيار رسالة عشوائية من القائمة المناسبة
+        const randomMsg = messages[Math.floor(Math.random() * messages.length)];
+        textEl.innerText = randomMsg;
+        iconEl.innerText = icon;
+        
+        banner.classList.remove('hidden-section');
+    }
+
+    /* ════════════════════════════════════════════════════════════
+       🎙️ ميزة الرسالة الصوتية — تسجيل + تحليل ذكي + إرسال فوري
+       تعمل بمنطق المسح الذكي للوصل تماماً (بلا مراجعة).
+    ════════════════════════════════════════════════════════════ */
+    let voiceMediaRecorder = null;
+    let voiceChunks = [];
+    let voiceStream = null;
+    let voiceMimeType = 'audio/webm';
+    let voiceTimerInterval = null;
+    let voiceStartTime = 0;
+    let voiceIsRecording = false;
+
+    // اختيار نوع صوت مدعوم (توافق Android/iOS)
+    function pickSupportedAudioMime() {
+        const candidates = ['audio/webm;codecs=opus', 'audio/webm', 'audio/mp4', 'audio/ogg'];
+        if (typeof MediaRecorder === 'undefined' || !MediaRecorder.isTypeSupported) return 'audio/webm';
+        for (const c of candidates) {
+            if (MediaRecorder.isTypeSupported(c)) return c;
+        }
+        return 'audio/webm';
+    }
+
+    async function startVoiceRecording() {
+        if (voiceIsRecording) return;
+        try {
+            /* 🎚️ الكلام يكفيه أحادي بـ16kHz. الافتراضي غالباً ستيريو 48kHz —
+               أي حِمل أضعافاً بلا فائدة، ويُحسّ على شبكة خلوية. */
+            voiceStream = await navigator.mediaDevices.getUserMedia({
+                audio: {
+                    channelCount: 1,
+                    sampleRate: 16000,
+                    echoCancellation: true,
+                    noiseSuppression: true,
+                    autoGainControl: true
+                }
+            }).catch(() => navigator.mediaDevices.getUserMedia({ audio: true }));
+        } catch (e) {
+            alert("⚠️ لا يمكن الوصول للميكروفون. تأكد من منح إذن التسجيل للتطبيق من إعدادات المتصفح.");
+            return;
+        }
+        voiceMimeType = pickSupportedAudioMime();
+        voiceChunks = [];
+        try {
+            voiceMediaRecorder = new MediaRecorder(voiceStream, { mimeType: voiceMimeType, audioBitsPerSecond: 24000 });
+        } catch (e) {
+            // بعض الأجهزة ترفض تمرير mimeType — نتركه افتراضياً
+            voiceMediaRecorder = new MediaRecorder(voiceStream);
+            voiceMimeType = voiceMediaRecorder.mimeType || 'audio/webm';
+        }
+
+        voiceMediaRecorder.ondataavailable = (ev) => {
+            if (ev.data && ev.data.size > 0) voiceChunks.push(ev.data);
+        };
+        voiceMediaRecorder.onstop = () => {
+            // إيقاف مسارات الميكروفون (إطفاء المؤشر الأحمر)
+            if (voiceStream) { voiceStream.getTracks().forEach(t => t.stop()); voiceStream = null; }
+            const blob = new Blob(voiceChunks, { type: voiceMimeType });
+            handleVoiceBlob(blob);
+        };
+
+        voiceMediaRecorder.start();
+        voiceIsRecording = true;
+        voiceStartTime = Date.now();
+
+        // واجهة التسجيل
+        const btn = document.getElementById('voiceBtn');
+        const icon = document.getElementById('voiceIcon');
+        const label = document.getElementById('voiceLabel');
+        const hint = document.getElementById('voiceHint');
+        btn.classList.add('recording');
+        icon.innerHTML = `<div class="voice-wave"><span></span><span></span><span></span><span></span><span></span></div>`;
+        label.textContent = 'يسجّل... ارفع إصبعك للإرسال';
+        hint.innerHTML = 'تكلّم الآن بوضوح 🎙️';
+        if (navigator.vibrate) navigator.vibrate(40);
+
+        // مؤقّت
+        const timerEl = document.getElementById('voiceTimer');
+        voiceTimerInterval = setInterval(() => {
+            const sec = Math.floor((Date.now() - voiceStartTime) / 1000);
+            const m = String(Math.floor(sec / 60)).padStart(2, '0');
+            const s = String(sec % 60).padStart(2, '0');
+            timerEl.textContent = `${m}:${s}`;
+            // حد أقصى 60 ثانية للأمان
+            if (sec >= 60) stopVoiceRecording();
+        }, 250);
+    }
+
+    function stopVoiceRecording() {
+        if (!voiceIsRecording) return;
+        voiceIsRecording = false;
+        if (voiceTimerInterval) { clearInterval(voiceTimerInterval); voiceTimerInterval = null; }
+
+        const recordedSec = (Date.now() - voiceStartTime) / 1000;
+
+        // تسجيل قصير جداً = إلغاء (ضغطة خاطئة)
+        if (recordedSec < 0.6) {
+            if (voiceMediaRecorder && voiceMediaRecorder.state !== 'inactive') {
+                voiceMediaRecorder.onstop = null; // لا نعالج التسجيل الملغى
+                try { voiceMediaRecorder.stop(); } catch(e) {}
+            }
+            if (voiceStream) { voiceStream.getTracks().forEach(t => t.stop()); voiceStream = null; }
+            resetVoiceUI();
+            document.getElementById('voiceHint').innerHTML = '⚠️ التسجيل قصير جداً، اضغط مطولاً وتكلّم.';
+            setTimeout(() => { if (currentOrderMode === 'voice') resetVoiceUI(); }, 2000);
+            return;
+        }
+
+        if (voiceMediaRecorder && voiceMediaRecorder.state !== 'inactive') {
+            try { voiceMediaRecorder.stop(); } catch(e) {}
+        }
+        if (navigator.vibrate) navigator.vibrate([30, 30]);
+    }
+
+    // تحويل Blob إلى base64 ثم تحليل وإرسال (مثل الوصل)
+    function handleVoiceBlob(blob) {
+        // واجهة المعالجة
+        const btn = document.getElementById('voiceBtn');
+        const icon = document.getElementById('voiceIcon');
+        const label = document.getElementById('voiceLabel');
+        const hint = document.getElementById('voiceHint');
+        const timerEl = document.getElementById('voiceTimer');
+        btn.classList.remove('recording');
+        btn.classList.add('processing');
+        icon.innerHTML = `<div class="spinner-border" role="status" style="width:2rem;height:2rem;"></div>`;
+        label.textContent = 'يُحلّل الطلب...';
+        hint.innerHTML = 'ذكاء الحوت يستمع ويستخرج تفاصيل الطلب ✨';
+        timerEl.textContent = '';
+
+        const reader = new FileReader();
+        reader.onloadend = async () => {
+            const dataUrl = reader.result;
+            const base64Content = (typeof dataUrl === 'string' && dataUrl.includes(',')) ? dataUrl.split(',')[1] : '';
+            if (!base64Content) {
+                alert("تعذّر قراءة التسجيل، حاول مجدداً.");
+                resetVoiceUI();
+                return;
+            }
+            // نمرّر نوع الصوت الأساسي (بدون codecs) لـ Gemini
+            const baseMime = voiceMimeType.split(';')[0];
+            await processVoiceOrder(base64Content, baseMime, currentResName);
+        };
+        reader.readAsDataURL(blob);
+    }
+
+    /* ══════════════════════════════════════════════════════════════════════
+       🎙️ الصوت — هنا كان البطء المحسوس كلّه.
+       ──────────────────────────────────────────────────────────────────────
+       كان الترتيب: سجّل ← **انتظر Gemini** ← أظهر النجاح ← أرسل الطلب.
+       والكاشير لا يراجع شيئاً في هذا المسار — يُرسَل الطلب بما فهمه الذكاء
+       مهما كان. فالانتظار كان محض هدر: ثوانٍ يقفها الكاشير بلا فائدة.
+
+       صار: سجّل ← **نجاح فوري** ← ينتقل للزبون التالي، والتحليل وبناء
+       الطلب يجريان في السيرفر. وأي فشل إرسال يُحفظ في طابور يُعاد تلقائياً.
+       ══════════════════════════════════════════════════════════════════════ */
+    async function processVoiceOrder(base64Content, mimeType, resName) {
+        // ① النجاح أولاً — هذا هو الفرق الذي يشعر به الكاشير
+        showSuccessMessage(`<div style="background: var(--success); width: 48px; height: 48px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 12px;"><i data-lucide="mic" style="color:#fff;width:26px;height:26px;"></i></div>
+            <div style="font-weight:900;font-size:1.05rem;">تم إرسال الطلب الصوتي ✅</div>
+            <div style="font-size:.85rem;opacity:.8;margin-top:4px;">يجري تحليله وإدخاله للرادار الآن</div>`);
+        resetVoiceUI();
+
+        // ② الإرسال بعدها — لا ينتظره أحد
+        try {
+            const r = await sendToAI({ kind: "voice", data: base64Content, mime: mimeType, resName: resName });
+            /* الطلب أُنشئ لكن التحليل فشل: نُعلم الكاشير بهدوء — فقد يصحّحه
+               من شاشة الطلبات بدل أن يكتشفه الليدر متأخّراً. */
+            if (r && r.parsed === false) {
+                console.warn("voice parsed=false:", r.err);
+                setTimeout(() => {
+                    try { alert("⚠️ أُرسل الطلب الصوتي لكن تعذّر تحليله — راجعه من قائمة طلباتك."); } catch (e) {}
+                }, 600);
+            }
+        } catch (e) {
+            console.error("voice intake failed (queued):", e && e.message);
+        }
+    }
+
+    function resetVoiceUI() {
+        const btn = document.getElementById('voiceBtn');
+        const icon = document.getElementById('voiceIcon');
+        const label = document.getElementById('voiceLabel');
+        const hint = document.getElementById('voiceHint');
+        const timerEl = document.getElementById('voiceTimer');
+        if (!btn) return;
+        btn.classList.remove('recording', 'processing');
+        icon.textContent = '🎙️';
+        label.textContent = 'اضغط مطولاً وتكلّم';
+        hint.innerHTML = 'اضغط الزر باستمرار وقل تفاصيل الطلب:<br><b>المنطقة، السعر، رقم الزبون</b><br>ثم ارفع إصبعك ليُرسَل ويُحلَّل تلقائياً ✨';
+        timerEl.textContent = '';
+    }
+
+    // ربط أحداث الضغط المطوّل (لمس + ماوس)
+    function bindVoiceButton() {
+        const btn = document.getElementById('voiceBtn');
+        if (!btn) return;
+
+        // اللمس (الجوال)
+        btn.addEventListener('touchstart', (e) => { e.preventDefault(); startVoiceRecording(); }, { passive: false });
+        btn.addEventListener('touchend', (e) => { e.preventDefault(); stopVoiceRecording(); }, { passive: false });
+        btn.addEventListener('touchcancel', (e) => { e.preventDefault(); stopVoiceRecording(); }, { passive: false });
+
+        // الماوس (سطح المكتب — للاختبار)
+        btn.addEventListener('mousedown', (e) => { e.preventDefault(); startVoiceRecording(); });
+        btn.addEventListener('mouseup', (e) => { e.preventDefault(); stopVoiceRecording(); });
+        btn.addEventListener('mouseleave', () => { if (voiceIsRecording) stopVoiceRecording(); });
+    }
+
+    // نربط الزر بعد تحميل الصفحة
+    bindVoiceButton();
+
+/* ⏳ الوحدة جاهزة — افتح زرّ الدخول (انظر السكربت المبكّر في الرأس). */
+try { if (typeof window.__nahlaUnlockBtn === 'function') window.__nahlaUnlockBtn(); } catch (_) {}
+</script>
+</body>
+</html>
