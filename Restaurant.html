@@ -33,21 +33,54 @@
         //  🛵 اسم الكابتن من drivers_locations/{phone}/name بدل شيت السائقين.
         const CURRENT_APP_VERSION = "40.0.Nahla-Swept";   /* 🔧 V2.2 */
         const RES_VERSION_KEY = 'hut_res_app_version';
+        /* ═══════════════════════════════════════════════════════════════════
+           🔴 [إصلاح عاجل] كان: caches.delete() و r.update() **وعدان غير
+           منتظَرين** ثم location.reload() فوراً في السطر التالي.
+           ───────────────────────────────────────────────────────────────────
+           وعامل الخدمة يعمل بـ Stale-While-Revalidate: يُرجع المخزَّن فوراً
+           ويحدّث في الخلفية. فيقع سباق:
+
+             ① الصفحة الجديدة تُحمَّل ⇒ الرقم تغيّر ⇒ يُحفظ الجديد
+             ② يبدأ المسح (لم يكتمل) ثم reload() فوراً
+             ③ عامل الخدمة يُرجع النسخة **القديمة** المخزَّنة بعد
+             ④ القديمة ترى رقمها ≠ المحفوظ ⇒ تحفظ القديم ⇒ تمسح ⇒ reload
+             ⑤ ... ⇒ **حلقة إعادة تحميل لا تنتهي**
+
+           والمستخدم يرى صفحة تُعيد تحميل نفسها، فيضغط الزر ولا يحدث شيء —
+           لأن الصفحة تُهدم تحته. «تعطّل زر تسجيل الدخول» بالضبط.
+
+           الآن: ننتظر اكتمال المسح **فعلاً** قبل إعادة التحميل، وحارس
+           زمني يمنع أكثر من إعادة تحميل واحدة كل ٦٠ ثانية مهما حدث،
+           وحزام يُعيد التحميل بعد ٤ ثوانٍ إن تعلّق وعد.
+           ═══════════════════════════════════════════════════════════════════ */
         try {
             if (localStorage.getItem(RES_VERSION_KEY) !== CURRENT_APP_VERSION) {
+                const RELOAD_TS_KEY = RES_VERSION_KEY + '_reload_ts';
+                const lastReload = Number(localStorage.getItem(RELOAD_TS_KEY) || 0);
                 localStorage.setItem(RES_VERSION_KEY, CURRENT_APP_VERSION);
-                if (localStorage.getItem(RES_VERSION_KEY) === CURRENT_APP_VERSION) {
+
+                if (Date.now() - lastReload < 60000) {
+                    /* 🛡️ حارس الحلقة: أُعيد التحميل قبل أقل من دقيقة.
+                       نكتفي بتحديث الرقم ونمضي — صفحة تعمل بأصول قديمة
+                       أفضل ألف مرّة من صفحة تُعيد تحميل نفسها أبداً. */
+                    console.warn('⏭️ تخطّي إعادة التحميل — حارس الحلقة');
+                } else {
+                    localStorage.setItem(RELOAD_TS_KEY, String(Date.now()));
+                    var jobs = [];
                     if ('caches' in window) {
-                        caches.keys().then(function(names) {
-                            for (let name of names) caches.delete(name);
-                        });
+                        jobs.push(caches.keys().then(function(names) {
+                            return Promise.all(names.map(function(n) { return caches.delete(n); }));
+                        }));
                     }
                     if ('serviceWorker' in navigator) {
-                        navigator.serviceWorker.getRegistrations().then(function(regs) {
-                            for (let r of regs) r.update();
-                        });
+                        jobs.push(navigator.serviceWorker.getRegistrations().then(function(regs) {
+                            return Promise.all(regs.map(function(r) { return r.update(); }));
+                        }));
                     }
-                    window.location.reload();
+                    var done = false;
+                    var go = function() { if (!done) { done = true; window.location.reload(); } };
+                    Promise.all(jobs).then(go, go);
+                    setTimeout(go, 4000);   /* حزام: لا نعلق إن تعلّق وعد */
                 }
             }
         } catch(e) {
@@ -3276,36 +3309,3 @@ function escAttr(x){ return esc(x).replace(/"/g,'&quot;').replace(/'/g,'&#39;');
         if (hint) hint.innerHTML = '✕ أُلغي التسجيل — لم يُرسَل شيء.';
         resTrack('voice_slide_cancel', {});
         if (navigator.vibrate) navigator.vibrate([20, 40, 20]);
-    }
-
-    function bindVoiceButton() {
-        const btn = document.getElementById('voiceBtn');
-        if (!btn) return;
-
-        // اللمس (الجوال)
-        btn.addEventListener('touchstart', (e) => {
-            e.preventDefault();
-            _voiceStartY = (e.touches && e.touches[0]) ? e.touches[0].clientY : 0;
-            armVoiceCancel(false);
-            startVoiceRecording();
-        }, { passive: false });
-
-        btn.addEventListener('touchmove', (e) => {
-            if (!voiceIsRecording) return;
-            const y = (e.touches && e.touches[0]) ? e.touches[0].clientY : 0;
-            armVoiceCancel((_voiceStartY - y) > VOICE_CANCEL_PX);
-        }, { passive: true });
-
-        btn.addEventListener('touchend', (e) => {
-            e.preventDefault();
-            if (_voiceCancelArmed) { discardVoiceRecording(); return; }
-            stopVoiceRecording();
-        }, { passive: false });
-
-        btn.addEventListener('touchcancel', (e) => { e.preventDefault(); discardVoiceRecording(); }, { passive: false });
-
-        // الماوس (سطح المكتب — للاختبار)
-        btn.addEventListener('mousedown', (e) => { e.preventDefault(); _voiceStartY = e.clientY; armVoiceCancel(false); startVoiceRecording(); });
-        btn.addEventListener('mousemove', (e) => { if (voiceIsRecording) armVoiceCancel((_voiceStartY - e.clientY) > VOICE_CANCEL_PX); });
-        btn.addEventListener('mouseup', (e) => { e.preventDefault(); if (_voiceCancelArmed) { discardVoiceRecording(); return; } stopVoiceRecording(); });
-        btn.addEventListener('mouseleave', () => { if (voiceIsRecording) { if (_voiceCancelArmed) discardVoiceRecording(); else stopVoiceRecording(); } });
