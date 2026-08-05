@@ -2952,13 +2952,3 @@ function escAttr(x){ return esc(x).replace(/"/g,'&quot;').replace(/'/g,'&#39;');
         btn.addEventListener('mousedown', (e) => { e.preventDefault(); startVoiceRecording(); });
         btn.addEventListener('mouseup', (e) => { e.preventDefault(); stopVoiceRecording(); });
         btn.addEventListener('mouseleave', () => { if (voiceIsRecording) stopVoiceRecording(); });
-    }
-
-    // نربط الزر بعد تحميل الصفحة
-    bindVoiceButton();
-
-/* ⏳ الوحدة جاهزة — افتح زرّ الدخول (انظر السكربت المبكّر في الرأس). */
-try { if (typeof window.__nahlaUnlockBtn === 'function') window.__nahlaUnlockBtn(); } catch (_) {}
-</script>
-</body>
-</html>
