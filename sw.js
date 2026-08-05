@@ -111,13 +111,48 @@ self.addEventListener('fetch', event => {
       url.hostname.includes('basemaps.cartocdn.com') ||
       url.hostname.includes('actions.google.com')) { 
     
+    /* ═══════════════════════════════════════════════════════════════════════
+       🔴🔴🔴 [الجذر] **هذا هو سبب «زرّ الدخول العالق على جارٍ التحميل».**
+       ───────────────────────────────────────────────────────────────────────
+       كان السطر:
+           if (networkResponse && (networkResponse.status === 200 ||
+                                   networkResponse.type === 'opaque'))
+
+       والردّ الـ opaque هو ردّ طلبٍ بلا CORS: **حالته 0 وجسمه غير مقروء**.
+       يقع حين تتعثّر الشبكة أو تتدخّل بوّابة مزوّد أو شبكة مقيّدة.
+
+       فإن عاد أحد استيرادات firebase من www.gstatic.com كـopaque مرّة واحدة:
+         ① يُخزَّن في CDN_CACHE_NAME
+         ② والاستراتيجية هنا **Cache-First**: `if (cachedResponse) return`
+            ⇒ يُقدَّم إلى الأبد بلا أي إعادة تحقّق
+         ③ ووحدة ES لا تستطيع تنفيذ ردٍّ opaque (لا جسم ولا نوع MIME)
+         ⇒ الوحدة تموت عند أول import ⇒ window.authAction لا تُعرَّف أبداً
+         ⇒ حارس الإقلاع في Restaurant.html يُبقي الزرّ «⏳ جارٍ التحميل…»
+
+       ⚠️ **ولهذا لم تنفع العودة إلى النسخة القديمة من Restaurant.html:**
+          السمّ ليس في صفحة المطاعم بل في كاش الـCDN. أي ملف HTML سيموت
+          عند نفس الاستيراد المسموم.
+
+       العلاج طبقتان:
+         ① لا نخزّن opaque أبداً لموارد حاجبة للتنفيذ. الردّ غير الصالح
+            يُمرَّر للمتصفّح ولا يُحفظ — فتُعاد المحاولة في التحميل التالي.
+         ② ولا نثق بالمخزَّن ثقةً عمياء: مدخلٌ حالته ليست 200 يُهمَل
+            ويُعاد الجلب — فيُشفى الكاش المسموم من تلقاء نفسه.
+       ═══════════════════════════════════════════════════════════════════════ */
     event.respondWith(
       caches.match(event.request).then(cachedResponse => {
-        if (cachedResponse) return cachedResponse; 
-        
+        /* ② المخزَّن الصالح وحده يُقدَّم. (opaque ⇒ status 0 ⇒ يُهمَل) */
+        if (cachedResponse && cachedResponse.status === 200 && cachedResponse.type !== 'opaque') {
+          return cachedResponse;
+        }
+        if (cachedResponse) {
+          console.warn('🧹 [AlHut SW] مدخل كاش تالف — يُطرح ويُعاد جلبه:', url.pathname);
+          caches.open(CDN_CACHE_NAME).then(c => c.delete(event.request)).catch(() => {});
+        }
+
         return fetch(event.request).then(networkResponse => {
-          // 🚨 السماح للردود التي ليس بها CORS (Opaque) بالدخول للكاش
-          if (networkResponse && (networkResponse.status === 200 || networkResponse.type === 'opaque')) {
+          /* ① الصالح وحده يُخزَّن — لا opaque ولا 4xx/5xx. */
+          if (networkResponse && networkResponse.status === 200 && networkResponse.type !== 'opaque') {
             const responseClone = networkResponse.clone();
             caches.open(CDN_CACHE_NAME).then(cache => cache.put(event.request, responseClone));
           }
