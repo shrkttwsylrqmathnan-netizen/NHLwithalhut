@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <!--
-  🍽️ تطبيق المطاعم — V41.0 "Owned"
+  🍽️ تطبيق المطاعم — V40.0 "Owned"
   ═══════════════════════════════════════════════════════════════════════
   ✅ الإنشاء من السيرفر (createOrder) — والمسار القديم يبقى سقوطاً آمناً.
      يُغلق ثلاثة أعطال معاً:
@@ -1801,7 +1801,7 @@ function escAttr(x){ return esc(x).replace(/"/g,'&quot;').replace(/'/g,'&#39;');
         let html = '';
         Object.keys(myCustomPriceList).sort().forEach(area => {
             const price = myCustomPriceList[area];
-            html += `<div class="dropdown-item-area" onclick="selectDropdownArea('${jss(area)}', ${Number(price)||0})">
+            html += `<div class="dropdown-item-area" onclick="selectDropdownArea('${area}', ${price})">
                         <span>${area}</span>
                         <span class="area-price-tag">${price} د.ع</span>
                      </div>`;
@@ -2420,28 +2420,6 @@ function escAttr(x){ return esc(x).replace(/"/g,'&quot;').replace(/'/g,'&#39;');
         });
     }
 
-    /* ═══════════════════════════════════════════════════════════════════════
-       🔴 [N-9.4] sid و jss — **منقولتان حرفياً من Driver.html**
-       ───────────────────────────────────────────────────────────────────────
-       ولم تُكتَبا من جديد عمداً: النمط واحد وتعليقهما هناك يشرح السبب.
-
-       ⚠️ **وescAttr الموجودة في هذا الملف لا تكفي داخل onclick.** في
-          onclick="f('${x}')" يمرّ النصّ بمحلّلين: محلّل HTML يفكّ السمة
-          **ويفكّ الكيانات**، ثم محلّل JS يفكّ السلسلة عند العلامة المفردة.
-          فـescAttr تحوّل ' إلى &#39; ثم **يفكّها محلّل HTML قبل أن يصل الدور
-          إلى JS** ⇒ منطقة اسمها حي's تُنتج f('حي's') ⇒ SyntaxError.
-
-       ⇒ esc للنصّ الظاهر · escAttr لقيمة سمة عادية · jss داخل onclick ·
-         sid للمُعرّفات.
-       ═══════════════════════════════════════════════════════════════════════ */
-    function sid(x){ return String(x??'').replace(/[^A-Za-z0-9_-]/g,'').slice(0,64); }
-    function jss(x){
-      return String(x??'')
-        .replace(/\\/g,'\\\\').replace(/'/g,"\\'").replace(/"/g,'&quot;')
-        .replace(/\r?\n/g,' ')
-        .replace(/&(?!quot;)/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
-    }
-
     function archiveRowHtml(o) {
         const orderTime = o.ts ? new Date(o.ts).toLocaleTimeString('ar-EG', { hour: '2-digit', minute: '2-digit' }) : '';
         const dPhone = o.drv || "";
@@ -2644,7 +2622,7 @@ function escAttr(x){ return esc(x).replace(/"/g,'&quot;').replace(/'/g,'&#39;');
             const readyBtnHtml = showReadyBtn ? (readyForPickup ? `<span class="ready-pill"><i data-lucide="check-circle" size="10"></i> جاهز للاستلام</span>` : `<button class="btn-ready" onclick="markOrderReady('${esc(orderId)}', this)"><i data-lucide="package-check" size="14"></i> إبلاغ الكابتن بالجهوزية</button>`) : '';
 
             const photoUrl = o.photoUrl || o.image; 
-            const imgBtnHtml = photoUrl ? `<button class="btn-call-mini" style="background:#e0f2fe; color:var(--primary-blue);" onclick="document.getElementById('fullReceiptImage').src='${jss(photoUrl)}'; document.getElementById('imageViewerModal').style.display='flex';" title="عرض الوصل"><i data-lucide="image" size="14"></i></button>` : '';
+            const imgBtnHtml = photoUrl ? `<button class="btn-call-mini" style="background:#e0f2fe; color:var(--primary-blue);" onclick="document.getElementById('fullReceiptImage').src='${photoUrl}'; document.getElementById('imageViewerModal').style.display='flex';" title="عرض الوصل"><i data-lucide="image" size="14"></i></button>` : '';
 
             activeOrdersHtml += `
             <div class="live-order-card" id="order-${esc(orderId)}">
@@ -2661,7 +2639,7 @@ function escAttr(x){ return esc(x).replace(/"/g,'&quot;').replace(/'/g,'&#39;');
                     </div>
                 </div>
                 <div class="order-details-row mt-2">
-                    <div class="detail-item"><i data-lucide="map-pin" size="14" style="color: var(--accent);"></i> ${esc(orderArea || 'غير محددة')}</div>
+                    <div class="detail-item"><i data-lucide="map-pin" size="14" style="color: var(--accent);"></i> ${orderArea || 'غير محددة'}</div>
                     <div class="detail-item"><i data-lucide="bike" size="14" style="color: var(--success);"></i> الكابتن: ${driverName}</div>
                 </div>
                 <div class="progress-tracker mt-3">
@@ -2956,7 +2934,7 @@ function escAttr(x){ return esc(x).replace(/"/g,'&quot;').replace(/'/g,'&#39;');
         document.getElementById('customerArea').value = ""; document.getElementById('areaDisplayInput').value = ""; document.getElementById('customAreaSection').classList.add('hidden-section');
         
         window.removePhoto(); clearDraft();
-        setTimeout(() => document.getElementById('orderStatusBox').classList.add('hidden-section'), 6000);   /* [N-9.4] كان 4500 — تختفي رسالة النجاح وشريط التراجع ما زال يعدّ */
+        setTimeout(() => document.getElementById('orderStatusBox').classList.add('hidden-section'), 4500);
     }
 
     // نظام الرسائل الإنسانية الذكي
@@ -3005,10 +2983,6 @@ function escAttr(x){ return esc(x).replace(/"/g,'&quot;').replace(/'/g,'&#39;');
        🎙️ ميزة الرسالة الصوتية — تسجيل + تحليل ذكي + إرسال فوري
        تعمل بمنطق المسح الذكي للوصل تماماً (بلا مراجعة).
     ════════════════════════════════════════════════════════════ */
-    /* [N-9.4] نُقل إلى هنا: resetVoiceUI (السطر ~3197) تكتبه وهي معرَّفة
-       قبل سطر let الأصلي — تعمل اليوم لأنها لا تُنادى إلا بعد تقييم
-       الوحدة، لكن أي استدعاء مبكر مستقبلاً كان سيرمي TDZ. */
-    let _voiceCancelArmed = false;
     let voiceMediaRecorder = null;
     let voiceChunks = [];
     let voiceStream = null;
@@ -3239,7 +3213,7 @@ function escAttr(x){ return esc(x).replace(/"/g,'&quot;').replace(/'/g,'&#39;');
        صفر ثانية إضافية على المسار السليم: من لم يسحب لا يشعر بشيء.
        ═══════════════════════════════════════════════════════════════════════ */
     const VOICE_CANCEL_PX = 60;
-    let _voiceStartY = 0;
+    let _voiceStartY = 0, _voiceCancelArmed = false;
 
     function armVoiceCancel(on) {
         if (_voiceCancelArmed === on) return;
