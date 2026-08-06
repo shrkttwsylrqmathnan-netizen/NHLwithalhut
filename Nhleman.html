@@ -23,68 +23,6 @@ const V="22.0",VK="hut_v22";
 try{if(localStorage.getItem(VK)!==V){localStorage.setItem(VK,V);if("caches"in window)caches.keys().then(n=>n.forEach(k=>caches.delete(k)));}}catch(e){}
 </script>
 <meta charset="UTF-8">
-<script>
-/* ═══════════════════════════════════════════════════════════════════════════
-   🔑 [ADM-3] حاكم إصدار — **لم يكن للوحة الإدارة حاكمٌ إطلاقاً**
-   ───────────────────────────────────────────────────────────────────────────
-   ولهذا كنتَ تحتاج Ctrl+Shift+R بعد كل رفع، و«أحياناً» لا تعمل: عامل الخدمة
-   يعمل بـStale-While-Revalidate ⇒ يقدّم المخزَّن أولاً ويحدّث في الخلفية،
-   فأي رفع لا يظهر إلا في التحميل **التالي** — وقد لا يظهر أبداً إن كان
-   مدخل الكاش فاسداً.
-
-   ⚠️ والمسح يُنتظر اكتماله **قبل** إعادة التحميل: هدمُ العامل والأصول
-      تُجلب عبره هو ما عطّل تطبيق المطاعم وتطبيق الكابتن.
-   ⚠️ update لا unregister · وحارس حلقة 60 ثانية · وحزام 4 ثوانٍ.
-
-   📌 ارفع هذا الرقم كلّما غيّرت الملف — وإلا لم يصل تغييرك.
-   ═══════════════════════════════════════════════════════════════════════════ */
-const ADMIN_APP_VERSION = "2.0-Nahla-Fast";
-try {
-  if (localStorage.getItem('hut_adm_version') !== ADMIN_APP_VERSION) {
-    var _rk='hut_adm_version_reload_ts', _last=Number(localStorage.getItem(_rk)||0);
-    localStorage.setItem('hut_adm_version', ADMIN_APP_VERSION);
-    if (Date.now()-_last < 60000) { console.warn('⏭️ تخطّي إعادة التحميل — حارس الحلقة'); }
-    else {
-      localStorage.setItem(_rk, String(Date.now()));
-      var _j=[];
-      if('caches' in window) _j.push(caches.keys().then(function(ns){
-        return Promise.all(ns.map(function(x){return caches.delete(x);}));}));
-      if('serviceWorker' in navigator) _j.push(navigator.serviceWorker.getRegistrations()
-        .then(function(rs){return Promise.all(rs.map(function(r){return r.update();}));}));
-      var _d=false,_go=function(){if(!_d){_d=true;window.location.reload();}};
-      Promise.all(_j).then(_go,_go); setTimeout(_go,4000);
-    }
-  }
-} catch(e){ console.warn('تعذّر التحقق من الإصدار:', e && e.message); }
-
-/* 🔦 مُبلِّغ فشل التحميل — مرئي، ولا يظهر إلا إن فشلت اللوحة فعلاً. */
-(function(){
-  var errs=[];
-  function tag(m){ if(!m)return; m=String(m).slice(0,300);
-    if(errs.indexOf(m)===-1)errs.push(m); try{console.warn('[AlHut] '+m);}catch(_){} }
-  window.addEventListener('error',function(e){
-    if(e&&e.target&&(e.target.src||e.target.href)) tag('فشل تحميل: '+(e.target.src||e.target.href));
-    else if(e&&e.message) tag(e.message);},true);
-  window.addEventListener('unhandledrejection',function(e){
-    tag('وعد مرفوض: '+((e.reason&&(e.reason.message||e.reason))||''));});
-  document.addEventListener('securitypolicyviolation',function(e){
-    tag('سياسة الأمان منعت: '+e.violatedDirective+' ← '+String(e.blockedURI||'').slice(0,90));});
-  setTimeout(function(){
-    if (typeof window.goTab === 'function') return;
-    try{
-      var b=document.createElement('div'); b.setAttribute('dir','rtl');
-      b.style.cssText='position:fixed;inset:auto 0 0 0;z-index:2147483647;background:#7f1d1d;color:#fff;'+
-        'padding:14px;font:600 13px/1.7 system-ui,sans-serif;max-height:60vh;overflow:auto';
-      b.innerHTML='<b style="font-size:15px">🔴 لم تكتمل لوحة الإدارة</b>'+
-        '<pre style="white-space:pre-wrap;word-break:break-all;background:#450a0a;padding:8px;border-radius:8px;font-size:11px">'+
-        (errs.length?errs.join('\n───\n'):'لم يُلتقط خطأ صريح — غالباً مورد مُعلَّق.')+
-        '</pre><div style="opacity:.8;font-size:11px">متصل: '+(navigator.onLine?'نعم':'لا')+
-        ' · الإصدار: '+ADMIN_APP_VERSION+'</div>';
-      document.body.appendChild(b);
-    }catch(_){}
-  },9000);
-})();
-</script>
 <!-- 🔒 [أ١] سياسة أمان المحتوى — تُقلّص أثر أي حقن أو اختراق CDN.
      ابدأ بـ Content-Security-Policy-Report-Only أسبوعاً، اقرأ التقارير، ثم أَلزِم.
      'unsafe-inline' لازمٌ اليوم: الشيفرة كلها كتل سكربت مضمّنة. إزالته
@@ -98,11 +36,11 @@ try {
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <!-- ⚡ الأداء: خرائط جوجل تُحمَّل كسولاً عند فتح نافذة التعديل فقط (كانت تُحمَّل
      مع كل فتح للّوحة وتُبطئها بشدّة). markercluster حُذف (كان يُحمَّل بلا استخدام). -->
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-database-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
 <!-- [V17] دوال السحابة — لنداء orderCommand في وضع الظلّ -->
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-functions-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-functions-compat.js"></script>
 <!-- 🗑️ [حذف] Leaflet + leaflet-heat + Chart.js — نحو 355 ك.ب و عشرات طلبات
      بلاطات basemaps.cartocdn مع كل تحريك. الخريطة الحيّة والرسمان أُزيلا بطلبك.
      ⚠️ خرائط جوجل (مُنتقي موقع المطعم) **باقية** — وهي تُحمَّل عند الطلب فقط
@@ -1115,8 +1053,6 @@ let liveOrd=[],archOrd=[],compArch=[],compByDay={};
 let liveLed={drivers:{},restaurants:{}},liveMet={},liveResLoc={};
 /* 🗑️ drvMk و resMk حُذفا مع الخريطة الحيّة. actDrv باقٍ — عدّاد النشطين. */
 let actDrv=new Set();
-/* 👑 [L-1] نظام الليدرز: من هو ليدر، ومتى بدأت نافذته اليوم. */
-let ldrSet=new Set(), ldrWin={};
 let ovr={o:{},d:{},r:{}};
 let rfilt="all",resSF="mostOrders",drvSF="mostOrders";
 let arcSC="date",arcSD="desc";
@@ -1439,9 +1375,6 @@ function setupFB(){
          عشرين كابتناً ينبضون كل 10–20 ثانية = 60–120 عملية DOM في الدقيقة،
          وهي أثقل مصدر تقطيع في اللوحة. الآن: عدٌّ فقط. */
       if(d.status==="active"&&d.lat&&d.lng&&!stale) actDrv.add(nP(phone));
-      /* 👑 [L-1] علَم الليدر ونافذته — من المستمع القائم، بلا قراءة إضافية. */
-      if(d.is_leader===true) ldrSet.add(nP(phone)); else ldrSet.delete(nP(phone));
-      if(d.leader_window_start) ldrWin[nP(phone)]=d.leader_window_start; else delete ldrWin[nP(phone)];
     });
     document.querySelectorAll(".v-drv").forEach(e=>e.textContent=actDrv.size);
     if(gD){updBadges("DRV",gD.drivers);}
@@ -1450,39 +1383,13 @@ function setupFB(){
     if(gD&&document.getElementById("pg-drivers").classList.contains("on"))_drvListDebounced();
   };
   listen(()=>db.ref("drivers_locations"),lCb);
-  const ledCb=()=>{
+  const ledCb=snap=>{
+    liveLed=snap.val()||{drivers:{},restaurants:{}};
     if(gD){updBadges("RES",gD.restaurants);updBadges("DRV",gD.drivers);}
     patchCards("RES");patchCards("DRV");updTicker();
   };
-  /* ═══════════════════════════════════════════════════════════════════════
-     🔴 [ADM-1] كان: listen(db.ref("ledgers"), ledCb) — العقدة **كاملة**.
-     ───────────────────────────────────────────────────────────────────────
-     و ledCb لا يستعمل منها إلا liveLed.drivers و liveLed.restaurants
-     (الأرصدة المجمَّعة) — أي حقول معدودة لكل جهة.
-
-     لكن مرآة المطعم تكتب تحت:
-         ledgers/restaurants/{هاتف}/today/{يوم}/{طلب}
-
-     ⇒ **كل طلب يكنسه terminalOrderSweeper يُطلق مستمع الإدارة**، وهو
-       يُعيد بناء بطاقات المطاعم والكباتن والشريط. ومع كنسٍ كل ربع ساعة
-       على أسطول مزدحم صارت اللوحة تُعيد الرسم عشرات المرّات في الدقيقة.
-       وحجم ما يُنقل تضخّم بيوم كامل من الطلبات لكل مطعم.
-
-     الآن: مستمعان على الفرعين المستعملين فقط. المرآة تحت `today` لا يمرّ
-     بها أيٌّ منهما ⇒ صفر إطلاق من الكنس، وحجمٌ أصغر بأضعاف.
-
-     ⚠️ وشكلُ liveLed يبقى كما هو {drivers,restaurants} — فلا يتغيّر حرفٌ
-        في patchCards ولا updBadges ولا updTicker.
-     ═══════════════════════════════════════════════════════════════════════ */
-  liveLed = liveLed || {drivers:{}, restaurants:{}};
-  listen(()=>db.ref("ledgers/drivers"),     snap=>{ liveLed.drivers    = snap.val()||{}; ledCb(null); });
-  listen(()=>db.ref("ledgers/restaurants"), snap=>{ liveLed.restaurants= snap.val()||{}; ledCb(null); });
-  /* ⚡ [ADM-4] daily_metrics يُكتب عند **كل إنجاز وكل رفض** لكل كابتن، وكان
-     يُعيد بناء بطاقات الكباتن كاملةً في كل مرّة بلا تهدئة. وفي الذروة تصل
-     عشرات الكتابات في الدقيقة ⇒ عشرات إعادات البناء. الآن تهدئة كالتي
-     تحمي قائمة الكباتن من نبضات المواقع (_drvListDebounced). */
-  const _metDebounced=debounce(()=>{if(gD&&document.getElementById("pg-drivers").classList.contains("on"))filtEnt("DRV");},400);
-  const dmCb=snap=>{liveMet=snap.val()||{};_metDebounced();};
+  listen(()=>db.ref("ledgers"),ledCb);
+  const dmCb=snap=>{liveMet=snap.val()||{};if(gD&&document.getElementById("pg-drivers").classList.contains("on"))filtEnt("DRV");};
   listen(()=>db.ref("daily_metrics"),dmCb);
   const shCb=snap=>{shiftsOn=snap.val()!==false;updShiftsUI();};
   listen(()=>db.ref("system_settings/shifts_enabled"),shCb);
@@ -1514,11 +1421,7 @@ function setupFB(){
   });
   /* 🗑️ كان يُعيد بناء **كل** علامات المطاعم على الخريطة مع كل لقطة
      (removeLayer + L.marker لكل مطعم). الآن: تخزين فقط. */
-    const _rlDebounced=debounce(()=>{
-    if(gD){updBadges("RES",gD.restaurants);}
-    if(document.getElementById("pg-audit")?.classList.contains("on")) renderAudit();
-  },400);
-const rlCb=snap=>{liveResLoc=snap.val()||{};_rlDebounced();};
+  const rlCb=snap=>{liveResLoc=snap.val()||{};};
   listen(()=>db.ref("restaurants_locations"),rlCb);
   if(!_alInit){_alInit=true;listen(()=>db.ref("system_alerts").limitToLast(60),snap=>{alData=[];const v=snap.val();if(v)Object.keys(v).forEach(k=>alData.unshift({id:k,...v[k]}));updTicker();if(document.getElementById("pg-aiops").classList.contains("on"))renderAlerts();});}
   if(!_auInit){_auInit=true;listen(()=>db.ref("admin_audit_trail").limitToLast(120),snap=>{auData=[];const v=snap.val();if(v)Object.keys(v).forEach(k=>auData.unshift(v[k]));if(document.getElementById("pg-audit").classList.contains("on"))renderAudit();});}
@@ -1603,21 +1506,6 @@ function filtEnt(type){
       else if(orders>=100){rC="dr-gd";rI="🥇";rL="ذهبي";}
       else if(orders>=30){rC="dr-sv";rI="🥈";rL="فضي";}
       else if(orders>=10){rC="dr-br";rI="🥉";rL="برونزي";}
-      /* 👑 [L-1] شارة الليدر: تعرض حاله في نافذته دون فتح أي شاشة أخرى. */
-      if(ldrSet.has(n)){
-        const ws=ldrWin[n];
-        let lt="👑 ليدر", lc="#7c3aed";
-        if(ws){
-          const el=(Date.now()-new Date(ws).getTime())/3600000;
-          if(el>=6){ lt="👑 انتهت نافذته"; lc="#64748b"; }
-          else {
-            const rem=(6-el), tgt=(2.25*el);
-            lt=`👑 ${dc}/${tgt.toFixed(1)} · باقٍ ${rem.toFixed(1)}س`;
-            lc = dc < 2.0*el ? "#16a34a" : dc >= 2.5*el ? "#f59e0b" : "#7c3aed";
-          }
-        } else lt="👑 ليدر — لم يبدأ";
-        extra=`<div class="dr-rt" style="background:${lc};color:#fff">${esc(lt)}</div>`;
-      } else
       extra=`<div class="dr-rt ${rC}">${rI} ${rL}</div>`
         +`<div class="dm-row"><div class="dm-it ${avg>0&&avg<=15?"dm-g":avg>25?"dm-r":""}">⚡ ${avg>0?avg+"د/ط":"---"}</div><div class="dm-it ${rj>2?"dm-r":rj>0?"dm-w":""}">✖ رفض:${rj}</div></div>`;
     }
@@ -1648,7 +1536,6 @@ function filtEnt(type){
           <button class="ea ea-a" title="تفعيل"   onclick="doAct('ACCEPT','${type}','${pj}',this)">✓</button>
           <button class="ea ea-p" title="استراحة" onclick="doAct('PAUSE','${type}','${pj}',this)">⏸</button>
           <button class="ea ea-b" title="حظر"      onclick="doAct('BAN','${type}','${pj}',this)">🚫</button>
-          ${type==="DRV" ? `<button class="ea" title="${ldrSet.has(n)?"إلغاء صفة الليدر":"جعله ليدر"}" style="background:${ldrSet.has(n)?"#7c3aed":"#e2e8f0"};color:${ldrSet.has(n)?"#fff":"#64748b"}" onclick="toggleLeader('${pj}',${ldrSet.has(n)?"false":"true"},this)">&#128081;</button>` : ""}
           <button class="ea ea-d" title="حذف"      onclick="doAct('DEL','${type}','${pj}',this)">🗑</button>
           <button class="ea ea-e" title="تعديل"   onclick="opEdit('${type}','${pj}')">✏️</button>
         </div>
@@ -1662,34 +1549,6 @@ function filtEnt(type){
   });
   rendered.forEach(id=>{if(!toR.has(id)){const el=document.getElementById(id);if(el){el.style.opacity="0";el.style.transition=".2s";setTimeout(()=>el.remove(),210);}}});
 }
-
-/* ═══════════════════════════════════════════════════════════════════════════
-   👑 [L-1] تفعيل صفة الليدر
-   ───────────────────────────────────────────────────────────────────────────
-   المحرك لا يرى ادّعاءات المصادقة (دور staff يأتي من Code.gs)، فهو يقرأ
-   drivers_locations وحدها ⇒ يلزم علَمٌ صريح على عقدة الكابتن.
-
-   والقواعد تسمح: drivers_locations/$phone له ".write": role == 'admin'،
-   ولا فحص يمنع حقلاً جديداً ⇒ **صفر تغيير في database.rules.json**.
-
-   ⚠️ وعند الإلغاء نمسح leader_window_start أيضاً — وإلا بقي ختمٌ يتيم
-      يوهم المحرك بنافذة لكابتن لم يعد ليدراً.
-   ═══════════════════════════════════════════════════════════════════════════ */
-window.toggleLeader=function(pj,on,btn){
-  const phone=nP(String(pj||""));
-  if(!phone){toast("رقم غير صالح ❌");return;}
-  const isOn=String(on)==="true";
-  if(!confirm(isOn ? "جعل "+phone+" ليدراً؟\n\nسيتلقّى 2–2.5 طلب/ساعة لمدة 6 ساعات من أول تسليم، ثم يتوقّف عنه التوزيع."
-                   : "إلغاء صفة الليدر عن "+phone+"؟\n\nسيعود كابتناً عادياً فوراً.")) return;
-  if(btn)btn.disabled=true;
-  const upd={};
-  upd["drivers_locations/"+phone+"/is_leader"]= isOn ? true : null;
-  if(!isOn) upd["drivers_locations/"+phone+"/leader_window_start"]=null;
-  db.ref().update(upd)
-    .then(function(){toast(isOn?"👑 صار ليدراً ✅":"عاد كابتناً عادياً ✅");})
-    .catch(function(e){toast("تعذّر: "+e.message);})
-    .finally(function(){if(btn)btn.disabled=false;});
-};
 
 function doAct(cmd,type,id,el){
   const stM={ACCEPT:"active",PAUSE:"inactive",BAN:"banned",DEL:"deleted"};
@@ -1922,41 +1781,14 @@ window.goTab=function(name){
     b.classList.toggle("on",oc.includes("'"+name+"'"));
   });
   const dh=document.getElementById("dhT");if(dh)dh.textContent=TITLES[name]||"لوحة التحكم";
-
-  /* ═══════════════════════════════════════════════════════════════════════
-     ⚡ [ADM-2] «التنقّل شبه ميت» — والسبب ليس بطء البناء بل **توقيته**.
-     ───────────────────────────────────────────────────────────────────────
-     كان تبديل اللوحة وبناء محتواها يقعان في **نفس الشوط**:
-
-         classList.add("on")   ← تبديل فوري
-         renderRadar()         ← بناء مئات البطاقات بـinnerHTML
-
-     والمتصفّح لا يرسم شيئاً حتى ينتهي الشوط. فالمستخدم يضغط الزرّ ويرى
-     الشاشة القديمة **مجمّدة** طوال البناء — يظنّها معلّقة فيضغط مرّتين،
-     فيتضاعف البناء وتزداد سوءاً.
-
-     الآن: نُفسح شوطاً للرسم قبل البناء. اللوحة الجديدة تظهر **فوراً**
-     والمحتوى يملؤها بعد إطار واحد. الزمن الكلّي كما هو — لكن الإحساس
-     ينقلب من «ميت» إلى «فوري»، لأن المستخدم يرى استجابةً لضغطته.
-
-     ⚠️ ونحمي من الضغط المتكرّر: طلبُ بناءٍ جديد يُلغي السابق المعلّق —
-        فالتنقّل السريع بين خمسة أقسام يبني الأخير وحده لا الخمسة.
-     ═══════════════════════════════════════════════════════════════════════ */
-  if(window._tabRaf) cancelAnimationFrame(window._tabRaf);
-  window._tabRaf = requestAnimationFrame(()=>{ window._tabRaf = requestAnimationFrame(()=>{
-    window._tabRaf = 0;
-    try{
-      if(name==="live"){renderRadar();}
-      if(name==="audit")renderAudit();
-      if(name==="aiops")renderAlerts();
-      if(name==="orders"){renderArch();}
-      if(name==="restaurants"&&gD)filtEnt("RES");
-      if(name==="drivers"&&gD)filtEnt("DRV");
-      if(name==="staff"){loadStaffRoster();renderStaffOnline();renderStaffList();renderStaffLog();updStaffKPIs();startStaffIdleTimer();}
-    }catch(e){ console.error("goTab render:",e&&e.message); }
-  }); });
-
-  if(name!=="staff") stopStaffIdleTimer();
+  if(name==="live"){renderRadar();}
+  if(name==="audit")renderAudit();
+  if(name==="aiops")renderAlerts();
+  if(name==="orders"){renderArch();}
+  if(name==="restaurants"&&gD)filtEnt("RES");
+  if(name==="drivers"&&gD)filtEnt("DRV");
+  if(name==="staff"){loadStaffRoster();renderStaffOnline();renderStaffList();renderStaffLog();updStaffKPIs();startStaffIdleTimer();}
+  else stopStaffIdleTimer();
 };
 
 window.doFilt=function(f,btn){
@@ -2634,33 +2466,3 @@ window.stSetStatus=async function(phone,status,el){
   if(el)el.disabled=true;
   try{
     const r=await fetch(API,{method:"POST",headers:{"Content-Type":"text/plain"},body:JSON.stringify({action:"MANAGE_EMPLOYEE",sub:"SET_STATUS",payload:{phone,status},token:TOK,pass:MP})});
-    const d=await r.json();
-    if(d&&d.success){toast(`تم ${verb} الموظف`);logAudit("manageStaff",`${verb} موظف: ${phone}`);loadStaffRoster();}
-    else toast(d&&d.msg||"فشل","e");
-  }catch(e){toast("خطأ","e");}
-  finally{if(el)el.disabled=false;}
-};
-window.stDelete=async function(phone,name,el){
-  if(!MP)return toast("انتهت الجلسة","e");
-  if(!confirm(`⚠️ حذف الموظف "${name}" نهائياً؟`))return;
-  if(el)el.disabled=true;
-  try{
-    const r=await fetch(API,{method:"POST",headers:{"Content-Type":"text/plain"},body:JSON.stringify({action:"MANAGE_EMPLOYEE",sub:"DELETE",payload:{phone},token:TOK,pass:MP})});
-    const d=await r.json();
-    if(d&&d.success){toast("تم حذف الموظف");logAudit("manageStaff",`حذف موظف: ${name}`);loadStaffRoster();}
-    else toast(d&&d.msg||"فشل","e");
-  }catch(e){toast("خطأ","e");}
-  finally{if(el)el.disabled=false;}
-};
-/* مؤقّت تحديث الخمول الحي (سلاسة) — يُعيد رسم المتصلين كل 30 ثانية */
-function startStaffIdleTimer(){
-  stopStaffIdleTimer();
-  _stIdleTimer=setInterval(()=>{
-    if(document.getElementById("pg-staff").classList.contains("on")){renderStaffOnline();updStaffKPIs();}
-    else stopStaffIdleTimer();
-  },30000);
-}
-function stopStaffIdleTimer(){if(_stIdleTimer){clearInterval(_stIdleTimer);_stIdleTimer=null;}}
-</script>
-</body>
-</html>
