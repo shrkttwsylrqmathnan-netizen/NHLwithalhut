@@ -23,6 +23,68 @@ const V="22.0",VK="hut_v22";
 try{if(localStorage.getItem(VK)!==V){localStorage.setItem(VK,V);if("caches"in window)caches.keys().then(n=>n.forEach(k=>caches.delete(k)));}}catch(e){}
 </script>
 <meta charset="UTF-8">
+<script>
+/* ═══════════════════════════════════════════════════════════════════════════
+   🔑 [ADM-3] حاكم إصدار — **لم يكن للوحة الإدارة حاكمٌ إطلاقاً**
+   ───────────────────────────────────────────────────────────────────────────
+   ولهذا كنتَ تحتاج Ctrl+Shift+R بعد كل رفع، و«أحياناً» لا تعمل: عامل الخدمة
+   يعمل بـStale-While-Revalidate ⇒ يقدّم المخزَّن أولاً ويحدّث في الخلفية،
+   فأي رفع لا يظهر إلا في التحميل **التالي** — وقد لا يظهر أبداً إن كان
+   مدخل الكاش فاسداً.
+
+   ⚠️ والمسح يُنتظر اكتماله **قبل** إعادة التحميل: هدمُ العامل والأصول
+      تُجلب عبره هو ما عطّل تطبيق المطاعم وتطبيق الكابتن.
+   ⚠️ update لا unregister · وحارس حلقة 60 ثانية · وحزام 4 ثوانٍ.
+
+   📌 ارفع هذا الرقم كلّما غيّرت الملف — وإلا لم يصل تغييرك.
+   ═══════════════════════════════════════════════════════════════════════════ */
+const ADMIN_APP_VERSION = "2.0-Nahla-Fast";
+try {
+  if (localStorage.getItem('hut_adm_version') !== ADMIN_APP_VERSION) {
+    var _rk='hut_adm_version_reload_ts', _last=Number(localStorage.getItem(_rk)||0);
+    localStorage.setItem('hut_adm_version', ADMIN_APP_VERSION);
+    if (Date.now()-_last < 60000) { console.warn('⏭️ تخطّي إعادة التحميل — حارس الحلقة'); }
+    else {
+      localStorage.setItem(_rk, String(Date.now()));
+      var _j=[];
+      if('caches' in window) _j.push(caches.keys().then(function(ns){
+        return Promise.all(ns.map(function(x){return caches.delete(x);}));}));
+      if('serviceWorker' in navigator) _j.push(navigator.serviceWorker.getRegistrations()
+        .then(function(rs){return Promise.all(rs.map(function(r){return r.update();}));}));
+      var _d=false,_go=function(){if(!_d){_d=true;window.location.reload();}};
+      Promise.all(_j).then(_go,_go); setTimeout(_go,4000);
+    }
+  }
+} catch(e){ console.warn('تعذّر التحقق من الإصدار:', e && e.message); }
+
+/* 🔦 مُبلِّغ فشل التحميل — مرئي، ولا يظهر إلا إن فشلت اللوحة فعلاً. */
+(function(){
+  var errs=[];
+  function tag(m){ if(!m)return; m=String(m).slice(0,300);
+    if(errs.indexOf(m)===-1)errs.push(m); try{console.warn('[AlHut] '+m);}catch(_){} }
+  window.addEventListener('error',function(e){
+    if(e&&e.target&&(e.target.src||e.target.href)) tag('فشل تحميل: '+(e.target.src||e.target.href));
+    else if(e&&e.message) tag(e.message);},true);
+  window.addEventListener('unhandledrejection',function(e){
+    tag('وعد مرفوض: '+((e.reason&&(e.reason.message||e.reason))||''));});
+  document.addEventListener('securitypolicyviolation',function(e){
+    tag('سياسة الأمان منعت: '+e.violatedDirective+' ← '+String(e.blockedURI||'').slice(0,90));});
+  setTimeout(function(){
+    if (typeof window.goTab === 'function') return;
+    try{
+      var b=document.createElement('div'); b.setAttribute('dir','rtl');
+      b.style.cssText='position:fixed;inset:auto 0 0 0;z-index:2147483647;background:#7f1d1d;color:#fff;'+
+        'padding:14px;font:600 13px/1.7 system-ui,sans-serif;max-height:60vh;overflow:auto';
+      b.innerHTML='<b style="font-size:15px">🔴 لم تكتمل لوحة الإدارة</b>'+
+        '<pre style="white-space:pre-wrap;word-break:break-all;background:#450a0a;padding:8px;border-radius:8px;font-size:11px">'+
+        (errs.length?errs.join('\n───\n'):'لم يُلتقط خطأ صريح — غالباً مورد مُعلَّق.')+
+        '</pre><div style="opacity:.8;font-size:11px">متصل: '+(navigator.onLine?'نعم':'لا')+
+        ' · الإصدار: '+ADMIN_APP_VERSION+'</div>';
+      document.body.appendChild(b);
+    }catch(_){}
+  },9000);
+})();
+</script>
 <!-- 🔒 [أ١] سياسة أمان المحتوى — تُقلّص أثر أي حقن أو اختراق CDN.
      ابدأ بـ Content-Security-Policy-Report-Only أسبوعاً، اقرأ التقارير، ثم أَلزِم.
      'unsafe-inline' لازمٌ اليوم: الشيفرة كلها كتل سكربت مضمّنة. إزالته
@@ -36,11 +98,11 @@ try{if(localStorage.getItem(VK)!==V){localStorage.setItem(VK,V);if("caches"in wi
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <!-- ⚡ الأداء: خرائط جوجل تُحمَّل كسولاً عند فتح نافذة التعديل فقط (كانت تُحمَّل
      مع كل فتح للّوحة وتُبطئها بشدّة). markercluster حُذف (كان يُحمَّل بلا استخدام). -->
-<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-database-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
 <!-- [V17] دوال السحابة — لنداء orderCommand في وضع الظلّ -->
-<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-functions-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-functions-compat.js"></script>
 <!-- 🗑️ [حذف] Leaflet + leaflet-heat + Chart.js — نحو 355 ك.ب و عشرات طلبات
      بلاطات basemaps.cartocdn مع كل تحريك. الخريطة الحيّة والرسمان أُزيلا بطلبك.
      ⚠️ خرائط جوجل (مُنتقي موقع المطعم) **باقية** — وهي تُحمَّل عند الطلب فقط
@@ -1415,7 +1477,12 @@ function setupFB(){
   liveLed = liveLed || {drivers:{}, restaurants:{}};
   listen(()=>db.ref("ledgers/drivers"),     snap=>{ liveLed.drivers    = snap.val()||{}; ledCb(null); });
   listen(()=>db.ref("ledgers/restaurants"), snap=>{ liveLed.restaurants= snap.val()||{}; ledCb(null); });
-  const dmCb=snap=>{liveMet=snap.val()||{};if(gD&&document.getElementById("pg-drivers").classList.contains("on"))filtEnt("DRV");};
+  /* ⚡ [ADM-4] daily_metrics يُكتب عند **كل إنجاز وكل رفض** لكل كابتن، وكان
+     يُعيد بناء بطاقات الكباتن كاملةً في كل مرّة بلا تهدئة. وفي الذروة تصل
+     عشرات الكتابات في الدقيقة ⇒ عشرات إعادات البناء. الآن تهدئة كالتي
+     تحمي قائمة الكباتن من نبضات المواقع (_drvListDebounced). */
+  const _metDebounced=debounce(()=>{if(gD&&document.getElementById("pg-drivers").classList.contains("on"))filtEnt("DRV");},400);
+  const dmCb=snap=>{liveMet=snap.val()||{};_metDebounced();};
   listen(()=>db.ref("daily_metrics"),dmCb);
   const shCb=snap=>{shiftsOn=snap.val()!==false;updShiftsUI();};
   listen(()=>db.ref("system_settings/shifts_enabled"),shCb);
@@ -1447,7 +1514,11 @@ function setupFB(){
   });
   /* 🗑️ كان يُعيد بناء **كل** علامات المطاعم على الخريطة مع كل لقطة
      (removeLayer + L.marker لكل مطعم). الآن: تخزين فقط. */
-  const rlCb=snap=>{liveResLoc=snap.val()||{};};
+    const _rlDebounced=debounce(()=>{
+    if(gD){updBadges("RES",gD.restaurants);}
+    if(document.getElementById("pg-audit")?.classList.contains("on")) renderAudit();
+  },400);
+const rlCb=snap=>{liveResLoc=snap.val()||{};_rlDebounced();};
   listen(()=>db.ref("restaurants_locations"),rlCb);
   if(!_alInit){_alInit=true;listen(()=>db.ref("system_alerts").limitToLast(60),snap=>{alData=[];const v=snap.val();if(v)Object.keys(v).forEach(k=>alData.unshift({id:k,...v[k]}));updTicker();if(document.getElementById("pg-aiops").classList.contains("on"))renderAlerts();});}
   if(!_auInit){_auInit=true;listen(()=>db.ref("admin_audit_trail").limitToLast(120),snap=>{auData=[];const v=snap.val();if(v)Object.keys(v).forEach(k=>auData.unshift(v[k]));if(document.getElementById("pg-audit").classList.contains("on"))renderAudit();});}
@@ -2466,3 +2537,130 @@ function renderStaffLog(){
     const nm=nmMap[e.action]||e.action;
     const col=colMap[e.action]||"var(--sky)";
     html+=`<div class="au-it">
+      <div class="au-ic" style="background:${col}1a;color:${col}">${ico}</div>
+      <div style="flex:1">
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:6px;margin-bottom:2px">
+          <div style="font-weight:800;color:var(--ink);font-size:.85rem">${esc(e.staffName||"موظف")} — ${esc(nm)}</div>
+          <span style="font-size:.62rem;font-weight:800;color:var(--ink4);direction:ltr">${esc(e.staffPhone||"")}</span>
+        </div>
+        <div style="font-size:.7rem;font-weight:700;color:var(--ink4);margin-bottom:4px">${esc(fmtDateTime(e.timestamp))}</div>
+        ${e.details?`<div style="font-size:.76rem;font-weight:700;color:var(--ink3);background:var(--base2);padding:4px 7px;border-radius:7px;border:1px solid var(--line2)">${esc(e.details)}</div>`:""}
+      </div>
+    </div>`;
+  });
+  c.innerHTML=html;
+}
+window.opStaffPerf=function(phone){
+  const n=nP(phone);
+  const emp=staffRoster.find(e=>nP(e.phone)===n);
+  const sess=staffSessions[n]||staffSessions[phone]||{};
+  const st=staffStats(phone);
+  const rt=staffRating(st);
+  document.getElementById("perfName").textContent=(emp?emp.name:sess.name)||"موظف";
+  document.getElementById("perfPhone").textContent=phone;
+  const onlineBadge=sess.online===true?`<span class="stb stb-g">🟢 متصل الآن</span>`:`<span class="stb stb-b">غير متصل</span>`;
+  const recent=staffLog.filter(e=>nP(e.staffPhone)===n).slice(0,10);
+  const icoMap={LOGIN:"🟢",LOGOUT:"🔴",ASSIGN:"👑",COMPLETE:"✅",DELETE:"🗑",WITHDRAW:"↩"};
+  let recentHtml=recent.length?recent.map(e=>`<div style="display:flex;align-items:center;gap:8px;padding:7px 0;border-bottom:1px dashed var(--line2)"><span>${icoMap[e.action]||"⚡"}</span><span style="flex:1;font-size:.74rem;font-weight:700;color:var(--ink3)">${esc(e.details||e.action)}</span><span style="font-size:.64rem;color:var(--ink4)">${fmtTime(e.timestamp)}</span></div>`).join(""):`<div style="text-align:center;color:var(--ink4);font-size:.78rem;padding:14px">لا أفعال بعد</div>`;
+  document.getElementById("perfBody").innerHTML=`
+    <div style="text-align:center;margin-bottom:14px">
+      <span class="dr-rt ${rt.cls}" style="font-size:.82rem">${rt.ic} ${rt.lbl}</span>
+      <div style="margin-top:8px">${onlineBadge}</div>
+    </div>
+    <div class="dm-row" style="margin-bottom:8px">
+      <div class="dm-it">🕐 الدخول: ${fmtTime(sess.login_time)}</div>
+      <div class="dm-it">⚡ آخر نشاط: ${fmtTime(sess.last_activity)}</div>
+    </div>
+    <div class="arch-kpi" style="grid-template-columns:repeat(2,1fr);margin-bottom:14px">
+      <div class="ak akb"><div class="ak-n" style="font-size:1.3rem">${st.counts.ASSIGN}</div><div class="ak-l">تعيين قسري</div></div>
+      <div class="ak akg"><div class="ak-n" style="font-size:1.3rem">${st.counts.COMPLETE}</div><div class="ak-l">إكمال طلب</div></div>
+      <div class="ak aka"><div class="ak-n" style="font-size:1.3rem">${st.counts.WITHDRAW}</div><div class="ak-l">سحب طلب</div></div>
+      <div class="ak akr"><div class="ak-n" style="font-size:1.3rem">${st.counts.DELETE}</div><div class="ak-l">حذف طلب</div></div>
+    </div>
+    <div style="font-weight:800;color:var(--ink);font-size:.82rem;margin-bottom:6px">📜 آخر 10 أفعال</div>
+    <div style="background:var(--base2);border-radius:12px;padding:6px 12px;border:1px solid var(--line2)">${recentHtml}</div>`;
+  opMod("staffPerfMod");
+};
+window.opStaffAdd=function(){
+  stEditMode=false;
+  document.getElementById("staffModTitle").textContent="إضافة موظف";
+  document.getElementById("stN").value="";
+  document.getElementById("stPH").value="";
+  document.getElementById("stPW").value="";
+  document.getElementById("stN").style.display="";
+  document.getElementById("stPH").style.display="";
+  document.getElementById("stNLabel").style.display="";
+  document.getElementById("stPHLabel").style.display="";
+  document.getElementById("stPWLabel").textContent="كلمة المرور";
+  opMod("staffMod");
+};
+window.opStaffReset=function(phone,name){
+  stEditMode=true;
+  document.getElementById("staffModTitle").textContent="إعادة كلمة مرور: "+name;
+  document.getElementById("stN").value=name;
+  document.getElementById("stPH").value=phone;
+  document.getElementById("stPW").value="";
+  document.getElementById("stN").style.display="none";
+  document.getElementById("stPH").style.display="none";
+  document.getElementById("stNLabel").style.display="none";
+  document.getElementById("stPHLabel").style.display="none";
+  document.getElementById("stPWLabel").textContent="كلمة المرور الجديدة";
+  opMod("staffMod");
+};
+window.clStaffMod=function(){clMod("staffMod");};
+window.svStaff=async function(){
+  if(!MP)return toast("انتهت الجلسة","e");
+  const name=document.getElementById("stN").value.trim();
+  const phone=document.getElementById("stPH").value.trim();
+  const pass=document.getElementById("stPW").value.trim();
+  const btn=document.getElementById("stSvBtn");
+  if(stEditMode){if(!pass)return toast("أدخل كلمة المرور الجديدة","e");}
+  else{if(!name||!phone||!pass)return toast("أكمل كل الحقول","e");}
+  btn.disabled=true;btn.classList.add("loading");
+  const sub=stEditMode?"RESET_PASS":"ADD";
+  const payload=stEditMode?{phone,password:pass}:{name,phone,password:pass};
+  try{
+    const r=await fetch(API,{method:"POST",headers:{"Content-Type":"text/plain"},body:JSON.stringify({action:"MANAGE_EMPLOYEE",sub,payload,token:TOK,pass:MP})});
+    const d=await r.json();
+    if(d&&d.success){toast(stEditMode?"تم تحديث كلمة المرور ✅":"تمت إضافة الموظف ✅");logAudit("manageStaff",(stEditMode?"إعادة كلمة مرور: ":"إضافة موظف: ")+(name||phone));clStaffMod();loadStaffRoster();}
+    else toast(d&&d.msg||"فشل العملية","e");
+  }catch(e){toast("خطأ في الاتصال","e");}
+  finally{btn.disabled=false;btn.classList.remove("loading");}
+};
+window.stSetStatus=async function(phone,status,el){
+  if(!MP)return toast("انتهت الجلسة","e");
+  const verb=status==="active"?"تفعيل":"إيقاف";
+  if(!confirm(`${verb} هذا الموظف؟${status!=="active"?" (سيُفصل فوراً إن كان متصلاً)":""}`))return;
+  if(el)el.disabled=true;
+  try{
+    const r=await fetch(API,{method:"POST",headers:{"Content-Type":"text/plain"},body:JSON.stringify({action:"MANAGE_EMPLOYEE",sub:"SET_STATUS",payload:{phone,status},token:TOK,pass:MP})});
+    const d=await r.json();
+    if(d&&d.success){toast(`تم ${verb} الموظف`);logAudit("manageStaff",`${verb} موظف: ${phone}`);loadStaffRoster();}
+    else toast(d&&d.msg||"فشل","e");
+  }catch(e){toast("خطأ","e");}
+  finally{if(el)el.disabled=false;}
+};
+window.stDelete=async function(phone,name,el){
+  if(!MP)return toast("انتهت الجلسة","e");
+  if(!confirm(`⚠️ حذف الموظف "${name}" نهائياً؟`))return;
+  if(el)el.disabled=true;
+  try{
+    const r=await fetch(API,{method:"POST",headers:{"Content-Type":"text/plain"},body:JSON.stringify({action:"MANAGE_EMPLOYEE",sub:"DELETE",payload:{phone},token:TOK,pass:MP})});
+    const d=await r.json();
+    if(d&&d.success){toast("تم حذف الموظف");logAudit("manageStaff",`حذف موظف: ${name}`);loadStaffRoster();}
+    else toast(d&&d.msg||"فشل","e");
+  }catch(e){toast("خطأ","e");}
+  finally{if(el)el.disabled=false;}
+};
+/* مؤقّت تحديث الخمول الحي (سلاسة) — يُعيد رسم المتصلين كل 30 ثانية */
+function startStaffIdleTimer(){
+  stopStaffIdleTimer();
+  _stIdleTimer=setInterval(()=>{
+    if(document.getElementById("pg-staff").classList.contains("on")){renderStaffOnline();updStaffKPIs();}
+    else stopStaffIdleTimer();
+  },30000);
+}
+function stopStaffIdleTimer(){if(_stIdleTimer){clearInterval(_stIdleTimer);_stIdleTimer=null;}}
+</script>
+</body>
+</html>
