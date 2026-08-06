@@ -1053,6 +1053,8 @@ let liveOrd=[],archOrd=[],compArch=[],compByDay={};
 let liveLed={drivers:{},restaurants:{}},liveMet={},liveResLoc={};
 /* 🗑️ drvMk و resMk حُذفا مع الخريطة الحيّة. actDrv باقٍ — عدّاد النشطين. */
 let actDrv=new Set();
+/* 👑 [L-1] نظام الليدرز: من هو ليدر، ومتى بدأت نافذته اليوم. */
+let ldrSet=new Set(), ldrWin={};
 let ovr={o:{},d:{},r:{}};
 let rfilt="all",resSF="mostOrders",drvSF="mostOrders";
 let arcSC="date",arcSD="desc";
@@ -1375,6 +1377,9 @@ function setupFB(){
          عشرين كابتناً ينبضون كل 10–20 ثانية = 60–120 عملية DOM في الدقيقة،
          وهي أثقل مصدر تقطيع في اللوحة. الآن: عدٌّ فقط. */
       if(d.status==="active"&&d.lat&&d.lng&&!stale) actDrv.add(nP(phone));
+      /* 👑 [L-1] علَم الليدر ونافذته — من المستمع القائم، بلا قراءة إضافية. */
+      if(d.is_leader===true) ldrSet.add(nP(phone)); else ldrSet.delete(nP(phone));
+      if(d.leader_window_start) ldrWin[nP(phone)]=d.leader_window_start; else delete ldrWin[nP(phone)];
     });
     document.querySelectorAll(".v-drv").forEach(e=>e.textContent=actDrv.size);
     if(gD){updBadges("DRV",gD.drivers);}
@@ -1506,6 +1511,21 @@ function filtEnt(type){
       else if(orders>=100){rC="dr-gd";rI="🥇";rL="ذهبي";}
       else if(orders>=30){rC="dr-sv";rI="🥈";rL="فضي";}
       else if(orders>=10){rC="dr-br";rI="🥉";rL="برونزي";}
+      /* 👑 [L-1] شارة الليدر: تعرض حاله في نافذته دون فتح أي شاشة أخرى. */
+      if(ldrSet.has(n)){
+        const ws=ldrWin[n];
+        let lt="👑 ليدر", lc="#7c3aed";
+        if(ws){
+          const el=(Date.now()-new Date(ws).getTime())/3600000;
+          if(el>=6){ lt="👑 انتهت نافذته"; lc="#64748b"; }
+          else {
+            const rem=(6-el), tgt=(2.25*el);
+            lt=`👑 ${dc}/${tgt.toFixed(1)} · باقٍ ${rem.toFixed(1)}س`;
+            lc = dc < 2.0*el ? "#16a34a" : dc >= 2.5*el ? "#f59e0b" : "#7c3aed";
+          }
+        } else lt="👑 ليدر — لم يبدأ";
+        extra=`<div class="dr-rt" style="background:${lc};color:#fff">${esc(lt)}</div>`;
+      } else
       extra=`<div class="dr-rt ${rC}">${rI} ${rL}</div>`
         +`<div class="dm-row"><div class="dm-it ${avg>0&&avg<=15?"dm-g":avg>25?"dm-r":""}">⚡ ${avg>0?avg+"د/ط":"---"}</div><div class="dm-it ${rj>2?"dm-r":rj>0?"dm-w":""}">✖ رفض:${rj}</div></div>`;
     }
@@ -1536,6 +1556,7 @@ function filtEnt(type){
           <button class="ea ea-a" title="تفعيل"   onclick="doAct('ACCEPT','${type}','${pj}',this)">✓</button>
           <button class="ea ea-p" title="استراحة" onclick="doAct('PAUSE','${type}','${pj}',this)">⏸</button>
           <button class="ea ea-b" title="حظر"      onclick="doAct('BAN','${type}','${pj}',this)">🚫</button>
+          ${type==="DRV" ? `<button class="ea" title="${ldrSet.has(n)?"إلغاء صفة الليدر":"جعله ليدر"}" style="background:${ldrSet.has(n)?"#7c3aed":"#e2e8f0"};color:${ldrSet.has(n)?"#fff":"#64748b"}" onclick="toggleLeader('${pj}',${ldrSet.has(n)?"false":"true"},this)">&#128081;</button>` : ""}
           <button class="ea ea-d" title="حذف"      onclick="doAct('DEL','${type}','${pj}',this)">🗑</button>
           <button class="ea ea-e" title="تعديل"   onclick="opEdit('${type}','${pj}')">✏️</button>
         </div>
@@ -1549,6 +1570,34 @@ function filtEnt(type){
   });
   rendered.forEach(id=>{if(!toR.has(id)){const el=document.getElementById(id);if(el){el.style.opacity="0";el.style.transition=".2s";setTimeout(()=>el.remove(),210);}}});
 }
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   👑 [L-1] تفعيل صفة الليدر
+   ───────────────────────────────────────────────────────────────────────────
+   المحرك لا يرى ادّعاءات المصادقة (دور staff يأتي من Code.gs)، فهو يقرأ
+   drivers_locations وحدها ⇒ يلزم علَمٌ صريح على عقدة الكابتن.
+
+   والقواعد تسمح: drivers_locations/$phone له ".write": role == 'admin'،
+   ولا فحص يمنع حقلاً جديداً ⇒ **صفر تغيير في database.rules.json**.
+
+   ⚠️ وعند الإلغاء نمسح leader_window_start أيضاً — وإلا بقي ختمٌ يتيم
+      يوهم المحرك بنافذة لكابتن لم يعد ليدراً.
+   ═══════════════════════════════════════════════════════════════════════════ */
+window.toggleLeader=function(pj,on,btn){
+  const phone=nP(String(pj||""));
+  if(!phone){toast("رقم غير صالح ❌");return;}
+  const isOn=String(on)==="true";
+  if(!confirm(isOn ? "جعل "+phone+" ليدراً؟\n\nسيتلقّى 2–2.5 طلب/ساعة لمدة 6 ساعات من أول تسليم، ثم يتوقّف عنه التوزيع."
+                   : "إلغاء صفة الليدر عن "+phone+"؟\n\nسيعود كابتناً عادياً فوراً.")) return;
+  if(btn)btn.disabled=true;
+  const upd={};
+  upd["drivers_locations/"+phone+"/is_leader"]= isOn ? true : null;
+  if(!isOn) upd["drivers_locations/"+phone+"/leader_window_start"]=null;
+  db.ref().update(upd)
+    .then(function(){toast(isOn?"👑 صار ليدراً ✅":"عاد كابتناً عادياً ✅");})
+    .catch(function(e){toast("تعذّر: "+e.message);})
+    .finally(function(){if(btn)btn.disabled=false;});
+};
 
 function doAct(cmd,type,id,el){
   const stM={ACCEPT:"active",PAUSE:"inactive",BAN:"banned",DEL:"deleted"};
@@ -2417,82 +2466,3 @@ window.opStaffAdd=function(){
   stEditMode=false;
   document.getElementById("staffModTitle").textContent="إضافة موظف";
   document.getElementById("stN").value="";
-  document.getElementById("stPH").value="";
-  document.getElementById("stPW").value="";
-  document.getElementById("stN").style.display="";
-  document.getElementById("stPH").style.display="";
-  document.getElementById("stNLabel").style.display="";
-  document.getElementById("stPHLabel").style.display="";
-  document.getElementById("stPWLabel").textContent="كلمة المرور";
-  opMod("staffMod");
-};
-window.opStaffReset=function(phone,name){
-  stEditMode=true;
-  document.getElementById("staffModTitle").textContent="إعادة كلمة مرور: "+name;
-  document.getElementById("stN").value=name;
-  document.getElementById("stPH").value=phone;
-  document.getElementById("stPW").value="";
-  document.getElementById("stN").style.display="none";
-  document.getElementById("stPH").style.display="none";
-  document.getElementById("stNLabel").style.display="none";
-  document.getElementById("stPHLabel").style.display="none";
-  document.getElementById("stPWLabel").textContent="كلمة المرور الجديدة";
-  opMod("staffMod");
-};
-window.clStaffMod=function(){clMod("staffMod");};
-window.svStaff=async function(){
-  if(!MP)return toast("انتهت الجلسة","e");
-  const name=document.getElementById("stN").value.trim();
-  const phone=document.getElementById("stPH").value.trim();
-  const pass=document.getElementById("stPW").value.trim();
-  const btn=document.getElementById("stSvBtn");
-  if(stEditMode){if(!pass)return toast("أدخل كلمة المرور الجديدة","e");}
-  else{if(!name||!phone||!pass)return toast("أكمل كل الحقول","e");}
-  btn.disabled=true;btn.classList.add("loading");
-  const sub=stEditMode?"RESET_PASS":"ADD";
-  const payload=stEditMode?{phone,password:pass}:{name,phone,password:pass};
-  try{
-    const r=await fetch(API,{method:"POST",headers:{"Content-Type":"text/plain"},body:JSON.stringify({action:"MANAGE_EMPLOYEE",sub,payload,token:TOK,pass:MP})});
-    const d=await r.json();
-    if(d&&d.success){toast(stEditMode?"تم تحديث كلمة المرور ✅":"تمت إضافة الموظف ✅");logAudit("manageStaff",(stEditMode?"إعادة كلمة مرور: ":"إضافة موظف: ")+(name||phone));clStaffMod();loadStaffRoster();}
-    else toast(d&&d.msg||"فشل العملية","e");
-  }catch(e){toast("خطأ في الاتصال","e");}
-  finally{btn.disabled=false;btn.classList.remove("loading");}
-};
-window.stSetStatus=async function(phone,status,el){
-  if(!MP)return toast("انتهت الجلسة","e");
-  const verb=status==="active"?"تفعيل":"إيقاف";
-  if(!confirm(`${verb} هذا الموظف؟${status!=="active"?" (سيُفصل فوراً إن كان متصلاً)":""}`))return;
-  if(el)el.disabled=true;
-  try{
-    const r=await fetch(API,{method:"POST",headers:{"Content-Type":"text/plain"},body:JSON.stringify({action:"MANAGE_EMPLOYEE",sub:"SET_STATUS",payload:{phone,status},token:TOK,pass:MP})});
-    const d=await r.json();
-    if(d&&d.success){toast(`تم ${verb} الموظف`);logAudit("manageStaff",`${verb} موظف: ${phone}`);loadStaffRoster();}
-    else toast(d&&d.msg||"فشل","e");
-  }catch(e){toast("خطأ","e");}
-  finally{if(el)el.disabled=false;}
-};
-window.stDelete=async function(phone,name,el){
-  if(!MP)return toast("انتهت الجلسة","e");
-  if(!confirm(`⚠️ حذف الموظف "${name}" نهائياً؟`))return;
-  if(el)el.disabled=true;
-  try{
-    const r=await fetch(API,{method:"POST",headers:{"Content-Type":"text/plain"},body:JSON.stringify({action:"MANAGE_EMPLOYEE",sub:"DELETE",payload:{phone},token:TOK,pass:MP})});
-    const d=await r.json();
-    if(d&&d.success){toast("تم حذف الموظف");logAudit("manageStaff",`حذف موظف: ${name}`);loadStaffRoster();}
-    else toast(d&&d.msg||"فشل","e");
-  }catch(e){toast("خطأ","e");}
-  finally{if(el)el.disabled=false;}
-};
-/* مؤقّت تحديث الخمول الحي (سلاسة) — يُعيد رسم المتصلين كل 30 ثانية */
-function startStaffIdleTimer(){
-  stopStaffIdleTimer();
-  _stIdleTimer=setInterval(()=>{
-    if(document.getElementById("pg-staff").classList.contains("on")){renderStaffOnline();updStaffKPIs();}
-    else stopStaffIdleTimer();
-  },30000);
-}
-function stopStaffIdleTimer(){if(_stIdleTimer){clearInterval(_stIdleTimer);_stIdleTimer=null;}}
-</script>
-</body>
-</html>
