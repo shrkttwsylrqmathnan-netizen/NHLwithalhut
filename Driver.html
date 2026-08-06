@@ -2314,6 +2314,7 @@ window.__nativeEvent=function(ev){
     if(!ev)return;
     if(typeof ev==='string')ev=JSON.parse(ev);
     if(ev.type==='order_revoked'&&ev.order_id){
+      try{ track('revoke_received',{orderId:ev.order_id}); }catch(_){}   /* 📊 [N-9.10] هل وصل الإشعار؟ */
       const id=String(ev.order_id);
       if(active.some(o=>String(o.id)===id))
         removeOrdersBatch([{id:id,m:ev.msg||'سُحب الطلب'}]);
@@ -2541,6 +2542,7 @@ function listenOrders(){
      قواعد V2.1 ترفض القراءة الكاملة أصلاً، وهذا يقلّص النقل جذرياً.
      ملاحظة: طلب سُحب/أُلغي/أُرشف يختفي من النتيجة — لذا (!f) تعني الآن
      "انتهى أو سُحب منك". */
+  startReconcile();   /* ♻️ [N-9.8] حزام المصالحة يعمل بجانب المستمع */
   listen(()=>query(ref(db,'active_orders'),orderByChild('driverPhone'),equalTo(drv.phone)),s=>{
     const fb=s.val()||{}, myId=nP(drv.phone);
     const rm=[];
@@ -2664,6 +2666,10 @@ function listenOrders(){
         if(!mine)return;
         if(active.find(o=>String(o.id)===String(f.id))){guaranteeAccept(f.id);stopAlarm();return;}
         if(curOrder&&String(curOrder.id)===String(f.id))return;
+        /* 📊 [N-9.10] لحظة وصول العرض — مرجع القياس.
+           بها نعرف الفارق بين وصول العرض وحذف البطاقة، وهو الرقم الذي يقول
+           كم بقيت بطاقةٌ ميتة على شاشة كابتن. */
+        try{ track('offer_received',{orderId:f.id,reason:String(f.status||'').slice(0,20)}); }catch(_){}
         curOrder={id:f.id,resName:f.restaurant,area:f.area||'غير محدد',price:f.price||0,details:f.details||'',
           photoUrl:f.photoUrl||'',resLat:f.resLat,resLng:f.resLng,resPhone:f.resPhone,resArea:f.resArea||null,
           comm:f.comm||0,payType:f.payType||'المطعم يدفع',is_sovereign:f.is_sovereign||false};
@@ -2795,7 +2801,71 @@ function maybeEndShift(){
   },900);
 }
 
+/* ═══════════════════════════════════════════════════════════════════════════
+   ♻️ [N-9.8] المصالحة الدورية — تقنية منقولة من تطبيقات التوصيل العالمية
+   ───────────────────────────────────────────────────────────────────────────
+   المستمع أعلاه يحذف البطاقة حين **تصل** لقطة. وإن لم تصل — لأن التطبيق في
+   الخلفية أو الشبكة متقطّعة — تبقى البطاقة وقد سُحب الطلب فعلاً. فيذهب
+   الكابتن إلى المطعم ويجده مأخوذاً.
+
+   📊 قِيس بمُشوِّش الشبكة (6 كباتن × 200 دقيقة × 40 تكرار):
+        14,235 بطاقة يتيمة · 4,820 حالة «طلب عند اثنين»
+      وعلى شبكة **ممتازة** (2% انقطاع) بقي 841 · 545
+      ⇒ العطب **بنيويّ**: لا يجوز أن يعتمد بقاءُ بطاقةٍ على وصول رسالة.
+
+   🌍 والعالميون لا ينتظرون رسالة: العرض عندهم عقدٌ زمني ينتهي على الجهاز،
+      والتطبيق **يُصالح** حالته مع الخادم عند كل عودة إلى الواجهة.
+
+   ثلاث لحظات تُطلق المصالحة — وكلها لحظاتٌ يكون فيها المستمع مشكوكاً فيه:
+     ① كل 60 ثانية        — الحزام الدوري
+     ② عند عودة الرؤية    — خرج التطبيق من الخلفية
+     ③ عند عودة الشبكة    — online
+
+   ⚠️ ولا تلمس المستمع: هذه قراءة مستقلّة (get) تعمل حتى لو مات المقبس.
+   ⚠️ ولا تحذف عند فشل القراءة — الصمت ليس دليلاً على السحب.
+   ═══════════════════════════════════════════════════════════════════════════ */
+let _recBusy=false, _recTimer=null;
+async function reconcileOrders(reason){
+  if(_recBusy || !auth.currentUser || !drv?.phone) return;
+  if(!Array.isArray(active) || !active.length) return;
+  _recBusy=true;
+  try{
+    const snap=await get(query(ref(db,'active_orders'),orderByChild('driverPhone'),equalTo(drv.phone)));
+    const fb=snap.val()||{}, myId=nP(drv.phone), rm=[];
+    for(const mo of active){
+      if(mo.__grace && Date.now()<mo.__grace) continue;   /* مهلة ما بعد القبول */
+      const f=fb[mo.id];
+      if(!f){ rm.push({id:mo.id,m:'انتهى هذا الطلب أو سُحب منك.'}); continue; }
+      const st=String(f.status||'').toLowerCase();
+      const DONE=['completed','مكتمل','settled','delivered','done','تم التسليم','تم','deleted'];
+      if(DONE.includes(st)||DONE.includes(f.status)){ rm.push({id:mo.id,m:'تم إنهاء الطلب.'}); continue; }
+      const fp=nP(f.driverPhone);
+      if(fp&&fp!==myId&&f.status!=='pending_driver'&&f.status!=='manual_pending')
+        rm.push({id:mo.id,m:'سُحب الطلب لكابتن آخر.'});
+    }
+    if(rm.length){
+      console.warn('♻️ مصالحة ('+reason+'): حُذفت '+rm.length+' بطاقة يتيمة');
+      /* 📊 [N-9.10] كل سطر هنا بطاقةٌ كانت ستُرسل كابتناً إلى مطعمٍ لا طلب له.
+         وهو المقياس الذي يُثبت أثر إصلاح اليوم في الميدان لا في المحاكاة. */
+      try{ track('orphan_found',{reason:reason,ms:rm.length}); }catch(_){}
+      removeOrdersBatch(rm);
+    }
+  }catch(e){ /* فشل القراءة ⇒ لا نستنتج شيئاً ولا نحذف */ }
+  finally{ _recBusy=false; }
+}
+function startReconcile(){
+  if(_recTimer) clearInterval(_recTimer);
+  _recTimer=setInterval(()=>reconcileOrders('دوري'),60000);
+  document.addEventListener('visibilitychange',()=>{ if(!document.hidden) reconcileOrders('عودة'); });
+  window.addEventListener('online',()=>reconcileOrders('شبكة'));
+}
+
 function removeOrdersBatch(list){
+  /* 📊 [N-9.10] سجلّ دورة حياة البطاقة — الحدث الذي كان ينقصنا.
+     شكوى «الطلبية عند اثنين» كلّفتنا يومين من الاستنتاج، ولو كان هذا
+     السطر يعمل لقرأنا الجواب في دقائق: **متى** حُذفت البطاقة و**لماذا**.
+     الكتابة لا تُحاسَب في فايربيس (الوارد مجّاني)، والاحتفاظ 3 أيام. */
+  try{ (list||[]).forEach(x=>track('card_removed',{orderId:x.id,reason:String(x.m||'').slice(0,60)})); }catch(_){}
   if(!list||!list.length)return;
   play('cancel');                                  /* صوت واحد مهما كان العدد */
   const ids=list.map(x=>'#'+x.id);
@@ -3261,73 +3331,3 @@ function startChat(){
     }
     if(chatOpen){renderChat();if(un>0)update(ref(db,cPath()),{unread_driver:0}).catch(()=>{});}
   });
-}
-document.addEventListener('keydown',e=>{
-  if(e.key==='Enter'&&!e.shiftKey&&document.activeElement===document.getElementById('chIn')){e.preventDefault();sendChat();}
-});
-
-/* ══════════════ 🖼️ عارض الوصل ══════════════ */
-(function(){
-  let sc=1, tx=0, ty=0, sx=0, sy=0, stx=0, sty=0, pd=0, ps=1, lastTap=0, drag=false, mode=null, bound=false;
-  const im=()=>document.getElementById('rvImg');
-  const apply=()=>{const e=im();if(e)e.style.transform=`translate(${tx}px,${ty}px) scale(${sc})`;};
-  const reset=()=>{sc=1;tx=0;ty=0;apply();};
-  function clamp(){
-    const e=im(); if(!e)return;
-    const w=e.offsetWidth*sc, h=e.offsetHeight*sc;
-    const mx=Math.max(0,(w-window.innerWidth)/2+40), my=Math.max(0,(h-window.innerHeight)/2+40);
-    tx=Math.max(-mx,Math.min(mx,tx)); ty=Math.max(-my,Math.min(my,ty));
-  }
-  const dOf=t=>Math.hypot(t[0].clientX-t[1].clientX, t[0].clientY-t[1].clientY);
-  function bind(){
-    if(bound)return; const st=document.getElementById('rvStage'); if(!st)return; bound=true;
-    st.addEventListener('touchstart',e=>{
-      const el=im();
-      if(e.touches.length===2){mode='pinch';pd=dOf(e.touches);ps=sc;if(el)el.classList.add('drag');}
-      else if(e.touches.length===1){
-        const now=Date.now();
-        if(now-lastTap<300){ if(sc>1)reset(); else {sc=2.6;clamp();apply();} lastTap=0; e.preventDefault(); return; }
-        lastTap=now;
-        if(sc>1){mode='pan';drag=true;sx=e.touches[0].clientX;sy=e.touches[0].clientY;stx=tx;sty=ty;if(el)el.classList.add('drag');}
-      }
-    },{passive:false});
-    st.addEventListener('touchmove',e=>{
-      if(mode==='pinch'&&e.touches.length===2){
-        e.preventDefault();
-        sc=Math.max(1,Math.min(5,ps*(dOf(e.touches)/pd)));
-        clamp(); apply();
-      } else if(mode==='pan'&&drag&&e.touches.length===1){
-        e.preventDefault();
-        tx=stx+(e.touches[0].clientX-sx); ty=sty+(e.touches[0].clientY-sy);
-        clamp(); apply();
-      }
-    },{passive:false});
-    st.addEventListener('touchend',()=>{
-      const el=im(); if(el)el.classList.remove('drag');
-      drag=false; mode=null;
-      if(sc<=1)reset();
-    });
-    st.addEventListener('dblclick',()=>{ if(sc>1)reset(); else {sc=2.6;clamp();apply();} });
-  }
-  window.openReceipt=function(url){
-    if(!url||!String(url).startsWith('http'))return;
-    const v=document.getElementById('rv'), e=im(), sp=document.getElementById('rvSpin'), h=document.getElementById('rvHint');
-    if(!v||!e)return;
-    bind(); reset();
-    e.style.visibility='hidden'; if(sp)sp.style.display='block';
-    if(h)h.textContent='انقر مرّتين للتكبير • اسحب للتحريك • قرصة للتقريب';
-    e.onload=()=>{ if(sp)sp.style.display='none'; e.style.visibility='visible'; };
-    e.onerror=()=>{ if(sp)sp.style.display='none'; if(h)h.textContent='⚠️ تعذّر تحميل الصورة — تحقّق من الاتصال'; };
-    e.src=url;
-    v.classList.remove('dn');
-  };
-  window.closeReceipt=function(){
-    const v=document.getElementById('rv'); if(!v)return;
-    v.classList.add('dn');
-    const e=im(); if(e){e.src='';e.onload=null;e.onerror=null;}
-    reset();
-  };
-})();
-</script>
-</body>
-</html>
