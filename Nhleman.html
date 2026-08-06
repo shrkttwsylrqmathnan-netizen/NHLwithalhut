@@ -1388,12 +1388,33 @@ function setupFB(){
     if(gD&&document.getElementById("pg-drivers").classList.contains("on"))_drvListDebounced();
   };
   listen(()=>db.ref("drivers_locations"),lCb);
-  const ledCb=snap=>{
-    liveLed=snap.val()||{drivers:{},restaurants:{}};
+  const ledCb=()=>{
     if(gD){updBadges("RES",gD.restaurants);updBadges("DRV",gD.drivers);}
     patchCards("RES");patchCards("DRV");updTicker();
   };
-  listen(()=>db.ref("ledgers"),ledCb);
+  /* ═══════════════════════════════════════════════════════════════════════
+     🔴 [ADM-1] كان: listen(db.ref("ledgers"), ledCb) — العقدة **كاملة**.
+     ───────────────────────────────────────────────────────────────────────
+     و ledCb لا يستعمل منها إلا liveLed.drivers و liveLed.restaurants
+     (الأرصدة المجمَّعة) — أي حقول معدودة لكل جهة.
+
+     لكن مرآة المطعم تكتب تحت:
+         ledgers/restaurants/{هاتف}/today/{يوم}/{طلب}
+
+     ⇒ **كل طلب يكنسه terminalOrderSweeper يُطلق مستمع الإدارة**، وهو
+       يُعيد بناء بطاقات المطاعم والكباتن والشريط. ومع كنسٍ كل ربع ساعة
+       على أسطول مزدحم صارت اللوحة تُعيد الرسم عشرات المرّات في الدقيقة.
+       وحجم ما يُنقل تضخّم بيوم كامل من الطلبات لكل مطعم.
+
+     الآن: مستمعان على الفرعين المستعملين فقط. المرآة تحت `today` لا يمرّ
+     بها أيٌّ منهما ⇒ صفر إطلاق من الكنس، وحجمٌ أصغر بأضعاف.
+
+     ⚠️ وشكلُ liveLed يبقى كما هو {drivers,restaurants} — فلا يتغيّر حرفٌ
+        في patchCards ولا updBadges ولا updTicker.
+     ═══════════════════════════════════════════════════════════════════════ */
+  liveLed = liveLed || {drivers:{}, restaurants:{}};
+  listen(()=>db.ref("ledgers/drivers"),     snap=>{ liveLed.drivers    = snap.val()||{}; ledCb(null); });
+  listen(()=>db.ref("ledgers/restaurants"), snap=>{ liveLed.restaurants= snap.val()||{}; ledCb(null); });
   const dmCb=snap=>{liveMet=snap.val()||{};if(gD&&document.getElementById("pg-drivers").classList.contains("on"))filtEnt("DRV");};
   listen(()=>db.ref("daily_metrics"),dmCb);
   const shCb=snap=>{shiftsOn=snap.val()!==false;updShiftsUI();};
@@ -1830,14 +1851,41 @@ window.goTab=function(name){
     b.classList.toggle("on",oc.includes("'"+name+"'"));
   });
   const dh=document.getElementById("dhT");if(dh)dh.textContent=TITLES[name]||"لوحة التحكم";
-  if(name==="live"){renderRadar();}
-  if(name==="audit")renderAudit();
-  if(name==="aiops")renderAlerts();
-  if(name==="orders"){renderArch();}
-  if(name==="restaurants"&&gD)filtEnt("RES");
-  if(name==="drivers"&&gD)filtEnt("DRV");
-  if(name==="staff"){loadStaffRoster();renderStaffOnline();renderStaffList();renderStaffLog();updStaffKPIs();startStaffIdleTimer();}
-  else stopStaffIdleTimer();
+
+  /* ═══════════════════════════════════════════════════════════════════════
+     ⚡ [ADM-2] «التنقّل شبه ميت» — والسبب ليس بطء البناء بل **توقيته**.
+     ───────────────────────────────────────────────────────────────────────
+     كان تبديل اللوحة وبناء محتواها يقعان في **نفس الشوط**:
+
+         classList.add("on")   ← تبديل فوري
+         renderRadar()         ← بناء مئات البطاقات بـinnerHTML
+
+     والمتصفّح لا يرسم شيئاً حتى ينتهي الشوط. فالمستخدم يضغط الزرّ ويرى
+     الشاشة القديمة **مجمّدة** طوال البناء — يظنّها معلّقة فيضغط مرّتين،
+     فيتضاعف البناء وتزداد سوءاً.
+
+     الآن: نُفسح شوطاً للرسم قبل البناء. اللوحة الجديدة تظهر **فوراً**
+     والمحتوى يملؤها بعد إطار واحد. الزمن الكلّي كما هو — لكن الإحساس
+     ينقلب من «ميت» إلى «فوري»، لأن المستخدم يرى استجابةً لضغطته.
+
+     ⚠️ ونحمي من الضغط المتكرّر: طلبُ بناءٍ جديد يُلغي السابق المعلّق —
+        فالتنقّل السريع بين خمسة أقسام يبني الأخير وحده لا الخمسة.
+     ═══════════════════════════════════════════════════════════════════════ */
+  if(window._tabRaf) cancelAnimationFrame(window._tabRaf);
+  window._tabRaf = requestAnimationFrame(()=>{ window._tabRaf = requestAnimationFrame(()=>{
+    window._tabRaf = 0;
+    try{
+      if(name==="live"){renderRadar();}
+      if(name==="audit")renderAudit();
+      if(name==="aiops")renderAlerts();
+      if(name==="orders"){renderArch();}
+      if(name==="restaurants"&&gD)filtEnt("RES");
+      if(name==="drivers"&&gD)filtEnt("DRV");
+      if(name==="staff"){loadStaffRoster();renderStaffOnline();renderStaffList();renderStaffLog();updStaffKPIs();startStaffIdleTimer();}
+    }catch(e){ console.error("goTab render:",e&&e.message); }
+  }); });
+
+  if(name!=="staff") stopStaffIdleTimer();
 };
 
 window.doFilt=function(f,btn){
@@ -2418,51 +2466,3 @@ function renderStaffLog(){
     const nm=nmMap[e.action]||e.action;
     const col=colMap[e.action]||"var(--sky)";
     html+=`<div class="au-it">
-      <div class="au-ic" style="background:${col}1a;color:${col}">${ico}</div>
-      <div style="flex:1">
-        <div style="display:flex;align-items:center;justify-content:space-between;gap:6px;margin-bottom:2px">
-          <div style="font-weight:800;color:var(--ink);font-size:.85rem">${esc(e.staffName||"موظف")} — ${esc(nm)}</div>
-          <span style="font-size:.62rem;font-weight:800;color:var(--ink4);direction:ltr">${esc(e.staffPhone||"")}</span>
-        </div>
-        <div style="font-size:.7rem;font-weight:700;color:var(--ink4);margin-bottom:4px">${esc(fmtDateTime(e.timestamp))}</div>
-        ${e.details?`<div style="font-size:.76rem;font-weight:700;color:var(--ink3);background:var(--base2);padding:4px 7px;border-radius:7px;border:1px solid var(--line2)">${esc(e.details)}</div>`:""}
-      </div>
-    </div>`;
-  });
-  c.innerHTML=html;
-}
-window.opStaffPerf=function(phone){
-  const n=nP(phone);
-  const emp=staffRoster.find(e=>nP(e.phone)===n);
-  const sess=staffSessions[n]||staffSessions[phone]||{};
-  const st=staffStats(phone);
-  const rt=staffRating(st);
-  document.getElementById("perfName").textContent=(emp?emp.name:sess.name)||"موظف";
-  document.getElementById("perfPhone").textContent=phone;
-  const onlineBadge=sess.online===true?`<span class="stb stb-g">🟢 متصل الآن</span>`:`<span class="stb stb-b">غير متصل</span>`;
-  const recent=staffLog.filter(e=>nP(e.staffPhone)===n).slice(0,10);
-  const icoMap={LOGIN:"🟢",LOGOUT:"🔴",ASSIGN:"👑",COMPLETE:"✅",DELETE:"🗑",WITHDRAW:"↩"};
-  let recentHtml=recent.length?recent.map(e=>`<div style="display:flex;align-items:center;gap:8px;padding:7px 0;border-bottom:1px dashed var(--line2)"><span>${icoMap[e.action]||"⚡"}</span><span style="flex:1;font-size:.74rem;font-weight:700;color:var(--ink3)">${esc(e.details||e.action)}</span><span style="font-size:.64rem;color:var(--ink4)">${fmtTime(e.timestamp)}</span></div>`).join(""):`<div style="text-align:center;color:var(--ink4);font-size:.78rem;padding:14px">لا أفعال بعد</div>`;
-  document.getElementById("perfBody").innerHTML=`
-    <div style="text-align:center;margin-bottom:14px">
-      <span class="dr-rt ${rt.cls}" style="font-size:.82rem">${rt.ic} ${rt.lbl}</span>
-      <div style="margin-top:8px">${onlineBadge}</div>
-    </div>
-    <div class="dm-row" style="margin-bottom:8px">
-      <div class="dm-it">🕐 الدخول: ${fmtTime(sess.login_time)}</div>
-      <div class="dm-it">⚡ آخر نشاط: ${fmtTime(sess.last_activity)}</div>
-    </div>
-    <div class="arch-kpi" style="grid-template-columns:repeat(2,1fr);margin-bottom:14px">
-      <div class="ak akb"><div class="ak-n" style="font-size:1.3rem">${st.counts.ASSIGN}</div><div class="ak-l">تعيين قسري</div></div>
-      <div class="ak akg"><div class="ak-n" style="font-size:1.3rem">${st.counts.COMPLETE}</div><div class="ak-l">إكمال طلب</div></div>
-      <div class="ak aka"><div class="ak-n" style="font-size:1.3rem">${st.counts.WITHDRAW}</div><div class="ak-l">سحب طلب</div></div>
-      <div class="ak akr"><div class="ak-n" style="font-size:1.3rem">${st.counts.DELETE}</div><div class="ak-l">حذف طلب</div></div>
-    </div>
-    <div style="font-weight:800;color:var(--ink);font-size:.82rem;margin-bottom:6px">📜 آخر 10 أفعال</div>
-    <div style="background:var(--base2);border-radius:12px;padding:6px 12px;border:1px solid var(--line2)">${recentHtml}</div>`;
-  opMod("staffPerfMod");
-};
-window.opStaffAdd=function(){
-  stEditMode=false;
-  document.getElementById("staffModTitle").textContent="إضافة موظف";
-  document.getElementById("stN").value="";
