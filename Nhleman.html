@@ -23,6 +23,68 @@ const V="22.0",VK="hut_v22";
 try{if(localStorage.getItem(VK)!==V){localStorage.setItem(VK,V);if("caches"in window)caches.keys().then(n=>n.forEach(k=>caches.delete(k)));}}catch(e){}
 </script>
 <meta charset="UTF-8">
+<script>
+/* ═══════════════════════════════════════════════════════════════════════════
+   🔑 [ADM-3] حاكم إصدار — **لم يكن للوحة الإدارة حاكمٌ إطلاقاً**
+   ───────────────────────────────────────────────────────────────────────────
+   ولهذا كنتَ تحتاج Ctrl+Shift+R بعد كل رفع، و«أحياناً» لا تعمل: عامل الخدمة
+   يعمل بـStale-While-Revalidate ⇒ يقدّم المخزَّن أولاً ويحدّث في الخلفية،
+   فأي رفع لا يظهر إلا في التحميل **التالي** — وقد لا يظهر أبداً إن كان
+   مدخل الكاش فاسداً.
+
+   ⚠️ والمسح يُنتظر اكتماله **قبل** إعادة التحميل: هدمُ العامل والأصول
+      تُجلب عبره هو ما عطّل تطبيق المطاعم وتطبيق الكابتن.
+   ⚠️ update لا unregister · وحارس حلقة 60 ثانية · وحزام 4 ثوانٍ.
+
+   📌 ارفع هذا الرقم كلّما غيّرت الملف — وإلا لم يصل تغييرك.
+   ═══════════════════════════════════════════════════════════════════════════ */
+const ADMIN_APP_VERSION = "3.0-Nahla-Resilient";
+try {
+  if (localStorage.getItem('hut_adm_version') !== ADMIN_APP_VERSION) {
+    var _rk='hut_adm_version_reload_ts', _last=Number(localStorage.getItem(_rk)||0);
+    localStorage.setItem('hut_adm_version', ADMIN_APP_VERSION);
+    if (Date.now()-_last < 60000) { console.warn('⏭️ تخطّي إعادة التحميل — حارس الحلقة'); }
+    else {
+      localStorage.setItem(_rk, String(Date.now()));
+      var _j=[];
+      if('caches' in window) _j.push(caches.keys().then(function(ns){
+        return Promise.all(ns.map(function(x){return caches.delete(x);}));}));
+      if('serviceWorker' in navigator) _j.push(navigator.serviceWorker.getRegistrations()
+        .then(function(rs){return Promise.all(rs.map(function(r){return r.update();}));}));
+      var _d=false,_go=function(){if(!_d){_d=true;window.location.reload();}};
+      Promise.all(_j).then(_go,_go); setTimeout(_go,4000);
+    }
+  }
+} catch(e){ console.warn('تعذّر التحقق من الإصدار:', e && e.message); }
+
+/* 🔦 مُبلِّغ فشل التحميل — مرئي، ولا يظهر إلا إن فشلت اللوحة فعلاً. */
+(function(){
+  var errs=[];
+  function tag(m){ if(!m)return; m=String(m).slice(0,300);
+    if(errs.indexOf(m)===-1)errs.push(m); try{console.warn('[AlHut] '+m);}catch(_){} }
+  window.addEventListener('error',function(e){
+    if(e&&e.target&&(e.target.src||e.target.href)) tag('فشل تحميل: '+(e.target.src||e.target.href));
+    else if(e&&e.message) tag(e.message);},true);
+  window.addEventListener('unhandledrejection',function(e){
+    tag('وعد مرفوض: '+((e.reason&&(e.reason.message||e.reason))||''));});
+  document.addEventListener('securitypolicyviolation',function(e){
+    tag('سياسة الأمان منعت: '+e.violatedDirective+' ← '+String(e.blockedURI||'').slice(0,90));});
+  setTimeout(function(){
+    if (typeof window.goTab === 'function') return;
+    try{
+      var b=document.createElement('div'); b.setAttribute('dir','rtl');
+      b.style.cssText='position:fixed;inset:auto 0 0 0;z-index:2147483647;background:#7f1d1d;color:#fff;'+
+        'padding:14px;font:600 13px/1.7 system-ui,sans-serif;max-height:60vh;overflow:auto';
+      b.innerHTML='<b style="font-size:15px">🔴 لم تكتمل لوحة الإدارة</b>'+
+        '<pre style="white-space:pre-wrap;word-break:break-all;background:#450a0a;padding:8px;border-radius:8px;font-size:11px">'+
+        (errs.length?errs.join('\n───\n'):'لم يُلتقط خطأ صريح — غالباً مورد مُعلَّق.')+
+        '</pre><div style="opacity:.8;font-size:11px">متصل: '+(navigator.onLine?'نعم':'لا')+
+        ' · الإصدار: '+ADMIN_APP_VERSION+'</div>';
+      document.body.appendChild(b);
+    }catch(_){}
+  },9000);
+})();
+</script>
 <!-- 🔒 [أ١] سياسة أمان المحتوى — تُقلّص أثر أي حقن أو اختراق CDN.
      ابدأ بـ Content-Security-Policy-Report-Only أسبوعاً، اقرأ التقارير، ثم أَلزِم.
      'unsafe-inline' لازمٌ اليوم: الشيفرة كلها كتل سكربت مضمّنة. إزالته
@@ -36,11 +98,11 @@ try{if(localStorage.getItem(VK)!==V){localStorage.setItem(VK,V);if("caches"in wi
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <!-- ⚡ الأداء: خرائط جوجل تُحمَّل كسولاً عند فتح نافذة التعديل فقط (كانت تُحمَّل
      مع كل فتح للّوحة وتُبطئها بشدّة). markercluster حُذف (كان يُحمَّل بلا استخدام). -->
-<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-database-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
 <!-- [V17] دوال السحابة — لنداء orderCommand في وضع الظلّ -->
-<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-functions-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-functions-compat.js"></script>
 <!-- 🗑️ [حذف] Leaflet + leaflet-heat + Chart.js — نحو 355 ك.ب و عشرات طلبات
      بلاطات basemaps.cartocdn مع كل تحريك. الخريطة الحيّة والرسمان أُزيلا بطلبك.
      ⚠️ خرائط جوجل (مُنتقي موقع المطعم) **باقية** — وهي تُحمَّل عند الطلب فقط
@@ -1257,29 +1319,93 @@ function startClk(){
   },1000);
 }
 
-async function loadData(){
+/* ═══════════════════════════════════════════════════════════════════════════
+   🔴 [ADM-5] «تهنّج في المنجزة والأسطول والمطاعم · تعذّر جلب البيانات»
+   ───────────────────────────────────────────────────────────────────────────
+   الأقسام الثلاثة كلها تعتمد على gD، ويجلبه نداءٌ **واحد** إلى Apps Script
+   عند الدخول — وكان **بلا مهلة وبلا إعادة محاولة وبلا ذاكرة**:
+
+     ① بلا مهلة   ⇒ إن تعثّر GAS بقي fetch معلّقاً بلا نهاية ⇒ اللوحة تبدو
+                     مجمّدة، ثم تسقط أخيراً إلى «فشل جلب البيانات».
+     ② بلا إعادة  ⇒ فشلةٌ واحدة تعني gD = null بقيّة الجلسة ⇒ الأقسام
+                     الثلاثة ميتة حتى تُحدِّث الصفحة يدوياً.
+     ③ بلا ذاكرة  ⇒ كل تحديث للصفحة يُعيد النداء الثقيل من الصفر.
+
+   ولماذا يتعثّر GAS؟ getGlobalData تقرأ في كل نداء:
+     · شيت Restaurants (مُخزَّن مؤقتاً ✅)
+     · شيت Drivers **كاملاً بلا تخزين** — getDataRange().getValues()
+     · و active_orders **كاملة** من فايربيس
+
+   ⚠️ والأخيرة تُبنى وتُنقل ولا تُستعمل إطلاقاً: بحثتُ عن gD.orders و
+      data.orders في اللوحة كلّها فوجدت **صفر استعمال**. اللوحة تقرأ طلباتها
+      من مستمع فايربيس مباشرةً. ⇒ حمولةٌ ثقيلة تُنقل بلا فائدة واحدة.
+
+   العلاج هنا (بلا لمس Apps Script):
+     ① مهلة 25 ثانية عبر AbortController — لا تعليق أبدي
+     ② ثلاث محاولات بتراجع تدريجي (2ث · 4ث)
+     ③ ذاكرة في sessionStorage: إن فشل الجلب نعمل بآخر نسخة ناجحة بدل
+        شاشةٍ فارغة — بيانات المطاعم والكباتن لا تتغيّر كل دقيقة.
+     ④ زرّ إعادة صريح في التنبيه بدل «فشل» أصمّ.
+   ═══════════════════════════════════════════════════════════════════════════ */
+const GD_CACHE_KEY = "hut_adm_gd_v1";
+
+async function loadData(attempt){
   if(!MP)return;
+  attempt = attempt || 1;
   try{
-    /* 🩹 [①] getGlobalData عبر POST بكلمة المرور (في الجسم، لا في الرابط) —
-       لا توكن إداري ثابت في العميل بعد الآن. */
-    const r=await fetch(API,{method:"POST",headers:{"Content-Type":"text/plain"},body:JSON.stringify({action:"getGlobalData",token:TOK,pass:MP})});
-    const data=await r.json();
+    const ctl = new AbortController();
+    const timer = setTimeout(()=>ctl.abort(), 25000);
+    let data;
+    try{
+      const r = await fetch(API,{method:"POST",headers:{"Content-Type":"text/plain"},
+        body:JSON.stringify({action:"getGlobalData",token:TOK,pass:MP}),signal:ctl.signal});
+      data = await r.json();
+    } finally { clearTimeout(timer); }
+
     if(data&&data.success===false){
       toast(data.msg||"مرفوض — تحقّق من كلمة مرور الإدارة","e");
       return;
     }
-    const now=Date.now();
-    data.drivers.forEach(d=>{const ov=ovr.d[d[D.PHONE]];if(ov&&now-ov.ts<120000)d[D.STATUS]=ov.status;else if(ov)delete ovr.d[d[D.PHONE]];});
-    data.restaurants.forEach(r=>{const ov=ovr.r[r[R.PHONE]];if(ov&&now-ov.ts<120000)r[R.STATUS]=ov.status;else if(ov)delete ovr.r[r[R.PHONE]];});
-    gD=data;
-    if(document.getElementById("arcRS").options.length===1){
-      data.restaurants.slice(1).forEach(r=>document.getElementById("arcRS").innerHTML+=`<option value="${esc(r[R.NAME])}">${esc(r[R.NAME])}</option>`);
-      data.drivers.slice(1).forEach(d=>document.getElementById("arcDS").innerHTML+=`<option value="${esc(String(d[D.PHONE]))}">${esc(d[D.NAME])}</option>`);
+    applyGD(data);
+    try{ sessionStorage.setItem(GD_CACHE_KEY, JSON.stringify({t:Date.now(),
+      restaurants:data.restaurants, drivers:data.drivers})); }catch(_){}
+  }catch(e){
+    const aborted = e && e.name === "AbortError";
+    if(attempt < 3){
+      console.warn("loadData محاولة "+attempt+" فشلت ("+(aborted?"مهلة":e.message)+") — إعادة…");
+      await new Promise(r=>setTimeout(r, attempt*2000));
+      return loadData(attempt+1);
     }
-    updBadges("RES",data.restaurants);updBadges("DRV",data.drivers);
-    if(document.getElementById("pg-restaurants").classList.contains("on"))filtEnt("RES");
-    if(document.getElementById("pg-drivers").classList.contains("on"))filtEnt("DRV");
-  }catch(e){toast("فشل جلب البيانات","e");}
+    /* ثلاث محاولات فشلت — نعمل بآخر نسخة ناجحة بدل شاشة فارغة */
+    let cached=null;
+    try{ cached = JSON.parse(sessionStorage.getItem(GD_CACHE_KEY)||"null"); }catch(_){}
+    if(cached && cached.restaurants && cached.drivers){
+      applyGD(cached);
+      const mins = Math.round((Date.now()-(cached.t||0))/60000);
+      toast("تعذّر التحديث — تعرض بيانات عمرها "+mins+" دقيقة","w");
+    } else {
+      toast("فشل جلب البيانات — اضغط للإعادة","e");
+      const el=document.getElementById("dhT");
+      if(el && !el.dataset.retryBound){ el.dataset.retryBound="1";
+        el.style.cursor="pointer"; el.title="اضغط لإعادة المحاولة";
+        el.addEventListener("click",()=>loadData(1)); }
+    }
+  }
+}
+
+/* يفصل «تطبيق البيانات» عن «جلبها» — فيُستعمل مع الطازج والمخزَّن سواءً. */
+function applyGD(data){
+  const now=Date.now();
+  data.drivers.forEach(d=>{const ov=ovr.d[d[D.PHONE]];if(ov&&now-ov.ts<120000)d[D.STATUS]=ov.status;else if(ov)delete ovr.d[d[D.PHONE]];});
+  data.restaurants.forEach(r=>{const ov=ovr.r[r[R.PHONE]];if(ov&&now-ov.ts<120000)r[R.STATUS]=ov.status;else if(ov)delete ovr.r[r[R.PHONE]];});
+  gD=data;
+  if(document.getElementById("arcRS").options.length===1){
+    data.restaurants.slice(1).forEach(r=>document.getElementById("arcRS").innerHTML+=`<option value="${esc(r[R.NAME])}">${esc(r[R.NAME])}</option>`);
+    data.drivers.slice(1).forEach(d=>document.getElementById("arcDS").innerHTML+=`<option value="${esc(String(d[D.PHONE]))}">${esc(d[D.NAME])}</option>`);
+  }
+  updBadges("RES",data.restaurants);updBadges("DRV",data.drivers);
+  if(document.getElementById("pg-restaurants").classList.contains("on"))filtEnt("RES");
+  if(document.getElementById("pg-drivers").classList.contains("on"))filtEnt("DRV");
 }
 
 function setupFB(){
@@ -1415,7 +1541,12 @@ function setupFB(){
   liveLed = liveLed || {drivers:{}, restaurants:{}};
   listen(()=>db.ref("ledgers/drivers"),     snap=>{ liveLed.drivers    = snap.val()||{}; ledCb(null); });
   listen(()=>db.ref("ledgers/restaurants"), snap=>{ liveLed.restaurants= snap.val()||{}; ledCb(null); });
-  const dmCb=snap=>{liveMet=snap.val()||{};if(gD&&document.getElementById("pg-drivers").classList.contains("on"))filtEnt("DRV");};
+  /* ⚡ [ADM-4] daily_metrics يُكتب عند **كل إنجاز وكل رفض** لكل كابتن، وكان
+     يُعيد بناء بطاقات الكباتن كاملةً في كل مرّة بلا تهدئة. وفي الذروة تصل
+     عشرات الكتابات في الدقيقة ⇒ عشرات إعادات البناء. الآن تهدئة كالتي
+     تحمي قائمة الكباتن من نبضات المواقع (_drvListDebounced). */
+  const _metDebounced=debounce(()=>{if(gD&&document.getElementById("pg-drivers").classList.contains("on"))filtEnt("DRV");},400);
+  const dmCb=snap=>{liveMet=snap.val()||{};_metDebounced();};
   listen(()=>db.ref("daily_metrics"),dmCb);
   const shCb=snap=>{shiftsOn=snap.val()!==false;updShiftsUI();};
   listen(()=>db.ref("system_settings/shifts_enabled"),shCb);
@@ -1447,7 +1578,11 @@ function setupFB(){
   });
   /* 🗑️ كان يُعيد بناء **كل** علامات المطاعم على الخريطة مع كل لقطة
      (removeLayer + L.marker لكل مطعم). الآن: تخزين فقط. */
-  const rlCb=snap=>{liveResLoc=snap.val()||{};};
+    const _rlDebounced=debounce(()=>{
+    if(gD){updBadges("RES",gD.restaurants);}
+    if(document.getElementById("pg-audit")?.classList.contains("on")) renderAudit();
+  },400);
+const rlCb=snap=>{liveResLoc=snap.val()||{};_rlDebounced();};
   listen(()=>db.ref("restaurants_locations"),rlCb);
   if(!_alInit){_alInit=true;listen(()=>db.ref("system_alerts").limitToLast(60),snap=>{alData=[];const v=snap.val();if(v)Object.keys(v).forEach(k=>alData.unshift({id:k,...v[k]}));updTicker();if(document.getElementById("pg-aiops").classList.contains("on"))renderAlerts();});}
   if(!_auInit){_auInit=true;listen(()=>db.ref("admin_audit_trail").limitToLast(120),snap=>{auData=[];const v=snap.val();if(v)Object.keys(v).forEach(k=>auData.unshift(v[k]));if(document.getElementById("pg-audit").classList.contains("on"))renderAudit();});}
