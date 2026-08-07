@@ -38,7 +38,7 @@ try{if(localStorage.getItem(VK)!==V){localStorage.setItem(VK,V);if("caches"in wi
 
    📌 ارفع هذا الرقم كلّما غيّرت الملف — وإلا لم يصل تغييرك.
    ═══════════════════════════════════════════════════════════════════════════ */
-const ADMIN_APP_VERSION = "3.0-Nahla-Resilient";
+const ADMIN_APP_VERSION = "5.0-Nahla-Rocket";
 try {
   if (localStorage.getItem('hut_adm_version') !== ADMIN_APP_VERSION) {
     var _rk='hut_adm_version_reload_ts', _last=Number(localStorage.getItem(_rk)||0);
@@ -89,11 +89,17 @@ try {
      ابدأ بـ Content-Security-Policy-Report-Only أسبوعاً، اقرأ التقارير، ثم أَلزِم.
      'unsafe-inline' لازمٌ اليوم: الشيفرة كلها كتل سكربت مضمّنة. إزالته
      تتطلّب نقلها إلى ملفات أو ختمها بـ nonce — مشروع لاحق موثّق. -->
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://*.firebasedatabase.app https://*.firebaseio.com https://www.gstatic.com https://maps.googleapis.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: blob: https:; media-src 'self' data: blob: https://actions.google.com; connect-src 'self' https://*.firebasedatabase.app https://*.firebaseio.com wss://*.firebasedatabase.app wss://*.firebaseio.com https://script.google.com https://script.googleusercontent.com https://*.googleapis.com https://securetoken.googleapis.com https://*.cloudfunctions.net https://*.run.app; object-src 'none'; base-uri 'none'; form-action 'none'">
+<!-- 🗺️ [MAP-2] أُضيف https://unpkg.com إلى script-src و style-src.
+     بدونهما تُحجب مكتبة الخريطة وتنسيقها، فتظهر «تعذّر تحميل الخريطة» —
+     وهو ما وقع فعلاً: الكتلة تُحمَّل بنجاح في المعمل وتُحجب عند المستخدم،
+     لأن الحجب لا يُرى إلا في متصفّح حقيقي.
+     ⚠️ img-src هنا 'self' data: blob: https: — فالبلاطات مسموحة أصلاً،
+        والحجب كان في السكربت وحده. -->
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://*.firebasedatabase.app https://*.firebaseio.com https://www.gstatic.com https://unpkg.com https://maps.googleapis.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://unpkg.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: blob: https:; media-src 'self' data: blob: https://actions.google.com; connect-src 'self' https://*.firebasedatabase.app https://*.firebaseio.com wss://*.firebasedatabase.app wss://*.firebaseio.com https://script.google.com https://script.googleusercontent.com https://*.googleapis.com https://securetoken.googleapis.com https://*.cloudfunctions.net https://*.run.app; object-src 'none'; base-uri 'none'; form-action 'none'">
 <link rel="manifest" href="manifest_admin.json">
 <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no,viewport-fit=cover">
 <title>نحلة — لوحة الإدارة</title>
-<meta name="theme-color" content="#0a1628">
+<meta name="theme-color" content="#111827">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <!-- ⚡ الأداء: خرائط جوجل تُحمَّل كسولاً عند فتح نافذة التعديل فقط (كانت تُحمَّل
@@ -111,22 +117,41 @@ try {
 <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap" rel="stylesheet">
 <style>
 :root{
-  --ink:#0a1628;--ink2:#1e3a5f;--ink3:#4a6fa5;--ink4:#8bafd4;
-  --sky:#2563eb;--sky-d:#1d4ed8;--sky-l:#eff6ff;--sky-m:#f0f7ff;
-  --jade:#059669;--jade-l:#ecfdf5;
-  --fire:#f97316;--fire-d:#ea580c;--fire-l:#fff7ed;
+  /* ═══════════════════════════════════════════════════════════════════════
+     🐝 [THEME-1] هوية «مملكة نحلة» — الأسود الفحمي والأصفر النحلي
+     ───────────────────────────────────────────────────────────────────────
+     أُعيدت الهوية **بإعادة تعيين قيم المتغيّرات، لا بإعادة كتابة CSS**.
+     الملف يستعمل var(--sky) في 43 موضعاً و var(--ink) في 29 — فتغيير
+     القيمة يُغيّر الهوية كلّها بسطرين، بينما إعادة كتابة الأنماط تعني
+     لمس مئات القواعد وخطر كسر تخطيطٍ يعمل.
+
+     الخريطة:
+       --sky  (لون العلامة والحالات النشطة)  ⇒ الأسود الفحمي #111827
+       --fire (اللون الدافئ الثانوي)          ⇒ الأصفر النحلي #FFC107
+       --ink  (النصّ الداكن)                  ⇒ يبقى داكناً — مقروء على الأبيض
+
+     ⚠️ ولماذا الأصفر ليس --sky؟ لأنّ --sky يُستعمل **نصّاً على خلفية
+        بيضاء** في مواضع كثيرة، والأصفر عليها غير مقروء (تباين ~1.6:1).
+        فالأسود يأخذ دور العلامة، والأصفر يأخذ دور اللمسة على الداكن —
+        وهو بالضبط ما كانت تفعله النسخة القديمة: شريط جانبي أسود وأيقونة
+        صفراء عليه.
+     ═══════════════════════════════════════════════════════════════════════ */
+  --ink:#111827;--ink2:#1f2937;--ink3:#4B5563;--ink4:#9CA3AF;
+  --sky:#111827;--sky-d:#000000;--sky-l:#F3F4F6;--sky-m:#F9FAFB;
+  --jade:#05A357;--jade-l:#e6faf3;
+  --fire:#FFC107;--fire-d:#E0A800;--fire-l:#FFF8E1;
   --rose:#ef4444;--rose-l:#fef2f2;
-  --amber:#f59e0b;--amber-l:#fffbeb;
-  --violet:#7c3aed;--violet-l:#f5f3ff;
+  --amber:#F59E0B;--amber-l:#fffbeb;
+  --violet:#8B5CF6;--violet-l:#f3e8ff;
   --base:#ffffff;--base2:#f8fafc;--base3:#f1f5f9;
   --line:rgba(37,99,235,.1);--line2:rgba(37,99,235,.06);
   --sh-xs:0 1px 3px rgba(10,22,40,.08),0 1px 2px rgba(10,22,40,.06);
   --sh-sm:0 4px 16px rgba(10,22,40,.08);
   --sh-md:0 8px 30px rgba(10,22,40,.10);
   --sh-lg:0 20px 60px rgba(10,22,40,.14);
-  --sh-sky:0 8px 24px rgba(37,99,235,.25);
+  --sh-sky:0 8px 24px rgba(17,24,39,.25);
   --sh-jade:0 8px 24px rgba(5,150,105,.22);
-  --sh-fire:0 8px 24px rgba(249,115,22,.22);
+  --sh-fire:0 8px 24px rgba(255,193,7,.30);
   --r2:8px;--r3:12px;--r4:16px;--r5:20px;--r6:24px;--rf:999px;
   --sb:280px;--nav:68px;
   --ease:cubic-bezier(.4,0,.2,1);
@@ -702,6 +727,60 @@ button,input,select,textarea{font-family:'Cairo',sans-serif;}
 .staff-card-on{position:relative;overflow:hidden;}
 .staff-card-on::after{content:'';position:absolute;right:0;top:10px;bottom:10px;width:3px;
   border-radius:99px;background:linear-gradient(180deg,var(--jade),#047857);}
+/* ═══════════════════════════════════════════════════════════════════════════
+   🗺️ [MAP-1] الخريطة الحيّة — عادت، ولم يعد ثمنها هو ثمنها القديم
+   ───────────────────────────────────────────────────────────────────────────
+   حُذفت سابقاً لسبب صحيح مكتوب في هذا الملف: «Leaflet + leaflet-heat نحو
+   355 ك.ب وعشرات طلبات بلاطات مع كل تحريك» — وكانت تُحمَّل مع **كل فتح
+   للّوحة** حتى لمن لا يفتح القسم الحيّ أصلاً.
+
+   الآن: لا يُحمَّل شيء حتى يضغط المستخدم على الخريطة. ⇒ من يفتح اللوحة
+   لمراجعة المطاعم أو الأسطول لا يدفع بايتاً واحداً، ومن يريد الميدان
+   يحصل عليه كاملاً. نفس الميزة، بلا الكلفة التي حذفتها.
+   ═══════════════════════════════════════════════════════════════════════════ */
+.map-wrap{position:relative;width:100%;height:340px;border-radius:var(--r3,18px);
+  overflow:hidden;margin-bottom:16px;background:var(--sky-m);border:1px solid var(--line);
+  box-shadow:var(--sh-sm);cursor:pointer}
+.map-wrap.full{position:fixed;inset:0;height:100vh;width:100vw;z-index:9998;border-radius:0;margin:0}
+#adminMap{width:100%;height:100%}
+.map-hint{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
+  font-weight:800;font-size:.9rem;color:var(--ink3);background:var(--sky-m);z-index:5}
+.map-badges{position:absolute;top:12px;right:12px;z-index:1000;display:flex;flex-direction:column;gap:6px}
+.mb-pill{background:rgba(255,255,255,.95);backdrop-filter:blur(10px);padding:6px 12px;
+  border-radius:999px;font-weight:800;font-size:.8rem;box-shadow:var(--sh-xs);
+  border:1px solid var(--line);display:flex;align-items:center;gap:6px;color:var(--ink)}
+.map-fab{position:absolute;top:12px;left:12px;z-index:1000;width:38px;height:38px;border-radius:12px;
+  background:var(--ink);color:var(--fire);border:none;font-size:16px;cursor:pointer;
+  box-shadow:var(--sh-sky);display:flex;align-items:center;justify-content:center}
+.map-fab:active{transform:scale(.9)}
+.drv-mk{width:32px;height:32px;border-radius:50%;border:2px solid #fff;display:flex;
+  align-items:center;justify-content:center;font-size:15px;background:var(--ink);box-shadow:var(--sh-sm)}
+.res-mk{width:24px;height:24px;border-radius:50%;border:2px solid #fff;background:var(--fire);
+  display:flex;align-items:center;justify-content:center;font-size:11px;
+  animation:rPulse 1.6s infinite}
+@keyframes rPulse{0%{box-shadow:0 0 0 0 rgba(255,193,7,.7)}70%{box-shadow:0 0 0 10px rgba(255,193,7,0)}100%{box-shadow:0 0 0 0 rgba(255,193,7,0)}}
+.leaflet-container{font-family:'Cairo',sans-serif}
+/* ═══════════════════════════════════════════════════════════════════════════
+   ⚡ [PERF-4] content-visibility — أرخص مكسب أداء في الملف كلّه
+   ───────────────────────────────────────────────────────────────────────────
+   يُخبر المتصفّح أن يتخطّى **حساب التخطيط والرسم** لكل عنصر خارج الشاشة،
+   ويحسبه عند اقترابه. سطران، بلا جافاسكربت، ويعمل على كل البطاقات والصفوف.
+   و contain-intrinsic-size يمنع قفزات شريط التمرير بإعطاء ارتفاع مُقدَّر.
+   ═══════════════════════════════════════════════════════════════════════════ */
+.ec,.oc,.audit-item,.arch-table tbody tr{content-visibility:auto}
+.ec,.oc{contain-intrinsic-size:0 190px}
+.audit-item{contain-intrinsic-size:0 92px}
+.arch-table tbody tr{contain-intrinsic-size:0 48px}
+
+/* 📄 شريط صفحات الأرشيف */
+.arc-pager{display:flex;align-items:center;justify-content:center;gap:12px;
+  padding:12px;border-top:1px solid var(--line);background:var(--sky-m)}
+.arc-pager:empty{display:none}
+.pgb{background:var(--ink);color:var(--fire);border:none;border-radius:10px;
+  padding:8px 16px;font-family:'Cairo';font-weight:800;font-size:.8rem;cursor:pointer}
+.pgb:disabled{opacity:.35;cursor:default}
+.pgb:active:not(:disabled){transform:scale(.95)}
+.pgi{font-weight:800;font-size:.78rem;color:var(--ink3)}
 </style>
 </head>
 <body>
@@ -906,6 +985,17 @@ button,input,select,textarea{font-family:'Cairo',sans-serif;}
       <div class="dh-cl" id="clkD">00:00</div>
     </div>
     <div id="pg-live" class="pg on">
+      <!-- 🗺️ [MAP-1] الخريطة الحيّة — أُعيدت بتحميل كسول -->
+      <div class="map-wrap" id="mapWrap">
+        <div id="adminMap"></div>
+        <div class="map-badges">
+          <div class="mb-pill"><span>📦</span><span class="v-ord">0</span></div>
+          <div class="mb-pill"><span>🛵</span><span class="v-drv">0</span></div>
+          <div class="mb-pill"><span>🍽</span><span class="v-res">0</span></div>
+        </div>
+        <button class="map-fab" id="mapFsBtn" onclick="toggleMapFull()" title="ملء الشاشة">⛶</button>
+        <div class="map-hint" id="mapHint">اضغط لتحميل الخريطة الحيّة 🗺️</div>
+      </div>
       <div class="kpi-row desk-only">
         <div class="kc kb"><div class="kc-ic" style="background:var(--sky-l)">📦</div><div><div class="kc-v v-ord">0</div><div class="kc-l">طلبات نشطة</div></div></div>
         <div class="kc kg"><div class="kc-ic" style="background:var(--jade-l)">🛵</div><div><div class="kc-v v-drv">0</div><div class="kc-l">كباتن بالميدان</div></div></div>
@@ -965,9 +1055,9 @@ button,input,select,textarea{font-family:'Cairo',sans-serif;}
            بصفر مكتبة وصفر canvas. -->
       <div class="tb-box">
         <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:9px">
-          <div><label class="el">بحث</label><input type="text" id="arcSch" class="fc" placeholder="رقم، مطعم..." oninput="renderArch()"></div>
-          <div><label class="el">المطعم</label><select id="arcRS" class="fc" onchange="renderArch()"><option value="">الكل</option></select></div>
-          <div><label class="el">الكابتن</label><select id="arcDS" class="fc" onchange="renderArch()"><option value="">الكل</option></select></div>
+          <div><label class="el">بحث</label><input type="text" id="arcSch" class="fc" placeholder="رقم، مطعم..." oninput="arcReset()"></div>
+          <div><label class="el">المطعم</label><select id="arcRS" class="fc" onchange="arcReset()"><option value="">الكل</option></select></div>
+          <div><label class="el">الكابتن</label><select id="arcDS" class="fc" onchange="arcReset()"><option value="">الكل</option></select></div>
         </div>
       </div>
       <div class="tb-wrap">
@@ -991,6 +1081,7 @@ button,input,select,textarea{font-family:'Cairo',sans-serif;}
             <tbody id="arcTb"></tbody>
           </table>
         </div>
+        <div id="arcPager" class="arc-pager"></div>
       </div>
     </div>
     <div id="pg-restaurants" class="pg tab-p">
@@ -1127,6 +1218,7 @@ let eType=null,ePh=null,eCT="fixed";
 let gMap=null,gMarker=null,gAutoComplete=null;
 /* 🗑️ dc و pc (كائنا Chart.js) حُذفا مع الرسمين. */
 let archHtml="",drvSelOpts="";
+let archSig="",arcPage=1;   /* ⚡ [PERF-1/2] بصمة العرض ورقم الصفحة */
 let _auInit=false,_alInit=false;
 
 /* ─── حالة نظام الموظفين ─── */
@@ -1493,6 +1585,9 @@ function setupFB(){
   };
   listen(()=>db.ref("active_orders"),oCb);
   const lCb=snap=>{
+    _lastLocs=snap.val()||{};      /* 🗺️ [MAP-1] تغذية الخريطة من المستمع القائم */
+    if(_map) paintMap();
+
     const locs=snap.val();if(!locs)return;
     const now=Date.now();actDrv.clear();
     Object.keys(locs).forEach(phone=>{
@@ -1978,6 +2073,97 @@ window.svEdit=async function(){
       توزيع طلبات أي مطعم بلا موقع.
    ═══════════════════════════════════════════════════════════════════════ */
 
+/* ═══════════════════════════════════════════════════════════════════════════
+   🗺️ [MAP-1] الخريطة الحيّة — تحميل كسول عند أول ضغطة
+   ───────────────────────────────────────────────────────────────────────────
+   حُذفت سابقاً لسبب صحيح: «Leaflet + leaflet-heat نحو 355 ك.ب وعشرات طلبات
+   بلاطات» — وكانت تُحمَّل مع **كل فتح للّوحة** حتى لمن لا يفتح القسم الحيّ.
+
+   الآن لا يُحمَّل شيء حتى يضغط المستخدم على الخريطة ⇒ من يفتح اللوحة
+   لمراجعة المطاعم لا يدفع بايتاً واحداً، ومن يريد الميدان يحصل عليه كاملاً.
+   وتُغذَّى من **المستمعين القائمين** — لا مستمع جديد ولا قراءة إضافية.
+   ═══════════════════════════════════════════════════════════════════════════ */
+let _map=null,_heat=null,_drvMk={},_resMk={},_mapLoading=false,_mapFull=false,_lastLocs={};
+
+function _loadScript(src){return new Promise((ok,no)=>{const t=document.createElement('script');
+  t.src=src;t.onload=ok;t.onerror=()=>no(new Error('فشل تحميل '+src));document.head.appendChild(t);});}
+function _loadCss(href){return new Promise(ok=>{const l=document.createElement('link');
+  l.rel='stylesheet';l.href=href;l.onload=ok;l.onerror=ok;document.head.appendChild(l);});}
+
+async function initMapLazy(){
+  if(_map||_mapLoading) return;
+  _mapLoading=true;
+  const hint=document.getElementById('mapHint');
+  if(hint) hint.textContent='جارٍ تحميل الخريطة…';
+  try{
+    await _loadCss('https://unpkg.com/leaflet@1.9.4/dist/leaflet.css');
+    await _loadScript('https://unpkg.com/leaflet@1.9.4/dist/leaflet.js');
+    try{ await _loadScript('https://unpkg.com/leaflet.heat@0.2.0/dist/leaflet-heat.js'); }catch(_){}
+    _map=L.map('adminMap',{zoomControl:false,attributionControl:false}).setView([35.468,44.392],13);
+    L.control.zoom({position:'bottomleft'}).addTo(_map);
+    L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png',
+      {maxZoom:19,subdomains:'abcd'}).addTo(_map);
+    if(typeof L.heatLayer==='function'){
+      _heat=L.heatLayer([],{radius:28,blur:18,maxZoom:14,
+        gradient:{0.3:'#FFF8E1',0.6:'#FFC107',0.85:'#E0A800',1.0:'#111827'}}).addTo(_map);
+    }
+    if(hint) hint.remove();
+    setTimeout(()=>_map.invalidateSize(),300);
+    paintMap();
+  }catch(e){
+    if(hint) hint.textContent='تعذّر تحميل الخريطة — اضغط للإعادة';
+    console.warn('[AlHut] initMapLazy:',e&&e.message);
+    _mapLoading=false;
+  }
+}
+
+function paintMap(){
+  if(!_map) return;
+  try{
+    const seen=new Set();
+    Object.entries(_lastLocs||{}).forEach(([ph,d])=>{
+      if(!d||d.status!=='active'||!d.lat||!d.lng) return;
+      const stale=(d.last_update?(Date.now()-new Date(d.last_update).getTime()):9e9)>420000;
+      if(stale) return;
+      seen.add(ph);
+      const pos=[parseFloat(d.lat),parseFloat(d.lng)];
+      if(_drvMk[ph]) _drvMk[ph].setLatLng(pos);
+      else _drvMk[ph]=L.marker(pos,{icon:L.divIcon({className:'',
+        html:'<div class="drv-mk">🐝</div>',iconSize:[32,32],iconAnchor:[16,16]})})
+        .bindPopup('<b>'+esc(d.name||ph)+'</b>').addTo(_map);
+    });
+    Object.keys(_drvMk).forEach(ph=>{ if(!seen.has(ph)){ _map.removeLayer(_drvMk[ph]); delete _drvMk[ph]; } });
+
+    const pts=[], live=(typeof liveOrd!=='undefined'&&liveOrd)?liveOrd:[];
+    const names=new Set(live.map(o=>o&&o[O.RES]).filter(Boolean));
+    const rseen=new Set();
+    names.forEach(n=>{
+      const r=((gD&&gD.restaurants)||[]).find(x=>x[R.NAME]===n);
+      if(!r||!r[R.LAT]||!r[R.LNG]) return;
+      const pos=[parseFloat(r[R.LAT]),parseFloat(r[R.LNG])];
+      pts.push([pos[0],pos[1],1]); rseen.add(n);
+      if(!_resMk[n]) _resMk[n]=L.marker(pos,{icon:L.divIcon({className:'',
+        html:'<div class="res-mk">🍽</div>',iconSize:[24,24],iconAnchor:[12,12]})})
+        .bindPopup('<b>'+esc(n)+'</b>').addTo(_map);
+    });
+    Object.keys(_resMk).forEach(n=>{ if(!rseen.has(n)){ _map.removeLayer(_resMk[n]); delete _resMk[n]; } });
+    if(_heat) _heat.setLatLngs(pts);
+  }catch(e){ console.warn('[AlHut] paintMap:',e&&e.message); }
+}
+
+window.toggleMapFull=function(ev){
+  if(ev) ev.stopPropagation();
+  const w=document.getElementById('mapWrap'); if(!w) return;
+  _mapFull=!_mapFull; w.classList.toggle('full',_mapFull);
+  const b=document.getElementById('mapFsBtn'); if(b) b.textContent=_mapFull?'✕':'⛶';
+  if(_map) setTimeout(()=>_map.invalidateSize(),350);
+};
+
+document.addEventListener('DOMContentLoaded',()=>{
+  const w=document.getElementById('mapWrap');
+  if(w) w.addEventListener('click',(e)=>{ if(e.target.id!=='mapFsBtn') initMapLazy(); });
+});
+
 window.goTab=function(name){
   document.querySelectorAll(".pg").forEach(t=>t.classList.remove("on"));
   const panel=document.getElementById("pg-"+name);if(panel)panel.classList.add("on");
@@ -2304,8 +2490,36 @@ function renderArch(){
   document.getElementById("akCm").textContent=fmt(tComm);
   document.getElementById("akRv").textContent=fmt(tRev);
   document.getElementById("arcBdg").textContent=filtered.length.toLocaleString("ar-EG")+" طلب";
+  /* ═══════════════════════════════════════════════════════════════════════
+     ⚡ [PERF-1] بوّابة رخيصة **قبل** البناء
+     ───────────────────────────────────────────────────────────────────────
+     التمييز الفرقي كان يقارن النصّ النهائي — أي **بعد** بناء مئات الصفوف.
+     فالمقارنة توفّر إعادة الرسم ولا توفّر البناء، وهو الأثقل: JSON.stringify
+     لكل صف + encodeURIComponent + تنسيق تاريخ + بحث عن المطعم.
+
+     الآن بصمة من مدخلات العرض وحدها (المُعرّفات والحالات والمرشّحات
+     والصفحة). إن لم تتغيّر ⇒ نخرج قبل أن نبني حرفاً واحداً.
+     ⇒ نبضةٌ لا تمسّ الأرشيف لم تعد تكلّف شيئاً.
+     ═══════════════════════════════════════════════════════════════════════ */
+  const sig = filtered.length + "|" + q + "|" + rF + "|" + dF + "|" + arcPage + "|" +
+              filtered.slice(0, 400).map(o => String(o[O.ID]) + o[O.STATUS]).join(",");
+  if (sig === archSig) return;
+  archSig = sig;
+
+  /* 📄 [PERF-2] صفحنة — 50 صفاً في الصفحة.
+     المرجع الصناعي: ابدأ القياس عند الخمسين عنصراً، وستُفاجأ كم تتدهور
+     الأمور سريعاً — خاصة على الجوال. وثلاثة أيام من completed_orders
+     قد تعني مئات الصفوف تُهدَم وتُبنى مع كل حدث.
+     والصفحنة تُبقي البناء ثابتاً مهما كبرت البيانات. */
+  const PAGE = 50;
+  const pages = Math.max(1, Math.ceil(filtered.length / PAGE));
+  if (arcPage > pages) arcPage = pages;
+  const pageRows = filtered.slice((arcPage - 1) * PAGE, arcPage * PAGE);
+  const offset = (arcPage - 1) * PAGE;
+
   let html="";
-  filtered.forEach((o,i)=>{
+  pageRows.forEach((o,i0)=>{
+    const i = offset + i0;
     const oId=o[O.ID]||"-",rN=o[O.RES]||"-",dp=o[O.DRV]||"",pr=parseFloat(o[O.PRICE])||0;
     const isDel=o[O.STATUS]==="deleted",isSt=o[O.STATUS]==="settled",pU=o[O.PHOTO]||"";
     let dateStr="---",timeStr="";
@@ -2330,7 +2544,30 @@ function renderArch(){
   const empty=`<tr><td colspan="9" style="padding:42px"><div class="empty-s"><div class="es-ic">📭</div><div class="es-t">لا توجد طلبات مطابقة</div></div></td></tr>`;
   const final=html||empty;
   if(archHtml!==final){document.getElementById("arcTb").innerHTML=final;archHtml=final;}
+
+  /* شريط الصفحات — يظهر عند تجاوز صفحة واحدة فقط */
+  const pg=document.getElementById("arcPager");
+  if(pg){
+    if(pages<=1){ pg.innerHTML=""; }
+    else{
+      pg.innerHTML =
+        `<button class="pgb" ${arcPage<=1?"disabled":""} onclick="arcGo(${arcPage-1})">‹ السابق</button>`+
+        `<span class="pgi">صفحة ${arcPage} من ${pages} · ${filtered.length.toLocaleString("ar-EG")} طلب</span>`+
+        `<button class="pgb" ${arcPage>=pages?"disabled":""} onclick="arcGo(${arcPage+1})">التالي ›</button>`;
+    }
+  }
 }
+/* ⚡ [PERF-2] الانتقال بين صفحات الأرشيف. */
+window.arcGo=function(p){
+  arcPage=Math.max(1,p); archSig="";        /* نُبطل البصمة كي يُعاد البناء */
+  renderArch();
+  const t=document.getElementById("arcTb");
+  if(t) t.closest(".card,.pg,div")?.scrollIntoView({behavior:"smooth",block:"start"});
+};
+/* أي تغيير في البحث أو المرشّحات يعيدنا إلى الصفحة الأولى — وإلا بقي
+   المستخدم على صفحة 7 من نتيجةٍ فيها صفحتان. */
+window.arcReset=function(){ arcPage=1; archSig=""; renderArch(); };
+
 window.opInv=function(payload){
   const d=JSON.parse(decodeURIComponent(payload));
   document.getElementById("invId").textContent="#"+d.id;
@@ -2411,8 +2648,13 @@ window.doLogout=function(){
   MP="";ovr={o:{},d:{},r:{}};sessionStorage.clear();localStorage.clear();location.reload();
 };
 function renderAudit(){
+  /* ⚡ [PERF-3] حدّ العرض — 100 سجلّ. المستمع محدود أصلاً بـlimitToLast(120)،
+     لكن البناء كان بلا حدّ ولا تمييز فرقي: كل سجلّ جديد يُعيد بناء القائمة
+     كاملةً. والتدقيق يُقرأ للمراجعة لا للتصفّح العميق — ومن أراد أقدم من
+     ذلك فالبحث موجود. */
+  const AUD_MAX = 100;
   const q=(document.getElementById("auSch")?.value.trim().toLowerCase()||"");
-  const list=auData.filter(e=>!q||JSON.stringify(e).toLowerCase().includes(q));
+  const list=auData.filter(e=>!q||JSON.stringify(e).toLowerCase().includes(q)).slice(0, AUD_MAX);
   const iMap={updateEntity:"✏️",resetDebt:"💵",assignDriver:"👑",withdrawOrder:"↩",forceComplete:"✅",deleteOrder:"🗑",ACCEPT:"✓",PAUSE:"⏸",BAN:"🚫",toggleShifts:"⏱",DEL:"🗑",manageStaff:"🧑‍💼"};
   const nMap={updateEntity:"تحديث بيانات",resetDebt:"تصفير ديون",assignDriver:"تعيين سيادي",withdrawOrder:"سحب طلب",forceComplete:"إكمال يدوي",deleteOrder:"إلغاء طلب",ACCEPT:"تفعيل حساب",PAUSE:"تجميد حساب",BAN:"حظر حساب",toggleShifts:"نظام الشفتات",DEL:"حذف نهائي",manageStaff:"إدارة موظف"};
   let html="";
