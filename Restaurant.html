@@ -19,52 +19,6 @@
 -->
 <html lang="ar" dir="rtl">
 <head>
-<!-- 🔒 [CSP-R1] سياسة أمان المحتوى — كانت الواجهة الوحيدة في نحلة بلا سياسة.
-     ═══════════════════════════════════════════════════════════════════════
-     ولماذا هي الأولى بها لا الأخيرة؟ لأنها الأوسع سطحَ هجوم في الحزمة:
-     تستقبل نصّ واتساب واللصق والصور من الزبائن، وتحفظ في localStorage
-     كلمة مرور المطعم بـbtoa (ترميز لا تشفير — انظر V2.30). فأي حقن هنا
-     لا يسرق جلسة بل **كلمة المرور نفسها**: قابلة لإعادة الاستعمال ولا تنتهي.
-
-     ⚠️ **موضعها في أعلى <head> شرطُ صحّة لا ترتيب.** وسم meta لا يحكم إلا ما
-        بعده، وأوّل كتلة سكربت في هذا الملف تبدأ في السطر التالي مباشرةً —
-        فلو وُضعت السياسة قرب المانيفست (كما في Nhleman) لبقيت حاكمُ الكاش
-        وكتلة الإقلاع كلّها خارج الحماية.
-
-     📋 كل أصلٍ أدناه مُشتقّ من مورد يُحمَّل فعلاً في هذا الملف — لا نسخاً عن أخت:
-       script-src   jsdelivr (leaflet · lucide) · unpkg (بديل lucide عند فشل
-                    الأول، السطر ~133) · gstatic (وحدات firebase 10.12.5)
-       style-src    jsdelivr (leaflet.css · bootstrap.rtl) · fonts.googleapis
-       connect-src  script.google.com (بوّابة GAS) · cloudfunctions (aiOrderIntake)
-                    · firebasedatabase + wss · googleapis (auth · storage)
-                    · nominatim.openstreetmap.org (البحث الجغرافي، السطر ~1716)
-       media-src    actions.google.com (نغمة التنبيه، السطر ~645)
-
-     🔍 تحقّق بعد أي تعديل:  python3 04_tools/csp_audit.py Restaurant.html
-        فهي تكشف الحجب الذي لا يُرى إلا في متصفّح حقيقي (درس V2.28).
-
-     🔴 **لا تحذف https://www.gstatic.com من script-src مهما قال الحارس.**
-        guard.js يُنذر CSP_WIDE عليه — **وهو إنذار كاذب**: الحارس يقرأ وسوم
-        سكربت ذات src وحدها، وgstatic هنا يدخل عبر استيرادات ES ثابتة داخل
-        كتلة النوع module (الأسطر ١٠٤٣–١٠٤٨: firebase-app · database ·
-        storage · auth · functions). حذفه ⇒ تُحجب وحدات فايربيس الخمس ⇒
-
-        📎 وملحوظة لمن يحرّر هذا التعليق لاحقاً: **لا تكتب وسم سكربت حرفياً
-           هنا** ولو داخل تعليق HTML. ماسح الكتل في guard.js يبحث عن النصّ
-           لا عن البنية، فيَعُدّ الوسمَ المذكورَ كتلةً ويُبلغ SYNTAX_HTML —
-           وقع فعلاً في أول صياغة لهذا التعليق.
-        الصفحة بيضاء بلا خطأ مفهوم. ونفس الإنذار الكاذب قائم على Driver.html
-        للسبب ذاته. (علاجه الصحيح ترقية ماسح الحارس ليقرأ import، لا تضييق
-        السياسة على مورد مستعمَل.)
-
-     ⚠️ form-action هنا 'self' لا 'none' كما في أخواتها — عن قصد. النموذج
-        orderForm يمنع الإرسال الافتراضي بـpreventDefault، لكن لو فشلت كتلة
-        السكربت (وهو بالضبط ما تحمي منه هذه السياسة) لعاد الزرّ إلى الإرسال
-        الأصلي. و'self' يجعله إعادة تحميل غير ضارّة بدل حجبٍ صامت.
-
-     📌 'unsafe-inline' لازمٌ اليوم: الشيفرة كلها كتل مضمّنة. إزالته تتطلّب
-        nonce أو نقلها إلى ملفات — مشروع لاحق، وهو نفس دَين أخواتها الأربع. -->
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://www.gstatic.com https://cdn.jsdelivr.net https://unpkg.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdn.jsdelivr.net; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: blob: https:; media-src 'self' data: blob: https://actions.google.com; connect-src 'self' https://*.firebasedatabase.app https://*.firebaseio.com wss://*.firebasedatabase.app wss://*.firebaseio.com https://script.google.com https://script.googleusercontent.com https://*.googleapis.com https://securetoken.googleapis.com https://*.cloudfunctions.net https://*.run.app https://nominatim.openstreetmap.org; object-src 'none'; base-uri 'none'; form-action 'self'; frame-ancestors 'none'">
     <script>
         // --- إصدار 39.0 (Fortress 🛡️ — متناسق مع القواعد المحصّنة V2.0 + GAS V16.0 + CF-6.0) ---
         //  ما تغيّر عن 38.0:
@@ -77,71 +31,61 @@
         //          القاعدة الجديدة ترفض القراءة الكاملة لغير الإدارة.
         //  🔒 ضمان مصادقة فايربيس قبل أي كتابة (القواعد لم تعد تقبل مجهولاً).
         //  🛵 اسم الكابتن من drivers_locations/{phone}/name بدل شيت السائقين.
-        const CURRENT_APP_VERSION = "46.0.Nahla-Unstuck";   /* 🔧 V2.2 */
+        const CURRENT_APP_VERSION = "43.0.Nahla-Full";   /* 🔧 V2.2 */
         const RES_VERSION_KEY = 'hut_res_app_version';
-        /* ═══════════════════════════════════════════════════════════════════
-           🔑 [R-1] حاكم الكاش — بنفس تحصين تطبيق الكابتن
-           ───────────────────────────────────────────────────────────────────
-           كان المسح غير منتظَر ثم reload() فوراً ⇒ يُهدَم عامل الخدمة والوحدة
-           تجلب استيراداتها عبره. وهذا ما عطّل التطبيقين.
-           ① ننتظر اكتمال المسح فعلاً  ② update لا unregister
-           ③ حارس حلقة 60 ثانية: صفحةٌ بأصول قديمة أفضل ألف مرّة من صفحة
-              تُعيد تحميل نفسها أبداً  ④ حزام 4 ثوانٍ إن تعلّق وعد.
-           📌 وارفع CURRENT_APP_VERSION كلّما غيّرت الملف — وإلا لم يصل تغييرك.
-           ═══════════════════════════════════════════════════════════════════ */
         try {
             if (localStorage.getItem(RES_VERSION_KEY) !== CURRENT_APP_VERSION) {
-                var _rk = RES_VERSION_KEY + '_reload_ts';
-                var _last = Number(localStorage.getItem(_rk) || 0);
                 localStorage.setItem(RES_VERSION_KEY, CURRENT_APP_VERSION);
-                if (Date.now() - _last < 60000) { console.warn('⏭️ تخطّي إعادة التحميل — حارس الحلقة'); }
-                else {
-                    localStorage.setItem(_rk, String(Date.now()));
-                    var _j = [];
-                    if ('caches' in window) _j.push(caches.keys().then(function(ns){
-                        return Promise.all(ns.map(function(n){ return caches.delete(n); })); }));
-                    if ('serviceWorker' in navigator) _j.push(navigator.serviceWorker.getRegistrations()
-                        .then(function(rs){ return Promise.all(rs.map(function(r){ return r.update(); })); }));
-                    var _d = false, _go = function(){ if(!_d){ _d = true; window.location.reload(); } };
-                    Promise.all(_j).then(_go, _go);
-                    setTimeout(_go, 4000);
+                if (localStorage.getItem(RES_VERSION_KEY) === CURRENT_APP_VERSION) {
+                    if ('caches' in window) {
+                        caches.keys().then(function(names) {
+                            for (let name of names) caches.delete(name);
+                        });
+                    }
+                    if ('serviceWorker' in navigator) {
+                        navigator.serviceWorker.getRegistrations().then(function(regs) {
+                            for (let r of regs) r.update();
+                        });
+                    }
+                    window.location.reload();
                 }
             }
-        } catch(e) { console.warn('تعذّر التحقق من الإصدار:', e && e.message); }
+        } catch(e) {
+            console.warn('تعذّر التحقق من الإصدار:', e.message);
+        }
+    </script>
+    <meta charset="UTF-8">
+<!-- 🔒 [أ١] سياسة أمان المحتوى — تُقلّص أثر أي حقن أو اختراق CDN.
+     ابدأ بـ Content-Security-Policy-Report-Only أسبوعاً، اقرأ التقارير، ثم أَلزِم.
+     'unsafe-inline' لازمٌ اليوم: الشيفرة كلها كتل سكربت مضمّنة. إزالته
+     تتطلّب نقلها إلى ملفات أو ختمها بـ nonce — مشروع لاحق موثّق. -->
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://*.firebasedatabase.app https://*.firebaseio.com https://unpkg.com https://www.gstatic.com https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://fonts.googleapis.com https://unpkg.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: blob: https:; media-src 'self' data: blob: https://actions.google.com; connect-src 'self' https://*.firebasedatabase.app https://*.firebaseio.com wss://*.firebasedatabase.app wss://*.firebaseio.com https://script.google.com https://script.googleusercontent.com https://*.googleapis.com https://securetoken.googleapis.com https://*.cloudfunctions.net https://*.run.app https://nominatim.openstreetmap.org https://unpkg.com https://cdn.jsdelivr.net; object-src 'none'; base-uri 'none'; form-action 'none'">
+<script>
+/* ═══════════════════════════════════════════════════════════════════════════
+   🔦 مُسجِّل أعطال التحميل — **بلا أي ظهور على الشاشة**
+   ───────────────────────────────────────────────────────────────────────────
+   أُزيل الشريط الأحمر بناءً على طلبك. والتسجيل في الطرفية باقٍ: لا يراه
+   الكاشير ولا يشغله، لكنه يوفّر يوماً كاملاً من المطاردة إن تكرّر عطبٌ
+   كالذي مررنا به — يكفي فتح الصفحة على حاسوب وقراءة Console.
 
-        /* 🔦 [R-1] مُبلِّغ فشل التحميل — **مرئي**.
-           أزلتُه بطلبك حين كان يظهر بلا داعٍ. الآن لا يظهر إلا إن فشل التحميل
-           فعلاً (window.authAction غير معرَّفة بعد 9 ثوانٍ) — فالكاشير السليم
-           لا يراه أبداً. وهو ما أنهى مطاردة يوم كامل في جولة واحدة. */
-        (function(){
-          var errs=[];
-          function tag(m){ if(!m)return; m=String(m).slice(0,300);
-            if(errs.indexOf(m)===-1)errs.push(m); try{console.warn('[AlHut] '+m);}catch(_){} }
-          window.addEventListener('error',function(e){
-            if(e&&e.target&&(e.target.src||e.target.href)) tag('فشل تحميل: '+(e.target.src||e.target.href));
-            else if(e&&e.message) tag(e.message+(e.filename?('  @'+String(e.filename).split('/').pop()+':'+e.lineno):''));
-          },true);
-          window.addEventListener('unhandledrejection',function(e){
-            tag('وعد مرفوض: '+((e.reason&&(e.reason.message||e.reason))||'')); });
-          document.addEventListener('securitypolicyviolation',function(e){
-            tag('سياسة الأمان منعت: '+e.violatedDirective+' ← '+String(e.blockedURI||'').slice(0,90)); });
-          setTimeout(function(){
-            if (typeof window.authAction === 'function') return;
-            try{
-              var b=document.createElement('div'); b.setAttribute('dir','rtl');
-              b.style.cssText='position:fixed;inset:auto 0 0 0;z-index:2147483647;background:#7f1d1d;color:#fff;'+
-                'padding:14px;font:600 13px/1.7 system-ui,sans-serif;max-height:60vh;overflow:auto';
-              b.innerHTML='<b style="font-size:15px">🔴 لم تكتمل وحدة التطبيق</b>'+
-                '<div style="opacity:.85;margin:6px 0">زرّ الدخول لن يعمل. صوّر الرسالة:</div>'+
-                '<pre style="white-space:pre-wrap;word-break:break-all;background:#450a0a;padding:8px;'+
-                'border-radius:8px;font-size:11px">'+
-                (errs.length?errs.join('\n───\n'):'لم يُلتقط خطأ صريح — غالباً استيراد مُعلَّق (شبكة أو حجب).')+
-                '</pre><div style="opacity:.8;font-size:11px">متصل: '+(navigator.onLine?'نعم':'لا')+
-                ' · الإصدار: '+CURRENT_APP_VERSION+'</div>';
-              document.body.appendChild(b);
-            }catch(_){}
-          },9000);
-        })();
+   وأُزيل معه قفل الزرّ القديم نهائياً: زرٌّ يعمل خيرٌ من قفلٍ لا يُفتح.
+   ═══════════════════════════════════════════════════════════════════════════ */
+(function () {
+  function tag(m){ try { console.warn('[AlHut] ' + String(m).slice(0, 300)); } catch (_) {} }
+  window.addEventListener('error', function (e) {
+    if (e && e.target && (e.target.src || e.target.href)) tag('فشل تحميل: ' + (e.target.src || e.target.href));
+    else if (e && e.message) tag(e.message);
+  }, true);
+  window.addEventListener('unhandledrejection', function (e) {
+    tag('وعد مرفوض: ' + ((e.reason && (e.reason.message || e.reason)) || ''));
+  });
+  document.addEventListener('securitypolicyviolation', function (e) {
+    tag('سياسة الأمان منعت: ' + e.violatedDirective + ' ← ' + (e.blockedURI || ''));
+  });
+  setTimeout(function () {
+    if (typeof window.authAction !== 'function') tag('⚠️ لم تكتمل وحدة التطبيق خلال 9 ثوانٍ.');
+  }, 9000);
+})();
 </script>
 
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
@@ -1502,8 +1446,6 @@ function escAttr(x){ return esc(x).replace(/"/g,'&quot;').replace(/'/g,'&#39;');
                     throw err;
                 }
                 resTrack('create_server', { orderId: oid });
-                /* 📊 [R-1] مرجع القياس: متى وُلد الطلب من عند المطعم. */
-                resTrack('order_created', { orderId: oid });
                 endAttemptCid();          // نجاح مؤكَّد ⇒ النيّة التالية مفتاحها الخاص
                 return oid;
             } catch (e) {
@@ -1519,42 +1461,14 @@ function escAttr(x){ return esc(x).replace(/"/g,'&quot;').replace(/'/g,'&#39;');
         throw new Error('SERVER_UNSURE');
     }
 
-    /* ═══════════════════════════════════════════════════════════════════════
-       🔴 [FIX-1] «الزرّ يبقى جارٍ الإرسال» — سلسلة من ثلاث حلقات
-       ───────────────────────────────────────────────────────────────────────
-       ① الشرط كان `if (sess.phone && sess.password)`. وبعد أن أُزيل عرض
-          كلمة المرور، صارت الجلسات الجديدة قد لا تحملها ⇒ **ensureResAuth
-          لا تُنادى إطلاقاً** ⇒ auth.currentUser يبقى null.
-       ② ثم تمضي الكتابة بلا مصادقة ⇒ القواعد ترفضها.
-       ③ و set() **بلا مهلة** ⇒ الوعد لا يُحسم ⇒ الزرّ معلّق إلى الأبد.
-
-       ولهذا بدأ الآن تحديداً: الجلسات القديمة تحمل كلمة المرور فتعمل،
-       والتي وُلدت بعد التحديث لا تحملها.
-
-       الآن: نحاول بأي وسيلة متاحة، وبمهلة، ولا نصمت عند الفشل.
-       ═══════════════════════════════════════════════════════════════════════ */
-    function _withTimeout(promise, ms, label) {
-        return Promise.race([
-            promise,
-            new Promise((_, rej) => setTimeout(() => rej(new Error(label || 'timeout')), ms))
-        ]);
-    }
-
     async function requireCloudAuth() {
         if (auth.currentUser) return true;
         const s = localStorage.getItem('hut_res_session');
         if (s) {
             try {
                 const sess = JSON.parse(s);
-                /* 🔑 الهاتف وحده يكفي للمحاولة. وكلمة المرور تُستعمل إن وُجدت،
-                   ولا يتوقّف كل شيء على وجودها. */
-                const pass = sess.password ? atob(sess.password) : '';
-                if (sess.phone && pass) {
-                    await _withTimeout(ensureResAuth(sess.phone, pass), 12000, 'AUTH_TIMEOUT');
-                }
-            } catch (e) {
-                console.warn('[AlHut] requireCloudAuth:', e && e.message);
-            }
+                if (sess.phone && sess.password) await ensureResAuth(sess.phone, atob(sess.password));
+            } catch (e) {}
         }
         return !!auth.currentUser;
     }
@@ -2045,36 +1959,10 @@ function escAttr(x){ return esc(x).replace(/"/g,'&quot;').replace(/'/g,'&#39;');
         if (sessionStr) {
             try {
                 const session = JSON.parse(sessionStr);
-
-                /* ═══════════════════════════════════════════════════════════
-                   🔑 [SESS-1] الخروج اليومي — ومفارقته
-                   ───────────────────────────────────────────────────────────
-                   كانت المهلة 24 ساعة **ثابتة لا متجدّدة**، وتُختم عند تسجيل
-                   الدخول وحده. فمطعمٌ يعمل بلا انقطاع يُطرَد بعد يوم بالضبط.
-
-                   🔴 والمفارقة: كلمة المرور كانت تُملأ في الحقل هنا **خارج
-                      شرط المهلة** — أي أن من يفتح الجهاز يجدها جاهزة سواء
-                      مضت 24 ساعة أو 24 يوماً. فالمهلة لم تكن تحمي شيئاً:
-                      كلفةٌ يومية على الكاشير بلا أي مقابل أمني.
-                      ⇒ أُزيل الملء التلقائي. الدخول يبقى تلقائياً عبر
-                        إعادة مصادقة صامتة، لكن كلمة المرور لم تعد **تُعرَض**.
-
-                   ⏳ والمهلة صارت **متجدّدة 30 يوماً**:
-                      · المطعم العامل لا يخرج أبداً — كل فتح يُجدّد الختم.
-                      · والجهاز المهجور أو المباع يُنظّف نفسه بعد شهر.
-                      · و«خروج» الصريح يمسح كل شيء كما كان.
-
-                   ولماذا لا «بلا نهاية»؟ لأن الفرق العملي صفر لمطاعمك
-                   (لا أحد يترك اللوحة شهراً)، لكنه فرقٌ حقيقي في جهازٍ
-                   بيع أو سُرق أو غادره كاشير.
-                   ═══════════════════════════════════════════════════════════ */
-                const SESSION_TTL_MS = 30 * 24 * 3600000;   /* 30 يوماً متجدّدة */
-                if ((Date.now() - session.timestamp) < SESSION_TTL_MS) {
-                    /* 🔄 تجديد الختم: ما دام يُستعمل فهو حيّ. */
-                    try {
-                        session.timestamp = Date.now();
-                        localStorage.setItem('hut_res_session', JSON.stringify(session));
-                    } catch (_) {}   /* فشل التجديد يعني مهلةً أقدم لا خروجاً — إهمال مقصود */
+                if (session.password) {
+                    document.getElementById('checkPassword').value = atob(session.password);
+                }
+                if ((Date.now() - session.timestamp) < 24 * 3600000) {
                     document.getElementById('checkPhone').value = session.phone.startsWith('0') ? session.phone : '0' + session.phone;
                     currentResName = session.name;
                     regPhone = session.phone;
@@ -2082,15 +1970,6 @@ function escAttr(x){ return esc(x).replace(/"/g,'&quot;').replace(/'/g,'&#39;');
                     if (session.password) { ensureResAuth(session.phone, atob(session.password)); }
                     enterDashboard(); return true;
                 }
-                /* ⏳ [SESS-1] مضى شهرٌ بلا استعمال ⇒ نُنظّف بدل أن نُبقي
-                   كلمة مرور نائمة على جهازٍ قد يكون بِيع أو غادره صاحبه.
-                   والهاتف يبقى وحده لتسهيل إعادة الدخول. */
-                try {
-                    localStorage.removeItem('hut_res_session');
-                    const ph = session.phone ? (String(session.phone).startsWith('0') ? session.phone : '0' + session.phone) : '';
-                    if (ph) document.getElementById('checkPhone').value = ph;
-                    resTrack('session_expired', { days: 30 });
-                } catch(_) {}   /* التنظيف تجميلي — الشرط أعلاه هو الحارس الفعلي */
             } catch(e) {}
         } else if (pendingStr) {
             document.getElementById('checkPhone').value = pendingStr;
@@ -2520,7 +2399,6 @@ function escAttr(x){ return esc(x).replace(/"/g,'&quot;').replace(/'/g,'&#39;');
         //   القاعدة الجديدة ترفض onValue على active_orders كلها لغير الإدارة،
         //   وتسمح فقط بـ query.orderByChild == 'resPhone' && query.equalTo == auth.uid.
         //   مكسب جانبي: لم نعد نحمّل طلبات كل المدينة إلى جوال المطعم.
-        startResReconcile();   /* ♻️ [R-1] حزام المصالحة بجانب المستمع */
         const myOrdersQuery = query(ref(db, 'active_orders'), orderByChild('resPhone'), equalTo(myPhone));
         onValue(myOrdersQuery, (snapshot) => {
             lastOrdersSnapshot = snapshot.val() || {};
@@ -2599,48 +2477,6 @@ function escAttr(x){ return esc(x).replace(/"/g,'&quot;').replace(/'/g,'&#39;');
                             <div class="fw-bold text-dark"><i data-lucide="info" size="12" style="color: var(--primary-blue);"></i> التفاصيل: <span class="fw-normal" style="user-select: text;">${orderDetails}</span></div>
                         </div>
                     </div>`;
-    }
-
-    /* ═══════════════════════════════════════════════════════════════════════
-       ♻️ [R-1] المصالحة الدورية — نفس تحصين تطبيق الكابتن
-       ───────────────────────────────────────────────────────────────────────
-       قائمة الطلبات النشطة تُبنى من مستمع onValue. وإن لم تصل اللقطة —
-       التطبيق في الخلفية أو الشبكة متقطّعة — بقيت الشاشة على حالة قديمة:
-       طلبٌ سُلّم أو أُلغي يبقى «نشطاً» أمام الكاشير، فيتصل بالإدارة عبثاً،
-       أو يظنّ طلباً لم يصل فيُعيد إرساله ⇒ **توأم حقيقي**.
-
-       والمصالحة قراءة مستقلّة تعمل حتى لو مات المقبس. ثلاث لحظات تُطلقها،
-       وكلها لحظاتٌ يكون فيها المستمع مشكوكاً فيه:
-         ① كل 60 ثانية   ② عند عودة الرؤية من الخلفية   ③ عند عودة الشبكة
-
-       ⚠️ ولا نستنتج شيئاً عند فشل القراءة — الصمت ليس دليلاً.
-       ⚠️ ولا نلمس المستمع: هذه طبقة مستقلّة فوقه.
-       ═══════════════════════════════════════════════════════════════════════ */
-    let _resRecBusy=false, _resRecTimer=null;
-    async function reconcileResOrders(reason){
-      if(_resRecBusy || !auth.currentUser) return;
-      const ph = window.__resPhone;
-      if(!ph) return;
-      _resRecBusy=true;
-      try{
-        const snap = await get(query(ref(db,'active_orders'), orderByChild('resPhone'), equalTo(ph)));
-        const fresh = snap.val() || {};
-        const before = JSON.stringify(Object.keys(lastOrdersSnapshot||{}).sort());
-        const after  = JSON.stringify(Object.keys(fresh).sort());
-        if(before !== after){
-          console.warn('♻️ مصالحة ('+reason+'): الشاشة كانت متأخّرة — حُدِّثت');
-          try{ resTrack('reconcile_fixed',{ reason: reason }); }catch(_){}
-          lastOrdersSnapshot = fresh;
-          rebuildOrderLists();
-        }
-      }catch(e){ /* فشل القراءة ⇒ لا نستنتج ولا نغيّر */ }
-      finally{ _resRecBusy=false; }
-    }
-    function startResReconcile(){
-      if(_resRecTimer) clearInterval(_resRecTimer);
-      _resRecTimer=setInterval(()=>reconcileResOrders('دوري'),60000);
-      document.addEventListener('visibilitychange',()=>{ if(!document.hidden) reconcileResOrders('عودة'); });
-      window.addEventListener('online',()=>reconcileResOrders('شبكة'));
     }
 
     function rebuildOrderLists() {
@@ -2756,7 +2592,6 @@ function escAttr(x){ return esc(x).replace(/"/g,'&quot;').replace(/'/g,'&#39;');
     //   وكان أصلاً ثغرة محو الدين. الإلغاء الآن = status:'deleted' فيمرّ الطلب
     //   الملغى بأرشيف الفجر كـ"ملغى" ويبقى قابلاً للتدقيق.
     window.cancelOrderGrace = async function(orderId) {
-      try{ resTrack('cancel_grace',{ orderId: orderId }); }catch(_){}   /* 📊 [R-1] */
         if (!confirm("تأكيد الإلغاء؟")) return;
         const card = document.getElementById(`order-${esc(orderId)}`);
         if (card) { card.style.opacity = '0'; setTimeout(() => card.style.display = 'none', 300); }
@@ -2786,7 +2621,6 @@ function escAttr(x){ return esc(x).replace(/"/g,'&quot;').replace(/'/g,'&#39;');
     };
 
     window.markOrderReady = async function(orderId, btn) {
-      try{ resTrack('marked_ready',{ orderId: orderId }); }catch(_){}   /* 📊 [R-1] */
         btn.disabled = true;
         await requireCloudAuth();
         update(ref(db, `active_orders/${esc(orderId)}`), { ready_for_pickup: true, ready_ts: new Date().toISOString() })
@@ -2929,34 +2763,12 @@ function escAttr(x){ return esc(x).replace(/"/g,'&quot;').replace(/'/g,'&#39;');
     }
 
     async function finalizeOrderPlacement(details, imageUrl, price, area, btn, originalBtnHtml) {
-        /* ═══════════════════════════════════════════════════════════════════
-           🛡️ [FIX-3] حزام أخير — الزرّ يعود مهما حدث
-           ───────────────────────────────────────────────────────────────────
-           ①و② يعالجان السببين المعروفين. وهذا يعالج **ما لا نعرفه بعد**:
-           أي وعدٍ لا يُحسم في المستقبل لن يترك الكاشير أمام زرٍّ ميّت.
-
-           25 ثانية — أطول من مهلة الكتابة (20) فلا تسبقها في الحالة العادية.
-           ═══════════════════════════════════════════════════════════════════ */
-        let _released = false;
-        const _release = () => {
-            if (_released) return; _released = true;
-            try { btn.innerHTML = originalBtnHtml; btn.disabled = false; } catch (_) {}
-        };
-        const _belt = setTimeout(() => {
-            if (_released) return;
-            _release();
-            try { resTrack('submit_stuck', { area: String(area).slice(0, 24) }); } catch (_) {}
-            alert('⏳ لم يصل تأكيد الخادم.\n\n' +
-                  'قد يكون الطلب أُنشئ وقد لا يكون — راجع «طلبات نشطة».\n\n' +
-                  '✅ وإن لم تجده، اضغط «إرسال» مرّة أخرى — الإعادة آمنة ولن تُنتج طلبين.');
-        }, 25000);
-
         try {
             await finalizeOrderPlacementSilent(details, imageUrl, price, area, currentResName);
-            clearTimeout(_belt); _release();
+            btn.innerHTML = originalBtnHtml; btn.disabled = false;
             showSuccessMessage(`<div style="background: var(--success); width: 48px; height: 48px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-bottom: 8px; box-shadow: 0 4px 15px rgba(16,185,129,0.3);"><i data-lucide="check" size="24" color="white"></i></div><div class="fw-black" style="font-size: 1rem;">تم إرسال الطلب عبر خوادم الحوت بنجاح! 🚀</div>`);
         } catch (e) { 
-            clearTimeout(_belt); _release();
+            btn.innerHTML = originalBtnHtml; btn.disabled = false; 
             /* إلغاء التكرار قرارُ الكاشير نفسه — لا يُعرض كخطأ في النظام */
             if (e && e.message === 'DUPLICATE_CANCELLED') return;
             /* 🩹 الرسالة كانت "حدث خطأ غير متوقع" لكل سببٍ عدا NO_PHONE — أي
@@ -3125,21 +2937,12 @@ function escAttr(x){ return esc(x).replace(/"/g,'&quot;').replace(/'/g,'&#39;');
         /* ② المسار القديم — يبقى كاملاً وبلا تغيير حرف واحد.
            هذا هو ما يُحذف **آخر** شيء: لا قبل أن يقرأ الرصد صفر
            create_fallback لأيام، ولا قبل نشر ".write": false. */
-        /* ⏱️ [FIX-2] مهلة على الكتابة — أهمّ الثلاثة.
-           set() بلا مهلة تعني وعداً قد لا يُحسم أبداً (قواعد ترفض · شبكة
-           متعثّرة · مصادقة ضائعة) ⇒ زرٌّ معلّق إلى الأبد والكاشير لا يعلم.
-           والعطب القادم سيكون بسبب آخر ونفس العَرَض ما لم تُوضع المهلة.
-
-           ⚠️ 20 ثانية سخيّة: فايربيس يحتفظ بالكتابة محلياً ويُرسلها عند
-              عودة الشبكة، فالمهلة تُنهي **الانتظار** لا الكتابة. ولهذا
-              نرمي SERVER_UNSURE لا فشلاً — والرسالة تقول للكاشير إن
-              إعادة الضغط آمنة (cid يمنع التوأم). */
-        await _withTimeout(set(ref(db, 'active_orders/' + uniqueId), {
+        await set(ref(db, 'active_orders/' + uniqueId), {
             id: uniqueId, restaurant: resName, area: area, details: details, status: "pending_driver",
             driverPhone: "system_routing", price: price, timestamp: tsIso, photoUrl: imageUrl,
             last_update: tsIso, resPhone: normResPhone, resLat: regLat || 0, resLng: regLng || 0,
             comm: safeComm, payType: safePayType, is_sovereign: false, ready_for_pickup: false
-        }), 20000, 'SERVER_UNSURE');
+        });
         resTrack('create_legacy', { orderId: uniqueId });
 
         // 🔧 أُزيل نداء NEW_ORDER إلى GAS — كان معالجه فارغاً ({success:true})
