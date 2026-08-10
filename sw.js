@@ -21,8 +21,8 @@
 
    📌 وارفعه في كل مرّة تُغيّر فيها ملفاً من ASSETS_TO_CACHE.
    ═══════════════════════════════════════════════════════════════════════════ */
-const CACHE_NAME = 'Nahla-Core-V16.9';
-const CDN_CACHE_NAME = 'Nahla-CDNs-V16.1';
+const CACHE_NAME = 'Nahla-Core-V17';
+const CDN_CACHE_NAME = 'Nahla-CDNs-V.17';
 
 // قائمة الملفات الأساسية للنظام
 // 🩹 [كاش الأوفلاين] تصحيح حالة الأحرف: GitHub Pages حسّاس لها، وكانت القائمة
