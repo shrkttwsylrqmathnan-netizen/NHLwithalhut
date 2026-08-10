@@ -890,20 +890,7 @@ button,input,select,textarea{font-family:'Cairo',sans-serif;}
   </div>
 </div>
 
-<!-- 👑 نافذة التعيين السيادي مع بحث -->
-<div id="assignModal" class="sheet-bg" onclick="clSheet('assignModal')">
-  <div class="sheet" onclick="event.stopPropagation()">
-    <div class="sheet-handle"></div>
-    <div class="sheet-title">👑 تعيين سيادي <span id="assignOrderId" style="color:var(--ink4)"></span></div>
-    <div class="sheet-sub">ابحث واختر الكابتن لإسناد الطلب له مباشرةً</div>
-    <div class="asn-srch-w">
-      <span class="asn-srch-i">🔍</span>
-      <input type="text" id="assignSearch" class="asn-srch" placeholder="ابحث عن كابتن بالاسم أو الرقم..." oninput="filterAssign()" autocomplete="off">
-    </div>
-    <div id="assignList" class="asn-list"></div>
-    <button class="sheet-cancel" onclick="clSheet('assignModal')">إلغاء</button>
-  </div>
-</div>
+<!-- [LDR-2] أُزيلت نافذة «التعيين السيادي». الشرح في كتلة الشيفرة أدناه. -->
 
 <!-- AUTH -->
 <div id="auth">
@@ -996,7 +983,7 @@ button,input,select,textarea{font-family:'Cairo',sans-serif;}
       <button class="fp on" onclick="doFilt('all',this)">الكل <span class="fc" id="cA">0</span></button>
       <button class="fp fr" onclick="doFilt('pending',this)">بانتظار كابتن <span class="fc" id="cP">0</span></button>
       <button class="fp fg" onclick="doFilt('active',this)">قيد التوصيل <span class="fc" id="cAc">0</span></button>
-      <button class="fp fv" onclick="doFilt('sov',this)">👑 سيادي <span class="fc" id="cSv">0</span></button>
+
       <button class="fp fo" onclick="doFilt('dlyr',this)">🕐 متأخر بالمطعم <span class="fc" id="cDR">0</span></button>
       <button class="fp fa" onclick="doFilt('dlyd',this)">🛵 متأخر بالطريق <span class="fc" id="cDD">0</span></button>
     </div>
@@ -1204,6 +1191,27 @@ function ej(s){return String(s??'').replace(/\\/g,'\\\\').replace(/'/g,"\\'").re
    تناديها مرّتين لكل كابتن لكل طلب). النتيجة نفسها دائماً لنفس المدخل،
    فحفظها يوفّر الجزء الأكبر من زمن الرسم. */
 const _nPCache=new Map();
+/* ═══════════════════════════════════════════════════════════════════════════
+   💬 [LDR-1] التواصل مع الكباتن صار واتساب — وهو الوسيلة المتعارف عليها هنا.
+   ───────────────────────────────────────────────────────────────────────────
+   كانت ستّ نسخ متفرّقة من `tel:` (بطاقة الطلب · شريط المراقبة · قائمة الطاقم ·
+   بطاقة الكابتن · ccDial · ccCall)، ولكلٍّ منها منطق تطبيعٍ خاص — وهو بالضبط
+   ما يُنتج انحرافاً لاحقاً حين يُعدَّل موضعٌ ويُنسى نظيره.
+
+   الآن دالة واحدة:
+     · تُطبَّع بـnP (تُسقط 964 وكل الأصفار البادئة) فتوافق بقيّة النظام
+     · ثم تُبنى الصيغة الدولية 964… التي يوجبها wa.me
+     · ورقمٌ فارغ أو غير صالح يُنبَّه عليه بدل فتح صفحة خاطئة
+
+   ⚠️ ورابط الواتساب في تبويب جديد (_blank): فتحه في نفس التبويب على أندرويد
+      كان يُخرج الليدر من اللوحة ويُوقف مستمعاتها الحيّة.
+   ═══════════════════════════════════════════════════════════════════════════ */
+window.waOpen=function(p){
+  const n=nP(p);
+  if(!n||n.length<8){ try{toast("لا يوجد رقم صالح لهذا الطرف","e");}catch(_){} return; }
+  window.open('https://wa.me/964'+n,'_blank','noopener');
+};
+
 function nP(p){
   if(!p)return"";
   const key=String(p);
@@ -1488,7 +1496,7 @@ function updateMap() {
                    ⏱️ تحديث الموقع: منذ ${idleMins} دقيقة
                </div>
                <div style="display:flex; gap:6px;">
-                  <button onclick="window.open('tel:${cleanP}')" style="flex:1; background:#eaf1fe; color:#1a5fd4; border:1px solid #c8dbfb; padding:8px 0; border-radius:10px; font-weight:800; cursor:pointer; font-family:'Cairo';">📞 اتصال</button>
+                  <button onclick="waOpen('${cleanP}')" style="flex:1; background:#e8f8ee; color:#128C7E; border:1px solid #b7e4c7; padding:8px 0; border-radius:10px; font-weight:800; cursor:pointer; font-family:'Cairo';">💬 واتساب</button>
                   <button onclick="msgCaptain('${ej(cleanP)}','${ej(nameStr)}')" style="flex:1; background:#e7f9ef; color:#048a48; border:1px solid #b6ecca; padding:8px 0; border-radius:10px; font-weight:800; cursor:pointer; font-family:'Cairo';">💬 رسالة</button>
                </div>
             </div>`;
@@ -1802,7 +1810,7 @@ function renderWatchList(){
           <div class="watch-rs">${reason} · أنجز ${c.completed}</div>
         </div>
         <div class="watch-acts">
-          <button class="watch-b wb-call" onclick="window.open('tel:${ej(c.phone)}')" title="اتصال">📞</button>
+          <button class="watch-b wb-call" onclick="waOpen('${ej(c.phone)}')" title="واتساب">💬</button>
           <button class="watch-b wb-msg" onclick="checkInCaptain('${ej(c.phone)}','${ej(c.name)}')" title="اطمئن عليه">💬</button>
         </div>
       </div>`;
@@ -1944,7 +1952,7 @@ function renderCrew(){
         </div>
         <div class="crew-dur">⏱️ مدة العمل اليوم: ${fmtDur(c.workedMin)}</div>
         <div class="crew-acts">
-          <button class="crew-b crew-b-call" onclick="window.open('tel:${ej(c.phone)}')">📞 اتصال</button>
+          <button class="crew-b crew-b-call" onclick="waOpen('${ej(c.phone)}')">💬 واتساب</button>
           <button class="crew-b crew-b-msg" onclick="msgCaptain('${ej(c.phone)}','${ej(c.name)}')">💬 رسالة</button>
           ${trackBtn}
         </div>
@@ -2090,7 +2098,11 @@ function updCnts(){
     const dp=o[O.DRV],st=o[O.STATUS],t=o[O.TIME];
     const hD=dp&&!["pending_driver","system_routing","manual_pending"].includes(dp);
     if(!hD)c.pending++;else c.active++;
-    if(o[O.SOV]===true)c.sov++;   /* 👑 عدّاد السيادي */
+    /* [LDR-2] العدّاد باقٍ رغم إزالة الفلتر: الحلقة `if(el)` أدناه تحرسه
+       (العنصر cSv محذوف فلا يُكتب شيء)، وطلباتٌ سياديةٌ قائمة قد تُنشأ من
+       لوحة الإدارة أو تبقى من قبل — فالعدّ يبقى صحيحاً إن أُعيد العرض يوماً.
+       حذفه يمسّ حلقةً ساخنة تعمل مع كل نبضة، بلا مكسب. */
+    if(o[O.SOV]===true)c.sov++;
     if(st==="arrived_at_res"&&t&&(now-new Date(t).getTime())/60000>10)c.dlyr++;
     if(["picked_up","في الطريق","heading"].includes(st)&&t&&(now-new Date(t).getTime())/60000>20)c.dlyd++;
   });
@@ -2215,10 +2227,10 @@ function renderRadar(){
         <div class="oc-dr">
           <div class="oc-dn"><span>🛵 ${esc(dn)}</span></div>
           <div class="oc-dc">
-            ${hD?`<button class="cb-sm" onclick="window.open('tel:${jDP}')">📞</button>`:''}
+            ${hD?`<button class="cb-sm" onclick="waOpen('${jDP}')">💬</button>`:''}
             ${msgBtn}
             ${wdBtn}
-            <button class="asel" style="cursor:pointer;display:flex;align-items:center;justify-content:center;gap:5px" onclick="openAssign('${jOId}')">👑 تعيين كابتن</button>
+
           </div>
         </div>
 
@@ -2259,100 +2271,23 @@ window.delOrder=async function(oId,el){
   }catch(e){toast("خطأ","e");}
   finally{if(el){el.disabled=false;el.classList.remove("loading");}}
 };
-window.asgnDrv=async function(oId,dPhone){
-  if(!dPhone)return;
-  try{
-    let d=await staffAction({action:"STAFF_ASSIGN",orderId:oId,driverPhone:dPhone});
-    /* 🛡️ [V19.2] الخادم يرفض التعيين لكابتن غير متاح ويُعيد السبب.
-       والتأكيد يُرسل force=1 — فيبقى القرار للّيدر، لكنه **قرارٌ يعلمه**
-       بدل تعيينٍ أعمى يرنّ هاتف كابتن مغلقٍ تطبيقه. */
-    if(d && d.needsConfirm){
-      if(!confirm(d.msg || 'الكابتن غير متاح — أتؤكّد التعيين القسري؟')) return;
-      d=await staffAction({action:"STAFF_ASSIGN",orderId:oId,driverPhone:dPhone,force:"true"});
-    }
-    if(d.success)toast("تم التعيين 👑");else toast(d.msg||"فشل","e");
-  }catch(e){toast("خطأ","e");}
-};
+/* ═══════════════════════════════════════════════════════════════════════════
+   🗑️ [LDR-2] **أُزيل التعيين السيادي** بقرار تشغيلي.
+   ───────────────────────────────────────────────────────────────────────────
+   ما حُذف من هذه اللوحة:
+     · زرّ «👑 تعيين كابتن» في بطاقة الطلب
+     · نافذة الاختيار وبحثها (assignModal)
+     · فلتر «👑 سيادي» وعدّاده
+     · الدوال: asgnDrv · openAssign · renderAssignList · filterAssign · doAssign
 
-/* ════════════════════════════════════════
-   👑 نافذة التعيين السيادي مع بحث
-════════════════════════════════════════ */
-let _assignOrderId="",_assignSearch="";
-
-window.openAssign=function(oId){
-  _assignOrderId=oId;
-  _assignSearch="";
-  document.getElementById("assignOrderId").textContent="#"+oId;
-  document.getElementById("assignSearch").value="";
-  renderAssignList();
-  opSheet("assignModal");
-  /* تركيز حقل البحث تلقائياً على الأجهزة المكتبية */
-  setTimeout(()=>{const el=document.getElementById("assignSearch");if(el&&window.innerWidth>768)el.focus();},100);
-};
-
-window.filterAssign=function(){
-  _assignSearch=document.getElementById("assignSearch").value;
-  renderAssignList();
-};
-
-/* يبني قائمة الكباتن المتاحين (النشطين) مع بحث + حالة الانشغال */
-function renderAssignList(){
-  const box=document.getElementById("assignList");if(!box)return;
-
-  /* حساب المشغولين */
-  const busySet=new Set();
-  liveOrd.forEach(o=>{
-    const dp=o[O.DRV];
-    if(dp&&!["pending_driver","system_routing","manual_pending"].includes(dp))busySet.add(nP(dp));
-  });
-
-  /* الكباتن النشطون فقط (المتصلون بالميدان) */
-  let avail=[];
-  gDrivers.forEach(d=>{
-    const n=nP(d.phone);
-    if(!actDrv.has(n))return;  /* المتاحون بالميدان فقط */
-    const cp=liveLed.drivers?.[n]?.completed_orders||0;
-    avail.push({phone:n,name:d.name||dN(n),ledger:cp,busy:busySet.has(n)});
-  });
-
-  /* بحث بالاسم أو الرقم */
-  const q=_assignSearch.trim().toLowerCase();
-  if(q)avail=avail.filter(c=>c.name.toLowerCase().includes(q)||c.phone.includes(nP(q)||q));
-
-  /* ترتيب: المتاحون (غير المشغولين) أولاً، ثم الأكثر إنجازاً */
-  avail.sort((a,b)=>{
-    if(a.busy!==b.busy)return a.busy?1:-1;
-    return b.ledger-a.ledger;
-  });
-
-  if(!avail.length){
-    box.innerHTML=`<div class="asn-empty">${q?`🔍 لا يوجد كابتن متاح يطابق "${esc(_assignSearch)}"`:"🌙 لا يوجد كباتن نشطون بالميدان حالياً"}</div>`;
-    return;
-  }
-
-  let html="";
-  avail.forEach(c=>{
-    const tier=c.ledger>=100?"💎":c.ledger>=30?"⭐":"🟢";
-    const initial=c.name!=="غير محدد"?c.name.charAt(0):"🛵";
-    const badge=c.busy?`<span class="asn-badge b-busy">🔴 مشغول</span>`:`<span class="asn-badge b-free">🟢 متاح</span>`;
-    html+=`<div class="asn-item" onclick="doAssign('${ej(c.phone)}')">
-      <div class="asn-av">${esc(initial)}</div>
-      <div class="asn-info">
-        <div class="asn-nm">${tier} ${esc(c.name)}</div>
-        <div class="asn-meta">${esc(c.phone)} · ${c.ledger} طلب إجمالي</div>
-      </div>
-      ${badge}
-    </div>`;
-  });
-  box.innerHTML=html;
-}
-
-/* تنفيذ التعيين من النافذة */
-window.doAssign=async function(dPhone){
-  if(!_assignOrderId||!dPhone)return;
-  clSheet("assignModal");
-  await asgnDrv(_assignOrderId,dPhone);
-};
+   ⚠️ وما **لم** يُحذف عمداً — ولا يجوز حذفه:
+     ① عرض الحالة `👑 سيادي` وزرّ «👑↩ سحب سيادي»: طلباتٌ سياديةٌ قائمة قد
+        تكون في الرادار الآن، ويجب أن تبقى مرئيةً وقابلةً للسحب.
+     ② منطق `is_sovereign` و`manual_pending` في المحرك: يعالج ما أُنشئ سابقاً،
+        وحذفه يترك تلك الطلبات بلا مَن يحرّرها بعد المهلة.
+     ③ `STAFF_ASSIGN` في Code.gs: **ما زال حيّاً**. إزالته من الواجهة لا تُغلق
+        النقطة — وإغلاقها قرارٌ منفصل (انظر الملاحظة في تقرير التسليم).
+   ═══════════════════════════════════════════════════════════════════════════ */
 window.wdOrder=async function(oId,dPhone,el){
   if(!confirm("سحب الطلب وإعادته للرادار؟"))return;
   if(el)el.disabled=true;
@@ -2840,7 +2775,7 @@ function _ccResPhone(oid){
 }
 window.ccDial=function(p){
   if(!p)return toast("لا يوجد رقم محفوظ لهذا الطرف","e");
-  location.href='tel:'+(String(p).startsWith('0')?p:'0'+p);
+  waOpen(p);            /* [LDR-1] واتساب لا اتصال */
 };
 /* الإنهاء الإداري — يعيد استخدام مسار اللوحة نفسه (STAFF_COMPLETE عبر GAS) */
 window.ccFinish=function(oid){
@@ -2901,8 +2836,8 @@ function _ccDrawMap(phone,orders){
 }
 
 /* أفعال شريط السياق */
-window.ccCall=function(p){location.href='tel:'+(String(p).startsWith('0')?p:'0'+p);};
-window.ccWhats=function(p){const n=String(p).startsWith('0')?'964'+String(p).slice(1):'964'+p;window.open('https://wa.me/'+n,'_blank');};
+window.ccCall=function(p){ waOpen(p); };   /* [LDR-1] واتساب — الاسم مُبقىً للتوافق مع مناديه */
+window.ccWhats=function(p){ waOpen(p); };  /* [LDR-1] وُحّدت مع waOpen — منطقُ تطبيعٍ واحد */
 window.ccLocate=function(p){
   const d=drvLocs[nP(p)];
   if(!d||!d.lat||!d.lng)return toast("لا يوجد موقع محفوظ لهذا الكابتن","e");
