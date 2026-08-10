@@ -49,7 +49,7 @@
      الآن: رقمٌ واحد يُشتقّ منه كل شيء — الشاشة والإعدادات ومسح الكاش.
      **وأي تسليم جديد يجب أن يرفعه، وإلا لم يصل.**
      ═══════════════════════════════════════════════════════════════════════ */
-  const CURRENT_APP_VERSION = "17.0-Nahla-Recon";   /* 🔧 V2.2 — لا تنسَ رفعه مع كل تسليم يمسّ هذا الملف */
+  const CURRENT_APP_VERSION = "18.2-Nahla-Bridged";   /* 🔧 V2.2 — لا تنسَ رفعه مع كل تسليم يمسّ هذا الملف */
   window.APP_VERSION = CURRENT_APP_VERSION;
   /* اطبعه في شاشة الدخول فور جهوز الصفحة — نصّاً واحداً لا نسختين. */
   document.addEventListener('DOMContentLoaded', function(){
@@ -1301,6 +1301,22 @@ const fbCfg = {
 };
 const app=initializeApp(fbCfg), db=getDatabase(app), auth=getAuth(app);
 
+/* ═══════════════════════════════════════════════════════════════════════════
+   ⏱️ [إصلاح] إزاحة ساعة السيرفر — العدّاد كان يقيس ساعة الهاتف.
+   ───────────────────────────────────────────────────────────────────────────
+   نافذة القبول تُحسب: 60000 - (Date.now() - last_update). و Date.now() ساعةُ
+   الهاتف لا السيرفر. فمن ساعته متقدّمة دقيقتين يحسب `age` دقيقتين زائدتين
+   ⇒ **كل طلباته بعدّاد الأرضية، كل يوم، بلا سبب ظاهر**. ثم ينتهي العدّاد
+   فيُنادى declineOrder تلقائياً، فتمنعه REJECT_PENALTY_MINS أربع دقائق —
+   عقوبةٌ على انحرافِ ساعةٍ لا يعلم بها.
+
+   .info/serverTimeOffset عقدةٌ يوفّرها فايربيس بلا صلاحيات ولا كلفة، وتُحدَّث
+   تلقائياً. و srvNow() تُستعمل في حساب العمر وحده — فلا تمسّ أي منطق آخر.
+   ═══════════════════════════════════════════════════════════════════════════ */
+let SRV_OFFSET = 0;
+try { onValue(ref(db, ".info/serverTimeOffset"), s => { SRV_OFFSET = Number(s.val()) || 0; }); } catch(_) {}
+function srvNow(){ return Date.now() + SRV_OFFSET; }
+
 const MIN_DIST_M=500, FALLBACK_MINS=15, MIN_PICKUP_SECS=120, RETRIES=3;
 let DAILY_GOAL = Math.min(40,Math.max(5,parseInt(localStorage.getItem('suf_goal'))||15));
 
@@ -2388,6 +2404,23 @@ window.__nativeEvent=function(ev){
   try{
     if(!ev)return;
     if(typeof ev==='string')ev=JSON.parse(ev);
+    /* ═══════════════════════════════════════════════════════════════════
+       🔴 [إصلاح] كوتلن يبثّ fcm_subscription وكان يُسقط هنا **بصمت**.
+       ───────────────────────────────────────────────────────────────────
+       والتعليق في WebAppInterface.kt يدّعي: «وبثٌّ للويب في الحالتين فيُسجَّل
+       في client_events ويقرؤه diagnoseOrphans». فما وقع هو إعادة المحاولة
+       وحدها — والقياس الذي وُضعت الرقعة لأجله لم يصل.
+
+       وهو **الصنف عينه** الذي وقع مع order_revoked: CF ترسل نوعاً والتطبيق
+       يعالج آخر. عقدٌ بين طبقتين، طرفٌ رُقّع وطرفٌ نُسي.
+       ⚠️ و kt_check تفحص الاتجاه JS→Kotlin وحده — ولذلك مرّت خضراء.
+          (وق٣٤ في البوّابة تفحص الاتجاه المعاكس الآن.)
+       ═══════════════════════════════════════════════════════════════════ */
+    if(ev.type==='fcm_subscription'){
+      try{ track(ev.ok?'fcm_sub_ok':'fcm_sub_fail',{command:ev.retried?'retried':'first'}); }catch(_){}
+      if(!ev.ok){ try{ toast('⚠️ تعذّر تفعيل الإشعارات — أعد فتح التطبيق','bad'); }catch(_){} }
+      return;
+    }
     if(ev.type==='order_revoked'&&ev.order_id){
       try{ track('revoke_received',{orderId:ev.order_id}); }catch(_){}   /* 📊 [N-9.10] هل وصل الإشعار؟ */
       const id=String(ev.order_id);
@@ -2748,13 +2781,35 @@ function listenOrders(){
         curOrder={id:f.id,resName:f.restaurant,area:f.area||'غير محدد',price:f.price||0,details:f.details||'',
           photoUrl:f.photoUrl||'',resLat:f.resLat,resLng:f.resLng,resPhone:f.resPhone,resArea:f.resArea||null,
           comm:f.comm||0,payType:f.payType||'المطعم يدفع',is_sovereign:f.is_sovereign||false};
-        const age=f.last_update?(Date.now()-new Date(f.last_update).getTime()):0;
-        curOrder.expire=Date.now()+Math.max(10000,60000-age);
+        /* ═══════════════════════════════════════════════════════════════════
+           ⏱️ [إصلاح] النافذة تبدأ من **الإسناد في المحرك** لا من وصول البطاقة،
+           فكل تأخيرٍ في الطريق كان يُخصم من الكابتن:
+               تأخّر ٥ ث  → يرى ٥٥ ث ✅        تأخّر ٥٥ ث → يرى ١٠ ث 🔴
+               تأخّر ٣٠ ث → يرى ٣٠ ث 🟠        أكثر من دقيقة → ١٠ ث دائماً 🔴
+           ثم عند الصفر يُنادى declineOrder تلقائياً ⇒ يُعاقَب أربع دقائق على
+           تأخيرٍ ليس منه. وهو مصدر «الطلب ظهر واختفى» و«ما لحقت أضغط».
+
+           والميزانية متاحة أصلاً: RING_GRACE_MINS = 2.5 د في المحرك — أي أن
+           السيرفر لا يُعيد العرض قبل ١٥٠ ثانية. فالستّون ثانية سقفٌ فرضه
+           العميل على نفسه، وتحته تسعون ثانية فائضة لا تُستعمل.
+           ⇒ أرضية ٣٥ ثانية: تبقى دون سقف السيرفر بهامش واسع، وتمنح الكابتن
+             وقتاً حقيقياً للقراءة والضغط.
+           ⚠️ و srvNow() تُسقط أثر الساعة المنحرفة — انظر تعليقها أعلاه. */
+        const age=f.last_update?Math.max(0,(srvNow()-new Date(f.last_update).getTime())):0;
+        curOrder.expire=Date.now()+Math.max(35000,60000-age);
+        /* 📊 قياس زمن التسليم الفعلي: الفارق بين الإسناد ووصول البطاقة.
+           يقرؤه diagnoseOrphans فيقول هل المواضيع (topics) بطيئة أم لا —
+           قياسٌ قبل أي قرار بتغيير مسار الإشعارات. */
+        try{ track('offer_latency',{orderId:f.id, ms:age}); }catch(_){}
         document.getElementById('alTitle').innerText=active.length?'طلب إضافي! 🔥':'طلب جديد!';
         document.getElementById('alSov').innerText=curOrder.is_sovereign?'⚠️ تعيين إداري مباشر — لا يمكن تجاهله':'';
         document.getElementById('alRes').innerText=f.restaurant;
         document.getElementById('alArea').innerText=f.area||'غير محدد';
-        document.getElementById('alPrice').innerHTML=`${esc(f.price||0)} <small style="font-size:.8rem;color:var(--muted);">د.ع</small>`;
+        /* 💰 [إصلاح] الوسم needs_price كان يُنذر الليدر ولا يظهر للكابتن.
+           فيصل المطعم ويرى «0 د.ع» بلا تمييز، ولا يعرف كم يقبض من الزبون. */
+        document.getElementById('alPrice').innerHTML=`${esc(f.price||0)} <small style="font-size:.8rem;color:var(--muted);">د.ع</small>`
+          + ((f.needs_price===true||!Number(f.price))
+             ? ` <div style="font-size:.78rem;color:#b45309;font-weight:700;margin-top:4px;">⚠️ السعر غير مؤكَّد — راجع الليدر قبل التسليم</div>` : ``);
         document.getElementById('alertOv').classList.remove('dn');
         if(window.AndroidRadar)window.AndroidRadar.triggerOrderAlarm();
         else startAlarm(active.length?'double':'alert');
@@ -3276,203 +3331,3 @@ window.orderAction=function(id,act,btn){
       uB[`daily_ledgers/${drv.phone}/${ts}/${id}`]={orderId:id,resName:o.resName,area:o.area,price:o.price,comm:o.comm||0,timestamp:Date.now()};
 
       let ok=await guaranteedWrite(uA,`active_orders/${id}/status`,'completed');
-      /* 🚚 [المسار الثالث] القبول يملك احتياطياً سيرفرياً (ACCEPT_ORDER) يتجاوز
-         قواعد فايربيس، والتسليم لم يملك شيئاً — فكابتن ترفض القواعد كتابته
-         (driverPhone المخزّن لا يطابق auth.uid حرفاً بحرف، أو مصادقته سقطت)
-         يقبل طلباً لا يستطيع إنهاءه أبداً، فيبقى باسمه حتى يموت بعد 24 ساعة
-         كـexpired: بلا عمولة ولا ذمّة ولا مبيعات. والزبون دفع، والكابتن سلّم.
-         GAS يكتب بحساب الخدمة فينجح حتى حين تنهار مصادقة الكابتن.
-         ⚠️ يتطلّب handleCompleteOrder منشورة في Code.gs (V17.0). */
-      if(!ok){
-        try{
-          const rr=await withTimeout(
-            fetch(`${API_URL}?action=COMPLETE_ORDER&orderId=${encodeURIComponent(id)}&driverPhone=${drv.phone}&token=${API_TOKEN}&stoken=${encodeURIComponent(getStoken())}`),
-            12000,'gas_timeout');
-          const dd=await rr.json();
-          if(dd&&dd.success){ ok=true; toast('✅ سُجّل التسليم عبر الخادم البديل.','ok'); }
-          else if(dd&&dd.msg){ toast('⚠️ '+dd.msg,'bad'); }
-        }catch(e){}
-      }
-      if(!ok){
-        btn.innerHTML=orig; btn.disabled=false;
-        try{queue.push({type:'multi',updates:uA,ts:Date.now()});queue.push({type:'multi',updates:uB,ts:Date.now()});
-          localStorage.setItem('hut_offline_queue',JSON.stringify(queue));}catch(e){}
-        toast(window._lastWriteError==='permission'
-          ? '⚠️ تعذّر تسجيل التسليم — رُفضت العملية من الخادم.<br>راجع الليدر فوراً ولا تُعد المحاولة.'
-          : '⚠️ تعذّر تسجيل التسليم — ضعف الاتصال.<br>سيُرسل تلقائياً عند عودة الشبكة. لا تُغلق التطبيق.','bad');
-        return;
-      }
-      /* 💰 [إصلاح] كان الفشل يُبتلع بصمت تام، فيُسجَّل الطلب مكتملاً ولا يظهر
-         في عدّاد الكابتن ولا دفتره — مصدر شكوى «أنجزتُ عشرة والتطبيق يعرض ثمانية».
-         الآن: أي فشل يذهب للطابور ليُعاد لاحقاً، والكابتن يُعلَم بلطف. */
-      withTimeout(update(ref(db),uB)).catch(()=>{
-        try{
-          queue.push({type:'multi',updates:uB,ts:Date.now()});
-          localStorage.setItem('hut_offline_queue',JSON.stringify(queue));
-        }catch(e){}
-        toast('ℹ️ سُجّل التسليم — تحديث عدّادك سيكتمل عند تحسّن الشبكة.','info');
-      });
-
-      const c=document.getElementById('o-'+id);
-      if(c){c.style.transition='.35s';c.style.opacity='0';c.style.transform='scale(.94)';}
-      readySet.delete(String(id));
-      active=active.filter(x=>String(x.id)!==String(id));
-      localStorage.setItem('suf_orders',JSON.stringify(active)); adjustHB();
-      /* آخر طلب بعد نهاية الشفت → الآن فقط ينتقل للاستراحة */
-      if(window._shiftOver&&active.length===0){
-        setTimeout(()=>{
-          try{
-            document.getElementById('onlineTog').checked=false;toggleOnline();
-            window._shiftOver=false;window._shiftEndNotified=false;
-            alert('⏰ أنهيت آخر طلب — انتهى شفتك. شكراً لك 🌟');
-          }catch(e){}
-        },900);
-      }
-      setTimeout(()=>{renderOrders();refreshDash();},350);
-      toast('🎉 تم تسجيل التسليم بنجاح!','ok');
-    })();
-  }
-};
-
-/* ══════════════ 💬 الدردشة — تطابق لوحة الليدر V3.0 ══════════════ */
-function cPath(){return `driver_chats/${drv.phone}`;}
-window.openChat=async function(){
-  if(!drv||!drv.phone)return;
-  document.getElementById('chat').classList.remove('dn'); chatOpen=true;
-  document.querySelectorAll('.sup-dot,#chatDot').forEach(d=>d.classList.remove('on'));
-  try{
-    const s=await withTimeout(get(ref(db,cPath()+'/status')), NET_TIMEOUT_MS, 'chat'); const st=s.val();   /* 🛡️ [V15] القراءة العارية الثانية */
-    if(!st||st==='closed'){
-      await withTimeout(update(ref(db,cPath()),{status:'open',driver_name:drv.name||'',driver_phone:drv.phone,
-        opened_at:new Date().toISOString(),claimed_by:null,claimed_by_name:null,claimed_at:null,unread_leader:0,unread_driver:0}), NET_TIMEOUT_MS, 'chatopen');
-    }
-    update(ref(db,cPath()),{unread_driver:0}).catch(()=>{});
-  }catch(e){toast('تعذّر فتح المحادثة — تحقّق من الاتصال','bad');}
-};
-window.closeChat=function(){document.getElementById('chat').classList.add('dn');chatOpen=false;};
-window.sendChat=async function(){
-  /* ✂️ [ب٦] حزامان: maxlength يمنع الكتابة، وهذا يمنع اللصق البرمجي.
-     وعقدة driver_chats تنمو بلا تنظيف (يعالجه purgeBloatCore في index.js). */
-  const i=document.getElementById('chIn'), t=(i.value||'').trim().slice(0,500); if(!t)return;
-  const b=document.getElementById('chSend'); b.disabled=true;
-  const k=`${Date.now()}_${Math.random().toString(36).slice(2,7)}`, u={};
-  u[`${cPath()}/messages/${k}`]={from:'driver',name:drv.name||'كابتن',text:t,ts:Date.now()};
-  u[`${cPath()}/last_msg`]=t.slice(0,60);
-  u[`${cPath()}/last_msg_at`]=Date.now();
-  u[`${cPath()}/last_from`]='driver';
-  u[`${cPath()}/unread_leader`]=increment(1);
-  u[`${cPath()}/driver_name`]=drv.name||'';
-  try{await withTimeout(update(ref(db),u), NET_TIMEOUT_MS, 'chatsend'); i.value=''; i.style.height='auto';}
-  catch(e){toast('لم تُرسل الرسالة — أعد المحاولة','bad');}
-  b.disabled=false;
-};
-function renderChat(){
-  const body=document.getElementById('chBody'), st=document.getElementById('chSt');
-  if(chatMeta.status==='claimed'&&chatMeta.claimed_by_name){
-    st.className='ch-st cs-l';
-    st.innerHTML=`✅ الليدر <b>${esc(chatMeta.claimed_by_name)}</b> فتح محادثتك — يمكنك التحدّث الآن`;
-  } else if(chatMeta.status==='closed'){
-    st.className='ch-st cs-w'; st.innerHTML='أُغلقت المحادثة. أرسل رسالة لفتح واحدة جديدة.';
-  } else {
-    st.className='ch-st cs-w'; st.innerHTML='⏳ جاري إرسال طلبك للّيدرز... سيردّ عليك أحدهم قريباً';
-  }
-  const ks=Object.keys(chatMsgs).sort();
-  if(!ks.length){body.innerHTML='<div style="text-align:center;color:var(--muted);font-weight:800;padding:44px 0;font-size:.9rem;">اكتب رسالتك وسيصلك ردّ الليدر هنا 👇</div>';return;}
-  let h='';
-  ks.forEach(k=>{
-    const m=chatMsgs[k]; if(!m||!m.text)return;
-    const mine=m.from==='driver';
-    const t=new Date(m.ts||Date.now()).toLocaleTimeString('ar-EG',{hour:'2-digit',minute:'2-digit'});
-    h+=`<div class="bub ${mine?'bub-me':'bub-ld'}">${mine?'':`<div class="bub-n">${esc(m.name||'الليدر')}</div>`}
-      <div>${esc(m.text)}</div><div class="bub-t">${t}</div></div>`;
-  });
-  body.innerHTML=h; body.scrollTop=body.scrollHeight;
-}
-function startChat(){
-  listen(()=>ref(db,cPath()),s=>{
-    const d=s.val()||{}, prev=chatMeta.status;
-    chatMeta=d; chatMsgs=d.messages||{};
-    if(prev==='open'&&d.status==='claimed'&&d.claimed_by_name){
-      play('ready'); toast(`✅ الليدر <b>${esc(d.claimed_by_name)}</b> فتح محادثتك`,'ok');
-      if(navigator.vibrate)navigator.vibrate([150,60,150]);
-    }
-    const un=Number(d.unread_driver||0);
-    document.querySelectorAll('.sup-dot,#chatDot').forEach(dot=>{
-      if(!chatOpen&&un>0)dot.classList.add('on'); else dot.classList.remove('on');
-    });
-    if(!chatOpen&&un>0&&d.last_msg_at>chatSeen&&d.last_from==='leader'){
-      chatSeen=d.last_msg_at; play('ready');
-      toast(`💬 ردّ من الليدر: ${esc(String(d.last_msg||'').slice(0,40))}`,'info');
-    }
-    if(chatOpen){renderChat();if(un>0)update(ref(db,cPath()),{unread_driver:0}).catch(()=>{});}
-  });
-}
-document.addEventListener('keydown',e=>{
-  if(e.key==='Enter'&&!e.shiftKey&&document.activeElement===document.getElementById('chIn')){e.preventDefault();sendChat();}
-});
-
-/* ══════════════ 🖼️ عارض الوصل ══════════════ */
-(function(){
-  let sc=1, tx=0, ty=0, sx=0, sy=0, stx=0, sty=0, pd=0, ps=1, lastTap=0, drag=false, mode=null, bound=false;
-  const im=()=>document.getElementById('rvImg');
-  const apply=()=>{const e=im();if(e)e.style.transform=`translate(${tx}px,${ty}px) scale(${sc})`;};
-  const reset=()=>{sc=1;tx=0;ty=0;apply();};
-  function clamp(){
-    const e=im(); if(!e)return;
-    const w=e.offsetWidth*sc, h=e.offsetHeight*sc;
-    const mx=Math.max(0,(w-window.innerWidth)/2+40), my=Math.max(0,(h-window.innerHeight)/2+40);
-    tx=Math.max(-mx,Math.min(mx,tx)); ty=Math.max(-my,Math.min(my,ty));
-  }
-  const dOf=t=>Math.hypot(t[0].clientX-t[1].clientX, t[0].clientY-t[1].clientY);
-  function bind(){
-    if(bound)return; const st=document.getElementById('rvStage'); if(!st)return; bound=true;
-    st.addEventListener('touchstart',e=>{
-      const el=im();
-      if(e.touches.length===2){mode='pinch';pd=dOf(e.touches);ps=sc;if(el)el.classList.add('drag');}
-      else if(e.touches.length===1){
-        const now=Date.now();
-        if(now-lastTap<300){ if(sc>1)reset(); else {sc=2.6;clamp();apply();} lastTap=0; e.preventDefault(); return; }
-        lastTap=now;
-        if(sc>1){mode='pan';drag=true;sx=e.touches[0].clientX;sy=e.touches[0].clientY;stx=tx;sty=ty;if(el)el.classList.add('drag');}
-      }
-    },{passive:false});
-    st.addEventListener('touchmove',e=>{
-      if(mode==='pinch'&&e.touches.length===2){
-        e.preventDefault();
-        sc=Math.max(1,Math.min(5,ps*(dOf(e.touches)/pd)));
-        clamp(); apply();
-      } else if(mode==='pan'&&drag&&e.touches.length===1){
-        e.preventDefault();
-        tx=stx+(e.touches[0].clientX-sx); ty=sty+(e.touches[0].clientY-sy);
-        clamp(); apply();
-      }
-    },{passive:false});
-    st.addEventListener('touchend',()=>{
-      const el=im(); if(el)el.classList.remove('drag');
-      drag=false; mode=null;
-      if(sc<=1)reset();
-    });
-    st.addEventListener('dblclick',()=>{ if(sc>1)reset(); else {sc=2.6;clamp();apply();} });
-  }
-  window.openReceipt=function(url){
-    if(!url||!String(url).startsWith('http'))return;
-    const v=document.getElementById('rv'), e=im(), sp=document.getElementById('rvSpin'), h=document.getElementById('rvHint');
-    if(!v||!e)return;
-    bind(); reset();
-    e.style.visibility='hidden'; if(sp)sp.style.display='block';
-    if(h)h.textContent='انقر مرّتين للتكبير • اسحب للتحريك • قرصة للتقريب';
-    e.onload=()=>{ if(sp)sp.style.display='none'; e.style.visibility='visible'; };
-    e.onerror=()=>{ if(sp)sp.style.display='none'; if(h)h.textContent='⚠️ تعذّر تحميل الصورة — تحقّق من الاتصال'; };
-    e.src=url;
-    v.classList.remove('dn');
-  };
-  window.closeReceipt=function(){
-    const v=document.getElementById('rv'); if(!v)return;
-    v.classList.add('dn');
-    const e=im(); if(e){e.src='';e.onload=null;e.onerror=null;}
-    reset();
-  };
-})();
-</script>
-</body>
-</html>
