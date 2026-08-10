@@ -78,7 +78,7 @@
         //          القاعدة الجديدة ترفض القراءة الكاملة لغير الإدارة.
         //  🔒 ضمان مصادقة فايربيس قبل أي كتابة (القواعد لم تعد تقبل مجهولاً).
         //  🛵 اسم الكابتن من drivers_locations/{phone}/name بدل شيت السائقين.
-        const CURRENT_APP_VERSION = "51.0.Nahla-AuthFix";   /* 🔧 V2.2 */
+        const CURRENT_APP_VERSION = "52.0.Nahla-SessionPurge";   /* 🔧 V2.2 */
         const RES_VERSION_KEY = 'hut_res_app_version';
         /* ═══════════════════════════════════════════════════════════════════
            🔑 [R-1] حاكم الكاش — بنفس تحصين تطبيق الكابتن
@@ -1587,6 +1587,11 @@ function escAttr(x){ return esc(x).replace(/"/g,'&quot;').replace(/'/g,'&#39;');
             } catch (e) {
                 console.warn('[AlHut] توكن غير صالح — إعادة مصادقة:', e && e.message);
                 try { resTrack('auth_token_stale', { reason: String((e && e.message) || '').slice(0, 40) }); } catch (_) {}
+                /* 🔴 [SESS-7] مستخدمٌ موجود بتوكن ميّت = جلسة تالفة في IndexedDB.
+                   وإبقاؤه **أسوأ من عدمه**: currentUser يبقى صادقاً فتمرّ كل
+                   الفحوص، والقواعد ترفض. نطرحه صراحةً ثم نُعيد المصادقة من
+                   الجلسة المحفوظة — فتتعافى الأجهزة وحدها بلا تدخّل أحد. */
+                try { await signOut(auth); } catch (_) {}
             }
         }
         const s = localStorage.getItem('hut_res_session');
@@ -2158,14 +2163,43 @@ function escAttr(x){ return esc(x).replace(/"/g,'&quot;').replace(/'/g,'&#39;');
         }
     };
 
-    window.logout = function() {
-        if (confirm("هل تريد تسجيل الخروج؟ سيتم مسح الذاكرة المؤقتة.")) {
-            signOut(auth).then(() => { 
-                localStorage.clear(); sessionStorage.clear(); location.reload();
-            }).catch(() => {
-                localStorage.clear(); sessionStorage.clear(); location.reload();
-            });
-        }
+    /* ═══════════════════════════════════════════════════════════════════════
+       🔴 [SESS-7] **«خروج» لم يكن يُخرج.** وهذا هو الجذر الحقيقي.
+       ───────────────────────────────────────────────────────────────────────
+       فايربيس يحفظ جلسته في **IndexedDB** (firebaseLocalStorageDb) —
+       و localStorage.clear() لا تمسّها إطلاقاً. فيبقى سجلّ مستخدم قديم حيّاً:
+
+           auth.currentUser موجود  ⇒  الشيفرة تظنّ نفسها مُصادَقة
+           والتوكن غير صالح للقواعد ⇒ القراءة تُرفض · والكتابة تُعلَّق ولا تُرفض
+
+       ⇒ عرَضان من عطبٍ واحد: اختفاء خانة «نظام الدفع» (مستمع الدين مرفوض)
+         و«لم يصل تأكيد الإرسال» (الكتابة معلّقة حتى مهلة الـ٢٠ ثانية).
+
+       والجدول الميداني يحسمه:
+           «خروج»            ❌  ← يمسح localStorage وحده
+           المتخفّي           ✅  ← يبدأ فارغاً
+           «مسح وإعادة تعيين» ✅  ← يمسح IndexedDB أيضاً
+       الفرق الوحيد الذي يفسّر الثلاثة معاً هو IndexedDB.
+
+       ⚠️ والخروج الذي لا يُخرج **أخطر من غياب الخروج** — لأنه يُطمئنك أنك
+          جرّبت. وقد كلّفنا هذا ثلاث جولات تخمين.
+       ═══════════════════════════════════════════════════════════════════════ */
+    window.logout = async function () {
+        if (!confirm("هل تريد تسجيل الخروج؟ سيتم مسح الذاكرة المؤقتة.")) return;
+        try { await signOut(auth); } catch (_) {}
+        try { localStorage.clear(); sessionStorage.clear(); } catch (_) {}
+        try {
+            if (indexedDB.databases) {
+                const dbs = await indexedDB.databases();
+                await Promise.all(dbs.map(d => (d && d.name && /firebase/i.test(d.name))
+                    ? new Promise(r => { const q = indexedDB.deleteDatabase(d.name); q.onsuccess = q.onerror = q.onblocked = r; })
+                    : null));
+            } else {
+                /* متصفّحات لا تدعم databases() — نحذف الاسم القياسي صراحةً. */
+                indexedDB.deleteDatabase('firebaseLocalStorageDb');
+            }
+        } catch (_) {}
+        setTimeout(() => location.reload(), 500);
     };
 
     window.showLoading = function(s) {
@@ -2579,6 +2613,23 @@ function escAttr(x){ return esc(x).replace(/"/g,'&quot;').replace(/'/g,'&#39;');
             requireCloudAuth();
         });
 
+        attachLedger(myPhone);
+    }
+
+    /* ═══════════════════════════════════════════════════════════════════════
+       🔴 [SESS-7] مستمع الدين كان **الوحيد بلا معالج خطأ** — ولهذا ظهر العرض
+       فيه أوّلاً: خانة «نظام الدفع» تختفي بلا أي أثر.
+       ───────────────────────────────────────────────────────────────────────
+       ونظيره (مستمع الطلبات) له معالج يُعيد المصادقة منذ [خ٢٣]. فهذا موضعٌ
+       ثانٍ لم يصله الإصلاح — النمط عينه للمرّة الخامسة في هذا الملف.
+
+       والآن يُعيد الربط بعد نجاح المصادقة: onValue المرفوض **لا يُعاد وصله
+       تلقائياً** — الاشتراك يموت ولا يعود ولو صحّت المصادقة بعد ثانية.
+       ⚠️ ومحاولة واحدة لا حلقة: فشلٌ ثانٍ يعني عطباً في القواعد لا في
+          المصادقة، وإعادة المحاولة عليه تُغرق الشبكة بلا فائدة.
+       ═══════════════════════════════════════════════════════════════════════ */
+    let _ledgerRetried = false;
+    function attachLedger(myPhone) {
         onValue(ref(db, `ledgers/restaurants/${myPhone}`), (snapshot) => {
             const ledger = snapshot.val() || { completed_orders: 0, debt: 0 };
             window.currentLedgerData = ledger; 
@@ -2593,6 +2644,13 @@ function escAttr(x){ return esc(x).replace(/"/g,'&quot;').replace(/'/g,'&#39;');
 
             const s = localStorage.getItem('hut_res_session');
             if (s) { document.getElementById('statPayType').innerText = (JSON.parse(s).payType || '').includes("مناصفة") ? "مناصفة" : "المطعم"; }
+        }, async (err) => {
+            console.error("❌ مستمع الدين رُفض:", err && err.message);
+            try { resTrack('ledger_denied', { reason: String((err && err.message) || '').slice(0, 40) }); } catch (_) {}
+            if (_ledgerRetried) return;          // محاولة واحدة — انظر الشرح أعلاه
+            _ledgerRetried = true;
+            const ok = await requireCloudAuth();
+            if (ok) setTimeout(() => attachLedger(myPhone), 1500);
         });
     }
 
