@@ -1359,7 +1359,7 @@ async function staffAction(params){
 window.addEventListener("DOMContentLoaded",()=>{
   const saved=sessionStorage.getItem("staff_session");
   if(saved){try{
-    const s=JSON.parse(saved);STOKEN=s.token;EMP_NAME=s.name;EMP_PHONE=s.phone;try{mountSovereignUI();}catch(_){}
+    const s=JSON.parse(saved);STOKEN=s.token;EMP_NAME=s.name;EMP_PHONE=s.phone;EMP_PERMS=Array.isArray(s.perms)?s.perms:[];try{mountSovereignUI();}catch(_){}
     enterApp();
     if(s.p){const pass=decodeURIComponent(escape(atob(s.p)));
       apiGet({action:"STAFF_LOGIN",phone:EMP_PHONE,password:pass}).then(d=>{
@@ -1379,8 +1379,8 @@ window.doLogin=async function(){
   try{
     const d=await apiGet({action:"STAFF_LOGIN",phone,password:pass});
     if(d.success){
-      STOKEN=d.token;EMP_NAME=d.name;EMP_PHONE=d.phone;try{mountSovereignUI();}catch(_){}
-      sessionStorage.setItem("staff_session",JSON.stringify({token:STOKEN,name:EMP_NAME,phone:EMP_PHONE,p:btoa(unescape(encodeURIComponent(pass)))}));
+      STOKEN=d.token;EMP_NAME=d.name;EMP_PHONE=d.phone;EMP_PERMS=Array.isArray(d.perms)?d.perms:[];try{mountSovereignUI();}catch(_){}
+      sessionStorage.setItem("staff_session",JSON.stringify({token:STOKEN,name:EMP_NAME,phone:EMP_PHONE,perms:EMP_PERMS,p:btoa(unescape(encodeURIComponent(pass)))}));
       await consumeStaffToken(d.firebase_token,EMP_PHONE,pass);
       enterApp();
     }else toast(d.msg||"فشل الدخول","e");
@@ -2287,23 +2287,26 @@ window.delOrder=async function(oId,el){
   finally{if(el){el.disabled=false;el.classList.remove("loading");}}
 };
 /* ═══════════════════════════════════════════════════════════════════════════
-   👑 [LDR-3] التعيين السيادي — **مقصورٌ على ليدرٍ واحد**
+   👑 [PERM-1] الصلاحية من **السيرفر** لا من رقمٍ مكتوب في هذا الملف.
    ───────────────────────────────────────────────────────────────────────────
-   أُزيل كلّياً في [LDR-2] بقرار تشغيلي، ويعود الآن مقيّداً بهاتفٍ واحد.
+   كان هنا `SOVEREIGN_LEADERS = ["7709366053"]` ونظيره في Code.gs — توأمان
+   مكتوبان بيد، وتعديل أحدهما دون الآخر يُنتج زرّاً يُرفض أو صلاحيةً بلا زرّ.
 
-   والهوية تُؤخذ من EMP_PHONE — وهو يأتي من **استجابة السيرفر** لـSTAFF_LOGIN
-   (`d.phone`) لا من إدخال المستخدم ولا من مخزَّنٍ يكتبه العميل. فتغييره يتطلّب
-   حساب ليدرٍ آخر بكلمة مروره.
+   الآن: عمود «الصلاحيات» في ورقة Employees. و staffLogin يُعيد `perms`،
+   فتبني الواجهة أزرارها منها. تُمنح بكتابة `assign` في خلية وتُسحب بمسحها —
+   **بلا نشر ولا لمس شيفرة، ولا رقم واحد مكتوب هنا**.
 
-   ⚠️ ويُقارَن بـnP في الطرفين: 07709366053 و 7709366053 و +9647709366053
-      كلها تُطبَّع إلى الصيغة نفسها. وبلاه يفشل الحارس على صيغةٍ مشروعة.
-
-   🔴 **وهذا حارس واجهة لا حارس أمان.** نقطة STAFF_ASSIGN في Code.gs ما زالت
-      مفتوحة لأي جلسة موظف — إخفاء الزرّ لا يُغلقها. وإغلاقها قرارٌ منفصل:
-      تُضاف قائمة بيضاء في staffAssignDriver تُقارن sess.phone بالرقم نفسه.
-      وحتى ذلك الحين: الأزرار مخفيّة عن الجميع إلا هو، والنقطة قابلة للنداء.
+   ⚠️ وهذا حارس **عرض** لا حارس أمان: الإغلاق الحقيقي في staffAssignDriver
+      التي تقرأ الصلاحية من الجلسة السيرفرية. فمن يعدّل EMP_PERMS في الطرفية
+      يرى الزرّ ويردّه السيرفر.
    ═══════════════════════════════════════════════════════════════════════════ */
-const SOVEREIGN_LEADERS = ["7709366053"];   /* تُطبَّع بـnP عند المقارنة */
+let EMP_PERMS = [];
+const PERM_ASSIGN = "assign";
+
+function canAssign(){
+  try{ return Array.isArray(EMP_PERMS) && EMP_PERMS.indexOf(PERM_ASSIGN) > -1; }
+  catch(_){ return false; }
+}
 
 /* يُظهر عناصر التعيين بعد أن تتأكّد الهوية من السيرفر. يُنادى بعد كل دخول
    ناجح وبعد استعادة الجلسة — فلا يعتمد على ترتيب التحميل. */
