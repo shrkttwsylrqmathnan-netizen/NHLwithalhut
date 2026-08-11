@@ -21,7 +21,7 @@
 
    📌 وارفعه في كل مرّة تُغيّر فيها ملفاً من ASSETS_TO_CACHE.
    ═══════════════════════════════════════════════════════════════════════════ */
-const CACHE_NAME = 'Nahla-Core-V18.2';
+const CACHE_NAME = 'Nahla-Core-V18.5';
 const CDN_CACHE_NAME = 'Nahla-CDNs-V16.1';
 
 // قائمة الملفات الأساسية للنظام
