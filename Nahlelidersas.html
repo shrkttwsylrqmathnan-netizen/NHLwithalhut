@@ -996,8 +996,8 @@ button,input,select,textarea{font-family:'Cairo',sans-serif;}
       <button class="fp on" onclick="doFilt('all',this)">الكل <span class="fc" id="cA">0</span></button>
       <button class="fp fr" onclick="doFilt('pending',this)">بانتظار كابتن <span class="fc" id="cP">0</span></button>
       <button class="fp fg" onclick="doFilt('active',this)">قيد التوصيل <span class="fc" id="cAc">0</span></button>
-      <!-- 👑 [LDR-3] فلتر السيادي — يُظهره mountSovereignUI للّيدر المخوّل وحده. -->
-      <button class="fp fv dn" id="fpSov" onclick="doFilt('sov',this)">👑 سيادي <span class="fc" id="cSv">0</span></button>
+      <!-- 👑 [PERM-8] فلتر السيادي — ظاهرٌ للجميع؛ الصلاحية تُفرَض في السيرفر. -->
+      <button class="fp fv" id="fpSov" onclick="doFilt('sov',this)">👑 سيادي <span class="fc" id="cSv">0</span></button>
 
       <button class="fp fo" onclick="doFilt('dlyr',this)">🕐 متأخر بالمطعم <span class="fc" id="cDR">0</span></button>
       <button class="fp fa" onclick="doFilt('dlyd',this)">🛵 متأخر بالطريق <span class="fc" id="cDD">0</span></button>
@@ -1161,17 +1161,11 @@ const MSG_TEMPLATES = [
    ⇒ حالة الجلسة تُعلَن **كلها في موضع واحد**، قبل أي مسار يلمسها.
    ═══════════════════════════════════════════════════════════════════════════ */
 let STOKEN="",EMP_NAME="",EMP_PHONE="",EMP_PERMS=[];
-/* 🔴 [PERM-7] **كرّرتُ عطب TDZ نفسه بعد جولتين من تشخيصه.**
-   ───────────────────────────────────────────────────────────────────────────
-   أعلنتُ `let _permsKnown` عند canAssign (السطر ~2373) بينما مسار التجديد
-   الصامت يكتب عليه في ~1392 — أي قبل تنفيذ سطر الإعلان بـ٩٨١ سطراً.
-   والأسوأ أن السطر كان **خارج أي try**، فالـReferenceError يقطع مسار التجديد
-   كاملاً: لا تُحفظ الجلسة، ولا تُنادى mountSovereignUI، ويختفي الزرّ ثانيةً.
-
-   ⇒ القاعدة بلا استثناء: **كل حالة الجلسة تُعلَن هنا، في هذا السطر وحده.**
-      أي متغيّر جديد يلمسه مسارُ دخولٍ أو استعادةٍ أو تجديد ⇒ مكانه هنا لا
-      عند أوّل دالةٍ تستعمله. */
-let _permsKnown=false;
+/* 🔴 [PERM-7] درسٌ محفوظ: **كل حالة الجلسة تُعلَن هنا، في هذا السطر وحده.**
+   وقع عطب TDZ مرّتين لأن متغيّراً أُعلن عند أوّل دالةٍ تستعمله بينما مسارُ
+   الدخول يكتب عليه قبل ذلك بمئات الأسطر — و let/const يُلقيان ReferenceError
+   صامتاً في تلك النافذة. وق٣٦ في البوّابة تحرس هذا آلياً الآن.
+   ⇒ أي متغيّر يلمسه مسارُ دخولٍ أو استعادةٍ أو تجديد ⇒ مكانه هنا. */
 /* [ق٣٦] مفاتيح الرسائل المرسومة — تُصفَّر في closeCC أعلى موضع إعلانها السابق. */
 let _ccRenderedKeys=new Set();
 let _ccNewWhileUp=0;
@@ -1391,7 +1385,7 @@ async function staffAction(params){
 window.addEventListener("DOMContentLoaded",()=>{
   const saved=sessionStorage.getItem("staff_session");
   if(saved){try{
-    const s=JSON.parse(saved);STOKEN=s.token;EMP_NAME=s.name;EMP_PHONE=s.phone;EMP_PERMS=Array.isArray(s.perms)?s.perms:[];/* [PERM-6] لا نرفع _permsKnown هنا: الجلسة المحفوظة نسخةٌ محلّية قد تسبق التعديل — واليقين من السيرفر وحده. */try{__permsLog("الجلسة المحفوظة",EMP_PERMS);mountSovereignUI();}catch(eMs){console.warn("[AlHut] mountSovereignUI:",eMs&&eMs.message);}
+    const s=JSON.parse(saved);STOKEN=s.token;EMP_NAME=s.name;EMP_PHONE=s.phone;EMP_PERMS=Array.isArray(s.perms)?s.perms:[];
     enterApp();
     if(s.p){const pass=decodeURIComponent(escape(atob(s.p)));
       apiGet({action:"STAFF_LOGIN",phone:EMP_PHONE,password:pass}).then(d=>{
@@ -1403,13 +1397,11 @@ window.addEventListener("DOMContentLoaded",()=>{
              فمن كانت له جلسة محفوظة قبل النشر يدخل بـEMP_PERMS=[] إلى الأبد:
              الجلسة تُجدَّد بنجاح، والصلاحية لا تصل أبداً.
              ⚠️ وهو الموضع الثالث لضبط الهوية — عولج اثنان ونُسي هذا. */
-          __permsLog("التجديد الصامت", d.perms);
+          /* [PERM-8] perms تُحفظ للعرض المستقبلي — ولا يُبنى عليها منعٌ اليوم. */
           if(Array.isArray(d.perms)){
             EMP_PERMS=d.perms;
-            try{ _permsKnown=true; }catch(ePk){ console.warn("[نحلة] _permsKnown:",ePk&&ePk.message); }
             try{ sessionStorage.setItem("staff_session",JSON.stringify(
               Object.assign(JSON.parse(sessionStorage.getItem("staff_session")||"{}"),{perms:EMP_PERMS}))); }catch(_){}
-            try{ mountSovereignUI(); }catch(_){}
           }
         }
       }).catch(()=>{});
@@ -1424,7 +1416,7 @@ window.doLogin=async function(){
   try{
     const d=await apiGet({action:"STAFF_LOGIN",phone,password:pass});
     if(d.success){
-      STOKEN=d.token;EMP_NAME=d.name;EMP_PHONE=d.phone;EMP_PERMS=Array.isArray(d.perms)?d.perms:[];if(Array.isArray(d.perms))_permsKnown=true;try{__permsLog("الدخول",EMP_PERMS);mountSovereignUI();}catch(eMs){console.warn("[AlHut] mountSovereignUI:",eMs&&eMs.message);}
+      STOKEN=d.token;EMP_NAME=d.name;EMP_PHONE=d.phone;EMP_PERMS=Array.isArray(d.perms)?d.perms:[];
       sessionStorage.setItem("staff_session",JSON.stringify({token:STOKEN,name:EMP_NAME,phone:EMP_PHONE,perms:EMP_PERMS,p:btoa(unescape(encodeURIComponent(pass)))}));
       await consumeStaffToken(d.firebase_token,EMP_PHONE,pass);
       enterApp();
@@ -2290,7 +2282,7 @@ function renderRadar(){
             ${hD?`<button class="cb-sm" onclick="waOpen('${jDP}')">💬</button>`:''}
             ${msgBtn}
             ${wdBtn}
-            ${canAssign()?`<button class="asel" style="cursor:pointer;display:flex;align-items:center;justify-content:center;gap:5px" onclick="openAssign('${jOId}')">👑 تعيين كابتن</button>`:''}
+            <button class="asel" style="cursor:pointer;display:flex;align-items:center;justify-content:center;gap:5px" onclick="openAssign('${jOId}')">👑 تعيين كابتن</button>
           </div>
         </div>
 
@@ -2332,127 +2324,39 @@ window.delOrder=async function(oId,el){
   finally{if(el){el.disabled=false;el.classList.remove("loading");}}
 };
 /* ═══════════════════════════════════════════════════════════════════════════
-   👑 [PERM-1] الصلاحية من **السيرفر** لا من رقمٍ مكتوب في هذا الملف.
+   👑 [PERM-8] **حُذف حارس العرض. الصلاحية تُفرَض في السيرفر وحده.**
    ───────────────────────────────────────────────────────────────────────────
-   كان هنا `SOVEREIGN_LEADERS = ["7709366053"]` ونظيره في Code.gs — توأمان
-   مكتوبان بيد، وتعديل أحدهما دون الآخر يُنتج زرّاً يُرفض أو صلاحيةً بلا زرّ.
+   بُني هنا حارسٌ يُخفي زرّ «تعيين كابتن» عمّن لا يملك الصلاحية، فكلّف **خمس
+   جولات من الانقطاع**: منطقة ميتة زمنياً مرّتين، وجلسةٌ لا تحمل perms، وحالةٌ
+   تُقرأ قبل أن تصل. وفي كل مرّة كانت النتيجة واحدة: **الميزة تختفي عن صاحبها**.
 
-   الآن: عمود «الصلاحيات» في ورقة Employees. و staffLogin يُعيد `perms`،
-   فتبني الواجهة أزرارها منها. تُمنح بكتابة `assign` في خلية وتُسحب بمسحها —
-   **بلا نشر ولا لمس شيفرة، ولا رقم واحد مكتوب هنا**.
+   والاختبار الميداني حسم الأمر: اللوحة القديمة — **بلا أي حارس عرض** — مع
+   السيرفر الجديد عملت بلا خلل. الليدر غير المخوّل يُرفض برسالة، والمخوّل ينجح.
 
-   ⚠️ وهذا حارس **عرض** لا حارس أمان: الإغلاق الحقيقي في staffAssignDriver
-      التي تقرأ الصلاحية من الجلسة السيرفرية. فمن يعدّل EMP_PERMS في الطرفية
-      يرى الزرّ ويردّه السيرفر.
+   ⇒ فحارس العرض لم يكن يضيف أماناً؛ كان يضيف **نقطة فشل**. والصلاحية تُفرَض
+     في staffAssignDriver التي تقرأ sess.phone من جلسة السيرفر — ولا يستطيع
+     أحد تزويرها من المتصفّح مهما فعل.
+
+   ما بقي: الزرّ يظهر لكل ليدر. من يملك الصلاحية ينجح، ومن لا يملكها يرى
+   «التعيين السيادي غير متاح لحسابك» — وهي رسالةٌ واضحة، وأرخص بما لا يُقاس
+   من ميزةٍ تختفي عن صاحبها بلا سبب ظاهر.
+
+   📌 والدرس الأعمّ: **لا تبنِ حارساً ثانياً يستطيع أن يمنع ما لا يستطيع أن
+      يسمح.** الحارس الذي يخطئ في الاتجاه المتساهل يُنتج رسالة رفض؛ والذي
+      يخطئ في الاتجاه المتشدّد يُنتج عطباً صامتاً — والصمت أغلى دائماً.
+
+   ⚠️ ولإخفاء الزرّ عن غير المخوّلين لاحقاً: يُبنى ذلك على `perms` القادمة من
+      staffLogin — **وبعد التحقّق أنها تصل فعلاً**، لا قبله.
    ═══════════════════════════════════════════════════════════════════════════ */
-/* ⚠️ EMP_PERMS و PERM_ASSIGN أُعلنا مع STOKEN في أعلى الملف — انظر [PERM-4]. */
 
-/* ═══════════════════════════════════════════════════════════════════════════
-   🩺 [PERM-5] تشخيصٌ ظاهر بدل صمتٍ يُخمَّن.
-   ───────────────────────────────────────────────────────────────────────────
-   العطب تكرّر ثلاث جولات بلا أي أثر مرئي: الصلاحية صحيحة في الشيت، والسيرفر
-   يُعيدها، ولا شيء يظهر — ولا سبيل للتفريق بين «لم تصل من السيرفر» و«وصلت
-   وفُقدت في الواجهة».
 
-   ⇒ نطبع الحالة صراحةً عند كل ضبط. سطرٌ واحد في الطرفية يحسم الأمر:
-       PERMS من السيرفر: [] ⇒ نشر Apps Script قديم — أعِد نشر **الويب أب**
-       PERMS من السيرفر: ["assign"] ⇒ وصلت، والخلل في العرض
-   ⚠️ ولا يُطبع شيء إطلاقاً ⇒ المسار لم يُنفَّذ أصلاً (جلسة لا تُجدَّد). */
-window.__permsLog=function(src,val){
-  try{
-    console.log("%c[نحلة] PERMS من "+src+": "+JSON.stringify(val||[]),
-                "background:#0f172a;color:#fbbf24;padding:2px 6px;border-radius:4px;font-weight:700");
-    if(!Array.isArray(val)||!val.length)
-      console.warn("[نحلة] ⚠️ لا صلاحيات. إن كان الشيت يقول assign فالنشر السيرفري قديم — "+
-                   "افتح Apps Script ← نشر ← إدارة عمليات النشر ← عدّل النشر القائم ← إصدار جديد.");
-  }catch(_){}
-};
 
-/* ═══════════════════════════════════════════════════════════════════════════
-   🔴 [PERM-6] الحارس كان **يفشل مُغلقاً عند الجهل** — وهذا خطأ تصميم لا خطأ سطر.
-   ───────────────────────────────────────────────────────────────────────────
-   كان: `return EMP_PERMS.indexOf("assign") > -1;`
-   فمتى لم تصل perms — لأي سبب: نشرٌ متأخّر · جلسة قديمة · نداءٌ لم يُنفَّذ —
-   كانت تعود false ويختفي الزرّ. أي أن **حارس عرضٍ ثانوي عطّل ميزةً كاملة**،
-   بينما الحارس الحقيقي في السيرفر يعمل بلا خلل (staffAssignDriver يرفض غير
-   المخوّل ويقبل المخوّل — وقد ثبت ذلك ميدانياً).
-
-   والقاعدة التي كسرتُها: **حارس العرض يُخفي ما تأكّدنا أنه ممنوع، لا ما جهلناه.**
-   الصلاحية تُفرَض في السيرفر؛ ودور الواجهة أن تُرتّب لا أن تمنع. فإخفاء زرٍّ
-   عند الجهل يُنتج انقطاعاً، وإظهاره عند الجهل يُنتج — في أسوأ الحالات — رسالة
-   رفضٍ مهذّبة من السيرفر.
-
-   الآن ثلاث حالات صريحة:
-     · perms وصلت وفيها assign        ⇒ يظهر
-     · perms وصلت وليس فيها assign    ⇒ يُخفى  (معرفةٌ مؤكّدة)
-     · perms لم تصل بعد               ⇒ **يظهر** (والسيرفر يحكم)
-   ═══════════════════════════════════════════════════════════════════════════ */
-/* ⚠️ _permsKnown أُعلن مع EMP_PERMS في أعلى الملف — انظر [PERM-7]. */
-function canAssign(){
-  try{
-    if(Array.isArray(EMP_PERMS)&&EMP_PERMS.indexOf(PERM_ASSIGN)>-1) return true;
-    if(_permsKnown) return false;      // جوابٌ مؤكّد: لا صلاحية
-    return true;                        // مجهول ⇒ لا نُخفي — السيرفر هو الحاكم
-  }catch(_){ return true; }
-}
-
-/* 🩺 فحصٌ يدوي من الطرفية: اكتب  nahlaPerms()  فتُخبرك بكل شيء دفعةً واحدة. */
-window.nahlaPerms=function(){
-  console.log("EMP_PHONE :", EMP_PHONE);
-  console.log("EMP_PERMS :", EMP_PERMS);
-  console.log("canAssign :", canAssign());
-  console.log("زرّ الفلتر:", document.getElementById("fpSov") ? "موجود" : "غير موجود في DOM");
-  console.log("الجلسة    :", sessionStorage.getItem("staff_session"));
-  return canAssign();
-};
-
-/* يُظهر عناصر التعيين بعد أن تتأكّد الهوية من السيرفر. يُنادى بعد كل دخول
-   ناجح وبعد استعادة الجلسة — فلا يعتمد على ترتيب التحميل. */
-/* [PERM-5] مسارٌ ثانٍ مستقلّ: إن لم تصل الصلاحية مع الدخول، نسألها صراحةً.
-   ⚠️ مرّة واحدة لا حلقة — فشلٌ ثانٍ يعني نشراً قديماً، وتكرار السؤال عليه
-      يُغرق GAS بلا فائدة. */
-let _permsAsked=false;
-async function ensurePerms(){
-  if(_permsAsked||!STOKEN)return;
-  if(Array.isArray(EMP_PERMS)&&EMP_PERMS.length)return;
-  _permsAsked=true;
-  try{
-    const d=await apiGet({action:"STAFF_PERMS",stoken:STOKEN});
-    if(d&&d.success&&Array.isArray(d.perms)){
-      EMP_PERMS=d.perms; _permsKnown=true;
-      __permsLog("STAFF_PERMS",EMP_PERMS);
-      try{ sessionStorage.setItem("staff_session",JSON.stringify(
-        Object.assign(JSON.parse(sessionStorage.getItem("staff_session")||"{}"),{perms:EMP_PERMS}))); }catch(_){}
-      mountSovereignUI();
-    } else {
-      console.warn("[نحلة] ⚠️ STAFF_PERMS لم تُجب بصلاحيات — النشر السيرفري قديم على الأرجح.",d);
-    }
-  }catch(e){ console.warn("[نحلة] STAFF_PERMS فشل:",e&&e.message); }
-}
-
-window.mountSovereignUI=function(){
-  try{
-    if(!(Array.isArray(EMP_PERMS)&&EMP_PERMS.length)) ensurePerms();
-    const on=canAssign();
-    const f=document.getElementById("fpSov");
-    if(f)f.classList.toggle("dn",!on);
-    /* الكروت تُبنى من الرادار، فطلبُ إعادة رسم يكفي كي يظهر الزرّ. */
-    if(on&&typeof scheduleRadar==="function")scheduleRadar();
-    else if(on&&typeof renderRadar==="function")renderRadar();
-  }catch(_){}
-};
-
-function canAssign(){
-  try{ return SOVEREIGN_LEADERS.map(nP).indexOf(nP(EMP_PHONE||"")) > -1; }
-  catch(_){ return false; }
-}
 
 window.asgnDrv=async function(oId,dPhone){
   if(!dPhone)return;
-  /* 🛡️ [LDR-3] الحارس هنا أيضاً لا في الزرّ وحده: من يفتح الطرفية ويُنادي
-     asgnDrv مباشرةً يتخطّى إخفاء الواجهة. وهذا ليس أمناً كاملاً (الأمن في
-     السيرفر) لكنه يمنع الاستعمال العابر ويُسجّل النيّة بوضوح. */
-  if(!canAssign()){ toast("التعيين السيادي غير متاح لحسابك","e"); return; }
+  /* [PERM-8] لا حارس هنا: staffAssignDriver في السيرفر تردّ نصّاً واضحاً
+     («التعيين السيادي غير متاح لحسابك») وتُسجّل المحاولة في سجلّ الموظفين.
+     وحارسٌ محلّي فوقه لا يزيد أماناً — يزيد نقطة فشل. */
   try{
     let d=await staffAction({action:"STAFF_ASSIGN",orderId:oId,driverPhone:dPhone});
     /* 🛡️ [V19.2] الخادم يرفض التعيين لكابتن غير متاح ويُعيد السبب.
