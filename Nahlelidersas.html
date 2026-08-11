@@ -1366,6 +1366,17 @@ window.addEventListener("DOMContentLoaded",()=>{
         if(d&&d.success){
           if(d.token)updateStoken(d.token);
           if(d.firebase_token)consumeStaffToken(d.firebase_token,EMP_PHONE,pass);
+          /* 🔴 [PERM-3] هنا كان العطب: هذا المسار يُجدّد الجلسة صامتاً عند كل
+             فتح، ويستقبل الاستجابة كاملة — **ويأخذ منها الرمز ويُهمل perms**.
+             فمن كانت له جلسة محفوظة قبل النشر يدخل بـEMP_PERMS=[] إلى الأبد:
+             الجلسة تُجدَّد بنجاح، والصلاحية لا تصل أبداً.
+             ⚠️ وهو الموضع الثالث لضبط الهوية — عولج اثنان ونُسي هذا. */
+          if(Array.isArray(d.perms)){
+            EMP_PERMS=d.perms;
+            try{ sessionStorage.setItem("staff_session",JSON.stringify(
+              Object.assign(JSON.parse(sessionStorage.getItem("staff_session")||"{}"),{perms:EMP_PERMS}))); }catch(_){}
+            try{ mountSovereignUI(); }catch(_){}
+          }
         }
       }).catch(()=>{});
     }
