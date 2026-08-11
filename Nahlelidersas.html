@@ -1375,7 +1375,7 @@ async function staffAction(params){
 window.addEventListener("DOMContentLoaded",()=>{
   const saved=sessionStorage.getItem("staff_session");
   if(saved){try{
-    const s=JSON.parse(saved);STOKEN=s.token;EMP_NAME=s.name;EMP_PHONE=s.phone;EMP_PERMS=Array.isArray(s.perms)?s.perms:[];try{mountSovereignUI();}catch(eMs){console.warn("[AlHut] mountSovereignUI:",eMs&&eMs.message);}
+    const s=JSON.parse(saved);STOKEN=s.token;EMP_NAME=s.name;EMP_PHONE=s.phone;EMP_PERMS=Array.isArray(s.perms)?s.perms:[];try{__permsLog("الجلسة المحفوظة",EMP_PERMS);mountSovereignUI();}catch(eMs){console.warn("[AlHut] mountSovereignUI:",eMs&&eMs.message);}
     enterApp();
     if(s.p){const pass=decodeURIComponent(escape(atob(s.p)));
       apiGet({action:"STAFF_LOGIN",phone:EMP_PHONE,password:pass}).then(d=>{
@@ -1387,6 +1387,7 @@ window.addEventListener("DOMContentLoaded",()=>{
              فمن كانت له جلسة محفوظة قبل النشر يدخل بـEMP_PERMS=[] إلى الأبد:
              الجلسة تُجدَّد بنجاح، والصلاحية لا تصل أبداً.
              ⚠️ وهو الموضع الثالث لضبط الهوية — عولج اثنان ونُسي هذا. */
+          __permsLog("التجديد الصامت", d.perms);
           if(Array.isArray(d.perms)){
             EMP_PERMS=d.perms;
             try{ sessionStorage.setItem("staff_session",JSON.stringify(
@@ -1406,7 +1407,7 @@ window.doLogin=async function(){
   try{
     const d=await apiGet({action:"STAFF_LOGIN",phone,password:pass});
     if(d.success){
-      STOKEN=d.token;EMP_NAME=d.name;EMP_PHONE=d.phone;EMP_PERMS=Array.isArray(d.perms)?d.perms:[];try{mountSovereignUI();}catch(eMs){console.warn("[AlHut] mountSovereignUI:",eMs&&eMs.message);}
+      STOKEN=d.token;EMP_NAME=d.name;EMP_PHONE=d.phone;EMP_PERMS=Array.isArray(d.perms)?d.perms:[];try{__permsLog("الدخول",EMP_PERMS);mountSovereignUI();}catch(eMs){console.warn("[AlHut] mountSovereignUI:",eMs&&eMs.message);}
       sessionStorage.setItem("staff_session",JSON.stringify({token:STOKEN,name:EMP_NAME,phone:EMP_PHONE,perms:EMP_PERMS,p:btoa(unescape(encodeURIComponent(pass)))}));
       await consumeStaffToken(d.firebase_token,EMP_PHONE,pass);
       enterApp();
@@ -2328,15 +2329,70 @@ window.delOrder=async function(oId,el){
       يرى الزرّ ويردّه السيرفر.
    ═══════════════════════════════════════════════════════════════════════════ */
 /* ⚠️ EMP_PERMS و PERM_ASSIGN أُعلنا مع STOKEN في أعلى الملف — انظر [PERM-4]. */
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   🩺 [PERM-5] تشخيصٌ ظاهر بدل صمتٍ يُخمَّن.
+   ───────────────────────────────────────────────────────────────────────────
+   العطب تكرّر ثلاث جولات بلا أي أثر مرئي: الصلاحية صحيحة في الشيت، والسيرفر
+   يُعيدها، ولا شيء يظهر — ولا سبيل للتفريق بين «لم تصل من السيرفر» و«وصلت
+   وفُقدت في الواجهة».
+
+   ⇒ نطبع الحالة صراحةً عند كل ضبط. سطرٌ واحد في الطرفية يحسم الأمر:
+       PERMS من السيرفر: [] ⇒ نشر Apps Script قديم — أعِد نشر **الويب أب**
+       PERMS من السيرفر: ["assign"] ⇒ وصلت، والخلل في العرض
+   ⚠️ ولا يُطبع شيء إطلاقاً ⇒ المسار لم يُنفَّذ أصلاً (جلسة لا تُجدَّد). */
+window.__permsLog=function(src,val){
+  try{
+    console.log("%c[نحلة] PERMS من "+src+": "+JSON.stringify(val||[]),
+                "background:#0f172a;color:#fbbf24;padding:2px 6px;border-radius:4px;font-weight:700");
+    if(!Array.isArray(val)||!val.length)
+      console.warn("[نحلة] ⚠️ لا صلاحيات. إن كان الشيت يقول assign فالنشر السيرفري قديم — "+
+                   "افتح Apps Script ← نشر ← إدارة عمليات النشر ← عدّل النشر القائم ← إصدار جديد.");
+  }catch(_){}
+};
+
 function canAssign(){
   try{ return Array.isArray(EMP_PERMS) && EMP_PERMS.indexOf(PERM_ASSIGN) > -1; }
   catch(_){ return false; }
 }
 
+/* 🩺 فحصٌ يدوي من الطرفية: اكتب  nahlaPerms()  فتُخبرك بكل شيء دفعةً واحدة. */
+window.nahlaPerms=function(){
+  console.log("EMP_PHONE :", EMP_PHONE);
+  console.log("EMP_PERMS :", EMP_PERMS);
+  console.log("canAssign :", canAssign());
+  console.log("زرّ الفلتر:", document.getElementById("fpSov") ? "موجود" : "غير موجود في DOM");
+  console.log("الجلسة    :", sessionStorage.getItem("staff_session"));
+  return canAssign();
+};
+
 /* يُظهر عناصر التعيين بعد أن تتأكّد الهوية من السيرفر. يُنادى بعد كل دخول
    ناجح وبعد استعادة الجلسة — فلا يعتمد على ترتيب التحميل. */
+/* [PERM-5] مسارٌ ثانٍ مستقلّ: إن لم تصل الصلاحية مع الدخول، نسألها صراحةً.
+   ⚠️ مرّة واحدة لا حلقة — فشلٌ ثانٍ يعني نشراً قديماً، وتكرار السؤال عليه
+      يُغرق GAS بلا فائدة. */
+let _permsAsked=false;
+async function ensurePerms(){
+  if(_permsAsked||!STOKEN)return;
+  if(Array.isArray(EMP_PERMS)&&EMP_PERMS.length)return;
+  _permsAsked=true;
+  try{
+    const d=await apiGet({action:"STAFF_PERMS",stoken:STOKEN});
+    if(d&&d.success&&Array.isArray(d.perms)){
+      EMP_PERMS=d.perms;
+      __permsLog("STAFF_PERMS",EMP_PERMS);
+      try{ sessionStorage.setItem("staff_session",JSON.stringify(
+        Object.assign(JSON.parse(sessionStorage.getItem("staff_session")||"{}"),{perms:EMP_PERMS}))); }catch(_){}
+      mountSovereignUI();
+    } else {
+      console.warn("[نحلة] ⚠️ STAFF_PERMS لم تُجب بصلاحيات — النشر السيرفري قديم على الأرجح.",d);
+    }
+  }catch(e){ console.warn("[نحلة] STAFF_PERMS فشل:",e&&e.message); }
+}
+
 window.mountSovereignUI=function(){
   try{
+    if(!(Array.isArray(EMP_PERMS)&&EMP_PERMS.length)) ensurePerms();
     const on=canAssign();
     const f=document.getElementById("fpSov");
     if(f)f.classList.toggle("dn",!on);
