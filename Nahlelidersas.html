@@ -6,7 +6,7 @@
      ابدأ بـ Content-Security-Policy-Report-Only أسبوعاً، اقرأ التقارير، ثم أَلزِم.
      'unsafe-inline' لازمٌ اليوم: الشيفرة كلها كتل سكربت مضمّنة. إزالته
      تتطلّب نقلها إلى ملفات أو ختمها بـ nonce — مشروع لاحق موثّق. -->
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://*.firebasedatabase.app https://*.firebaseio.com https://unpkg.com https://www.gstatic.com https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://unpkg.com https://cdn.jsdelivr.net; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: blob: https:; media-src 'self' data: blob:; connect-src 'self' https://*.firebasedatabase.app https://*.firebaseio.com wss://*.firebasedatabase.app wss://*.firebaseio.com https://script.google.com https://script.googleusercontent.com https://*.googleapis.com https://securetoken.googleapis.com https://*.cloudfunctions.net https://*.run.app https://unpkg.com https://www.gstatic.com; object-src 'none'; base-uri 'none'; form-action 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://*.firebasedatabase.app https://*.firebaseio.com https://unpkg.com https://www.gstatic.com https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://unpkg.com https://cdn.jsdelivr.net; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: blob: https:; media-src 'self' data: blob:; connect-src 'self' https://*.firebasedatabase.app https://*.firebaseio.com wss://*.firebasedatabase.app wss://*.firebaseio.com https://script.google.com https://script.googleusercontent.com https://*.googleapis.com https://securetoken.googleapis.com https://*.cloudfunctions.net https://*.run.app https://unpkg.com https://www.gstatic.com https://cdn.jsdelivr.net; object-src 'none'; base-uri 'none'; form-action 'none'">
 <link rel="manifest" href="manifest_leader.json">
 <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no,viewport-fit=cover">
 <title>نحلة — لوحة الموظفين</title>
@@ -1145,7 +1145,23 @@ const MSG_TEMPLATES = [
 ];
 
 /* ════ STATE ════ */
-let STOKEN="",EMP_NAME="",EMP_PHONE="";
+/* ═══════════════════════════════════════════════════════════════════════════
+   🔴 [PERM-4] هنا كان العطب — **منطقةٌ ميتة زمنياً (TDZ)**.
+   ───────────────────────────────────────────────────────────────────────────
+   كان `let EMP_PERMS` معلَناً في السطر ~2314، بينما مسارا استعادة الجلسة
+   والدخول يكتبان عليه في ~1362 و~1393. و let/const يخضعان لـTDZ: أي لمسة
+   قبل تنفيذ سطر الإعلان تُلقي ReferenceError.
+
+   ولماذا لم يظهر شيء في الطرفية؟ لأن الكتابة ملفوفة بـ`try{...}catch(_){}`
+   ⇒ **الاستثناء يُبتلع بصمت تامّ**، فتبقى EMP_PERMS كما هي وتعود canAssign
+   بـfalse دائماً. الصلاحية تصل من السيرفر صحيحة، وتُفقد قبل أن تُقرأ.
+
+   ⚠️ وهذه catch الفارغة هي عين ما تحرسه ق٩ (السقّاطة) — أخفت العطب ثلاث
+      جولات، وأنا من كتبها.
+   ⇒ حالة الجلسة تُعلَن **كلها في موضع واحد**، قبل أي مسار يلمسها.
+   ═══════════════════════════════════════════════════════════════════════════ */
+let STOKEN="",EMP_NAME="",EMP_PHONE="",EMP_PERMS=[];
+const PERM_ASSIGN="assign";
 let liveOrd=[],actDrv=new Set(),gDrivers=[],liveLed={drivers:{}};
 let drvLocs={},rfilt="all",pendCnt=0,fbConn=true,fbL=[];
 let radarHtml="";
@@ -1359,7 +1375,7 @@ async function staffAction(params){
 window.addEventListener("DOMContentLoaded",()=>{
   const saved=sessionStorage.getItem("staff_session");
   if(saved){try{
-    const s=JSON.parse(saved);STOKEN=s.token;EMP_NAME=s.name;EMP_PHONE=s.phone;EMP_PERMS=Array.isArray(s.perms)?s.perms:[];try{mountSovereignUI();}catch(_){}
+    const s=JSON.parse(saved);STOKEN=s.token;EMP_NAME=s.name;EMP_PHONE=s.phone;EMP_PERMS=Array.isArray(s.perms)?s.perms:[];try{mountSovereignUI();}catch(eMs){console.warn("[AlHut] mountSovereignUI:",eMs&&eMs.message);}
     enterApp();
     if(s.p){const pass=decodeURIComponent(escape(atob(s.p)));
       apiGet({action:"STAFF_LOGIN",phone:EMP_PHONE,password:pass}).then(d=>{
@@ -1390,7 +1406,7 @@ window.doLogin=async function(){
   try{
     const d=await apiGet({action:"STAFF_LOGIN",phone,password:pass});
     if(d.success){
-      STOKEN=d.token;EMP_NAME=d.name;EMP_PHONE=d.phone;EMP_PERMS=Array.isArray(d.perms)?d.perms:[];try{mountSovereignUI();}catch(_){}
+      STOKEN=d.token;EMP_NAME=d.name;EMP_PHONE=d.phone;EMP_PERMS=Array.isArray(d.perms)?d.perms:[];try{mountSovereignUI();}catch(eMs){console.warn("[AlHut] mountSovereignUI:",eMs&&eMs.message);}
       sessionStorage.setItem("staff_session",JSON.stringify({token:STOKEN,name:EMP_NAME,phone:EMP_PHONE,perms:EMP_PERMS,p:btoa(unescape(encodeURIComponent(pass)))}));
       await consumeStaffToken(d.firebase_token,EMP_PHONE,pass);
       enterApp();
@@ -2311,9 +2327,7 @@ window.delOrder=async function(oId,el){
       التي تقرأ الصلاحية من الجلسة السيرفرية. فمن يعدّل EMP_PERMS في الطرفية
       يرى الزرّ ويردّه السيرفر.
    ═══════════════════════════════════════════════════════════════════════════ */
-let EMP_PERMS = [];
-const PERM_ASSIGN = "assign";
-
+/* ⚠️ EMP_PERMS و PERM_ASSIGN أُعلنا مع STOKEN في أعلى الملف — انظر [PERM-4]. */
 function canAssign(){
   try{ return Array.isArray(EMP_PERMS) && EMP_PERMS.indexOf(PERM_ASSIGN) > -1; }
   catch(_){ return false; }
