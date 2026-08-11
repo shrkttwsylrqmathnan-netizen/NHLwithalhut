@@ -1468,7 +1468,7 @@ function escAttr(x){ return esc(x).replace(/"/g,'&quot;').replace(/'/g,'&#39;');
             try {
                 const sess = JSON.parse(s);
                 if (sess.phone && sess.password) await ensureResAuth(sess.phone, atob(sess.password));
-            } catch (e) {}
+            } catch (e) { console.warn('[AlHut] requireCloudAuth:', e && e.message); }
         }
         return !!auth.currentUser;
     }
