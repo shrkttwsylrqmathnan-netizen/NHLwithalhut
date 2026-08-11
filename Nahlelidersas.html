@@ -1161,6 +1161,22 @@ const MSG_TEMPLATES = [
    ⇒ حالة الجلسة تُعلَن **كلها في موضع واحد**، قبل أي مسار يلمسها.
    ═══════════════════════════════════════════════════════════════════════════ */
 let STOKEN="",EMP_NAME="",EMP_PHONE="",EMP_PERMS=[];
+/* 🔴 [PERM-7] **كرّرتُ عطب TDZ نفسه بعد جولتين من تشخيصه.**
+   ───────────────────────────────────────────────────────────────────────────
+   أعلنتُ `let _permsKnown` عند canAssign (السطر ~2373) بينما مسار التجديد
+   الصامت يكتب عليه في ~1392 — أي قبل تنفيذ سطر الإعلان بـ٩٨١ سطراً.
+   والأسوأ أن السطر كان **خارج أي try**، فالـReferenceError يقطع مسار التجديد
+   كاملاً: لا تُحفظ الجلسة، ولا تُنادى mountSovereignUI، ويختفي الزرّ ثانيةً.
+
+   ⇒ القاعدة بلا استثناء: **كل حالة الجلسة تُعلَن هنا، في هذا السطر وحده.**
+      أي متغيّر جديد يلمسه مسارُ دخولٍ أو استعادةٍ أو تجديد ⇒ مكانه هنا لا
+      عند أوّل دالةٍ تستعمله. */
+let _permsKnown=false;
+/* [ق٣٦] مفاتيح الرسائل المرسومة — تُصفَّر في closeCC أعلى موضع إعلانها السابق. */
+let _ccRenderedKeys=new Set();
+let _ccNewWhileUp=0;
+let _ordIdx=null,_ordIdxLen=-1;
+let _onlineCache=null,_onlineCacheAt=0;
 const PERM_ASSIGN="assign";
 let liveOrd=[],actDrv=new Set(),gDrivers=[],liveLed={drivers:{}};
 let drvLocs={},rfilt="all",pendCnt=0,fbConn=true,fbL=[];
@@ -1389,7 +1405,8 @@ window.addEventListener("DOMContentLoaded",()=>{
              ⚠️ وهو الموضع الثالث لضبط الهوية — عولج اثنان ونُسي هذا. */
           __permsLog("التجديد الصامت", d.perms);
           if(Array.isArray(d.perms)){
-            EMP_PERMS=d.perms; _permsKnown=true;
+            EMP_PERMS=d.perms;
+            try{ _permsKnown=true; }catch(ePk){ console.warn("[نحلة] _permsKnown:",ePk&&ePk.message); }
             try{ sessionStorage.setItem("staff_session",JSON.stringify(
               Object.assign(JSON.parse(sessionStorage.getItem("staff_session")||"{}"),{perms:EMP_PERMS}))); }catch(_){}
             try{ mountSovereignUI(); }catch(_){}
@@ -2370,8 +2387,7 @@ window.__permsLog=function(src,val){
      · perms وصلت وليس فيها assign    ⇒ يُخفى  (معرفةٌ مؤكّدة)
      · perms لم تصل بعد               ⇒ **يظهر** (والسيرفر يحكم)
    ═══════════════════════════════════════════════════════════════════════════ */
-let _permsKnown=false;
-
+/* ⚠️ _permsKnown أُعلن مع EMP_PERMS في أعلى الملف — انظر [PERM-7]. */
 function canAssign(){
   try{
     if(Array.isArray(EMP_PERMS)&&EMP_PERMS.indexOf(PERM_ASSIGN)>-1) return true;
@@ -2614,7 +2630,7 @@ let _ccSort="recent";
 let _ccFilter="inbox",_ccSearch="",_ccListSig="",_ccCtxSig="",_ccQrCat=0;
 let _ccDrafts={};              /* مسوّدة لكل محادثة — التنقّل لا يضيّع ما كتبته */
 let _ccPending={};             /* رسائل قيد الإرسال (عرض متفائل) */
-let _ccRenderedKeys=new Set(); /* مفاتيح الرسائل المرسومة — للرسم التراكمي */
+/* [ق٣٦] _ccRenderedKeys أُعلن مع _ccActive أعلاه — كان يُكتب عليه في 2612 قبل إعلانه هنا. */
 let _ccNoteTimer=null;
 
 /* ── ترسانة الردود السريعة ──
@@ -2844,7 +2860,7 @@ function renderChatList(){
 /* ════ شريط السياق — الميزة التوقيعية ════ */
 /* ⚡ [أداء] حالة الاتصال تُحسب مرة لكل دورة رسم لا مرة لكل بطاقة.
    كانت كل بطاقة تُنشئ Date وتقارن — عشرات المرات في الرسمة الواحدة. */
-let _onlineCache=null,_onlineCacheAt=0;
+/* [ق٣٦] _onlineCache أُعلن مع حالة الجلسة أعلاه — كان يُكتب عليه في 1693. */
 function _ccIsOnline(phone){
   const now=Date.now();
   if(!_onlineCache||now-_onlineCacheAt>3000){
@@ -2858,7 +2874,7 @@ function _ccIsOnline(phone){
   return _onlineCache.get(nP(phone))===true;
 }
 /* ⚡ [أداء] فهرس طلبات الكابتن — كان يمسح كل الطلبات في كل نداء. */
-let _ordIdx=null,_ordIdxLen=-1;
+/* [ق٣٦] أُعلن مع حالة الجلسة أعلاه. */
 function _ccDriverOrders(phone){
   try{
     if(!_ordIdx||_ordIdxLen!==(liveOrd||[]).length){
@@ -3208,7 +3224,7 @@ window.openThread=function(phone){
    الرسم القديم كان يعيد بناء innerHTML كاملاً عند كل لقطة، فيقطع التحديد
    ويُقفز التمرير ويُثقل الجهاز مع طول المحادثة. الآن نُلحق الجديد فقط. */
 /* حبّة "رسائل جديدة" + فاصل غير المقروء */
-let _ccNewWhileUp=0;
+/* [ق٣٦] أُعلن مع حالة الجلسة أعلاه. */
 function _ccUpdJump(){
   const j=document.getElementById("ctJump"),t=document.getElementById("ctJumpTxt");
   if(!j||!t)return;
