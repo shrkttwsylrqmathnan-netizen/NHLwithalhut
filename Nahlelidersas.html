@@ -890,7 +890,20 @@ button,input,select,textarea{font-family:'Cairo',sans-serif;}
   </div>
 </div>
 
-<!-- [LDR-2] أُزيلت نافذة «التعيين السيادي». الشرح في كتلة الشيفرة أدناه. -->
+<!-- 👑 نافذة التعيين السيادي مع بحث -->
+<div id="assignModal" class="sheet-bg" onclick="clSheet('assignModal')">
+  <div class="sheet" onclick="event.stopPropagation()">
+    <div class="sheet-handle"></div>
+    <div class="sheet-title">👑 تعيين سيادي <span id="assignOrderId" style="color:var(--ink4)"></span></div>
+    <div class="sheet-sub">ابحث واختر الكابتن لإسناد الطلب له مباشرةً</div>
+    <div class="asn-srch-w">
+      <span class="asn-srch-i">🔍</span>
+      <input type="text" id="assignSearch" class="asn-srch" placeholder="ابحث عن كابتن بالاسم أو الرقم..." oninput="filterAssign()" autocomplete="off">
+    </div>
+    <div id="assignList" class="asn-list"></div>
+    <button class="sheet-cancel" onclick="clSheet('assignModal')">إلغاء</button>
+  </div>
+</div>
 
 <!-- AUTH -->
 <div id="auth">
@@ -983,6 +996,8 @@ button,input,select,textarea{font-family:'Cairo',sans-serif;}
       <button class="fp on" onclick="doFilt('all',this)">الكل <span class="fc" id="cA">0</span></button>
       <button class="fp fr" onclick="doFilt('pending',this)">بانتظار كابتن <span class="fc" id="cP">0</span></button>
       <button class="fp fg" onclick="doFilt('active',this)">قيد التوصيل <span class="fc" id="cAc">0</span></button>
+      <!-- 👑 [LDR-3] فلتر السيادي — يُظهره mountSovereignUI للّيدر المخوّل وحده. -->
+      <button class="fp fv dn" id="fpSov" onclick="doFilt('sov',this)">👑 سيادي <span class="fc" id="cSv">0</span></button>
 
       <button class="fp fo" onclick="doFilt('dlyr',this)">🕐 متأخر بالمطعم <span class="fc" id="cDR">0</span></button>
       <button class="fp fa" onclick="doFilt('dlyd',this)">🛵 متأخر بالطريق <span class="fc" id="cDD">0</span></button>
@@ -1344,7 +1359,7 @@ async function staffAction(params){
 window.addEventListener("DOMContentLoaded",()=>{
   const saved=sessionStorage.getItem("staff_session");
   if(saved){try{
-    const s=JSON.parse(saved);STOKEN=s.token;EMP_NAME=s.name;EMP_PHONE=s.phone;
+    const s=JSON.parse(saved);STOKEN=s.token;EMP_NAME=s.name;EMP_PHONE=s.phone;try{mountSovereignUI();}catch(_){}
     enterApp();
     if(s.p){const pass=decodeURIComponent(escape(atob(s.p)));
       apiGet({action:"STAFF_LOGIN",phone:EMP_PHONE,password:pass}).then(d=>{
@@ -1364,7 +1379,7 @@ window.doLogin=async function(){
   try{
     const d=await apiGet({action:"STAFF_LOGIN",phone,password:pass});
     if(d.success){
-      STOKEN=d.token;EMP_NAME=d.name;EMP_PHONE=d.phone;
+      STOKEN=d.token;EMP_NAME=d.name;EMP_PHONE=d.phone;try{mountSovereignUI();}catch(_){}
       sessionStorage.setItem("staff_session",JSON.stringify({token:STOKEN,name:EMP_NAME,phone:EMP_PHONE,p:btoa(unescape(encodeURIComponent(pass)))}));
       await consumeStaffToken(d.firebase_token,EMP_PHONE,pass);
       enterApp();
@@ -2230,7 +2245,7 @@ function renderRadar(){
             ${hD?`<button class="cb-sm" onclick="waOpen('${jDP}')">💬</button>`:''}
             ${msgBtn}
             ${wdBtn}
-
+            ${canAssign()?`<button class="asel" style="cursor:pointer;display:flex;align-items:center;justify-content:center;gap:5px" onclick="openAssign('${jOId}')">👑 تعيين كابتن</button>`:''}
           </div>
         </div>
 
@@ -2272,22 +2287,140 @@ window.delOrder=async function(oId,el){
   finally{if(el){el.disabled=false;el.classList.remove("loading");}}
 };
 /* ═══════════════════════════════════════════════════════════════════════════
-   🗑️ [LDR-2] **أُزيل التعيين السيادي** بقرار تشغيلي.
+   👑 [LDR-3] التعيين السيادي — **مقصورٌ على ليدرٍ واحد**
    ───────────────────────────────────────────────────────────────────────────
-   ما حُذف من هذه اللوحة:
-     · زرّ «👑 تعيين كابتن» في بطاقة الطلب
-     · نافذة الاختيار وبحثها (assignModal)
-     · فلتر «👑 سيادي» وعدّاده
-     · الدوال: asgnDrv · openAssign · renderAssignList · filterAssign · doAssign
+   أُزيل كلّياً في [LDR-2] بقرار تشغيلي، ويعود الآن مقيّداً بهاتفٍ واحد.
 
-   ⚠️ وما **لم** يُحذف عمداً — ولا يجوز حذفه:
-     ① عرض الحالة `👑 سيادي` وزرّ «👑↩ سحب سيادي»: طلباتٌ سياديةٌ قائمة قد
-        تكون في الرادار الآن، ويجب أن تبقى مرئيةً وقابلةً للسحب.
-     ② منطق `is_sovereign` و`manual_pending` في المحرك: يعالج ما أُنشئ سابقاً،
-        وحذفه يترك تلك الطلبات بلا مَن يحرّرها بعد المهلة.
-     ③ `STAFF_ASSIGN` في Code.gs: **ما زال حيّاً**. إزالته من الواجهة لا تُغلق
-        النقطة — وإغلاقها قرارٌ منفصل (انظر الملاحظة في تقرير التسليم).
+   والهوية تُؤخذ من EMP_PHONE — وهو يأتي من **استجابة السيرفر** لـSTAFF_LOGIN
+   (`d.phone`) لا من إدخال المستخدم ولا من مخزَّنٍ يكتبه العميل. فتغييره يتطلّب
+   حساب ليدرٍ آخر بكلمة مروره.
+
+   ⚠️ ويُقارَن بـnP في الطرفين: 07709366053 و 7709366053 و +9647709366053
+      كلها تُطبَّع إلى الصيغة نفسها. وبلاه يفشل الحارس على صيغةٍ مشروعة.
+
+   🔴 **وهذا حارس واجهة لا حارس أمان.** نقطة STAFF_ASSIGN في Code.gs ما زالت
+      مفتوحة لأي جلسة موظف — إخفاء الزرّ لا يُغلقها. وإغلاقها قرارٌ منفصل:
+      تُضاف قائمة بيضاء في staffAssignDriver تُقارن sess.phone بالرقم نفسه.
+      وحتى ذلك الحين: الأزرار مخفيّة عن الجميع إلا هو، والنقطة قابلة للنداء.
    ═══════════════════════════════════════════════════════════════════════════ */
+const SOVEREIGN_LEADERS = ["7709366053"];   /* تُطبَّع بـnP عند المقارنة */
+
+/* يُظهر عناصر التعيين بعد أن تتأكّد الهوية من السيرفر. يُنادى بعد كل دخول
+   ناجح وبعد استعادة الجلسة — فلا يعتمد على ترتيب التحميل. */
+window.mountSovereignUI=function(){
+  try{
+    const on=canAssign();
+    const f=document.getElementById("fpSov");
+    if(f)f.classList.toggle("dn",!on);
+    /* الكروت تُبنى من الرادار، فطلبُ إعادة رسم يكفي كي يظهر الزرّ. */
+    if(on&&typeof scheduleRadar==="function")scheduleRadar();
+    else if(on&&typeof renderRadar==="function")renderRadar();
+  }catch(_){}
+};
+
+function canAssign(){
+  try{ return SOVEREIGN_LEADERS.map(nP).indexOf(nP(EMP_PHONE||"")) > -1; }
+  catch(_){ return false; }
+}
+
+window.asgnDrv=async function(oId,dPhone){
+  if(!dPhone)return;
+  /* 🛡️ [LDR-3] الحارس هنا أيضاً لا في الزرّ وحده: من يفتح الطرفية ويُنادي
+     asgnDrv مباشرةً يتخطّى إخفاء الواجهة. وهذا ليس أمناً كاملاً (الأمن في
+     السيرفر) لكنه يمنع الاستعمال العابر ويُسجّل النيّة بوضوح. */
+  if(!canAssign()){ toast("التعيين السيادي غير متاح لحسابك","e"); return; }
+  try{
+    let d=await staffAction({action:"STAFF_ASSIGN",orderId:oId,driverPhone:dPhone});
+    /* 🛡️ [V19.2] الخادم يرفض التعيين لكابتن غير متاح ويُعيد السبب.
+       والتأكيد يُرسل force=1 — فيبقى القرار للّيدر، لكنه **قرارٌ يعلمه**
+       بدل تعيينٍ أعمى يرنّ هاتف كابتن مغلقٍ تطبيقه. */
+    if(d && d.needsConfirm){
+      if(!confirm(d.msg || 'الكابتن غير متاح — أتؤكّد التعيين القسري؟')) return;
+      d=await staffAction({action:"STAFF_ASSIGN",orderId:oId,driverPhone:dPhone,force:"true"});
+    }
+    if(d.success)toast("تم التعيين 👑");else toast(d.msg||"فشل","e");
+  }catch(e){toast("خطأ","e");}
+};
+
+/* ════════════════════════════════════════
+   👑 نافذة التعيين السيادي مع بحث
+════════════════════════════════════════ */
+let _assignOrderId="",_assignSearch="";
+
+window.openAssign=function(oId){
+  _assignOrderId=oId;
+  _assignSearch="";
+  document.getElementById("assignOrderId").textContent="#"+oId;
+  document.getElementById("assignSearch").value="";
+  renderAssignList();
+  opSheet("assignModal");
+  /* تركيز حقل البحث تلقائياً على الأجهزة المكتبية */
+  setTimeout(()=>{const el=document.getElementById("assignSearch");if(el&&window.innerWidth>768)el.focus();},100);
+};
+
+window.filterAssign=function(){
+  _assignSearch=document.getElementById("assignSearch").value;
+  renderAssignList();
+};
+
+/* يبني قائمة الكباتن المتاحين (النشطين) مع بحث + حالة الانشغال */
+function renderAssignList(){
+  const box=document.getElementById("assignList");if(!box)return;
+
+  /* حساب المشغولين */
+  const busySet=new Set();
+  liveOrd.forEach(o=>{
+    const dp=o[O.DRV];
+    if(dp&&!["pending_driver","system_routing","manual_pending"].includes(dp))busySet.add(nP(dp));
+  });
+
+  /* الكباتن النشطون فقط (المتصلون بالميدان) */
+  let avail=[];
+  gDrivers.forEach(d=>{
+    const n=nP(d.phone);
+    if(!actDrv.has(n))return;  /* المتاحون بالميدان فقط */
+    const cp=liveLed.drivers?.[n]?.completed_orders||0;
+    avail.push({phone:n,name:d.name||dN(n),ledger:cp,busy:busySet.has(n)});
+  });
+
+  /* بحث بالاسم أو الرقم */
+  const q=_assignSearch.trim().toLowerCase();
+  if(q)avail=avail.filter(c=>c.name.toLowerCase().includes(q)||c.phone.includes(nP(q)||q));
+
+  /* ترتيب: المتاحون (غير المشغولين) أولاً، ثم الأكثر إنجازاً */
+  avail.sort((a,b)=>{
+    if(a.busy!==b.busy)return a.busy?1:-1;
+    return b.ledger-a.ledger;
+  });
+
+  if(!avail.length){
+    box.innerHTML=`<div class="asn-empty">${q?`🔍 لا يوجد كابتن متاح يطابق "${esc(_assignSearch)}"`:"🌙 لا يوجد كباتن نشطون بالميدان حالياً"}</div>`;
+    return;
+  }
+
+  let html="";
+  avail.forEach(c=>{
+    const tier=c.ledger>=100?"💎":c.ledger>=30?"⭐":"🟢";
+    const initial=c.name!=="غير محدد"?c.name.charAt(0):"🛵";
+    const badge=c.busy?`<span class="asn-badge b-busy">🔴 مشغول</span>`:`<span class="asn-badge b-free">🟢 متاح</span>`;
+    html+=`<div class="asn-item" onclick="doAssign('${ej(c.phone)}')">
+      <div class="asn-av">${esc(initial)}</div>
+      <div class="asn-info">
+        <div class="asn-nm">${tier} ${esc(c.name)}</div>
+        <div class="asn-meta">${esc(c.phone)} · ${c.ledger} طلب إجمالي</div>
+      </div>
+      ${badge}
+    </div>`;
+  });
+  box.innerHTML=html;
+}
+
+/* تنفيذ التعيين من النافذة */
+window.doAssign=async function(dPhone){
+  if(!_assignOrderId||!dPhone)return;
+  clSheet("assignModal");
+  await asgnDrv(_assignOrderId,dPhone);
+};
 window.wdOrder=async function(oId,dPhone,el){
   if(!confirm("سحب الطلب وإعادته للرادار؟"))return;
   if(el)el.disabled=true;
