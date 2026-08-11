@@ -38,7 +38,7 @@ try{if(localStorage.getItem(VK)!==V){localStorage.setItem(VK,V);if("caches"in wi
 
    📌 ارفع هذا الرقم كلّما غيّرت الملف — وإلا لم يصل تغييرك.
    ═══════════════════════════════════════════════════════════════════════════ */
-const ADMIN_APP_VERSION = "5.0-Nahla-Rocket";
+const ADMIN_APP_VERSION = "6.0-Nahla-Leaflet";
 try {
   if (localStorage.getItem('hut_adm_version') !== ADMIN_APP_VERSION) {
     var _rk='hut_adm_version_reload_ts', _last=Number(localStorage.getItem(_rk)||0);
@@ -95,7 +95,13 @@ try {
      لأن الحجب لا يُرى إلا في متصفّح حقيقي.
      ⚠️ img-src هنا 'self' data: blob: https: — فالبلاطات مسموحة أصلاً،
         والحجب كان في السكربت وحده. -->
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://*.firebasedatabase.app https://*.firebaseio.com https://www.gstatic.com https://unpkg.com https://maps.googleapis.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://unpkg.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: blob: https:; media-src 'self' data: blob: https://actions.google.com; connect-src 'self' https://*.firebasedatabase.app https://*.firebaseio.com wss://*.firebasedatabase.app wss://*.firebaseio.com https://script.google.com https://script.googleusercontent.com https://*.googleapis.com https://securetoken.googleapis.com https://*.cloudfunctions.net https://*.run.app; object-src 'none'; base-uri 'none'; form-action 'none'">
+<!-- 🔴 [ADM-10] **لا تحذف https://unpkg.com من script-src ولا من style-src**
+     مهما قالت أداة تدقيق. الحارس يقرأ وسوم script ذات src، وLeaflet تدخل عبر
+     createElement (تحميلٌ كسول بالتصميم) ⇒ إنذارٌ كاذب بأنها «غير مستعملة».
+     وحذفها ⇒ خريطةٌ لا تفتح **بلا خطأ في الواجهة**.
+     ⚠️ و nominatim لازمٌ في connect-src — حذفه يكسر البحث صامتاً.
+     ⚠️ و maps.googleapis أُسقط: المُنتقي انتقل إلى Leaflet. -->
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://*.firebasedatabase.app https://*.firebaseio.com https://www.gstatic.com https://unpkg.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://unpkg.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: blob: https:; media-src 'self' data: blob: https://actions.google.com; connect-src 'self' https://*.firebasedatabase.app https://*.firebaseio.com wss://*.firebasedatabase.app wss://*.firebaseio.com https://script.google.com https://script.googleusercontent.com https://*.googleapis.com https://securetoken.googleapis.com https://*.cloudfunctions.net https://*.run.app https://nominatim.openstreetmap.org; object-src 'none'; base-uri 'none'; form-action 'none'">
 <link rel="manifest" href="manifest_admin.json">
 <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no,viewport-fit=cover">
 <title>نحلة — لوحة الإدارة</title>
@@ -760,6 +766,14 @@ button,input,select,textarea{font-family:'Cairo',sans-serif;}
   animation:rPulse 1.6s infinite}
 @keyframes rPulse{0%{box-shadow:0 0 0 0 rgba(255,193,7,.7)}70%{box-shadow:0 0 0 10px rgba(255,193,7,0)}100%{box-shadow:0 0 0 0 rgba(255,193,7,0)}}
 .leaflet-container{font-family:'Cairo',sans-serif}
+/* 🐝 [ADM-10] علامة نحلة — من متغيّرات الهوية لا من صورة. */
+.nhl-pin-wrap{background:none;border:0}
+.nhl-pin{width:30px;height:30px;border-radius:50% 50% 50% 0;transform:rotate(-45deg);
+  background:var(--sky,#2563eb);border:2.5px solid #fff;
+  box-shadow:0 3px 10px rgba(10,22,40,.35);display:flex;align-items:center;justify-content:center}
+.nhl-pin-dot{width:9px;height:9px;border-radius:50%;background:var(--amber,#f59e0b);transform:rotate(45deg)}
+.nhl-pin-wrap:active .nhl-pin{filter:brightness(1.15)}
+.leaflet-control-attribution{font-size:10px;opacity:.75}
 /* ═══════════════════════════════════════════════════════════════════════════
    ⚡ [PERF-4] content-visibility — أرخص مكسب أداء في الملف كلّه
    ───────────────────────────────────────────────────────────────────────────
@@ -1215,7 +1229,7 @@ let pendCnt=0,emrgMuted=false,isFS=false,fbConn=true;
 let fbL=[],shiftsOn=true;
 let auData=[],alData=[];
 let eType=null,ePh=null,eCT="fixed";
-let gMap=null,gMarker=null,gAutoComplete=null;
+let gMap=null,gMarker=null;   /* [ADM-10] gAutoComplete أُسقط مع Places — لا نظير له في Leaflet */
 /* 🗑️ dc و pc (كائنا Chart.js) حُذفا مع الرسمين. */
 let archHtml="",drvSelOpts="";
 let archSig="",arcPage=1;   /* ⚡ [PERF-1/2] بصمة العرض ورقم الصفحة */
@@ -1271,12 +1285,60 @@ function healAdminAuth(){
 /* 🩹 مستمع ذاتي الشفاء: mkRef دالة تُعيد ref/query (لدعم limitToLast عند
    إعادة الربط). فايربيس يفصل المستمع المرفوض نهائياً — هنا نشفي
    المصادقة ونعيد الربط بأنفسنا. */
+/* ⚡ [ADM-7] مُجمِّع نبضات: يبتلع الرشقة ويُنفّذ **مرّة واحدة** بآخر لقطة.
+   ───────────────────────────────────────────────────────────────────────────
+   مستمعا active_orders و drivers_locations يعملان على العقدة **كاملة**، فأي
+   تغيّر في أي حقل يُسلّم اللقطة كلها. وعند ٣٨ طلباً و٤٩ كابتناً:
+     · كل نبضة موقع (كل ١٠–٢٠ ثانية لكل كابتن) ⇒ ~٣–٥ أحداث/ثانية
+     · وكل كتابة على طلب (status · last_update · is_double) ⇒ حدث
+   وكلٌّ منها كان يُشغّل الخطّ كاملاً: إعادة بناء المصفوفات · فرزان · عدّادات ·
+   إعادة رسم. أي عشرات الدورات في الثانية لعملٍ نتيجته واحدة.
+   ⚠️ و requestAnimationFrame كي تقع كتابات DOM في إطار الرسم لا وسطه —
+      فيختفي التقطيع البصري حتى مع نفس كمّية العمل. */
+function _coalesce(fn, ms){
+  let t=null, last=null;
+  return function(v){
+    last=v;
+    if(t)return;
+    t=setTimeout(()=>{ t=null;
+      const v2=last; last=null;
+      if(window.requestAnimationFrame) requestAnimationFrame(()=>fn(v2)); else fn(v2);
+    }, ms);
+  };
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   🔴 [ADM-8] كان يُعيد المحاولة **كل ١٥ ثانية بلا حدّ وبلا أثر مرئي**، فأنتج:
+     ① إطعاماً مستمرّاً لحاجز القوة الغاشمة في GAS — وهو يُجدّد نافذته مع كل
+        فشل ⇒ **الحجب لا ينتهي ما دامت الصفحة مفتوحة**.
+     ② شاشةً تعرض **أصفاراً** طوال ذلك بلا أي تنبيه — فيبدو أن البيانات ضاعت
+        بينما هي سليمة والقراءة وحدها مرفوضة.
+   الآن: تراجعٌ أُسّي (٢ث → ١٢٠ث سقفاً) وشريطٌ أحمر يقول ما يجري.
+   ═══════════════════════════════════════════════════════════════════════════ */
+let _healTries=0;
+function authBanner(show,msg){
+  let b=document.getElementById("authBanner");
+  if(!show){ if(b)b.remove(); return; }
+  if(!b){
+    b=document.createElement("div"); b.id="authBanner";
+    b.style.cssText="position:fixed;top:0;left:0;right:0;z-index:99999;background:#b91c1c;color:#fff;"
+      +"padding:10px 14px;text-align:center;font-weight:700;font-size:.85rem;box-shadow:0 2px 10px rgba(0,0,0,.3)";
+    document.body.appendChild(b);
+  }
+  b.innerHTML=msg+' &nbsp; <span style="text-decoration:underline;cursor:pointer" onclick="location.reload()">أعد التحميل</span>';
+}
+
 function listen(mkRef,cb){
   const ref=mkRef();
   const cancel=async(err)=>{
     console.warn("🔒 رُفضت القراءة:",err&&err.message);
+    _healTries++;
+    authBanner(true,"⚠️ تعذّر تحميل البيانات — الأرقام المعروضة غير صحيحة. جارٍ إعادة الاتصال…");
     const ok=await healAdminAuth();
-    setTimeout(()=>listen(mkRef,cb),ok?1200:15000);
+    if(ok){ _healTries=0; authBanner(false); setTimeout(()=>listen(mkRef,cb),1200); return; }
+    const wait=Math.min(120000,2000*Math.pow(2,Math.min(_healTries,6)));
+    if(_healTries>=4) authBanner(true,"🔒 انتهت جلستك — سجّل الدخول من جديد.");
+    setTimeout(()=>listen(mkRef,cb),wait);
   };
   ref.on("value",cb,cancel);
   fbL.push({ref,cb});
@@ -1352,10 +1414,29 @@ function cDisp(cs){
 /* 🩹[خ٣٣] البحث عن المطعم بالهاتف أولاً — المفتاح الحقيقي.
    البحث بالاسم كان يخلط مطعمين متشابهي الاسم (أو فرعين)، فتظهر
    إحداثيات وعمولة المطعم الخطأ. الاسم يبقى احتياطاً للطلبات القديمة. */
+/* ⚡ [ADM-6] فهرس الهاتف ← المطعم، يُبنى **مرّة عند تحميل البيانات**.
+   ───────────────────────────────────────────────────────────────────────────
+   كانت findRes تمسح gD.restaurants خطياً وتنادي nP() على **كل صفّ** حتى تجد
+   المطابق. و nP() ليست رخيصة: عشرون split/join للأرقام العربية والفارسية،
+   ثم regex، ثم فحص المفتاح الدولي.
+   والحساب: 300 مطعم × 38 طلباً = **~11,400 نداء nP في كل رسمة** — وأضعافها
+   في بناء كروت الرادار. وهذه هي البطء المحسوس، لا الخريطة ولا فايربيس.
+   الآن: قاموسٌ واحد. البحث O(1)، والتطبيع مرّة لكل مطعم لا مرّة لكل مقارنة.
+   ⚠️ ويُبطَل في applyGD — أي كلّما تغيّرت قائمة المطاعم. */
+let _resIdx=null;
+function _buildResIdx(){
+  _resIdx={};
+  const rows=(gD&&gD.restaurants)||[];
+  for(let i=1;i<rows.length;i++){
+    const ph=nP(rows[i][R.PHONE]);
+    if(ph && !_resIdx[ph]) _resIdx[ph]=rows[i];
+  }
+}
 function findRes(o){
   if(!gD?.restaurants) return null;
+  if(!_resIdx) _buildResIdx();
   const ph=nP(o?.[O.RESPH]);
-  if(ph){ const byPh=gD.restaurants.find(r=>nP(r[R.PHONE])===ph); if(byPh) return byPh; }
+  if(ph && _resIdx[ph]) return _resIdx[ph];
   return gD.restaurants.find(r=>r[R.NAME]===o?.[O.RES]) || null;
 }
 function findResByName(nm){
@@ -1491,6 +1572,7 @@ function applyGD(data){
   data.drivers.forEach(d=>{const ov=ovr.d[d[D.PHONE]];if(ov&&now-ov.ts<120000)d[D.STATUS]=ov.status;else if(ov)delete ovr.d[d[D.PHONE]];});
   data.restaurants.forEach(r=>{const ov=ovr.r[r[R.PHONE]];if(ov&&now-ov.ts<120000)r[R.STATUS]=ov.status;else if(ov)delete ovr.r[r[R.PHONE]];});
   gD=data;
+  _resIdx=null;   /* ⚡ [ADM-6] الفهرس يُبطَل مع كل تحميل — يُعاد بناؤه كسولاً. */
   if(document.getElementById("arcRS").options.length===1){
     data.restaurants.slice(1).forEach(r=>document.getElementById("arcRS").innerHTML+=`<option value="${esc(r[R.NAME])}">${esc(r[R.NAME])}</option>`);
     data.drivers.slice(1).forEach(d=>document.getElementById("arcDS").innerHTML+=`<option value="${esc(String(d[D.PHONE]))}">${esc(d[D.NAME])}</option>`);
@@ -1541,7 +1623,7 @@ function setupFB(){
     const wd=document.getElementById("wdT");if(wd)wd.textContent=liveOrd.length+total;
   }
 
-  const oCb=snap=>{
+  const _oCbRun=snap=>{
     const obj=snap.val();let active=[],arch=[];const now=Date.now();
     if(obj){Object.values(obj).forEach(o=>{
       if(!o.restaurant?.trim())return;
@@ -1583,8 +1665,10 @@ function setupFB(){
     const bd=document.getElementById("bnDot");if(bd)bd.classList.toggle("on",np>0);
     updRadarCnts();updTicker();scheduleDerived();
   };
+  /* ⚡ [ADM-7] 220 مللي: تبتلع رشقة الكتابات ولا تُؤخّر إنذاراً محسوساً. */
+  const oCb=_coalesce(_oCbRun,220);
   listen(()=>db.ref("active_orders"),oCb);
-  const lCb=snap=>{
+  const _lCbRun=snap=>{
     _lastLocs=snap.val()||{};      /* 🗺️ [MAP-1] تغذية الخريطة من المستمع القائم */
     if(_map) paintMap();
 
@@ -1608,6 +1692,8 @@ function setupFB(){
     // ⚡ تأجيل رسم قائمة الأسطول: كان يُعاد بناؤها كاملةً مع كل نبضة موقع لكل كابتن
     if(gD&&document.getElementById("pg-drivers").classList.contains("on"))_drvListDebounced();
   };
+  /* ⚡ [ADM-7] 400 مللي: الموقع نفسه يُحدَّث كل ١٠ ثوانٍ — لا حاجة لدقّة أعلى. */
+  const lCb=_coalesce(_lCbRun,400);
   listen(()=>db.ref("drivers_locations"),lCb);
   const ledCb=()=>{
     if(gD){updBadges("RES",gD.restaurants);updBadges("DRV",gD.drivers);}
@@ -1634,8 +1720,39 @@ function setupFB(){
         في patchCards ولا updBadges ولا updTicker.
      ═══════════════════════════════════════════════════════════════════════ */
   liveLed = liveLed || {drivers:{}, restaurants:{}};
-  listen(()=>db.ref("ledgers/drivers"),     snap=>{ liveLed.drivers    = snap.val()||{}; ledCb(null); });
-  listen(()=>db.ref("ledgers/restaurants"), snap=>{ liveLed.restaurants= snap.val()||{}; ledCb(null); });
+  /* ═══════════════════════════════════════════════════════════════════════
+     🔴 [ADM-9] العطب ليس النقل بل **التجسيد**.
+     ───────────────────────────────────────────────────────────────────────
+     مرآة المطعم تُكتب في: ledgers/restaurants/{هاتف}/today/{يوم}/{طلب}
+     والمستمع على ledgers/restaurants — وهي **الأب المباشر** لـtoday.
+     فـ snap.val() يستنسخ الشجرة **كاملةً** في **كل** كتابة مرآة، و ledCb
+     لا يقرأ منها إلا حقلين: debt و completed_orders.
+
+         25 مطعماً × 60 طلباً ⇒ تجسيد ~264 ك.ب لاستخراج ~1.2 ك.ب  (×225)
+
+     🕐 ولهذا اللوحة أسرع صباحاً وأبطأ مساءً: today تنمو مع اليوم — وهو بالضبط
+        شكل الشكوى: بطءٌ يشتدّ بلا نمطٍ ظاهر.
+
+     ⚠️ ولا ch.val() هنا أيضاً — ذاك يجسّد today لهذا المطعم بعينه، فنعود إلى
+        نفس العطب موزّعاً على الأبناء. child() وحدها.
+     ⚠️ **وهذا علاجٌ داخل اللوحة — لا يُلغي الكلفة الشبكية.** النقل الأوّلي
+        وفروق المزامنة ما زالت تحمل today. والعلاج الجذري نقلُ المرآة خارج
+        ledgers، ويمسّ index.js والقواعد والكنّاس — دفعةٌ أخرى.
+     ═══════════════════════════════════════════════════════════════════════ */
+  const _pickLed=snap=>{
+    const out={};
+    snap.forEach(ch=>{
+      out[ch.key]={
+        debt:             ch.child("debt").val()||0,
+        completed_orders: ch.child("completed_orders").val()||0,
+        balance:          ch.child("balance").val()||0
+      };
+      return false;
+    });
+    return out;
+  };
+  listen(()=>db.ref("ledgers/drivers"),     snap=>{ liveLed.drivers    = _pickLed(snap); ledCb(null); });
+  listen(()=>db.ref("ledgers/restaurants"), snap=>{ liveLed.restaurants= _pickLed(snap); ledCb(null); });
   /* ⚡ [ADM-4] daily_metrics يُكتب عند **كل إنجاز وكل رفض** لكل كابتن، وكان
      يُعيد بناء بطاقات الكباتن كاملةً في كل مرّة بلا تهدئة. وفي الذروة تصل
      عشرات الكتابات في الدقيقة ⇒ عشرات إعادات البناء. الآن تهدئة كالتي
@@ -1884,17 +2001,42 @@ window.rstDebt=function(type,id,el){
 
 /* ⚡ الأداء: خرائط جوجل تُحمَّل كسولاً عند أول فتح لمنتقي الموقع فقط — لا مع كل
    فتح للّوحة. (المفتاح متصفّحي عام؛ قيّده بالـreferrer في Cloud Console.) */
-let _gmapsPromise=null;
+/* ═══════════════════════════════════════════════════════════════════════════
+   🗺️ [ADM-10] مُنتقي موقع المطعم: خرائط جوجل → Leaflet + Nominatim
+   ───────────────────────────────────────────────────────────────────────────
+   والخريطة الحيّة في هذه اللوحة **كانت Leaflet أصلاً** — فبقاء المُنتقي على
+   جوجل كان يعني تحميل محرّكَي خرائط في صفحة واحدة.
+
+   ولماذا الاستبدال، والتحميل كسولٌ في الحالتين؟ لأن الكسل يؤجّل الكلفة ولا
+   يُلغيها. وحين يفتح المدير قسم الموقع يدفعها كاملة:
+
+       خرائط جوجل + libraries=places   ≈ 500+ ك.ب  ·  ومحاسَبة لكل تحميل
+       Leaflet (محمَّلة أصلاً للخريطة الحيّة) ≈ 0 ك.ب إضافية
+
+   ⇒ البند المحاسَب يسقط من الفاتورة، والمفتاح المكشوف في المصدر يسقط معه.
+
+   ⚠️ **وشروط Nominatim ليست اختيارية**: خدمة تطوّعية بحدّ **نداءٍ واحد في
+      الثانية**، وتحجب من يتجاوزه. ولهذا: تبريدٌ بين النداءات، وإلغاءُ النداء
+      السابق، وحدٌّ للنتائج، وviewbox حول كركوك — وبلاه يُعيد «شارع الجمهورية»
+      في مدينةٍ أخرى فيقفز المدير بعيداً.
+
+   ⚠️ واسم loadGoogleMaps **باقٍ**: خمسة مواضع تناديه، وتغييره تغييرٌ بلا مقابل.
+   ═══════════════════════════════════════════════════════════════════════════ */
+const NHL_TILES = "https://basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png";
+let _leafletPromise=null;
 function loadGoogleMaps(){
-  if(window.google&&window.google.maps)return Promise.resolve();
-  if(_gmapsPromise)return _gmapsPromise;
-  _gmapsPromise=new Promise((res,rej)=>{
-    const s=document.createElement("script");
-    s.src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAo1rmqUzieYZU3RIwXOAN87GkpNrp-_Hc&libraries=places";
-    s.async=true;s.defer=true;s.onload=()=>res();s.onerror=()=>rej(new Error("gmaps"));
-    document.head.appendChild(s);
+  if(window.L&&window.L.map)return Promise.resolve();
+  if(_leafletPromise)return _leafletPromise;
+  _leafletPromise=new Promise((res,rej)=>{
+    const css=document.createElement("link");
+    css.rel="stylesheet";css.href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css";
+    document.head.appendChild(css);
+    const sc=document.createElement("script");
+    sc.src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js";
+    sc.async=true;sc.defer=true;sc.onload=()=>res();sc.onerror=()=>rej(new Error("leaflet"));
+    document.head.appendChild(sc);
   });
-  return _gmapsPromise;
+  return _leafletPromise;
 }
 
 function initEditMap(){
@@ -1904,56 +2046,85 @@ function initEditMap(){
 function _initEditMapCore(div){
   const lat=parseFloat(document.getElementById("eLat").value)||35.468;
   const lng=parseFloat(document.getElementById("eLng").value)||44.392;
-  const center={lat,lng};
+
+  /* الخريطة موجودة ⇒ إعادة توسيط لا إعادة بناء. وinvalidateSize لازمة:
+     Leaflet يقيس الحاوية عند الإنشاء، وحاويتنا كانت مخفيّة (display:none)
+     فقاسها صفراً ⇒ خريطة رمادية فارغة. وهو أشهر عطب Leaflet داخل حوار. */
   if(gMap){
-    setTimeout(()=>{google.maps.event.trigger(gMap,"resize");gMap.setCenter(center);gMarker.setPosition(center);},200);
+    setTimeout(()=>{ gMap.invalidateSize(); gMap.setView([lat,lng],16); gMarker.setLatLng([lat,lng]); },200);
     return;
   }
+
   setTimeout(()=>{
-    gMap=new google.maps.Map(div,{center,zoom:16,disableDefaultUI:true,zoomControl:true,streetViewControl:false,mapTypeControl:false,fullscreenControl:false});
-    gMarker=new google.maps.Marker({position:center,map:gMap,draggable:true,animation:google.maps.Animation.DROP,title:"اسحب الدبوس لتحديد الموقع بدقة"});
-    google.maps.event.addListener(gMarker,"dragend",()=>{
-      const p=gMarker.getPosition();
-      document.getElementById("eLat").value=p.lat().toFixed(6);
-      document.getElementById("eLng").value=p.lng().toFixed(6);
-      toast("📍 تم تحديث الإحداثيات");
+    gMap=L.map(div,{zoomControl:true,attributionControl:true}).setView([lat,lng],16);
+    L.tileLayer(NHL_TILES,{
+      maxZoom:19,
+      /* ⚖️ الإسناد شرطُ ترخيص لا تزيين — carto وOSM يشترطانه. لا تحذفه. */
+      attribution:'&copy; <a href="https://www.openstreetmap.org/copyright">OSM</a> &copy; <a href="https://carto.com/attributions">CARTO</a>'
+    }).addTo(gMap);
+
+    /* 🐝 علامة نحلة — divIcon لا صورة: تُلوَّن من متغيّرات الهوية نفسها،
+       فتتبع أي تغيير في اللوحة بلا ملفٍّ يُرفع. */
+    const nhlIcon=L.divIcon({
+      className:"nhl-pin-wrap",
+      html:'<div class="nhl-pin"><span class="nhl-pin-dot"></span></div>',
+      iconSize:[30,42], iconAnchor:[15,42]
     });
-    google.maps.event.addListener(gMap,"click",(e)=>{
-      gMarker.setPosition(e.latLng);
-      document.getElementById("eLat").value=e.latLng.lat().toFixed(6);
-      document.getElementById("eLng").value=e.latLng.lng().toFixed(6);
-    });
-    if(!gAutoComplete){
-      const input=document.getElementById("mapSearchInp");
-      gAutoComplete=new google.maps.places.Autocomplete(input,{componentRestrictions:{country:"iq"},fields:["geometry","name","formatted_address"]});
-      gAutoComplete.addListener("place_changed",()=>{
-        const place=gAutoComplete.getPlace();
-        if(!place.geometry)return toast("لم يُعثر على المكان","e");
-        const loc=place.geometry.location;
-        gMap.setCenter(loc);gMap.setZoom(17);gMarker.setPosition(loc);
-        document.getElementById("eLat").value=loc.lat().toFixed(6);
-        document.getElementById("eLng").value=loc.lng().toFixed(6);
-        toast("🎯 "+(place.name||place.formatted_address));
-      });
+    gMarker=L.marker([lat,lng],{draggable:true,icon:nhlIcon,autoPan:true}).addTo(gMap);
+
+    const sync=(la,ln)=>{
+      document.getElementById("eLat").value=Number(la).toFixed(6);
+      document.getElementById("eLng").value=Number(ln).toFixed(6);
+    };
+    gMarker.on("dragend",()=>{ const p=gMarker.getLatLng(); sync(p.lat,p.lng); toast("📍 تم تحديث الإحداثيات"); });
+    gMap.on("click",e=>{ gMarker.setLatLng(e.latlng); sync(e.latlng.lat,e.latlng.lng); });
+
+    /* ⌨️ البحث بـEnter — بديل Places Autocomplete.
+       وpreventDefault لازم: الحقل داخل حوار، وEnter يُرسله ويغلقه. */
+    const inp=document.getElementById("mapSearchInp");
+    if(inp&&!inp.dataset.nhlBound){
+      inp.dataset.nhlBound="1";
+      inp.addEventListener("keydown",ev=>{ if(ev.key==="Enter"){ ev.preventDefault(); window.srchGMap(); } });
     }
-    google.maps.event.trigger(gMap,"resize");
+
+    gMap.invalidateSize();
   },350);
 }
-window.srchGMap=function(){
-  const q=document.getElementById("mapSearchInp").value.trim();if(!q)return;
-  if(typeof google==="undefined")return toast("Google Maps لم يُحمَّل بعد","e");
-  const svc=new google.maps.places.PlacesService(gMap);
-  svc.findPlaceFromQuery({query:q+" كركوك العراق",fields:["geometry","name"]},
-    (results,status)=>{
-      if(status===google.maps.places.PlacesServiceStatus.OK&&results[0]){
-        const loc=results[0].geometry.location;
-        gMap.setCenter(loc);gMap.setZoom(17);gMarker.setPosition(loc);
-        document.getElementById("eLat").value=loc.lat().toFixed(6);
-        document.getElementById("eLng").value=loc.lng().toFixed(6);
-        toast("🎯 "+results[0].name);
-      }else toast("لم يُعثر على المكان","e");
-    });
+
+let _geoBusy=false,_geoLast=0,_geoAbort=null;
+window.srchGMap=async function(){
+  const el=document.getElementById("mapSearchInp");
+  const q=(el&&el.value||"").trim();
+  if(!q)return;
+  if(!window.L||!gMap)return toast("الخريطة لم تُحمَّل بعد","e");
+
+  const now=Date.now();
+  if(_geoBusy||now-_geoLast<1100)return toast("لحظة… البحث الجغرافي محدود بنداءٍ في الثانية");
+  _geoBusy=true;_geoLast=now;
+
+  try{
+    if(_geoAbort)try{_geoAbort.abort();}catch(_){}
+    _geoAbort=new AbortController();
+    const t=setTimeout(()=>{try{_geoAbort.abort();}catch(_){}} ,8000);
+
+    const url="https://nominatim.openstreetmap.org/search?format=json&limit=1&countrycodes=iq"
+            + "&bounded=1&viewbox=43.9,35.9,44.9,35.1&q="+encodeURIComponent(q);
+    const r=await fetch(url,{signal:_geoAbort.signal,headers:{"Accept":"application/json"}});
+    clearTimeout(t);
+    if(!r.ok)throw new Error("http "+r.status);
+    const j=await r.json();
+    if(!j||!j.length)return toast("لم يُعثر على المكان","e");
+
+    const la=parseFloat(j[0].lat),ln=parseFloat(j[0].lon);
+    gMap.setView([la,ln],17); gMarker.setLatLng([la,ln]);
+    document.getElementById("eLat").value=la.toFixed(6);
+    document.getElementById("eLng").value=ln.toFixed(6);
+    toast("🎯 "+String(j[0].display_name||q).split(",")[0]);
+  }catch(e){
+    toast(e&&e.name==="AbortError"?"انتهت مهلة البحث":"تعذّر البحث الجغرافي","e");
+  }finally{ _geoBusy=false; }
 };
+
 window.sCT=function(t){
   eCT=t;
   ["F","S","M"].forEach(x=>document.getElementById("ctb"+x)?.classList.toggle("on",x===t.charAt(0).toUpperCase()));
@@ -2644,7 +2815,13 @@ window.doLogout=function(){
   try{auth.signOut();}catch(e){}
   fbL.forEach(({ref,cb})=>ref.off("value",cb));fbL=[];
   stopStaffIdleTimer();
-  gMap=null;gMarker=null;gAutoComplete=null;
+  /* 🧹 [ADM-11] تفكيك الخريطة عند الخروج — remove() لا تصفيرٌ فقط.
+     Leaflet يربط مستمعي resize و scroll بالنافذة، وتصفير المرجع وحده يتركها
+     معلّقة: تتراكم مع كل فتحٍ وإغلاق حتى تصير اللوحة أبطأ كلّما طال بقاؤها
+     مفتوحة — وهو تسرّبٌ لا يظهر إلا بعد ساعة عمل. */
+  try{ if(gMap&&gMap.remove) gMap.remove(); }catch(_){}
+  try{ if(_map&&_map.remove) _map.remove(); _map=null; }catch(_){}
+  gMap=null;gMarker=null;
   MP="";ovr={o:{},d:{},r:{}};sessionStorage.clear();localStorage.clear();location.reload();
 };
 function renderAudit(){
