@@ -1,0 +1,27 @@
+{
+  "name": "ليدر نحلة | غرفة العمليات",
+  "short_name": "ليدر نحلة",
+  "description": "لوحة الليدر — متابعة الطلبات والكباتن لحظةً بلحظة",
+  "start_url": "./Nahlelidersas.html",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#f6f8fc",
+  "theme_color": "#1e3a5f",
+  "orientation": "any",
+  "lang": "ar",
+  "dir": "rtl",
+  "icons": [
+    {
+      "src": "./admin-logo.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "./admin-logo.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ]
+}
