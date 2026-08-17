@@ -38,7 +38,7 @@ try{if(localStorage.getItem(VK)!==V){localStorage.setItem(VK,V);if("caches"in wi
 
    📌 ارفع هذا الرقم كلّما غيّرت الملف — وإلا لم يصل تغييرك.
    ═══════════════════════════════════════════════════════════════════════════ */
-const ADMIN_APP_VERSION = "6.1-Nahla-Track";
+const ADMIN_APP_VERSION = "6.2-Nahla-PrefDrivers";
 try {
   if (localStorage.getItem('hut_adm_version') !== ADMIN_APP_VERSION) {
     var _rk='hut_adm_version_reload_ts', _last=Number(localStorage.getItem(_rk)||0);
@@ -836,6 +836,26 @@ button,input,select,textarea{font-family:'Cairo',sans-serif;}
   </div>
 </div>
 
+<!-- 🍽️ [N-10.0] كباتن المطعم الثابتون -->
+<div id="prefMod" class="mbg" onclick="clMod('prefMod')">
+  <div class="mcard" style="max-width:520px" onclick="event.stopPropagation()">
+    <div style="width:46px;height:46px;border-radius:14px;background:var(--sky-l);display:flex;align-items:center;justify-content:center;color:var(--sky);margin:0 auto 11px;font-size:22px">🍽️</div>
+    <h4 style="font-weight:900;text-align:center;color:var(--ink);margin-bottom:3px">كباتن المطعم الثابتون</h4>
+    <p id="prefSub" style="font-size:.75rem;font-weight:700;color:var(--ink4);text-align:center;margin-bottom:14px"></p>
+    <div style="background:var(--base2);border:1px solid var(--line2);border-radius:12px;padding:9px 12px;margin-bottom:12px;font-size:.72rem;font-weight:700;color:var(--ink3);line-height:1.7">
+      ⏱️ يُعرض الطلب على هؤلاء وحدهم <b id="prefGraceTxt">٥</b> دقائق، ثم يُفتح للأسطول كلّه.<br>
+      🚦 وفي ساعة الزخم يُفتح فوراً — فلا يتأخّر زبون.<br>
+      🗑️ وقائمةٌ فارغة تعني الأسطول كلّه (الحال الافتراضي).
+    </div>
+    <input type="text" id="prefSearch" class="fc" style="margin-bottom:10px" placeholder="🔍 ابحث باسم الكابتن أو رقمه" oninput="prefRender()">
+    <div id="prefBody" style="max-height:42vh;overflow-y:auto;border:1px solid var(--line2);border-radius:12px;padding:5px"></div>
+    <div style="display:flex;gap:8px;margin-top:14px">
+      <button id="prefSave" onclick="prefSave()" style="flex:1;padding:11px;background:var(--sky);color:#fff;border:0;border-radius:12px;font-weight:800;cursor:pointer;font-family:'Cairo'">حفظ</button>
+      <button onclick="clMod('prefMod')" style="flex:1;padding:11px;background:var(--base2);border:1px solid var(--line2);border-radius:12px;font-weight:800;cursor:pointer;color:var(--ink3);font-family:'Cairo'">إلغاء</button>
+    </div>
+  </div>
+</div>
+
 <div id="editMod" class="mbg" onclick="clEdit()">
   <div class="mcard" style="max-width:500px" onclick="event.stopPropagation()">
     <div style="width:46px;height:46px;border-radius:14px;background:var(--sky-l);display:flex;align-items:center;justify-content:center;color:var(--sky);margin:0 auto 11px;font-size:22px">✏️</div>
@@ -1225,6 +1245,8 @@ let liveLed={drivers:{},restaurants:{}},liveMet={},liveResLoc={};
 let actDrv=new Set();
 /* 👑 [L-1] نظام الليدرز: من هو ليدر، ومتى بدأت نافذته اليوم. */
 let ldrSet=new Set(), ldrWin={};
+/* 🍽️ [N-10.0] عدد كباتن كل مطعم — لتلوين زرّ البطاقة بلا نداء لكل بطاقة. */
+let prefCount={};
 let ovr={o:{},d:{},r:{}};
 let rfilt="all",resSF="mostOrders",drvSF="mostOrders";
 let arcSC="date",arcSD="desc";
@@ -1799,6 +1821,13 @@ function setupFB(){
   },400);
 const rlCb=snap=>{liveResLoc=snap.val()||{};_rlDebounced();};
   listen(()=>db.ref("restaurants_locations"),rlCb);
+  /* 🍽️ [N-10.0] العقدة صغيرة (مفاتيح منطقية)، ومستمعٌ واحد عليها أرخص من
+     نداءٍ لكل بطاقة مطعم. والقواعد تسمح للإدارة بقراءة الأمّ. */
+  listen(()=>db.ref("restaurant_drivers"),snap=>{
+    const v=snap.val()||{};prefCount={};
+    Object.keys(v).forEach(rp=>{const dl=v[rp]&&v[rp].drivers;if(dl)prefCount[nP(rp)]=Object.keys(dl).filter(k=>dl[k]===true).length;});
+    if(document.getElementById("pg-restaurants").classList.contains("on"))filtEnt("RES");
+  });
   if(!_alInit){_alInit=true;listen(()=>db.ref("system_alerts").limitToLast(60),snap=>{alData=[];const v=snap.val();if(v)Object.keys(v).forEach(k=>alData.unshift({id:k,...v[k]}));updTicker();if(document.getElementById("pg-aiops").classList.contains("on"))renderAlerts();});}
   if(!_auInit){_auInit=true;listen(()=>db.ref("admin_audit_trail").limitToLast(120),snap=>{auData=[];const v=snap.val();if(v)Object.keys(v).forEach(k=>auData.unshift(v[k]));if(document.getElementById("pg-audit").classList.contains("on"))renderAudit();});}
   setupStaffFB();
@@ -1907,6 +1936,10 @@ function filtEnt(type){
       const ov=ex.querySelector(".ls-ord"),dv=ex.querySelector(".ls-debt");
       if(ov)ov.textContent=orders.toLocaleString("ar-EG");
       if(dv)dv.textContent=debt.toLocaleString("ar-EG")+" د.ع";
+      /* 🍽️ [N-10.0] البطاقة القائمة تُرقَّع ولا تُعاد بناءً — فلولا هذا السطر
+         لبقي لون الزرّ على حاله حتى إعادة تحميل اللوحة. */
+      if(type==="RES"){const pb=ex.querySelector(".ea-pref");
+        if(pb){pb.style.background=prefCount[n]?"#0ea5e9":"#e2e8f0";pb.style.color=prefCount[n]?"#fff":"#64748b";}}
       return;
     }
     const pj=ej(phone);
@@ -1928,6 +1961,7 @@ function filtEnt(type){
           <button class="ea ea-p" title="استراحة" onclick="doAct('PAUSE','${type}','${pj}',this)">⏸</button>
           <button class="ea ea-b" title="حظر"      onclick="doAct('BAN','${type}','${pj}',this)">🚫</button>
           ${type==="DRV" ? `<button class="ea" title="${ldrSet.has(n)?"إلغاء صفة الليدر":"جعله ليدر"}" style="background:${ldrSet.has(n)?"#7c3aed":"#e2e8f0"};color:${ldrSet.has(n)?"#fff":"#64748b"}" onclick="toggleLeader('${pj}',${ldrSet.has(n)?"false":"true"},this)">&#128081;</button>` : ""}
+          ${type==="RES" ? `<button class="ea ea-pref" title="كباتن المطعم الثابتون" style="background:${prefCount[n]?"#0ea5e9":"#e2e8f0"};color:${prefCount[n]?"#fff":"#64748b"}" onclick="opPref('${pj}')">&#127869;</button>` : ""}
           <button class="ea ea-d" title="حذف"      onclick="doAct('DEL','${type}','${pj}',this)">🗑</button>
           <button class="ea ea-e" title="تعديل"   onclick="opEdit('${type}','${pj}')">✏️</button>
         </div>
@@ -1968,6 +2002,98 @@ window.toggleLeader=function(pj,on,btn){
     .then(function(){toast(isOn?"👑 صار ليدراً ✅":"عاد كابتناً عادياً ✅");})
     .catch(function(e){toast("تعذّر: "+e.message);})
     .finally(function(){if(btn)btn.disabled=false;});
+};
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   🍽️ [N-10.0] كباتن المطعم الثابتون — الضبط من هنا وحده
+   ───────────────────────────────────────────────────────────────────────────
+   العقدة restaurant_drivers/<هاتف المطعم>/drivers/<هاتف الكابتن> = true
+   والقواعد تشترط دور admin للكتابة، وتشترط أن تكون القيمة true ومفتاحها
+   أرقاماً — فحقلٌ مشوّه يُرفض عند الحافة لا يُكتشف في المحرك.
+
+   ⚠️ ولا تُكتب القائمة داخل restaurants_config: مرآة GAS تكتبها بـfbPut،
+      أي دهساً كاملاً للكائن، فأي تعديل مطعم كان يمحوها بصمت.
+
+   🧹 والحفظ **فرقٌ لا دهس**: نُرسل null لمن أُزيل وtrue لمن أُضيف في تحديث
+      واحد. فلو فُتحت النافذة على بيانات قديمة (وصلت إضافةٌ من جهاز آخر بين
+      الفتح والحفظ) لا نمحو ما لم نره — نمحو ما أزاله الإداري بيده فقط.
+   ═══════════════════════════════════════════════════════════════════════════ */
+let _prefRes="", _prefName="", _prefOrig=new Set(), _prefSel=new Set();
+
+window.opPref=function(pj){
+  const phone=nP(String(pj||""));
+  if(!phone){toast("رقم غير صالح ❌","e");return;}
+  const item=gD?.restaurants?.find(i=>nP(i[2])===phone);
+  _prefRes=phone; _prefName=item?String(item[1]):phone;
+  _prefOrig=new Set(); _prefSel=new Set();
+  document.getElementById("prefSub").textContent=_prefName+" · "+phone;
+  document.getElementById("prefSearch").value="";
+  document.getElementById("prefBody").innerHTML=`<div style="text-align:center;padding:18px;color:var(--ink4);font-size:.78rem;font-weight:700">جارٍ الجلب…</div>`;
+  opMod("prefMod");
+  db.ref("restaurant_drivers/"+phone+"/drivers").once("value")
+    .then(function(s){
+      const v=s.val()||{};
+      Object.keys(v).forEach(function(k){ if(v[k]===true){ const n=nP(k); if(n){_prefOrig.add(n);_prefSel.add(n);} } });
+      prefRender();
+    })
+    .catch(function(e){
+      document.getElementById("prefBody").innerHTML=`<div style="text-align:center;padding:18px;color:var(--red);font-size:.78rem;font-weight:700">تعذّر الجلب: ${esc(e.message)}</div>`;
+    });
+};
+
+window.prefRender=function(){
+  const q=(document.getElementById("prefSearch")?.value||"").trim().toLowerCase();
+  const all=(gD?.drivers||[]).slice(1).filter(function(d){
+    const st=d[D.STATUS];
+    /* المحذوف والموقوف لا يُعرضان — إلا إن كانا في القائمة أصلاً، فيُعرضان
+       ليراهما الإداري ويُزيلهما. قائمةٌ فيها كابتن محظور تُضيّق بلا فائدة. */
+    return (st!=="deleted"&&st!=="banned")||_prefSel.has(nP(d[2]));
+  });
+  let list=all;
+  if(q)list=all.filter(d=>String(d[1]).toLowerCase().includes(q)||String(d[2]).toLowerCase().includes(q));
+  /* المختارون أولاً — فالإداري يرى قائمته الحالية بلا تمرير. */
+  list=list.slice().sort(function(a,b){
+    const sa=_prefSel.has(nP(a[2]))?0:1, sb=_prefSel.has(nP(b[2]))?0:1;
+    return sa-sb || String(a[1]).localeCompare(String(b[1]),"ar");
+  });
+  const body=document.getElementById("prefBody");
+  if(!list.length){body.innerHTML=`<div style="text-align:center;padding:18px;color:var(--ink4);font-size:.78rem;font-weight:700">لا نتائج</div>`;return;}
+  body.innerHTML=list.map(function(d){
+    const n=nP(d[2]), on=_prefSel.has(n), live=actDrv.has(n);
+    return `<label style="display:flex;align-items:center;gap:9px;padding:8px 9px;border-radius:10px;cursor:pointer;background:${on?"var(--sky-l)":"transparent"};margin-bottom:3px">
+      <input type="checkbox" ${on?"checked":""} onchange="prefTgl('${ej(n)}',this.checked)" style="width:17px;height:17px;accent-color:var(--sky);cursor:pointer">
+      <span style="flex:1;font-size:.78rem;font-weight:800;color:var(--ink)">${esc(d[1])}</span>
+      <span style="font-size:.68rem;font-weight:700;color:var(--ink4)">${esc(d[2])}</span>
+      <span style="font-size:.62rem;font-weight:800;color:${live?"#16a34a":"var(--ink4)"}">${live?"🟢":"⚪"}</span>
+    </label>`;
+  }).join("");
+  document.getElementById("prefSave").textContent="حفظ ("+_prefSel.size+" كابتن)";
+};
+
+window.prefTgl=function(n,on){ if(on)_prefSel.add(String(n)); else _prefSel.delete(String(n)); prefRender(); };
+
+window.prefSave=function(){
+  const btn=document.getElementById("prefSave");
+  const added=[..._prefSel].filter(n=>!_prefOrig.has(n));
+  const removed=[..._prefOrig].filter(n=>!_prefSel.has(n));
+  if(!added.length&&!removed.length){toast("لا تغيير");clMod("prefMod");return;}
+  if(!_prefSel.size&&!confirm("إفراغ القائمة يُعيد هذا المطعم إلى الأسطول كلّه.\n\nمتابعة؟"))return;
+  btn.disabled=true;
+  const base="restaurant_drivers/"+_prefRes;
+  const upd={};
+  added.forEach(n=>{ upd[base+"/drivers/"+n]=true; });
+  removed.forEach(n=>{ upd[base+"/drivers/"+n]=null; });
+  upd[base+"/updated_at"]=new Date().toISOString();
+  upd[base+"/updated_by"]="admin";
+  db.ref().update(upd)
+    .then(function(){
+      _prefOrig=new Set(_prefSel);
+      toast("✅ حُفظت قائمة "+_prefName+" ("+_prefSel.size+" كابتن)");
+      logAudit("prefDrivers",`كباتن ${_prefName}: ${_prefSel.size} (+${added.length} · −${removed.length})`);
+      clMod("prefMod");
+    })
+    .catch(function(e){ toast("تعذّر الحفظ: "+e.message,"e"); })
+    .finally(function(){ btn.disabled=false; });
 };
 
 function doAct(cmd,type,id,el){
