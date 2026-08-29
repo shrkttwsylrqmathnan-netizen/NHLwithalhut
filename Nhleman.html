@@ -38,7 +38,7 @@ try{if(localStorage.getItem(VK)!==V){localStorage.setItem(VK,V);if("caches"in wi
 
    📌 ارفع هذا الرقم كلّما غيّرت الملف — وإلا لم يصل تغييرك.
    ═══════════════════════════════════════════════════════════════════════════ */
-const ADMIN_APP_VERSION = "6.2-Nahla-PrefDrivers";
+const ADMIN_APP_VERSION = "6.3-Nahla-Profile";
 try {
   if (localStorage.getItem('hut_adm_version') !== ADMIN_APP_VERSION) {
     var _rk='hut_adm_version_reload_ts', _last=Number(localStorage.getItem(_rk)||0);
@@ -1247,6 +1247,9 @@ let actDrv=new Set();
 let ldrSet=new Set(), ldrWin={};
 /* 🍽️ [N-10.0] عدد كباتن كل مطعم — لتلوين زرّ البطاقة بلا نداء لكل بطاقة. */
 let prefCount={};
+/* 🖼️🕐 [N-12.0] صورة الكابتن وموعد شفته — من نفس مستمع drivers_locations
+   القائم، بلا نداءٍ إضافي واحد. */
+let drvPhoto={}, drvShift={};
 let ovr={o:{},d:{},r:{}};
 let rfilt="all",resSF="mostOrders",drvSF="mostOrders";
 let arcSC="date",arcSD="desc";
@@ -1707,6 +1710,14 @@ function setupFB(){
          عشرين كابتناً ينبضون كل 10–20 ثانية = 60–120 عملية DOM في الدقيقة،
          وهي أثقل مصدر تقطيع في اللوحة. الآن: عدٌّ فقط. */
       if(d.status==="active"&&d.lat&&d.lng&&!stale) actDrv.add(nP(phone));
+      /* 🖼️🕐 [N-12.0] الصورة والشفت من نفس اللقطة — صفر نداء إضافي. */
+      const _n=nP(phone);
+      if(d.photo) drvPhoto[_n]=String(d.photo); else delete drvPhoto[_n];
+      if(d.shift_h!==undefined&&d.shift_h!==null){
+        const _h=Number(d.shift_h), _l=Number(d.shift_len||10), _e=(_h+_l)%24;
+        const _lb=x=>((x%12)||12)+(x<12?"ص":"م");
+        drvShift[_n]=_lb(_h)+" ← "+_lb(_e)+" · "+_l+"س";
+      } else delete drvShift[_n];
       /* 👑 [L-1] علَم الليدر ونافذته — من المستمع القائم، بلا قراءة إضافية. */
       if(d.is_leader===true) ldrSet.add(nP(phone)); else ldrSet.delete(nP(phone));
       if(d.leader_window_start) ldrWin[nP(phone)]=d.leader_window_start; else delete ldrWin[nP(phone)];
@@ -1946,11 +1957,14 @@ function filtEnt(type){
     const html=`<div id="${cid}" class="ec ec-${status}">
       ${extra}
       <div class="ec-top">
-        <div class="ec-av">${type==="RES"?"🍽":"🛵"}</div>
+        <div class="ec-av">${type==="DRV"&&drvPhoto[n]
+          ? `<img src="${esc(drvPhoto[n])}" alt="" loading="lazy" style="width:100%;height:100%;border-radius:inherit;object-fit:cover">`
+          : (type==="RES"?"🍽":"🛵")}</div>
         <span class="sp ${spC}">${esc(spL)}</span>
       </div>
       <div class="ec-n">${esc(name)}</div>
       <div class="ec-ph">${esc(phone)}</div>
+      ${type==="DRV"&&drvShift[n] ? `<div class="ec-ph" style="color:#0369a1;font-weight:700">🕐 ${esc(drvShift[n])}</div>` : ""}
       <div class="ls">
         <div class="lm"><div class="lv b ls-ord">${orders.toLocaleString("ar-EG")}</div><div class="ll">طلبات منجزة</div></div>
         <div class="lm"><div class="lv r ls-debt">${debt.toLocaleString("ar-EG")} د.ع</div><div class="ll">عمولة مستحقة</div></div>
