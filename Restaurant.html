@@ -31,7 +31,7 @@
         //          القاعدة الجديدة ترفض القراءة الكاملة لغير الإدارة.
         //  🔒 ضمان مصادقة فايربيس قبل أي كتابة (القواعد لم تعد تقبل مجهولاً).
         //  🛵 اسم الكابتن من drivers_locations/{phone}/name بدل شيت السائقين.
-        const CURRENT_APP_VERSION = "43.1.Nahla-Avatar";   /* 🔧 V2.2 */
+        const CURRENT_APP_VERSION = "43.2.Nahla-Avatar36";   /* 🔧 V2.2 */
         const RES_VERSION_KEY = 'hut_res_app_version';
         try {
             if (localStorage.getItem(RES_VERSION_KEY) !== CURRENT_APP_VERSION) {
@@ -2409,13 +2409,20 @@ function escAttr(x){ return esc(x).replace(/"/g,'&quot;').replace(/'/g,'&#39;');
     }
     /* الوسم يُبنى بـescAttr على الرابط — والقاعدة تشترط بدايةَ https،
        فلا يصل إلى هنا جافاسكربت متنكّر في هيئة صورة. */
+    /* 🖼️ [N-12.0-ب] الحجم 22 كان بحجم حرفٍ في السطر — لا يُميّز وجهاً.
+       رُفع إلى 36، وأُصلح معه سلوكان كانا يعملان في الفراغ:
+         • vertical-align لا أثر له داخل حاوية flex (‏.detail-item منها)
+           — أُزيل، وalign-items:center في الأمّ يتكفّل بالمحاذاة.
+         • margin-inline-end يُضاف فوق gap:6px القائمة ⇒ فراغٌ مضاعف.
+       وأُضيف flex-shrink:0: بدونه تُسحق الدائرة على الشاشات الضيّقة
+       فتصير بيضةً لا وجهاً — وهو ما يقع فعلاً على هواتف 360 بكسل. */
     function driverAvatarHtml(phone, px) {
         const u = getDriverPhotoCached(phone);
-        const size = px || 22;
+        const size = px || 36;
         if (!u) return '';
         return `<img src="${escAttr(u)}" alt="" loading="lazy"
             style="width:${size}px;height:${size}px;border-radius:50%;object-fit:cover;
-                   vertical-align:middle;margin-inline-end:6px;border:1px solid rgba(15,23,42,.12)">`;
+                   flex-shrink:0;border:1px solid rgba(15,23,42,.12)">`;
     }
 
     let lastOrdersSnapshot = {};
@@ -2700,7 +2707,7 @@ function escAttr(x){ return esc(x).replace(/"/g,'&quot;').replace(/'/g,'&#39;');
                 </div>
                 <div class="order-details-row mt-2">
                     <div class="detail-item"><i data-lucide="map-pin" size="14" style="color: var(--accent);"></i> ${esc(orderArea || 'غير محددة')}</div>
-                    <div class="detail-item">${hasDriver ? driverAvatarHtml(driverPhone,22) : '<i data-lucide="bike" size="14" style="color: var(--success);"></i> '}الكابتن: ${driverName}</div>
+                    <div class="detail-item">${hasDriver ? driverAvatarHtml(driverPhone,36) : '<i data-lucide="bike" size="14" style="color: var(--success);"></i> '}الكابتن: ${driverName}</div>
                 </div>
                 <div class="progress-tracker mt-3">
                     <div class="progress-line"></div>
