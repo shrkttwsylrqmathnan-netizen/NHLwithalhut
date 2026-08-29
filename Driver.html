@@ -49,7 +49,7 @@
      الآن: رقمٌ واحد يُشتقّ منه كل شيء — الشاشة والإعدادات ومسح الكاش.
      **وأي تسليم جديد يجب أن يرفعه، وإلا لم يصل.**
      ═══════════════════════════════════════════════════════════════════════ */
-  const CURRENT_APP_VERSION = "18.2-Nahla-Bridged";   /* 🔧 V2.2 — لا تنسَ رفعه مع كل تسليم يمسّ هذا الملف */
+  const CURRENT_APP_VERSION = "18.8-Nahla-Twin";   /* 🔧 V2.2 — لا تنسَ رفعه مع كل تسليم يمسّ هذا الملف */
   window.APP_VERSION = CURRENT_APP_VERSION;
   /* اطبعه في شاشة الدخول فور جهوز الصفحة — نصّاً واحداً لا نسختين. */
   document.addEventListener('DOMContentLoaded', function(){
@@ -895,6 +895,23 @@ window.__SND={alert:"UklGRvaoAABXQVZFZm10IBAAAAABAAEAIlYAAESsAAACABAAZGF0YdKoAAA
     </div>
 
     <div class="set">
+      <div class="set-r">
+        <div style="display:flex;align-items:center;gap:12px">
+          <div style="width:52px;height:52px;border-radius:50%;background:#f1f5f9;overflow:hidden;display:flex;align-items:center;justify-content:center;flex-shrink:0">
+            <span id="setPhotoPh" style="font-size:22px">👤</span>
+            <img id="setPhoto" style="width:100%;height:100%;object-fit:cover;display:none" alt="">
+          </div>
+          <div>
+            <div class="set-l">🖼️ صورتي وموعد شفتي</div>
+            <div class="set-h" id="setShiftWin">—</div>
+            <div class="set-h" id="setShiftNext" style="color:#b45309"></div>
+          </div>
+        </div>
+        <button class="stp-b" style="width:auto;padding:0 14px" onclick="openOnboarding(false)">تعديل</button>
+      </div>
+    </div>
+
+    <div class="set">
       <div class="set-l">🕐 معلومات الشفت والعمل</div>
       <div class="set-h">تُدار ساعات شفتك من الإدارة.</div>
       <div class="sg">
@@ -967,6 +984,53 @@ window.__SND={alert:"UklGRvaoAABXQVZFZm10IBAAAAABAAEAIlYAAESsAAACABAAZGF0YdKoAAA
 </div>
 
 <!-- ══════════════ تنبيه الطلب ══════════════ -->
+<!-- ══════════════ [N-12.0] الإعداد الإجباري: الصورة وتوقيت الشفت ══════════════
+     ⚠️ تحجب **زرّ الإتاحة** لا التطبيق كلّه. وكابتنٌ يحمل طلباً الآن يُكمل
+        تسليمه ثم يُطالَب — فلا يُحبس بين شاشةٍ وزبون ينتظر. -->
+<div id="obOv" class="sheet-ov dn">
+  <div class="sheet" style="max-height:92vh;overflow-y:auto">
+    <div class="grab"></div>
+    <div class="sheet-t" id="obTitle">👋 أكمل ملفّك قبل النزول</div>
+    <div class="set-h" style="margin:-6px 0 14px">صورتك تظهر للمطعم فيعرف من يستلم الطلب، وموعدك يحفظ لك شفتك اليومي.</div>
+
+    <div class="set">
+      <div class="set-l">📷 صورتك</div>
+      <div class="set-h">صورة واضحة لوجهك. يراها المطعم والإدارة والليدر — لا الزبون.</div>
+      <div style="display:flex;align-items:center;gap:14px;margin-top:12px">
+        <div id="obImgBox" style="width:88px;height:88px;border-radius:50%;background:#f1f5f9;border:2px dashed #cbd5e1;display:flex;align-items:center;justify-content:center;overflow:hidden;flex-shrink:0">
+          <span id="obImgPh" style="font-size:30px">👤</span>
+          <img id="obImg" style="width:100%;height:100%;object-fit:cover;display:none" alt="">
+        </div>
+        <div style="flex:1">
+          <button class="cta cta-1" style="padding:11px" onclick="document.getElementById('obFile').click()">اختر صورة</button>
+          <div id="obImgMsg" style="font-size:.76rem;color:var(--muted);margin-top:7px">لم تُختَر صورة بعد</div>
+        </div>
+      </div>
+      <input type="file" id="obFile" accept="image/*" capture="user" style="display:none" onchange="obPick(this)">
+    </div>
+
+    <div class="set">
+      <div class="set-l">🕐 موعد شفتك اليومي</div>
+      <div class="set-h">تنزل كل يوم في هذا الموعد. ولن تصلك طلبات قبله.</div>
+      <div style="display:flex;gap:10px;margin-top:12px">
+        <div style="flex:1">
+          <div style="font-size:.75rem;color:var(--muted);margin-bottom:5px">ساعة البدء</div>
+          <select id="obStart" class="fc" style="width:100%;padding:11px;border-radius:12px;font-family:inherit;font-size:1rem"></select>
+        </div>
+        <div style="flex:1">
+          <div style="font-size:.75rem;color:var(--muted);margin-bottom:5px">عدد الساعات</div>
+          <select id="obHours" class="fc" style="width:100%;padding:11px;border-radius:12px;font-family:inherit;font-size:1rem"></select>
+        </div>
+      </div>
+      <div id="obWin" style="margin-top:11px;padding:10px 12px;background:#eff6ff;border:1px solid #bfdbfe;border-radius:11px;font-size:.83rem;font-weight:700;color:#1e40af"></div>
+    </div>
+
+    <div id="obErr" style="display:none;margin:10px 0;padding:10px 12px;background:#FEF2F2;border:1px solid #FCA5A5;border-radius:11px;font-size:.82rem;font-weight:700;color:#B91C1C"></div>
+    <button class="cta cta-3" id="obSave" onclick="obSave()">حفظ والمتابعة</button>
+    <button id="obLater" class="cta" style="background:#f1f5f9;color:#64748b;margin-top:8px;display:none" onclick="closeSheet('obOv')">لاحقاً — عندي طلب الآن</button>
+  </div>
+</div>
+
 <div id="alertOv" class="dn">
   <div>
     <div class="al-bell"><svg class="si" style="width:44px;height:44px;" viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg></div>
@@ -1272,6 +1336,10 @@ window.addEventListener('popstate',()=>{
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";
 import { getDatabase, ref, onValue, update, set, get, increment, onDisconnect, query, orderByChild, equalTo } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-database.js";
 import { getFunctions, httpsCallable } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-functions.js";
+/* 🖼️ [N-12.0] Storage — نفس النسخة والنمط الذي يرفع به تطبيق المطاعم
+   صور الوصولات منذ إصدارات. و connect-src في الـCSP يسمح بـgoogleapis
+   أصلاً، فلا تعديل على السياسة. */
+import { getStorage, ref as sRef, uploadString, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-storage.js";
 import { getAuth, signInWithCustomToken, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
 
 /* ═══════════════════════════════════════════════════════════════
@@ -1299,7 +1367,7 @@ const fbCfg = {
   projectId:"nahla-delivery-6b06f", storageBucket:"nahla-delivery-6b06f.firebasestorage.app",
   messagingSenderId:"592782211437", appId:"1:592782211437:web:4af068aab5807926bf0264"
 };
-const app=initializeApp(fbCfg), db=getDatabase(app), auth=getAuth(app);
+const app=initializeApp(fbCfg), db=getDatabase(app), auth=getAuth(app), storage=getStorage(app);
 
 /* ═══════════════════════════════════════════════════════════════════════════
    ⏱️ [إصلاح] إزاحة ساعة السيرفر — العدّاد كان يقيس ساعة الهاتف.
@@ -1348,6 +1416,15 @@ let lastAckTs = 0;                     // [ج] آخر كتابة أكّدها ا
    وghostDriverSweeper لا يكنسه لأن نبضته طازجة.
    المبدأ: **الموقع يحمل وقت قياسه، لا وقت إرساله.**
    ═══════════════════════════════════════════════════════════════════════ */
+/* ═══════════════════════════════════════════════════════════════════════════
+   🔴 [ق٣٦] كانت `let lastLat, lastLng` معلَنة **بعد** markFix بـ٢٣ سطراً.
+   و markFix دالةٌ معرَّفة (مرفوعة) تُنادى من __nativeLocation ومن watchPosition —
+   فأيّ تثبيت موقع يصل قبل أن يبلغ التنفيذُ سطرَ الإعلان يُلقي ReferenceError
+   ⇒ يضيع التثبيت، ويبقى الكابتن «بلا موقع» حتى التثبيت التالي.
+   والنافذة ضيّقة لكنها واقعة: GPS المُخزَّن يُطلق أول تثبيت فوراً عند التحميل.
+   ⇒ الإعلان انتقل إلى ما قبل أوّل مَن يلمسه. */
+let lastLat=0, lastLng=0;
+
 function markFix(lat,lng,acc){
   lastLat=lat; lastLng=lng; lastFixTs=Date.now();
   if(drv){ drv.currentLat=lat; drv.currentLng=lng; if(acc)drv.gpsAccuracy=acc; }
@@ -1372,7 +1449,8 @@ function updateLinkPill(){
 }
 setInterval(()=>{ if(isOnline) updateLinkPill(); }, 5000);
 
-let lastLat=0, lastLng=0, lastHtml="";
+/* [PERM-7/ق٣٦] أُعلنت أعلاه قبل markFix — كانت هنا وهي تُكتب في 1352. */
+let lastHtml="";
 let readySet=new Set(), rejToday=0, doneToday=0, earnToday=0, lifetime=0, debtNow=0;
 let queue=JSON.parse(localStorage.getItem('hut_offline_queue')||'[]'), qBusy=false;
 let chatOpen=false, chatMsgs={}, chatMeta={}, chatSeen=0;
@@ -1761,12 +1839,14 @@ async function guaranteeAccept(id){
   }
 
   /* [س١] التحقّق النهائي: الحالة **والمالك** معاً */
+  let fOwner='', fStatus='';
   try{
     const snap=await withTimeout(get(ref(db,path)));
     const f=snap.val()||{};
+    fOwner=String(f.driverPhone||''); fStatus=String(f.status||'');
     ok=(String(f.status||'').toLowerCase()==='accepted')&&(nP(f.driverPhone)===nP(drv.phone));
     if(!ok) why.push('التحقّق: status='+String(f.status||'?')+' · owner='+String(f.driverPhone||'?'));
-  }catch(e){ ok=false; why.push('التحقّق: '+String(e&&e.message||e).slice(0,60)); }
+  }catch(e){ ok=false; why.push('التحقّق: '+String(e&&e.message||e).slice(0,60)); fOwner='__unknown__'; }
 
   if(!ok && why.length){
     console.warn('⚠️ guaranteeAccept #'+id+' → '+why.join(' | '));
@@ -1778,7 +1858,20 @@ async function guaranteeAccept(id){
       }).catch(()=>{});
     }catch(_){}
   }
-  return ok;
+
+  /* ═══════════════════════════════════════════════════════════════════════
+     🔴 [V15.9] المستدعي كان يرمي هذه النتيجة — والدالة كُتبت لتُقرأ.
+     ───────────────────────────────────────────────────────────────────────
+     تُعاد الآن **مع سببها**، لأن «فشل» وحدها لا تكفي لاتّخاذ قرار:
+       lost    ⇒ الطلب صار لكابتن آخر أو انتهى — البطاقة كذبٌ يجب أن يُزال
+       retry   ⇒ الشبكة أو المصادقة — الطلب قد يكون ما زال متاحاً فنعيد
+     والفرق بينهما هو الفرق بين «أرسلتُه إلى مطعمٍ لا طلب له» و«حرمتُه
+     طلباً كان له». وكلاهما خطأ، فلا يجوز الخلط بينهما بعلمٍ واحد.
+     ═══════════════════════════════════════════════════════════════════════ */
+  if(ok) return { ok:true };
+  const mine = nP(fOwner)===nP(drv.phone);
+  const lost = (fOwner!=='__unknown__') && (fOwner!=='') && !mine;
+  return { ok:false, kind: lost ? 'lost' : 'retry', owner:fOwner, status:fStatus, why:why.join(' | ') };
 }
 /* 🕵️ سجل الإنجاز المبكّر — قواعد V2.1 تسمح للكابتن بالكتابة على نفسه فقط */
 function logEarly(id,d,m){try{if(!drv||!drv.phone)return;
@@ -2139,6 +2232,25 @@ function scheduleOffRetry(){
   if(offRetryTimer) clearInterval(offRetryTimer);
   offRetryTimer=setInterval(async()=>{
     if(isOnline){ clearInterval(offRetryTimer); offRetryTimer=null; return; }
+
+    /* 🔬 [V15.7] اقرأ قبل أن تكتب — لأن الفشل قد يكون **كاذباً**.
+       withTimeout يقطع الانتظار ولا يُلغي الكتابة: مقبس فايربيس يُسلّمها
+       متى استطاع. فكل «فشل» هنا قد يكون كتابةً وصلت متأخّرة بعد ثانية.
+       وقياسٌ يعدّ الوصول المتأخّر فشلاً يُنتج ٢٨ إنذاراً عن عطبٍ لم يقع —
+       فتُطارد شبحاً، أو أسوأ: تعتاد الرقم فتتجاهل العطب الحقيقي حين يجيء.
+       والقراءة أرخص من الكتابة، فلا ثمن لهذا الصدق. */
+    try{
+      const s=await withTimeout(get(ref(db,`drivers_locations/${drv.phone}/status`)),NET_TIMEOUT_MS,'off_verify');
+      if(s && s.val()==='inactive'){
+        clearInterval(offRetryTimer); offRetryTimer=null; unawake();
+        _mirrorOn=false; paintToggle(false);
+        track('break_ok_late');           /* وصلت متأخّرة — لا فشل */
+        document.getElementById('radarT').innerText='الرادار متوقف';
+        document.getElementById('radarD').innerText='فعّل «متاح للطلبات» لبدء الشفت';
+        return;
+      }
+    }catch(_){}   /* فشل القراءة لا يمنع المحاولة — نمضي إلى الكتابة أدناه */
+
     if(await fbStatus('inactive')){
       clearInterval(offRetryTimer); offRetryTimer=null; unawake();
       _mirrorOn = false; paintToggle(false);          // [V15.5]
@@ -2169,6 +2281,26 @@ function startDayRollover(initial){
 }
 
 window.toggleOnline=async function(){
+  /* 🚦 [N-12.0] بوّابتان قبل النزول — رسالةٌ لا حراسة (الحراسة في المحرك):
+       ① ملفٌّ ناقص  ⇒ افتح الإعداد الإجباري
+       ② خارج موعده ⇒ قُل له كم يتبقّى بالضبط، لا «غير متاح» وحدها.
+     ولا تُطبَّقان على الانصراف أبداً: منعُ كابتنٍ من الانصراف يُبقيه في
+     الأسطول وهو في بيته — وهو أسوأ من أي شيء تحرسه هذه البوّابة. */
+  if(document.getElementById('onlineTog').checked && drv){
+    if(!profileComplete()){
+      document.getElementById('onlineTog').checked=false;
+      toast('أكمل صورتك وموعد شفتك قبل النزول','warn');
+      openOnboarding(true); return;
+    }
+    const s=myShift(), w=inWindowLocal(s.h, s.len, srvNow());
+    if(!w.inside){
+      document.getElementById('onlineTog').checked=false;
+      const hh=Math.floor(w.opensInMins/60), mm=w.opensInMins%60;
+      toast('🕐 شفتك يبدأ '+hLabel(s.h)+' — يتبقّى '+(hh?hh+' س ':'')+mm+' د','warn');
+      try{ track('shift_gate_blocked',{ms:w.opensInMins}); }catch(_){}
+      return;
+    }
+  }
   isOnline=document.getElementById('onlineTog').checked;
   availEpoch++;            /* [V16.0] أبطل كل كتابةٍ معلّقة من قبل هذا القرار */
   /* 🔴 [V15.6] كان الحجب بمؤقّت أعمى (٤ ث) — وعملية التفعيل قد تطول أكثر
@@ -2446,6 +2578,234 @@ function startSystem(){
   }
 }
 
+/* ═══════════════════════════════════════════════════════════════════════════
+   🖼️🕐 [N-12.0] ملفّ الكابتن — الصورة وموعد الشفت
+   ───────────────────────────────────────────────────────────────────────────
+   الحقول في drivers_locations/<هاتف>: photo · shift_h · shift_len · shift_next
+   وهي آمنةٌ هناك لأن GAS يكتب بـfbPatch (دمج) لا fbPut (دهس) — بعكس فخّ
+   restaurants_config الذي واجهناه في ميزة الكباتن المفضّلين.
+
+   🔒 والبوّابة الحقيقية في المحرك (inShiftWindow) لا هنا. ما في هذا الملف
+      **رسالةٌ للكابتن** كي يفهم لماذا لا ينزل — لا حارس. فحارسٌ يعيش في
+      المتصفّح يُلتفّ عليه بسطرٍ في وحدة التحكّم.
+   ═══════════════════════════════════════════════════════════════════════════ */
+let _obPhoto = null;            /* base64 المختارة قبل الرفع */
+const SHIFT_LEN_CHOICES = [4,5,6,7,8,9,10,11,12,13,14,15,16];
+
+function hLabel(h){
+  const ap = h < 12 ? 'ص' : 'م';
+  const h12 = h % 12 === 0 ? 12 : h % 12;
+  return h12 + ':00 ' + ap;
+}
+function winLabel(h, len){
+  const end = (h + len) % 24;
+  const cross = (h + len) >= 24;
+  return 'شفتك: ' + hLabel(h) + ' ← ' + hLabel(end) + (cross ? ' (اليوم التالي)' : '') + ' · ' + len + ' ساعة';
+}
+
+/* نفس منطق inShiftWindow في المحرك حرفاً بحرف — والاختبار يقارنهما،
+   فلا تنحرف نسخة العميل عن نسخة الخادم بلا أن يفشل شيء. */
+function inWindowLocal(h, len, nowMs){
+  const s = Number(h), L = Number(len);
+  if(!isFinite(s) || !isFinite(L) || s<0 || s>23 || L<=0 || L>24) return { inside:true, opensInMins:0 };
+  const bag = new Date(nowMs + 3*3600000);
+  const mins = bag.getUTCHours()*60 + bag.getUTCMinutes();
+  const start = s*60, end = start + L*60;
+  const inside = (end<=1440) ? (mins>=start && mins<end) : ((mins>=start) || (mins<end-1440));
+  if(inside) return { inside:true, opensInMins:0 };
+  let d = start - mins; if(d<0) d += 1440;
+  return { inside:false, opensInMins:d };
+}
+
+function myShift(){
+  /* 🔒 [N-12.1] قراءةٌ فقط — لا كتابة. الترقية صارت في المحرك
+     (effectiveShift)، والقواعد لم تعد تسمح للكابتن بكتابة shift_h.
+     وما هنا حسابُ **العرض** كي يرى موعده الصحيح فوراً، لا مصدرَ حكم:
+     الحكم في المحرك، وهذه نسخته المرآة. */
+  if(!drv) return null;
+  const nx = drv.shift_next;
+  const today = new Date(srvNow() + 3*3600000).toISOString().slice(0,10);
+  /* 🔗 [N-12.2] الافتراضي موحَّد مع effectiveShift في المحرك حرفاً:
+     ساعةٌ بلا طولٍ صالح = **لا تفضيل** لا «عشر ساعات».
+     كان ||10 هنا و«كما هو» هناك، فينحرف الطرفان: المحرك يرى الكابتن
+     داخلاً (طولٌ غير صالح ⇒ no_pref) والتطبيق يراه خارجاً ⇒ فتطفئ
+     shiftWindowPulse مفتاحه **كل ٦٠ ثانية** ولا يستطيع البقاء متاحاً.
+     وهو عكس عطب N-12.0 بالضبط ومن جذره: طرفان يحكمان بقاعدتين. */
+  const ok=(v,lo,hi)=>{const n=Number(v);return isFinite(n)&&n>=lo&&n<=hi;};
+  let h, len;
+  if(nx && nx.from && ok(nx.h,0,23) && ok(nx.len,1,16) && today >= String(nx.from)){
+    h=Number(nx.h); len=Number(nx.len);
+  } else { h=drv.shift_h; len=drv.shift_len; }
+  if(!ok(h,0,23) || !ok(len,1,16)) return null;
+  return { h:Number(h), len:Number(len) };
+}
+
+function profileComplete(){ return !!(drv && drv.photo && myShift()); }
+
+window.obPick=function(inp){
+  const f = inp.files && inp.files[0]; if(!f) return;
+  if(f.size > 8*1024*1024){ obErr('الصورة كبيرة جداً — اختر واحدة أصغر'); return; }
+  const r = new FileReader();
+  r.onload = ()=>{
+    const img = new Image();
+    img.onload = ()=>{
+      /* ضغطٌ إلى ٤٠٠ بكسل: الصورة تُعرض في دائرة صغيرة، ورفعُ ٤ ميغا
+         على شبكة كركوك يفشل ويُحبط الكابتن في أول تجربة له مع الميزة. */
+      const M = 400, sc = Math.min(1, M/Math.max(img.width, img.height));
+      const c = document.createElement('canvas');
+      c.width = Math.round(img.width*sc); c.height = Math.round(img.height*sc);
+      c.getContext('2d').drawImage(img,0,0,c.width,c.height);
+      _obPhoto = c.toDataURL('image/jpeg', 0.82);
+      const el=document.getElementById('obImg');
+      el.src=_obPhoto; el.style.display='block';
+      document.getElementById('obImgPh').style.display='none';
+      document.getElementById('obImgBox').style.borderStyle='solid';
+      document.getElementById('obImgMsg').textContent='جاهزة للحفظ ✓';
+      obErr('');
+    };
+    img.onerror = ()=>obErr('تعذّرت قراءة الصورة — جرّب صورة أخرى');
+    img.src = r.result;
+  };
+  r.onerror = ()=>obErr('تعذّرت قراءة الملف');
+  r.readAsDataURL(f);
+};
+
+function obErr(m){
+  const e=document.getElementById('obErr');
+  e.style.display = m ? 'block' : 'none'; e.textContent = m || '';
+}
+
+window.openOnboarding=function(force){
+  const st=document.getElementById('obStart'), hr=document.getElementById('obHours');
+  if(!st.options.length){
+    for(let i=0;i<24;i++) st.add(new Option(hLabel(i), String(i)));
+    SHIFT_LEN_CHOICES.forEach(v=>hr.add(new Option(v+' ساعات', String(v))));
+  }
+  const cur = myShift();
+  st.value = String(cur ? cur.h : 14);
+  hr.value = String(cur ? cur.len : 10);
+  const paint=()=>{ document.getElementById('obWin').textContent =
+      winLabel(Number(st.value), Number(hr.value)); };
+  st.onchange=paint; hr.onchange=paint; paint();
+
+  if(drv && drv.photo){
+    const el=document.getElementById('obImg');
+    el.src=drv.photo; el.style.display='block';
+    document.getElementById('obImgPh').style.display='none';
+    document.getElementById('obImgBox').style.borderStyle='solid';
+    document.getElementById('obImgMsg').textContent='صورتك الحالية — اختر أخرى لتغييرها';
+  }
+  document.getElementById('obTitle').textContent = force ? '👋 أكمل ملفّك قبل النزول' : '⚙️ ملفّي وشفتي';
+  /* ⚠️ [N-12.1] كان يظهر لمن يحمل طلباً فقط. وكابتنٌ فشل رفع صورته — شبكة
+     كركوك أو مهلة أو صلاحية Storage — كان يعجز عن النزول إطلاقاً حتى يكتب
+     له الإداري الحقل يدوياً. فميزةٌ قيمتها أن يعرف المطعم من يطرق بابه
+     صارت شرطاً لكسب الكابتن قوت يومه. والبوّابة السيرفرية تمرّ من بلا
+     صورة كما تمرّ من بلا موعد — فلا شيء يُحرَس بهذا القفل أصلاً. */
+  document.getElementById('obLater').style.display = force ? 'block' : 'none';
+  document.getElementById('obLater').textContent = active.length
+    ? 'لاحقاً — عندي طلب الآن' : 'لاحقاً';
+  obErr('');
+  document.getElementById('obOv').classList.remove('dn');
+};
+window.closeSheet=function(id){ document.getElementById(id).classList.add('dn'); };
+
+window.obSave=async function(){
+  const btn=document.getElementById('obSave');
+  const h=Number(document.getElementById('obStart').value);
+  const len=Number(document.getElementById('obHours').value);
+  if(!drv || !drv.phone){ obErr('لم تُسجّل دخولك بعد'); return; }
+  if(!_obPhoto && !(drv && drv.photo)){ obErr('الصورة مطلوبة — اختر صورة واضحة لوجهك'); return; }
+  if(!(h>=0&&h<=23) || !(len>=1&&len<=16)){ obErr('اختيار غير صالح'); return; }
+
+  btn.disabled=true; btn.innerHTML='<div class="spin" style="border-top-color:#fff"></div> جارٍ الحفظ…';
+  try{
+    let url = drv.photo || null;
+    if(_obPhoto){
+      const path = `driver_photos/${drv.phone}.jpg`;
+      await withTimeout(uploadString(sRef(storage, path), _obPhoto, 'data_url'), 25000, 'photo_up');
+      url = await withTimeout(getDownloadURL(sRef(storage, path)), 15000, 'photo_url');
+    }
+
+    const cur = myShift();
+    const patch = { photo:url, photo_at:new Date().toISOString() };
+    /* 🔒 [N-12.1] الكابتن يكتب shift_next **دائماً** — لا shift_h.
+       الاختيار الأول: from = اليوم ⇒ يرقّيه المحرك خلال دقيقة.
+       والتغيير اللاحق: from = الغد ⇒ القاعدة سيرفريّة لا يلتفّ عليها أحد. */
+    if(!cur || cur.h!==h || cur.len!==len){
+      const t=new Date(srvNow()+3*3600000);
+      if(cur) t.setUTCDate(t.getUTCDate()+1);
+      patch.shift_next={ h:h, len:len, from:t.toISOString().slice(0,10) };
+      patch.shift_set_at=new Date().toISOString();
+    }
+    await withTimeout(update(ref(db,`drivers_locations/${drv.phone}`), patch), NET_TIMEOUT_MS, 'prof_save');
+
+    drv.photo=url;
+    if(patch.shift_next) drv.shift_next=patch.shift_next;
+    localStorage.setItem('suf_session',JSON.stringify(drv));
+    _obPhoto=null;
+    document.getElementById('obOv').classList.add('dn');
+    const _today=new Date(srvNow()+3*3600000).toISOString().slice(0,10);
+    toast((patch.shift_next && patch.shift_next.from > _today)
+      ? '✅ حُفظ — وموعدك الجديد يسري من الغد'
+      : '✅ حُفظ ملفّك — '+winLabel(h,len),'ok');
+    try{ track('profile_saved'); }catch(_){}
+    paintShiftInfo();
+  }catch(e){
+    obErr('تعذّر الحفظ: '+String(e&&e.message||e).slice(0,70));
+  }finally{
+    btn.disabled=false; btn.innerHTML='حفظ والمتابعة';
+  }
+};
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   🔴 [N-12.1] نبضة نافذة الشفت — الوصلة التي كانت ناقصة
+   ───────────────────────────────────────────────────────────────────────────
+   كانت inWindowLocal تُنادى في toggleOnline **وحدها**: أي لحظة الضغط على
+   «متاح»، ولا مرّة بعدها. فكابتنٌ نزل ٠١:٥٥ ونافذته تُغلق ٠٢:٠٠ يبقى مفتاحه
+   أخضر والرادار يدور والموقع يُرفع والبطارية تنفد — والمحرك يستبعده من كل
+   دورة. صفر طلب، وصفر رسالة تقول لماذا.
+
+   وهو نفس صنف العطب الذي شخّصناه في تقرير سحب الطلبات: الدالّة صحيحة،
+   والاختبار يحرسها بـ٢٣٠٤ مقارنة، والسلك الأخير غير موصول. حراسةُ الدالّة
+   لا تُغني عن حراسة **موضع ندائها**.
+
+   والسلوك منقولٌ من maybeEndShift حرفاً: من يحمل طلباً لا يُقذف إلى استراحة
+   وهو عند باب الزبون — يتوقّف استقبالُ الجديد فقط حتى يُسلّم آخر طلب.
+   ═══════════════════════════════════════════════════════════════════════════ */
+function shiftWindowPulse(){
+  if(!isOnline || !drv) return;
+  const s=myShift(); if(!s) return;
+  const w=inWindowLocal(s.h, s.len, srvNow());
+  if(w.inside){ window._winOver=false; window._winNotified=false; return; }
+
+  if(active.length>0){
+    if(!window._winNotified){
+      window._winNotified=true; window._shiftOver=true;
+      play('ready');
+      toast(`⏰ انتهت نافذة شفتك — أكمل طلباتك الحالية (${active.length}).<br>لن تصلك طلبات جديدة.`,'warn');
+    }
+    return;
+  }
+  if(window._winOver) return;
+  window._winOver=true;
+  try{ track('shift_window_ended'); }catch(_){}
+  document.getElementById('onlineTog').checked=false; toggleOnline();
+  toast('⏰ انتهت نافذة شفتك ('+hLabel(s.h)+' ← '+hLabel((s.h+s.len)%24)+'). شكراً لك 🌟','warn');
+}
+
+function paintShiftInfo(){
+  const s=myShift();
+  const el=document.getElementById('setShiftWin'); if(el)
+    el.textContent = s ? winLabel(s.h, s.len) : 'لم تختر موعداً بعد';
+  const im=document.getElementById('setPhoto');
+  if(im && drv && drv.photo){ im.src=drv.photo; im.style.display='block';
+    const ph=document.getElementById('setPhotoPh'); if(ph) ph.style.display='none'; }
+  const nx=document.getElementById('setShiftNext');
+  if(nx) nx.textContent = (drv && drv.shift_next)
+    ? ('⏳ موعدك الجديد ('+hLabel(drv.shift_next.h)+' · '+drv.shift_next.len+' ساعة) يسري من '+drv.shift_next.from)
+    : '';
+}
+
 /* ══════════════ الإعدادات ══════════════ */
 window.openSettings=function(){
   /* 🔧 [V15.2] كان CURRENT_APP_VERSION غير معرَّف إطلاقاً — رصده ESLint.
@@ -2458,6 +2818,7 @@ window.openSettings=function(){
                           nat=' · APK '+AndroidRadar.getNativeVersion(); }catch(e){}
        if(v) v.textContent = 'V' + (window.APP_VERSION || '?') + nat +
              ' · ' + (localStorage.getItem('suf_build_src')||'?'); }catch(e){}
+  paintShiftInfo();
   document.getElementById('goalStp').innerText=DAILY_GOAL;
   document.getElementById('remTog').checked=(localStorage.getItem('suf_rem')!=='off');
   document.getElementById('siHrs').innerText=(drv?.shiftHours||'--')+' س';
@@ -2530,6 +2891,24 @@ function startListeners(){
         العدّادات عن بعضها ويُبقي بقايا لا تُنظَّف. */
   const today=new Date().toISOString().split('T')[0];
   startDayRollover(today);
+
+  /* 🖼️🕐 [N-12.0] ملفّ الكابتن — يُقرأ من الخادم لا من الجلسة المحفوظة.
+     فالإداري قد يكون عدّل موعده أو حذف صورته، والجلسة في localStorage لا
+     تعرف ذلك. ومستمعٌ واحدٌ على العقدة يبقيهما متطابقين طوال الجلسة. */
+  listen(()=>ref(db,`drivers_locations/${drv.phone}`),s=>{
+    const v=s.val()||{};
+    drv.photo     = v.photo || null;
+    drv.shift_h   = (v.shift_h===undefined?null:v.shift_h);
+    drv.shift_len = v.shift_len || null;
+    drv.shift_next= v.shift_next || null;
+    try{ localStorage.setItem('suf_session',JSON.stringify(drv)); }catch(_){}
+    paintShiftInfo();
+    /* الطلب الإجباري مرّةً واحدة لكل فتحة تطبيق — لا مع كل لقطة. */
+    if(!profileComplete() && !window._obAsked){
+      window._obAsked=true;
+      setTimeout(()=>{ if(!profileComplete()) openOnboarding(true); }, 1200);
+    }
+  });
 
   listen(()=>ref(db,`drivers_locations/${drv.phone}/account_status`),s=>{
     if(s.val()==='banned'){alert('⚠️ تم حظر حسابك.');clearPass();localStorage.removeItem('suf_session');sessionStorage.clear();location.reload();}
@@ -2678,6 +3057,10 @@ function listenOrders(){
          12 ثانية تغطّي أسوأ مسار في guaranteeAccept بهامش. (نحلة تستعمل 6،
          وهي أقصر ممّا يلزم هنا لأن ترتيب finalizeAccept مختلف.) */
       if(!f && mo.acceptedTime && (Date.now()-mo.acceptedTime) < 12000) continue;
+      /* 🛡️ [V15.9] وما دام watchAccept يؤمّن هذه البطاقة، لا يحكم عليها أحد
+         غيره. وإلا سبقته هذه الحلقة برسالتها الغامضة («انتهى أو سُحب منك»)
+         بينما هو على وشك أن يقول السبب الحقيقي — أو أن ينجح في التأمين. */
+      if(mo.__grace && Date.now() < mo.__grace) continue;
 
       /* 🛡️ [غياب الدليل] بعد انقضاء المهلة يصير الغياب **دليلاً**: onValue لا
          يُطلق إلا حين تتغيّر النتيجة، فخروج الطلب من الاستعلام يعني أن
@@ -2772,7 +3155,12 @@ function listenOrders(){
         const fp=nP(f.driverPhone);
         const mine=(fp===myId)&&(f.status==='pending_driver'||f.status==='manual_pending');
         if(!mine)return;
-        if(active.find(o=>String(o.id)===String(f.id))){guaranteeAccept(f.id);stopAlarm();return;}
+        /* 🔴 [V15.9] كان: guaranteeAccept(f.id) بلا قراءة نتيجة.
+           وهذا المسار يقع تحديداً حين يكون الطلب **ما زال pending عندي**
+           رغم وجوده في قائمتي — أي أن قبولي لم يثبت. فهو أَولى المسارات
+           بالمراقبة لا أقلّها. */
+        const mo=active.find(o=>String(o.id)===String(f.id));
+        if(mo){ watchAccept(mo); stopAlarm(); return; }
         if(curOrder&&String(curOrder.id)===String(f.id))return;
         /* 📊 [N-9.10] لحظة وصول العرض — مرجع القياس.
            بها نعرف الفارق بين وصول العرض وحذف البطاقة، وهو الرقم الذي يقول
@@ -2908,10 +3296,71 @@ function finalizeAccept(){
     comm:curOrder.comm||0,payType:curOrder.payType||'المطعم يدفع',
     acceptedTime:Date.now(),is_sovereign:curOrder.is_sovereign||false,readyForPickup:false};
   active.push(o); localStorage.setItem('suf_orders',JSON.stringify(active));
-  adjustHB(); renderOrders(); guaranteeAccept(o.id);
+  adjustHB(); renderOrders();
+  /* 🔴 [V15.9] كانت: guaranteeAccept(o.id);  — بلا await وبلا قراءة نتيجة.
+     فالبطاقة تظهر في قائمته على أساس قبولٍ قد لا يكون وصل، ثم تحذفها
+     المصالحة بعد ≤٦٠ ث برسالة «انتهى أو سُحب منك». والكابتن يقرأ هذا
+     سرقةً، وقد كان قبولُه ببساطة **لم يصل**.
+     الآن تُقرأ النتيجة ويُخبَر بالحقيقة. */
+  watchAccept(o);
   const b=document.getElementById('btnAccept');
   b.innerHTML='<svg class="si si-l" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>قبول الطلب فوراً'; b.disabled=false;
 }
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   🛡️ [V15.9] مراقب القبول — لا بطاقة بلا سندٍ من الخادم
+   ───────────────────────────────────────────────────────────────────────────
+   ثلاث نهايات لا واحدة:
+     ✅ نجح            ⇒ صمت. الحال الطبيعية لا تستحقّ رسالة.
+     🔴 lost           ⇒ الطلب لغيره فعلاً. تُزال البطاقة **فوراً** بسببٍ
+                          صريح — لا بعد دقيقة برسالةٍ غامضة. وإرسالُه إلى
+                          مطعمٍ لا طلب له أسوأ من إخباره الآن.
+     🔁 retry          ⇒ شبكة أو مصادقة. البطاقة تبقى، ومحاولتان تلقائيتان
+                          بفارق ٣ ثوانٍ. فإن فشلتا أُبلغ بوضوح مع زرّ يدوي.
+   ═══════════════════════════════════════════════════════════════════════════ */
+async function watchAccept(o, attempt){
+  attempt = attempt || 1;
+  /* 🔒 حارس تداخل: المستمع اللحظي قد ينادي هذه على نفس الطلب بينما دورةٌ
+     سابقة تعمل. ودورتان متوازيتان تُنتجان محاولاتٍ مضاعفة ورسالتين. */
+  if(attempt===1){ if(o.__watching) return; o.__watching=true; }
+  /* المصالحة لا تلمس بطاقةً ما زلنا نؤمّنها — وإلا حذفتها من تحت أيدينا. */
+  o.__grace = Date.now() + 14000;
+  let r;
+  try{ r = await guaranteeAccept(o.id); }
+  catch(e){ r = { ok:false, kind:'retry', why:String(e&&e.message||e) }; }
+
+  if(r && r.ok){ o.__accOk=true; delete o.__grace; delete o.__watching; delete o.__accFail; return; }
+
+  if(r && r.kind==='lost'){
+    track('accept_lost',{orderId:o.id, reason:(r.status||'?')+'/'+(r.owner||'?')});
+    delete o.__watching;
+    removeOrdersBatch([{id:o.id, m:'لم يتأكّد قبولك — الطلب صار لكابتن آخر. لا تذهب إلى المطعم.'}]);
+    return;
+  }
+
+  if(attempt < 3){
+    setTimeout(()=>{ if(active.find(x=>String(x.id)===String(o.id))) watchAccept(o, attempt+1); }, 3000);
+    return;
+  }
+
+  /* استُنفدت المحاولات ولم نعرف مالكه — لا نحذف ولا نطمئن.
+     الطلب قد يكون له فعلاً، فالحذف يحرمه؛ وقد لا يكون، فالصمت يخدعه. */
+  track('accept_unconfirmed',{orderId:o.id, reason:String((r&&r.why)||'').slice(0,60)});
+  o.__accFail=true; delete o.__grace; delete o.__watching;
+  localStorage.setItem('suf_orders',JSON.stringify(active));
+  renderOrders();
+  play('cancel');
+  toast('⚠️ لم يتأكّد قبولك للطلب #'+o.id+' — اضغط «تأكيد القبول» على البطاقة قبل أن تتحرّك','bad');
+}
+
+/* زرّ يدوي على البطاقة غير المؤكَّدة */
+window.retryAccept=async function(id){
+  const o=active.find(x=>String(x.id)===String(id)); if(!o) return;
+  toast('جارٍ تأكيد القبول…');
+  delete o.__accFail; delete o.__watching; renderOrders();
+  await watchAccept(o, 1);
+  if(o.__accOk){ toast('✅ تأكّد قبولك للطلب #'+id,'ok'); renderOrders(); }
+};
 /* ═══════════════════════════════════════════════════════════════════════
    ⏰ [ز] إعادة التفعيل بعد نهاية الشفت كانت في مسار **واحد**: نجاح التسليم.
    لكن active تفرغ من مسارات أخرى: سحب الليدر · إعادة التوزيع · انتهاء
@@ -2970,8 +3419,17 @@ async function reconcileOrders(reason){
       const DONE=['completed','مكتمل','settled','delivered','done','تم التسليم','تم','deleted'];
       if(DONE.includes(st)||DONE.includes(f.status)){ rm.push({id:mo.id,m:'تم إنهاء الطلب.'}); continue; }
       const fp=nP(f.driverPhone);
-      if(fp&&fp!==myId&&f.status!=='pending_driver'&&f.status!=='manual_pending')
-        rm.push({id:mo.id,m:'سُحب الطلب لكابتن آخر.'});
+      if(fp&&fp!==myId&&f.status!=='pending_driver'&&f.status!=='manual_pending'){
+        rm.push({id:mo.id,m:'سُحب الطلب لكابتن آخر.'}); continue;
+      }
+      /* 🛡️ [V15.9] رفع وسم «لم يتأكّد» متى شهد الخادم بالملكية.
+         فالقبول قد يصل متأخّراً — عبر المسار السيرفري أو محاولةٍ ناجحة —
+         ووسمٌ أحمر يبقى على بطاقةٍ صحيحة يُعلّم الكابتن تجاهل الوسم كلّه. */
+      if(mo.__accFail && fp===myId){
+        delete mo.__accFail;
+        try{ localStorage.setItem('suf_orders',JSON.stringify(active)); }catch(_){}
+        renderOrders();
+      }
     }
     if(rm.length){
       console.warn('♻️ مصالحة ('+reason+'): حُذفت '+rm.length+' بطاقة يتيمة');
@@ -2985,7 +3443,7 @@ async function reconcileOrders(reason){
 }
 function startReconcile(){
   if(_recTimer) clearInterval(_recTimer);
-  _recTimer=setInterval(()=>reconcileOrders('دوري'),60000);
+  _recTimer=setInterval(()=>{ reconcileOrders('دوري'); try{ shiftWindowPulse(); }catch(_){} },60000);
   document.addEventListener('visibilitychange',()=>{ if(!document.hidden) reconcileOrders('عودة'); });
   window.addEventListener('online',()=>reconcileOrders('شبكة'));
 }
@@ -3153,6 +3611,13 @@ function renderOrders(){
     const mp=o.resLat?`https://www.google.com/maps/dir/?api=1&destination=${o.resLat},${o.resLng}`:'';
     const tags=dbl?`<span class="pill p-warn">🔥 مزدوج (${idx+1}/${active.length})</span>`:'';
     const ready=o.readyForPickup?`<div class="ready">${ICO.bell}<span class="ready-t">🍽️ الطلبية جاهزة — توجّه للاستلام!</span></div>`:'';
+    /* 🛡️ [V15.9] بطاقةٌ لم يتأكّد قبولها عند الخادم — تُعلَّم صراحةً.
+       والوسم فوق كل شيء في البطاقة عمداً: قراره الأول أن يتحرّك أو لا. */
+    const unconf=o.__accFail?`<div class="ready" style="background:#FEF2F2;border-color:#FCA5A5">
+        <span class="ready-t" style="color:#B91C1C">⚠️ لم يتأكّد قبولك عند الخادم — لا تتحرّك قبل التأكيد</span>
+        <button class="act" style="background:#DC2626;color:#fff;margin-top:8px;width:100%"
+          onclick="retryAccept('${sid(o.id)}')">تأكيد القبول الآن</button>
+      </div>`:'';
     const photo=(o.photoUrl&&String(o.photoUrl).startsWith('http'))?`<button class="act a-img" onclick="openReceipt('${o.photoUrl}')">${ICO.img} الوصل</button>`:'';
     if(!o.resArea) enrichOrder(o);
     const pick = o.resArea ? ` (${esc(o.resArea)})` : '';
@@ -3171,7 +3636,7 @@ function renderOrders(){
           <div class="step ${step>=3?(step===3?'now':'done'):''}"><div class="step-d">${step>3?'✓':'3'}</div><span class="step-l">استلمت</span></div>
           <div class="step ${step>=4?'now':''}"><div class="step-d">🏁</div><span class="step-l">سلّمت</span></div>
         </div>
-        ${ready}
+        ${unconf}${ready}
         <div class="route">
           <div class="rp up"><div class="rp-t">📍 الاستلام من${pick}</div><div class="rp-n">${esc(o.resName)}</div>
             <div class="acts">
