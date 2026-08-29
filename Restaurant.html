@@ -31,7 +31,7 @@
         //          القاعدة الجديدة ترفض القراءة الكاملة لغير الإدارة.
         //  🔒 ضمان مصادقة فايربيس قبل أي كتابة (القواعد لم تعد تقبل مجهولاً).
         //  🛵 اسم الكابتن من drivers_locations/{phone}/name بدل شيت السائقين.
-        const CURRENT_APP_VERSION = "43.0.Nahla-Full";   /* 🔧 V2.2 */
+        const CURRENT_APP_VERSION = "43.1.Nahla-Avatar";   /* 🔧 V2.2 */
         const RES_VERSION_KEY = 'hut_res_app_version';
         try {
             if (localStorage.getItem(RES_VERSION_KEY) !== CURRENT_APP_VERSION) {
@@ -2386,6 +2386,38 @@ function escAttr(x){ return esc(x).replace(/"/g,'&quot;').replace(/'/g,'&#39;');
         return (n && n.trim()) ? n : "كابتن التوصيل";
     }
 
+    /* 🖼️ [N-12.0] صورة الكابتن — نفس نمط كاش الاسم حرفاً بحرف: قراءةٌ واحدة
+       لكل رقم، ثم إعادة بناء القوائم حين تصل. والقواعد تسمح بقراءة
+       drivers_locations/$phone/photo لأي مُصادَق، كما name تماماً. */
+    const driverPhotoCache = {};
+    const driverPhotoFetching = new Set();
+    function getDriverPhotoCached(phone) {
+        if (!phone || ["system_routing","pending_driver","manual_pending",""].includes(String(phone))) return null;
+        if (driverPhotoCache[phone] !== undefined) return driverPhotoCache[phone];
+        if (!driverPhotoFetching.has(phone)) {
+            driverPhotoFetching.add(phone);
+            get(ref(db, `drivers_locations/${phone}/photo`))
+                .then(s => {
+                    driverPhotoCache[phone] = s.val() || "";
+                    lastActiveHtml = ""; lastArchiveHtml = "";
+                    rebuildOrderLists();
+                })
+                .catch(() => { driverPhotoCache[phone] = ""; })
+                .finally(() => driverPhotoFetching.delete(phone));
+        }
+        return null;
+    }
+    /* الوسم يُبنى بـescAttr على الرابط — والقاعدة تشترط بدايةَ https،
+       فلا يصل إلى هنا جافاسكربت متنكّر في هيئة صورة. */
+    function driverAvatarHtml(phone, px) {
+        const u = getDriverPhotoCached(phone);
+        const size = px || 22;
+        if (!u) return '';
+        return `<img src="${escAttr(u)}" alt="" loading="lazy"
+            style="width:${size}px;height:${size}px;border-radius:50%;object-fit:cover;
+                   vertical-align:middle;margin-inline-end:6px;border:1px solid rgba(15,23,42,.12)">`;
+    }
+
     let lastOrdersSnapshot = {};
     let mirrorToday = {};   // 🪞 [N-9.2] ledgers/restaurants/{هاتف}/today/{يوم}/{طلب}
 
@@ -2668,7 +2700,7 @@ function escAttr(x){ return esc(x).replace(/"/g,'&quot;').replace(/'/g,'&#39;');
                 </div>
                 <div class="order-details-row mt-2">
                     <div class="detail-item"><i data-lucide="map-pin" size="14" style="color: var(--accent);"></i> ${esc(orderArea || 'غير محددة')}</div>
-                    <div class="detail-item"><i data-lucide="bike" size="14" style="color: var(--success);"></i> الكابتن: ${driverName}</div>
+                    <div class="detail-item">${hasDriver ? driverAvatarHtml(driverPhone,22) : '<i data-lucide="bike" size="14" style="color: var(--success);"></i> '}الكابتن: ${driverName}</div>
                 </div>
                 <div class="progress-tracker mt-3">
                     <div class="progress-line"></div>
