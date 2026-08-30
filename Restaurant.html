@@ -31,7 +31,7 @@
         //          القاعدة الجديدة ترفض القراءة الكاملة لغير الإدارة.
         //  🔒 ضمان مصادقة فايربيس قبل أي كتابة (القواعد لم تعد تقبل مجهولاً).
         //  🛵 اسم الكابتن من drivers_locations/{phone}/name بدل شيت السائقين.
-        const CURRENT_APP_VERSION = "43.2.Nahla-Avatar36";   /* 🔧 V2.2 */
+        const CURRENT_APP_VERSION = "44.2.Nahla-AlHut";   /* 🔧 V2.2 */
         const RES_VERSION_KEY = 'hut_res_app_version';
         try {
             if (localStorage.getItem(RES_VERSION_KEY) !== CURRENT_APP_VERSION) {
@@ -533,15 +533,138 @@
         .voice-wave span:nth-child(5) { animation-delay: 0.6s; height: 10px; }
         @keyframes waveBar { 0%, 100% { transform: scaleY(0.4); } 50% { transform: scaleY(1); } }
 
+        /* ═══════════════════════════════════════════════════════════════════
+           🎴 [N-12.10] بطاقة الطلب — إعادة تصميم
+           ───────────────────────────────────────────────────────────────────
+           المشكلة في القديم: البطاقة كانت **قائمة حقول** لا بطاقة حالة.
+           رقمُ الطلب أكبر عنصر فيها، والكابتن سطرٌ رمادي بصورةٍ بحجم حرف،
+           والحالة مستنتَجةٌ من أربع نقاط صغيرة يقرؤها المطعم بعينٍ مدقّقة.
+
+           والمطعم يسأل سؤالاً واحداً كل مرّة: **أين طلبي الآن؟**
+           فصار الجواب هو العنوان — سطرٌ صريح يقول الحالة بالكلمات، وشريطٌ
+           رفيع فوق البطاقة يقولها بالنظرة. والكابتن صار كتلةً بذاته: وجهٌ
+           بحجم 56 يُميَّز من بعيد، واسمٌ، وزرّ اتصالٍ في متناول الإبهام.
+           والنقاط الأربع بقيت — لكن هادئةً في الأسفل، مرجعاً لا عنواناً.
+
+           📌 والألوان من الهوية نفسها: الكهرماني للانتظار، والأخضر للحركة.
+              فتدرّج الشريط يحكي الرحلة من العسل إلى التسليم.
+           ═══════════════════════════════════════════════════════════════════ */
         .live-order-card {
-            background: rgba(255,255,255,0.9); border-radius: 20px; padding: 16px; margin-bottom: 12px;
-            border: none;
-            display: flex; flex-direction: column; gap: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.03);
+            background: #fff; border-radius: 22px; margin-bottom: 14px;
+            border: 1px solid rgba(124,74,3,.07); overflow: hidden;
+            box-shadow: 0 2px 8px rgba(124,74,3,.04), 0 12px 28px -12px rgba(124,74,3,.14);
+            transition: box-shadow .25s ease, transform .25s ease;
         }
+        .live-order-card:hover { box-shadow: 0 4px 12px rgba(124,74,3,.06), 0 18px 36px -14px rgba(124,74,3,.2); }
+
+        /* الشريط العلوي — الحالة بالنظرة قبل القراءة */
+        .oc-rail { height: 4px; background: #f1f5f9; position: relative; overflow: hidden; }
+        .oc-rail-fill {
+            position: absolute; inset-block: 0; inset-inline-start: 0; height: 100%;
+            background: linear-gradient(90deg, var(--accent), var(--success));
+            border-radius: 0 4px 4px 0; transition: width .5s cubic-bezier(.4,0,.2,1);
+        }
+        /* نبضةٌ خفيفة ما دام الطلب حيّاً — تُطفأ لمن يطلب تقليل الحركة */
+        .oc-rail-fill::after {
+            content: ""; position: absolute; inset: 0;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,.55), transparent);
+            animation: ocSweep 2.2s ease-in-out infinite;
+        }
+        @keyframes ocSweep { 0% { transform: translateX(-100%);} 100% { transform: translateX(100%);} }
+        @media (prefers-reduced-motion: reduce) { .oc-rail-fill::after { animation: none; } }
+
+        .oc-body { padding: 16px 18px 14px; }
+
+        /* الترويسة: الحالة عنواناً · والمُعرّف بيانَ خدمة */
+        .oc-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; }
+        .oc-status { font-size: 1rem; font-weight: 900; color: var(--primary-blue-dark); line-height: 1.35; }
+        .oc-status.searching { color: #b45309; }
+        .oc-meta { text-align: end; flex-shrink: 0; }
+        .oc-id { font-size: .72rem; font-weight: 800; color: #94a3b8; letter-spacing: .3px; font-variant-numeric: tabular-nums; }
+        .oc-time { font-size: .7rem; color: #94a3b8; font-weight: 700; display: flex; align-items: center; justify-content: flex-end; gap: 4px; margin-top: 3px; font-variant-numeric: tabular-nums; }
+
+        /* كتلة الكابتن — الوجه هو ما يُميَّز من بعيد */
+        .oc-driver {
+            display: flex; align-items: center; gap: 12px; margin-top: 14px;
+            background: #fffbeb; border: 1px solid rgba(255,179,0,.18);
+            border-radius: 16px; padding: 10px 12px;
+        }
+        .oc-driver.waiting { background: #f8fafc; border-color: rgba(15,23,42,.06); }
+        .oc-av {
+            width: 56px; height: 56px; border-radius: 50%; flex-shrink: 0;
+            background: #fff; border: 2px solid rgba(255,179,0,.35); overflow: hidden;
+            display: flex; align-items: center; justify-content: center;
+            color: var(--accent); box-shadow: 0 2px 8px rgba(124,74,3,.1);
+        }
+        .oc-av img { width: 100%; height: 100%; object-fit: cover; display: block; }
+        .oc-av.waiting { border-style: dashed; border-color: #cbd5e1; color: #94a3b8; box-shadow: none; }
+        .oc-av.waiting i { animation: ocPulse 1.8s ease-in-out infinite; }
+        @keyframes ocPulse { 0%,100% { opacity: .45; transform: scale(.92);} 50% { opacity: 1; transform: scale(1);} }
+        @media (prefers-reduced-motion: reduce) { .oc-av.waiting i { animation: none; } }
+
+        .oc-dname { font-size: .95rem; font-weight: 900; color: var(--primary-blue-dark); line-height: 1.3; }
+        .oc-drole { font-size: .72rem; font-weight: 700; color: #a16207; margin-top: 2px; }
+        .oc-driver.waiting .oc-drole { color: #94a3b8; }
+        .oc-dwrap { flex: 1; min-width: 0; }
+        .oc-dname, .oc-drole { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+        .oc-call {
+            width: 46px; height: 46px; border-radius: 50%; flex-shrink: 0; border: none; cursor: pointer;
+            background: var(--success); color: #fff; display: flex; align-items: center; justify-content: center;
+            box-shadow: 0 4px 12px rgba(16,185,129,.35); transition: transform .18s ease, box-shadow .18s ease;
+        }
+        .oc-call:hover { box-shadow: 0 6px 18px rgba(16,185,129,.45); }
+        .oc-call:active { transform: scale(.92); }
+        .oc-call:focus-visible { outline: 3px solid rgba(16,185,129,.4); outline-offset: 2px; }
+
+        /* الوجهة */
+        .oc-dest {
+            display: flex; align-items: center; gap: 8px; margin-top: 12px;
+            font-size: .85rem; font-weight: 800; color: #475569;
+        }
+        .oc-dest i { color: var(--accent); flex-shrink: 0; }
+
+        /* المراحل — مرجعٌ هادئ في الأسفل، لا عنوان */
+        .oc-steps { display: flex; gap: 6px; margin-top: 14px; }
+        .oc-step { flex: 1; text-align: center; }
+        .oc-step-bar { height: 3px; border-radius: 3px; background: #e2e8f0; transition: background .35s ease; }
+        .oc-step.done .oc-step-bar { background: var(--success); }
+        .oc-step.now  .oc-step-bar { background: var(--primary-blue-dark); }
+        .oc-step-lb { font-size: .62rem; font-weight: 800; color: #cbd5e1; margin-top: 5px; }
+        .oc-step.done .oc-step-lb { color: #94a3b8; }
+        .oc-step.now  .oc-step-lb { color: var(--primary-blue-dark); }
+
+        /* الأفعال */
+        .oc-actions {
+            display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
+            margin-top: 14px; padding-top: 13px; border-top: 1px solid #f1f5f9;
+        }
+        .oc-actions .btn-ready { flex: 1; justify-content: center; padding: 11px 14px; font-size: .82rem; border-radius: 13px; }
+        .oc-actions .ready-pill { flex: 1; justify-content: center; padding: 11px 14px; font-size: .8rem; border-radius: 13px; }
+        .oc-icon-btn {
+            width: 40px; height: 40px; border-radius: 13px; flex-shrink: 0; border: none; cursor: pointer;
+            display: flex; align-items: center; justify-content: center;
+            background: #f1f5f9; color: #64748b; transition: background .18s ease, transform .18s ease;
+        }
+        .oc-icon-btn:hover { background: #e2e8f0; }
+        .oc-icon-btn:active { transform: scale(.92); }
+        .oc-icon-btn:focus-visible { outline: 3px solid rgba(124,74,3,.28); outline-offset: 2px; }
+        .oc-icon-btn.receipt { background: #eff6ff; color: #2563eb; }
+        .oc-icon-btn.receipt:hover { background: #dbeafe; }
+        .oc-icon-btn.danger { background: #fef2f2; color: #ef4444; }
+        .oc-icon-btn.danger:hover { background: #fee2e2; }
+
+        @media (max-width: 380px) {
+            .oc-body { padding: 14px 14px 12px; }
+            .oc-av { width: 48px; height: 48px; }
+            .oc-status { font-size: .92rem; }
+        }
+
+        /* أسماء قديمة محفوظة كي لا ينكسر شيء يشير إليها */
         .order-header-row { display: flex; justify-content: space-between; align-items: flex-start; }
         .order-id-text { font-weight: 900; color: var(--primary-blue-dark); font-size: 0.95rem; display: block;}
         .order-time-text { font-size: 0.7rem; color: #94a3b8; font-weight: 600; display: flex; align-items: center; gap: 4px; margin-top: 2px;}
-        
+
         .btn-call-mini { background: #f0fdf4; border: none; border-radius: 50%; width: 34px; height: 34px; display: flex; align-items: center; justify-content: center; cursor: pointer; color: #16a34a; transition: 0.2s;}
         .btn-call-mini:active { transform: scale(0.9); }
         
@@ -564,51 +687,213 @@
         .progress-step.active .progress-label, .progress-step.current .progress-label { color: var(--primary-blue-dark); }
 
         /* الأرشيف الذكي والبحث */
-        .archive-item { 
-            display: flex; 
-            flex-direction: column; 
-            background: rgba(255,255,255,0.95); 
-            padding: 15px; 
-            border-radius: 16px; 
-            border: 1px solid rgba(0,0,0,0.05); 
-            margin-bottom: 12px; 
-            box-shadow: 0 2px 10px rgba(0,0,0,0.03);
+        /* ═══════════════════════════════════════════════════════════════════
+           📦 [N-12.10] بطاقة الطلب المكتمل
+           ───────────────────────────────────────────────────────────────────
+           سؤال المطعم هنا مختلف: لا «أين طلبي» بل **«بكم ومع من؟»**.
+           فالمبلغ هو البطل، والكابتن ثانيه — بوجهه، فيُعرَف بالنظر لا بقراءة
+           اسمٍ رمادي. والتفاصيل تبقى قابلةً للتحديد (user-select) لأن الكاشير
+           ينسخ منها العنوان فعلاً.
+           ═══════════════════════════════════════════════════════════════════ */
+        .archive-item {
+            background: #fff; border-radius: 18px; padding: 14px 16px; margin-bottom: 12px;
+            border: 1px solid rgba(124,74,3,.07);
+            box-shadow: 0 1px 6px rgba(124,74,3,.04), 0 8px 20px -12px rgba(124,74,3,.12);
+            transition: box-shadow .22s ease;
         }
+        .archive-item:hover { box-shadow: 0 2px 10px rgba(124,74,3,.06), 0 14px 28px -14px rgba(124,74,3,.18); }
+
+        .ac-top { display: flex; align-items: center; gap: 12px; }
+        .ac-av {
+            width: 46px; height: 46px; border-radius: 50%; flex-shrink: 0; overflow: hidden;
+            background: #f8fafc; border: 2px solid #e2e8f0;
+            display: flex; align-items: center; justify-content: center; color: #94a3b8;
+        }
+        .ac-av img { width: 100%; height: 100%; object-fit: cover; display: block; }
+        .ac-mid { flex: 1; min-width: 0; }
+        .ac-dname { font-size: .9rem; font-weight: 900; color: var(--primary-blue-dark); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .ac-sub { font-size: .7rem; font-weight: 700; color: #94a3b8; margin-top: 3px; display: flex; align-items: center; gap: 6px; font-variant-numeric: tabular-nums; }
+        .ac-sub .dot { width: 3px; height: 3px; border-radius: 50%; background: #cbd5e1; flex-shrink: 0; }
+        .ac-price { text-align: end; flex-shrink: 0; }
+        .ac-amount { font-size: 1.12rem; font-weight: 900; color: var(--success); line-height: 1.2; font-variant-numeric: tabular-nums; }
+        .ac-amount small { font-size: .66rem; font-weight: 800; opacity: .75; }
+        .ac-done { font-size: .64rem; font-weight: 800; color: #10b981; background: #ecfdf5; border-radius: 7px; padding: 2px 7px; margin-top: 5px; display: inline-flex; align-items: center; gap: 3px; }
+
         .archive-details-box {
-            background: #f8fafc;
-            border-radius: 12px;
-            padding: 12px;
-            margin-top: 12px;
-            font-size: 0.75rem;
-            color: #475569;
-            border: 1px dashed rgba(15, 23, 42, 0.1);
+            background: #fafaf9; border-radius: 13px; padding: 11px 13px; margin-top: 12px;
+            font-size: .78rem; color: #475569; border: 1px solid rgba(124,74,3,.06);
         }
+        .ac-row { display: flex; align-items: flex-start; gap: 8px; font-weight: 700; color: #334155; }
+        .ac-row + .ac-row { margin-top: 8px; padding-top: 8px; border-top: 1px dashed rgba(15,23,42,.08); }
+        .ac-row i { flex-shrink: 0; margin-top: 2px; }
+        .ac-row span { font-weight: 600; color: #64748b; }
+        .ac-call {
+            display: inline-flex; align-items: center; gap: 5px; text-decoration: none;
+            background: #f0fdf4; color: #16a34a; padding: 7px 12px; border-radius: 11px;
+            font-weight: 800; font-size: .74rem; margin-top: 11px; font-variant-numeric: tabular-nums;
+            transition: background .18s ease;
+        }
+        .ac-call:hover { background: #dcfce7; color: #15803d; }
+        .ac-call:focus-visible { outline: 3px solid rgba(16,185,129,.4); outline-offset: 2px; }
         
         .success-toast { background: rgba(15, 23, 42, 0.9); backdrop-filter: blur(10px); color: white; border-radius: 20px; padding: 20px; margin-top: 10px; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; gap: 8px; animation: slideUp 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
         
         /* -------------------------------------
            شاشة المصادقة والانتظار 
            ------------------------------------- */
-        .login-wrapper { 
-            min-height: 100dvh; 
-            display: flex; 
-            flex-direction: column; 
-            background: var(--primary-blue-dark); 
-            position: relative; 
-            overflow-y: auto; 
-            justify-content: space-between;
+        /* ═══════════════════════════════════════════════════════════════════
+           🔐 [N-12.10] شاشة الدخول — إعادة تصميم
+           ───────────────────────────────────────────────────────────────────
+           الشاشة القديمة كانت خلفيةً بنّية صمّاء فوقها بطاقةٌ بيضاء ونصّ
+           «منصة الحوت 🐳» — وهو اسمٌ لا يطابق العلامة (نحلة)، ولا الأيقونة،
+           ولا الألوان الكهرمانية في بقيّة اللوحة. فأول ما يراه شريكُك كان
+           يقول له إنه دخل المكان الخطأ.
+
+           والتصميم الآن مبنيٌّ من مادّة العلامة نفسها: **قرص العسل**.
+           ليس زخرفةً مضافة — هو ما تصنعه النحلة، ومنه اشتُقّ الشكل السداسي
+           الذي يحمل الشعار، والتدرّج من البنّي الداكن إلى الكهرماني.
+
+           📐 والتخطيط لجمهوره: الكاشير على هاتفه في وسط الدوام. فالحقول
+              كبيرة، والزرّ في متناول الإبهام، والصفحة تعمل من 320 بكسل صعوداً.
+           ═══════════════════════════════════════════════════════════════════ */
+        .login-wrapper {
+            min-height: 100dvh;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+            background:
+                radial-gradient(120% 80% at 50% 0%, #6B3F02 0%, #3A2201 55%, #24150 100%),
+                #24150A;
+            position: relative;
+            overflow-y: auto;
         }
-        
-        .login-card { 
-            background: white; 
-            border-radius: 24px; 
-            padding: 30px 25px; 
-            padding-bottom: calc(30px + env(safe-area-inset-bottom)); 
-            width: 100%; 
-            box-shadow: 0 -5px 25px rgba(0,0,0,0.1); 
-            margin: 0; 
-            max-width: 100%; 
+        /* 🍯 قرص العسل — مادّة العلامة، لا زخرفة فوقها */
+        .login-wrapper::before {
+            content: ""; position: absolute; inset: 0; pointer-events: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='28' height='49' viewBox='0 0 28 49'%3E%3Cg fill='%23FFB300' fill-opacity='0.09'%3E%3Cpath d='M13.99 9.25l13 7.5v15l-13 7.5L1 31.75v-15l12.99-7.5zM3 17.9v12.7l10.99 6.34 11-6.35V17.9l-11-6.34L3 17.9zM0 15l12.98-7.5V0h-2v6.35L0 12.69v2.3zm0 18.5L12.98 41v8h-2v-6.85L0 35.81V33.5zM15 0v7.5L27.99 15H28v-2.31l-11-6.34V0h-2zm0 49v-8l12.99-7.5H28v2.31l-11 6.34V49h-2z'/%3E%3C/g%3E%3C/svg%3E");
+            mask-image: linear-gradient(to bottom, #000 0%, rgba(0,0,0,.35) 55%, transparent 80%);
+            -webkit-mask-image: linear-gradient(to bottom, #000 0%, rgba(0,0,0,.35) 55%, transparent 80%);
+        }
+
+        .lg-hero {
+            position: relative; z-index: 1;
+            text-align: center; padding: 46px 24px 34px;
+        }
+        /* الشعار داخل سداسيّ — الشكل من القرص لا من مكتبة أيقونات */
+        .lg-mark {
+            width: 78px; height: 86px; margin: 0 auto 18px;
+            display: flex; align-items: center; justify-content: center;
+            background: linear-gradient(160deg, #FFC947, #FFB300 55%, #E09400);
+            clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
+            box-shadow: 0 12px 30px rgba(255,179,0,.28);
+        }
+        .lg-mark img { width: 52px; height: 52px; object-fit: contain; }
+        .lg-title { font-size: 1.9rem; font-weight: 900; color: #fff; letter-spacing: -.5px; line-height: 1.2; }
+        .lg-sub {
+            font-size: .84rem; font-weight: 700; color: #FFD98A; margin-top: 7px;
+            display: inline-flex; align-items: center; gap: 7px;
+        }
+        .lg-sub::before, .lg-sub::after {
+            content: ""; width: 22px; height: 1px; background: rgba(255,217,138,.4);
+        }
+        /* 🐳 منصّة الحوت — العلامة الثانية، وموضعها هنا لا في الهامش.
+           الهوية سطران في هذا الملف نفسه (س١٣٠): «شركة نحلة (منصة الحوت)».
+           فنحلة ما يعرفه المطعم ويتعامل معه، والحوت ما يُشغّله ويضمن وصوله —
+           وشارةٌ تحت الاسم تقول الاثنين بلا أن يزاحم أحدهما الآخر. */
+        .lg-platform {
+            display: inline-flex; align-items: center; gap: 6px; margin-top: 16px;
+            background: rgba(255,255,255,.07); border: 1px solid rgba(255,179,0,.22);
+            color: #FFD98A; font-size: .72rem; font-weight: 800;
+            padding: 7px 15px; border-radius: 999px;
+            backdrop-filter: blur(6px);
+        }
+
+        /* الورقة البيضاء — ترتفع من الأسفل، فالإبهام يصلها أولاً */
+        .login-card {
+            position: relative; z-index: 1;
+            background: #fff;
+            border-radius: 30px 30px 0 0;
+            padding: 26px 22px calc(26px + env(safe-area-inset-bottom));
+            width: 100%; max-width: 520px; margin: 0 auto;
+            box-shadow: 0 -12px 40px rgba(0,0,0,.28);
             border: none;
+        }
+        .lg-card-title { font-size: 1.08rem; font-weight: 900; color: var(--primary-blue-dark); margin-bottom: 4px; }
+        .lg-card-hint { font-size: .78rem; font-weight: 600; color: #94a3b8; margin-bottom: 20px; }
+
+        /* حقلٌ بأيقونة داخله — أوضح من عنوانٍ فوقه على الشاشات الضيّقة */
+        .lg-field { margin-bottom: 14px; }
+        .lg-field label { font-size: .74rem; font-weight: 800; color: #64748b; margin-bottom: 7px; display: block; }
+        .lg-input-wrap { position: relative; }
+        .lg-input-wrap > i {
+            position: absolute; inset-inline-start: 15px; top: 50%; transform: translateY(-50%);
+            color: #cbd5e1; pointer-events: none; transition: color .2s ease;
+        }
+        .lg-input-wrap:focus-within > i { color: var(--accent); }
+        .lg-input-wrap .custom-input {
+            padding-inline-start: 46px; padding-block: 15px;
+            background: #fafaf9; border: 1.5px solid #eeece7; border-radius: 15px;
+            font-size: 1rem; text-align: start;
+        }
+        .lg-input-wrap .custom-input:focus {
+            background: #fff; border-color: var(--accent);
+            box-shadow: 0 0 0 4px rgba(255,179,0,.14);
+        }
+        .lg-input-wrap .custom-input.phone-format { letter-spacing: .5px; font-variant-numeric: tabular-nums; }
+        .lg-eye {
+            position: absolute; inset-inline-end: 8px; top: 50%; transform: translateY(-50%);
+            width: 38px; height: 38px; border: none; background: transparent; cursor: pointer;
+            color: #94a3b8; border-radius: 11px; display: flex; align-items: center; justify-content: center;
+        }
+        .lg-eye:hover { background: #f1f5f9; color: #475569; }
+        .lg-eye:focus-visible { outline: 3px solid rgba(255,179,0,.35); outline-offset: 1px; }
+        .lg-input-wrap:has(.lg-eye) .custom-input { padding-inline-end: 50px; }
+
+        .magical-submit-btn.lg-btn {
+            background: linear-gradient(135deg, #FFC947, #FFB300 60%, #F0A500);
+            color: #4A2C00; padding: 16px; border-radius: 16px; font-size: 1.02rem; font-weight: 900;
+            box-shadow: 0 8px 22px rgba(255,179,0,.35); margin-top: 20px;
+        }
+        .magical-submit-btn.lg-btn:hover { box-shadow: 0 10px 28px rgba(255,179,0,.45); }
+        .magical-submit-btn.lg-btn:focus-visible { outline: 3px solid rgba(124,74,3,.4); outline-offset: 3px; }
+
+        /* شارة الثقة — تقول لماذا يُؤتمن على أرقامه، لا «نحن رائدون» */
+        .lg-trust {
+            display: flex; align-items: center; justify-content: center; gap: 7px;
+            margin-top: 16px; font-size: .7rem; font-weight: 700; color: #94a3b8;
+        }
+        .lg-trust i { color: var(--success); }
+
+        /* 🐳 توقيع البنية التحتية — هادئ لكنه حاضر. والكتابة `AlHut`
+           لا `Al-Hout`: هي الصيغة التي يكتبها النظام بنفسه في سجلّه
+           (`[AlHut]` في س٧٤ و١٤٧١)، فتوحيدها يمنع علامتين لشيء واحد. */
+        .lg-foot {
+            text-align: center; margin-top: 14px; padding-top: 13px;
+            border-top: 1px solid #f8fafc;
+            font-size: .64rem; font-weight: 800; color: #cbd5e1; letter-spacing: .2px;
+        }
+
+        .lg-reg-head {
+            display: flex; align-items: center; gap: 10px; margin: 22px 0 16px;
+            padding-top: 20px; border-top: 1px solid #f1f5f9;
+        }
+        .lg-reg-ic {
+            width: 40px; height: 40px; border-radius: 13px; flex-shrink: 0;
+            background: #FFF8E7; color: #B45309;
+            display: flex; align-items: center; justify-content: center;
+        }
+        .lg-reg-t { font-size: .95rem; font-weight: 900; color: var(--primary-blue-dark); }
+        .lg-reg-s { font-size: .72rem; font-weight: 600; color: #94a3b8; margin-top: 2px; }
+
+        @media (min-width: 768px) {
+            .login-wrapper { justify-content: center; padding: 40px 20px; }
+            .lg-hero { padding-top: 0; }
+            .login-card { border-radius: 26px; box-shadow: 0 30px 70px -20px rgba(0,0,0,.5); }
+        }
+        @media (max-width: 340px) {
+            .lg-title { font-size: 1.6rem; }
+            .lg-mark { width: 66px; height: 73px; }
+            .lg-mark img { width: 42px; height: 42px; }
         }
         
         .btn-refresh-waiting { background: #f1f5f9; color: var(--text-muted); border: 1px solid var(--border-light); font-weight: 700; border-radius: 12px; padding: 12px 20px; transition: 0.2s; border: none; }
@@ -650,41 +935,50 @@
 </div>
 
 <div id="loginSection" class="login-wrapper">
-    <div class="container py-5">
-        <div class="text-center mb-5 mt-4">
-            <h2 class="fw-black" style="color: white; letter-spacing: -0.5px;">منصة الحوت 🐳</h2>
-            <p class="fw-bold" style="color: #94a3b8; font-size: 0.85rem;">نظام الإدارة اللوجستية الذكي</p>
+    <div class="lg-hero">
+        <div class="lg-mark"><img src="rest-logo.png" alt="" width="52" height="52"></div>
+        <h1 class="lg-title">نحلة</h1>
+        <div class="lg-sub">للمتاجر الشريكة</div>
+        <div><span class="lg-platform">🐳 مدعومة بمنصّة الحوت</span></div>
+    </div>
+
+    <div class="login-card" id="authBox">
+        <div class="lg-card-title">دخول المنشأة</div>
+        <div class="lg-card-hint">أدخل رقم منشأتك وكلمة المرور للمتابعة</div>
+
+        <div class="lg-field">
+            <label for="checkPhone">رقم هاتف المنشأة</label>
+            <div class="lg-input-wrap">
+                <i data-lucide="phone" size="18"></i>
+                <input type="tel" id="checkPhone" class="custom-input phone-format" placeholder="07XXXXXXXXX" dir="ltr" autocomplete="username" inputmode="numeric">
+            </div>
         </div>
 
-        <div class="row justify-content-center">
-            <div class="col-lg-5">
-                
-                <div class="login-card" id="authBox">
-                    <h4 class="fw-black mb-4 text-center">تسجيل دخول المنشأة</h4>
-                    
-                    <div class="mb-3 text-center">
-                        <label class="form-label text-center w-100">رقم هاتف المنشأة</label>
-                        <input type="tel" id="checkPhone" class="custom-input phone-format py-3 text-center" placeholder="07XXXXXXXXX" dir="ltr" autocomplete="off">
-                    </div>
-                    <div class="mb-4 text-center" id="loginPassContainer">
-                        <label class="form-label text-center w-100">كلمة المرور</label>
-                        <input type="password" id="checkPassword" class="custom-input py-3 text-center" placeholder="********" autocomplete="off">
-                    </div>
+        <div class="lg-field" id="loginPassContainer">
+            <label for="checkPassword">كلمة المرور</label>
+            <div class="lg-input-wrap">
+                <i data-lucide="lock" size="18"></i>
+                <input type="password" id="checkPassword" class="custom-input" placeholder="••••••••" autocomplete="current-password">
+                <button type="button" class="lg-eye" onclick="togglePassView(this)" aria-label="إظهار كلمة المرور"><i data-lucide="eye" size="18"></i></button>
+            </div>
+        </div>
 
-                    <div id="registerFields" class="hidden-section text-start" style="animation: fadeIn 0.5s;">
-                        <hr class="my-4 opacity-10">
-                        <div class="d-flex align-items-center justify-content-center gap-2 mb-4 text-dark">
-                            <i data-lucide="building"></i>
-                            <h5 class="fw-black m-0">تسجيل مطعم جديد</h5>
-                        </div>
+        <div id="registerFields" class="hidden-section text-start" style="animation: fadeIn 0.5s;">
+            <div class="lg-reg-head">
+                <div class="lg-reg-ic"><i data-lucide="building" size="20"></i></div>
+                <div>
+                    <div class="lg-reg-t">تسجيل منشأة جديدة</div>
+                    <div class="lg-reg-s">رقمك غير مسجّل — أكمل البيانات للانضمام</div>
+                </div>
+            </div>
                         
-                        <div class="mb-2"><input type="password" id="regPassword" class="custom-input" placeholder="إنشاء كلمة مرور قوية" autocomplete="off"></div>
-                        <div class="mb-2"><input type="text" id="regName" class="custom-input" placeholder="الاسم التجاري للمطعم" autocomplete="off"></div>
-                        <div class="mb-2"><input type="text" id="regArea" class="custom-input" placeholder="منطقة المطعم الأساسية" autocomplete="off"></div>
+                        <div class="mb-2"><input type="password" id="regPassword" class="custom-input" placeholder="إنشاء كلمة مرور قوية" autocomplete="new-password"></div>
+                        <div class="mb-2"><input type="text" id="regName" class="custom-input" placeholder="الاسم التجاري للمنشأة" autocomplete="off"></div>
+                        <div class="mb-2"><input type="text" id="regArea" class="custom-input" placeholder="منطقة المنشأة الأساسية" autocomplete="off"></div>
                         
                         <div class="mb-2">
                             <label class="form-label" style="text-align: right; color: var(--primary-blue-dark); font-size: 0.75rem;">
-                                <i data-lucide="map-pin" size="14"></i> حدد موقع المطعم بدقة:
+                                <i data-lucide="map-pin" size="14"></i> حدد موقع المنشأة بدقة:
                             </label>
                             <div class="d-flex gap-2 mb-2">
                                 <input type="text" id="mapSearchInput" class="custom-input py-1 mb-0" placeholder="اسم المطعم أو المنطقة..." style="font-size: 0.8rem; flex: 1;">
@@ -734,13 +1028,16 @@
                         </div>
                     </div>
 
-                    <button class="magical-submit-btn mt-2" id="mainAuthBtn" onclick="authAction()">
+                    <button class="magical-submit-btn lg-btn" id="mainAuthBtn" onclick="authAction()">
                         دخول المنصة <i data-lucide="arrow-left" size="18"></i>
                     </button>
-                    
-                    <div style="text-align: center; margin-top: 15px; font-size: 0.65rem; color: #94a3b8; font-weight: 700;">
-                        Powered by Al-Hout Cloud Infrastructure 🐳
+
+                    <div class="lg-trust">
+                        <i data-lucide="check-circle" size="13"></i>
+                        كلمة مرورك مُعمّاة ولا يراها أحد
                     </div>
+
+                    <div class="lg-foot">Powered by AlHut Cloud Infrastructure 🐳</div>
                 </div>
 
                 <div class="login-card hidden-section text-center" id="waitingBox">
@@ -754,10 +1051,6 @@
                         تعديل معلومات التسجيل
                     </button>
                 </div>
-
-            </div>
-        </div>
-    </div>
 </div>
 
 <div id="orderSection" class="hidden-section">
@@ -2409,20 +2702,17 @@ function escAttr(x){ return esc(x).replace(/"/g,'&quot;').replace(/'/g,'&#39;');
     }
     /* الوسم يُبنى بـescAttr على الرابط — والقاعدة تشترط بدايةَ https،
        فلا يصل إلى هنا جافاسكربت متنكّر في هيئة صورة. */
-    /* 🖼️ [N-12.0-ب] الحجم 22 كان بحجم حرفٍ في السطر — لا يُميّز وجهاً.
-       رُفع إلى 36، وأُصلح معه سلوكان كانا يعملان في الفراغ:
-         • vertical-align لا أثر له داخل حاوية flex (‏.detail-item منها)
-           — أُزيل، وalign-items:center في الأمّ يتكفّل بالمحاذاة.
-         • margin-inline-end يُضاف فوق gap:6px القائمة ⇒ فراغٌ مضاعف.
-       وأُضيف flex-shrink:0: بدونه تُسحق الدائرة على الشاشات الضيّقة
-       فتصير بيضةً لا وجهاً — وهو ما يقع فعلاً على هواتف 360 بكسل. */
+    /* 🖼️ [N-12.10] الصورة تملأ حاويتها بدل أن تحمل مقاسها بنفسها.
+       كانت تُمرَّر px من موضع النداء (22) — أي أن **الحجم يعيش في مكانين**:
+       نداءٌ في الوسم وقاعدةٌ في CSS. والحجم الآن قرارُ الحاوية وحدها
+       (.oc-av 56 · .ac-av 46)، فيتغيّر من مكانٍ واحد ولا يتباعد.
+       ⚠️ والوسيط px مُبقى للتوافق: من مرّره حصل على مقاسٍ صريح. */
     function driverAvatarHtml(phone, px) {
         const u = getDriverPhotoCached(phone);
-        const size = px || 36;
         if (!u) return '';
+        const fixed = px ? `width:${px}px;height:${px}px;border-radius:50%;` : 'width:100%;height:100%;';
         return `<img src="${escAttr(u)}" alt="" loading="lazy"
-            style="width:${size}px;height:${size}px;border-radius:50%;object-fit:cover;
-                   flex-shrink:0;border:1px solid rgba(15,23,42,.12)">`;
+            style="${fixed}object-fit:cover;display:block;flex-shrink:0">`;
     }
 
     let lastOrdersSnapshot = {};
@@ -2480,6 +2770,23 @@ function escAttr(x){ return esc(x).replace(/"/g,'&quot;').replace(/'/g,'&#39;');
          sid للمُعرّفات.
        ═══════════════════════════════════════════════════════════════════════ */
     function sid(x){ return String(x??'').replace(/[^A-Za-z0-9_-]/g,'').slice(0,64); }
+
+    /* 👁️ [N-12.10] إظهار كلمة المرور — ليست رفاهيةً على هاتف.
+       الكاشير يكتب على لوحةٍ صغيرة وسط الدوام، وكلمةٌ خاطئة تعني محاولةً
+       ضائعة من خمسٍ قبل الحظر المؤقّت (BF_MAX_ATTEMPTS في Code.gs). */
+    window.togglePassView = function (btn) {
+        const inp = btn.parentElement.querySelector('input');
+        if (!inp) return;
+        const show = inp.type === 'password';
+        inp.type = show ? 'text' : 'password';
+        btn.setAttribute('aria-label', show ? 'إخفاء كلمة المرور' : 'إظهار كلمة المرور');
+        /* سلسلتان ثابتتان لا حقنٌ في قالب — فلا يمرّ ${...} داخل innerHTML
+           أصلاً، ولا يحتاج الأمر إعفاءً من ق٨ ولا ثقةً في مراجعتي. */
+        btn.innerHTML = show
+            ? '<i data-lucide="eye-off" size="18"></i>'
+            : '<i data-lucide="eye" size="18"></i>';
+        if (typeof lucide !== 'undefined') lucide.createIcons();
+    };
     function jss(x){
       return String(x??'')
         .replace(/\\/g,'\\\\').replace(/'/g,"\\'").replace(/"/g,'&quot;')
@@ -2494,27 +2801,36 @@ function escAttr(x){ return esc(x).replace(/"/g,'&quot;').replace(/'/g,'&#39;');
         const isValidPhone = dPhone && !["system_routing", "pending_driver", "manual_pending"].includes(dPhone);
         const orderArea = esc(o.area || "غير محددة");
         const orderDetails = esc(o.details || "لا توجد تفاصيل إضافية");
+        /* 🖼️ [N-12.10] وجه الكابتن هنا أيضاً — نفس الكاش، فلا قراءة إضافية. */
+        const avInner = (isValidPhone && driverAvatarHtml(dPhone)) || '<i data-lucide="user" size="22"></i>';
         return `
                     <div class="archive-item searchable-archive-item" data-search="${escAttr(o.id)} ${escAttr(orderArea)} ${escAttr(orderDetails)} ${escAttr(dName)} ${escAttr(dPhone)}">
-                        <div class="d-flex justify-content-between align-items-start w-100">
-                            <div>
-                                <span class="fw-black text-dark" style="font-size: 0.95rem;">#${esc(o.id)}</span>
-                            </div>
-                            <div class="text-end">
-                                <span class="fw-black text-success" style="font-size: 1.05rem;">${esc(o.price)} <small>د.ع</small></span>
-                                <div class="small text-muted mt-1" style="font-size: 0.7rem;"><i data-lucide="clock" size="10"></i> ${esc(orderTime)}</div>
-                            </div>
-                        </div>
-                        <div class="archive-details-box w-100 text-start" dir="rtl">
-                            <div class="d-flex justify-content-between align-items-center mb-2 pb-2" style="border-bottom: 1px dashed rgba(15,23,42,0.1);">
-                                <div class="fw-bold text-dark">
-                                    <i data-lucide="bike" size="12" style="color: var(--success);"></i> الكابتن: <span class="fw-black">${dName}</span>
+                        <div class="ac-top">
+                            <div class="ac-av">${avInner}</div>
+                            <div class="ac-mid">
+                                <div class="ac-dname">${dName}</div>
+                                <div class="ac-sub">
+                                    <span>#${esc(o.id)}</span>
+                                    <span class="dot"></span>
+                                    <span>${esc(orderTime)}</span>
                                 </div>
-                                ${isValidPhone ? `<a href="tel:${escAttr(dPhone)}" class="text-decoration-none d-flex align-items-center gap-1" style="background: #f0fdf4; color: #16a34a; padding: 4px 10px; border-radius: 8px; font-weight: 800; font-size: 0.75rem;"><i data-lucide="phone" size="12"></i> ${esc(dPhone)}</a>` : ''}
                             </div>
-                            <div class="mb-2 fw-bold text-dark"><i data-lucide="map-pin" size="12" style="color: var(--accent);"></i> المنطقة: <span class="fw-normal">${orderArea}</span></div>
-                            <div class="fw-bold text-dark"><i data-lucide="info" size="12" style="color: var(--primary-blue);"></i> التفاصيل: <span class="fw-normal" style="user-select: text;">${orderDetails}</span></div>
+                            <div class="ac-price">
+                                <div class="ac-amount">${esc(o.price)} <small>د.ع</small></div>
+                                <div class="ac-done"><i data-lucide="check" size="10"></i> مكتمل</div>
+                            </div>
                         </div>
+                        <div class="archive-details-box" dir="rtl">
+                            <div class="ac-row">
+                                <i data-lucide="map-pin" size="14" style="color: var(--accent);"></i>
+                                المنطقة: <span>${orderArea}</span>
+                            </div>
+                            <div class="ac-row">
+                                <i data-lucide="info" size="14" style="color: var(--primary-blue);"></i>
+                                التفاصيل: <span style="user-select: text;">${orderDetails}</span>
+                            </div>
+                        </div>
+                        ${isValidPhone ? `<a href="tel:${escAttr(dPhone)}" class="ac-call"><i data-lucide="phone" size="13"></i> ${esc(dPhone)}</a>` : ''}
                     </div>`;
     }
 
@@ -2685,37 +3001,58 @@ function escAttr(x){ return esc(x).replace(/"/g,'&quot;').replace(/'/g,'&#39;');
                 else { step = 2; fillWidth = "33%"; }
             }
 
+            /* 🎴 [N-12.10] الحالة بالكلمات — هي عنوان البطاقة الآن.
+               والصياغة من جهة المطعم لا من جهة النظام: «الكابتن عند بابك»
+               تُقرأ ويُفهم منها الفعل المطلوب، و«arrived_at_res» لا. */
+            const STATUS_TEXT = ['', 'نبحث عن كابتن قريب', 'الكابتن متوجّه إليك', 'الكابتن عند بابك', 'الطلب في طريقه للزبون'];
+            const statusLine = STATUS_TEXT[step] || 'قيد المتابعة';
+
             const showReadyBtn = hasDriver && (status === 'accepted' || status === 'heading' || status === 'arrived_at_res');
-            const readyBtnHtml = showReadyBtn ? (readyForPickup ? `<span class="ready-pill"><i data-lucide="check-circle" size="10"></i> جاهز للاستلام</span>` : `<button class="btn-ready" onclick="markOrderReady('${esc(orderId)}', this)"><i data-lucide="package-check" size="14"></i> إبلاغ الكابتن بالجهوزية</button>`) : '';
+            const readyBtnHtml = showReadyBtn ? (readyForPickup ? `<span class="ready-pill"><i data-lucide="check-circle" size="14"></i> جاهز للاستلام</span>` : `<button class="btn-ready" onclick="markOrderReady('${esc(orderId)}', this)"><i data-lucide="package-check" size="15"></i> إبلاغ الكابتن بالجهوزية</button>`) : '';
 
             const photoUrl = o.photoUrl || o.image; 
-            const imgBtnHtml = photoUrl ? `<button class="btn-call-mini" style="background:#e0f2fe; color:var(--primary-blue);" onclick="document.getElementById('fullReceiptImage').src='${jss(photoUrl)}'; document.getElementById('imageViewerModal').style.display='flex';" title="عرض الوصل"><i data-lucide="image" size="14"></i></button>` : '';
+            const imgBtnHtml = photoUrl ? `<button class="oc-icon-btn receipt" onclick="document.getElementById('fullReceiptImage').src='${jss(photoUrl)}'; document.getElementById('imageViewerModal').style.display='flex';" title="عرض الوصل" aria-label="عرض الوصل"><i data-lucide="image" size="17"></i></button>` : '';
+
+            const avatarInner = hasDriver
+                ? (driverAvatarHtml(driverPhone) || '<i data-lucide="user" size="26"></i>')
+                : '<i data-lucide="radar" size="24"></i>';
+
+            const stepsHtml = ['بانتظار', 'متوجّه', 'بالمطعم', 'بالطريق'].map((lb, i) => {
+                const n = i + 1;
+                const cls = n < step ? 'done' : (n === step ? 'now' : '');
+                return `<div class="oc-step ${cls}"><div class="oc-step-bar"></div><div class="oc-step-lb">${lb}</div></div>`;
+            }).join('');
 
             activeOrdersHtml += `
             <div class="live-order-card" id="order-${esc(orderId)}">
-                <div class="order-header-row">
-                    <div>
-                        <span class="order-id-text">#${esc(orderId)}</span>
-                        <div class="order-time-text"><i data-lucide="clock" size="10"></i> ${esc(orderTime)}</div>
+                <div class="oc-rail"><div class="oc-rail-fill" style="width:${fillWidth}"></div></div>
+                <div class="oc-body">
+                    <div class="oc-head">
+                        <div class="oc-status ${hasDriver ? '' : 'searching'}">${esc(statusLine)}</div>
+                        <div class="oc-meta">
+                            <div class="oc-id">#${esc(orderId)}</div>
+                            <div class="oc-time"><i data-lucide="clock" size="11"></i> ${esc(orderTime)}</div>
+                        </div>
                     </div>
-                    <div class="d-flex align-items-center gap-2">
+
+                    <div class="oc-driver ${hasDriver ? '' : 'waiting'}">
+                        <div class="oc-av ${hasDriver ? '' : 'waiting'}">${avatarInner}</div>
+                        <div class="oc-dwrap">
+                            <div class="oc-dname">${esc(driverName)}</div>
+                            <div class="oc-drole">${hasDriver ? 'كابتن التوصيل' : 'جارٍ الإسناد…'}</div>
+                        </div>
+                        ${hasDriver ? `<button class="oc-call" onclick="window.open('tel:${esc(driverPhone)}')" title="اتصال بالكابتن" aria-label="اتصال بالكابتن"><i data-lucide="phone" size="19"></i></button>` : ''}
+                    </div>
+
+                    <div class="oc-dest"><i data-lucide="map-pin" size="15"></i> ${esc(orderArea || 'غير محددة')}</div>
+
+                    <div class="oc-steps">${stepsHtml}</div>
+
+                    <div class="oc-actions">
                         ${readyBtnHtml}
-                        ${isCancelable ? `<button class="btn-cancel-grace" onclick="cancelOrderGrace('${esc(orderId)}')">إلغاء</button>` : ''}
                         ${imgBtnHtml}
-                        ${hasDriver ? `<button class="btn-call-mini" onclick="window.open('tel:${esc(driverPhone)}')"><i data-lucide="phone" size="14"></i></button>` : ''}
+                        ${isCancelable ? `<button class="oc-icon-btn danger" onclick="cancelOrderGrace('${esc(orderId)}')" title="إلغاء الطلب" aria-label="إلغاء الطلب"><i data-lucide="x" size="18"></i></button>` : ''}
                     </div>
-                </div>
-                <div class="order-details-row mt-2">
-                    <div class="detail-item"><i data-lucide="map-pin" size="14" style="color: var(--accent);"></i> ${esc(orderArea || 'غير محددة')}</div>
-                    <div class="detail-item">${hasDriver ? driverAvatarHtml(driverPhone,36) : '<i data-lucide="bike" size="14" style="color: var(--success);"></i> '}الكابتن: ${driverName}</div>
-                </div>
-                <div class="progress-tracker mt-3">
-                    <div class="progress-line"></div>
-                    <div class="progress-line-fill" style="width: ${fillWidth};"></div>
-                    <div class="progress-step ${step >= 1 ? (step === 1 ? 'current' : 'active') : ''}"><div class="progress-dot"><i data-lucide="radar" size="10"></i></div><span class="progress-label">بانتظار</span></div>
-                    <div class="progress-step ${step >= 2 ? (step === 2 ? 'current' : 'active') : ''}"><div class="progress-dot"><i data-lucide="truck" size="10"></i></div><span class="progress-label">متوجه</span></div>
-                    <div class="progress-step ${step >= 3 ? (step === 3 ? 'current' : 'active') : ''}"><div class="progress-dot"><i data-lucide="store" size="10"></i></div><span class="progress-label">بالمطعم</span></div>
-                    <div class="progress-step ${step >= 4 ? (step === 4 ? 'current' : 'active') : ''}"><div class="progress-dot"><i data-lucide="user" size="10"></i></div><span class="progress-label">بالطريق</span></div>
                 </div>
             </div>`;
         });
