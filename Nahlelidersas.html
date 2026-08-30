@@ -193,6 +193,50 @@ button,input,select,textarea{font-family:'Cairo',sans-serif;}
 .crew-dur{background:var(--blue-l);border:1px solid #d8e5fb;border-radius:8px;padding:6px 8px;
   text-align:center;font-size:.68rem;font-weight:900;color:var(--blue-d);margin-bottom:10px;}
 .crew-acts{display:flex;gap:6px;}
+
+/* 💰 [N-13.0] شارة الدَّين — والحالة تُقرأ باللون قبل الرقم.
+   الأحمر ليس تنبيهاً بل **معلومة تشغيلية**: هذا الكابتن لا تصله طلبات
+   الآن، فحين يشتكي يعرف الليدر السبب من بطاقته لا من التخمين. */
+.crew-debt{display:flex;align-items:center;justify-content:space-between;gap:9px;
+  margin-top:8px;padding:9px 11px;border-radius:12px;
+  background:var(--surface3);border:1px solid var(--line);}
+.crew-debt.blocked{background:var(--red-l);border-color:rgba(225,25,0,.22);}
+.cd-l{display:flex;align-items:center;gap:9px;min-width:0;}
+.cd-ic{font-size:16px;flex-shrink:0;}
+.cd-t{font-size:.85rem;font-weight:900;color:var(--ink);font-variant-numeric:tabular-nums;}
+.crew-debt.blocked .cd-t{color:var(--red);}
+.cd-s{font-size:.66rem;font-weight:700;color:var(--ink4);margin-top:1px;
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.crew-debt.blocked .cd-s{color:var(--red-d,#a11);}
+.cd-b{flex-shrink:0;background:var(--green);color:#fff;border:none;border-radius:10px;
+  padding:8px 13px;font-size:.72rem;font-weight:900;cursor:pointer;font-family:inherit;
+  transition:filter .15s;}
+.cd-b:hover{filter:brightness(1.07);}
+.cd-b:active{transform:scale(.95);}
+.cd-b:focus-visible{outline:3px solid rgba(4,138,72,.4);outline-offset:2px;}
+
+/* ورقة السداد */
+.cd-card{background:var(--surface3);border:1px solid var(--line);border-radius:14px;
+  padding:13px;margin-bottom:15px;}
+.cd-nm{font-size:.95rem;font-weight:900;color:var(--ink);}
+.cd-ph{font-size:.72rem;font-weight:700;color:var(--ink4);direction:ltr;text-align:right;
+  margin-top:2px;font-variant-numeric:tabular-nums;}
+.cd-tot{font-size:.78rem;font-weight:700;color:var(--ink2);margin-top:9px;
+  padding-top:9px;border-top:1px dashed var(--line);}
+.cd-tot b{color:var(--red);font-size:.95rem;font-variant-numeric:tabular-nums;}
+.cd-lb{display:block;font-size:.74rem;font-weight:800;color:var(--ink3);margin-bottom:7px;}
+.cd-in{width:100%;background:var(--surface);border:1.5px solid var(--line);border-radius:13px;
+  padding:14px 15px;font-size:1.15rem;font-weight:900;color:var(--ink);outline:none;
+  font-family:inherit;text-align:center;font-variant-numeric:tabular-nums;
+  transition:border-color .15s;}
+.cd-in:focus{border-color:var(--green);}
+.cd-hint{font-size:.68rem;font-weight:600;color:var(--ink4);margin-top:8px;line-height:1.7;}
+.cd-go{width:100%;background:var(--green);color:#fff;border:none;border-radius:14px;
+  padding:15px;font-size:.95rem;font-weight:900;cursor:pointer;margin-top:15px;
+  font-family:inherit;transition:filter .15s;}
+.cd-go:hover{filter:brightness(1.07);}
+.cd-go:disabled{opacity:.6;cursor:not-allowed;}
+.cd-go:focus-visible{outline:3px solid rgba(4,138,72,.4);outline-offset:2px;}
 .crew-b{flex:1;border:none;border-radius:9px;padding:8px;font-size:.72rem;font-weight:800;cursor:pointer;
   display:flex;align-items:center;justify-content:center;gap:4px;transition:transform .12s;}
 .crew-b:active{transform:scale(.95);}
@@ -915,6 +959,29 @@ button,input,select,textarea{font-family:'Cairo',sans-serif;}
     </div>
     <div id="assignList" class="asn-list"></div>
     <button class="sheet-cancel" onclick="clSheet('assignModal')">إلغاء</button>
+  </div>
+</div>
+
+<!-- 💰 [N-13.0] ورقة تسجيل سداد الكابتن — لليدر صاحب صلاحية assign -->
+<div id="clearDebtSheet" class="sheet-bg" onclick="clSheet('clearDebtSheet')">
+  <div class="sheet" onclick="event.stopPropagation()">
+    <div class="sheet-handle"></div>
+    <div class="sheet-title">💰 تسجيل سداد</div>
+    <div class="sheet-sub">يُسجَّل باسمك، وتراه الإدارة في إنذاراتها</div>
+
+    <div class="cd-card">
+      <div class="cd-nm" id="cdName">—</div>
+      <div class="cd-ph" id="cdPhone">—</div>
+      <div class="cd-tot">الدَّين الكلّي: <b id="cdTotal">—</b></div>
+    </div>
+
+    <label class="cd-lb" for="cdAmount">المبلغ المستلَم</label>
+    <input type="text" id="cdAmount" class="cd-in" inputmode="numeric" autocomplete="off" placeholder="0">
+    <div class="cd-hint">المبلغ كاملٌ مبدئياً — عدّله إن كان السداد جزئياً.
+      ويُخصم من الرسوم أولاً ثم المناصفة.</div>
+
+    <button class="cd-go" onclick="submitClearDebt(this)">تأكيد الاستلام</button>
+    <button class="sheet-cancel" onclick="clSheet('clearDebtSheet')">إلغاء</button>
   </div>
 </div>
 
@@ -1945,7 +2012,11 @@ function crewToday(){
       completed:0,rejected:0,totalMin:0,avg:0,
       online:false,busy:false,
       openTime:null,lastSeen:null,workedMin:null,
-      ledgerTotal:liveLed.drivers?.[n]?.completed_orders||0
+      ledgerTotal:liveLed.drivers?.[n]?.completed_orders||0,
+      /* 💰 [N-13.0] الدَّينان — من نفس liveLed المستمَع إليه أصلاً، فلا
+         قراءة إضافية. والمجموع هو ما يقيسه الحظر في المحرّك حرفياً. */
+      debt:Number(liveLed.drivers?.[n]?.debt||0),
+      debtOps:Number(liveLed.drivers?.[n]?.debt_ops||0)
     };
     return map[n];
   };
@@ -2007,6 +2078,74 @@ function crewToday(){
   return Object.values(map);
 }
 
+/* ═══════════════════════════════════════════════════════════════════════════
+   💰 [N-13.0] الدَّين في بطاقة الكابتن + تسجيل السداد
+   ───────────────────────────────────────────────────────────────────────────
+   لماذا في بطاقة الليدر لا في لوحة الإدارة وحدها؟ لأن الحظر المالي بلا فكٍّ
+   فوري **يعاقب من دفع**: الكابتن يسلّم النقود التاسعة مساءً ويبقى محجوباً
+   حتى تفتح الإدارة صباحاً. فيخسر ليلته وقد سدّد.
+
+   🔒 والزرّ لا يظهر إلا لمن يملك «assign» — صلاحية الليدر الأول. والحارس
+      الحقيقي في Code.gs (sessHasPerm_)، وهذا إخفاءُ واجهةٍ لا أمن: من يزوّر
+      الطلب يُردّ من الخادم لا من هنا.
+   ═══════════════════════════════════════════════════════════════════════════ */
+const DEBT_LIMIT = 5000;   /* ⚠️ يطابق TUNE.DEBT_BLOCK_LIMIT — غيّرهما معاً */
+
+function canClearDebt(){ return Array.isArray(EMP_PERMS) && EMP_PERMS.indexOf("assign") > -1; }
+
+function debtRowHtml(c){
+  const total = (c.debt||0) + (c.debtOps||0);
+  if(total <= 0 && !canClearDebt()) return "";
+  const blocked = total >= DEBT_LIMIT;
+  const parts = [];
+  if(c.debtOps) parts.push("رسوم " + c.debtOps.toLocaleString());
+  if(c.debt)    parts.push("مناصفة " + c.debt.toLocaleString());
+  return `<div class="crew-debt ${blocked?"blocked":""}">
+      <div class="cd-l">
+        <span class="cd-ic">${blocked?"🚫":"💰"}</span>
+        <div>
+          <div class="cd-t">${total.toLocaleString()} د.ع</div>
+          <div class="cd-s">${blocked?"محجوب — لا تصله طلبات":(parts.join(" · ")||"لا دين")}</div>
+        </div>
+      </div>
+      ${canClearDebt() && total>0
+        ? `<button class="cd-b" onclick="openClearDebt('${ej(c.phone)}','${ej(c.name)}',${total})">تسجيل سداد</button>`
+        : ""}
+    </div>`;
+}
+
+/* الورقة: مبلغٌ مقترحٌ كاملاً، ويقبل التعديل لسدادٍ جزئي. */
+window.openClearDebt = function(phone, name, total){
+  if(!canClearDebt()) return toast("غير متاح لحسابك","e");
+  document.getElementById("cdName").textContent  = name || phone;
+  document.getElementById("cdPhone").textContent = phone;
+  document.getElementById("cdTotal").textContent = Number(total).toLocaleString() + " د.ع";
+  const inp = document.getElementById("cdAmount");
+  inp.value = total; inp.dataset.phone = phone; inp.dataset.max = total;
+  document.getElementById("clearDebtSheet").classList.add("open");
+};
+
+window.submitClearDebt = async function(btn){
+  const inp = document.getElementById("cdAmount");
+  const phone = inp.dataset.phone;
+  const max = Number(inp.dataset.max)||0;
+  const amt = Number(String(inp.value).replace(/[^0-9]/g,""))||0;
+  if(amt <= 0)  return toast("أدخل مبلغاً صحيحاً","e");
+  /* حارسٌ في الواجهة أيضاً: الخادم يقصّ الزائد إلى الدَّين الكامل، لكن
+     تنبيهَ الليدر هنا أوضح من تصحيحٍ صامت يظنّه قبولاً. */
+  if(amt > max) return toast("المبلغ أكبر من الدَّين ("+max.toLocaleString()+")","e");
+
+  btn.disabled = true; const old = btn.textContent; btn.textContent = "…";
+  try{
+    const d = await staffAction({action:"STAFF_CLEAR_DEBT", driverPhone:phone, amount:amt});
+    if(d && d.success){
+      toast("✅ " + (d.msg || "تم التسجيل"), "s");
+      clSheet("clearDebtSheet");
+    } else toast((d && d.msg) || "فشل التسجيل","e");
+  }catch(e){ toast("تعذّر الاتصال","e"); }
+  btn.disabled = false; btn.textContent = old;
+};
+
 function renderCrew(){
   const box=document.getElementById("crewGrid");if(!box)return;
   let list=crewToday();
@@ -2056,6 +2195,7 @@ function renderCrew(){
           <div class="crew-time"><div class="crew-time-l">👁 آخر ظهور</div><div class="crew-time-v">${fmtClock(c.lastSeen)}</div></div>
         </div>
         <div class="crew-dur">⏱️ مدة العمل اليوم: ${fmtDur(c.workedMin)}</div>
+        ${debtRowHtml(c)}
         <div class="crew-acts">
           <button class="crew-b crew-b-call" onclick="waOpen('${ej(c.phone)}')">💬 واتساب</button>
           <button class="crew-b crew-b-msg" onclick="msgCaptain('${ej(c.phone)}','${ej(c.name)}')">💬 رسالة</button>
