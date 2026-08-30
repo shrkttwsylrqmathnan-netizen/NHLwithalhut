@@ -49,7 +49,7 @@
      الآن: رقمٌ واحد يُشتقّ منه كل شيء — الشاشة والإعدادات ومسح الكاش.
      **وأي تسليم جديد يجب أن يرفعه، وإلا لم يصل.**
      ═══════════════════════════════════════════════════════════════════════ */
-  const CURRENT_APP_VERSION = "18.8-Nahla-Twin";   /* 🔧 V2.2 — لا تنسَ رفعه مع كل تسليم يمسّ هذا الملف */
+  const CURRENT_APP_VERSION = "18.9-Nahla-Debt";   /* 🔧 V2.2 — لا تنسَ رفعه مع كل تسليم يمسّ هذا الملف */
   window.APP_VERSION = CURRENT_APP_VERSION;
   /* اطبعه في شاشة الدخول فور جهوز الصفحة — نصّاً واحداً لا نسختين. */
   document.addEventListener('DOMContentLoaded', function(){
@@ -172,6 +172,39 @@
   --line:rgba(255,179,0,.22);
   --ok:#10B981; --ok-dp:#059669; --warn:#E8830C; --warn-dp:#C96A00;
   --bad:#EF4444; --bad-dp:#DC2626; --info:#3B82F6;
+}
+/* ═══════════════════════════════════════════════════════════════════════════
+   💰 [N-13.0] شريط الدَّين — الكابتن يعرف قبل أن يُحجب
+   ───────────────────────────────────────────────────────────────────────────
+   الحجب الصامت أسوأ من الحجب: الكابتن يفتح تطبيقه، حالته «متاح»، وصفر
+   طلبات. فيظنّ النظام معطّلاً أو التوزيع ظالماً، ويتّصل غاضباً — وثقة
+   الأسطول في عدالة التوزيع أصعب ما يُعاد بناؤه بعد كسره.
+
+   فالشريط ثلاث حالات لا حالتان:
+     أقلّ من 60٪ من الحدّ   ⇒ لا يظهر إطلاقاً (لا نُزعج بلا سبب)
+     من 60٪ إلى الحدّ        ⇒ كهرماني: «اقتربتَ — سدّد قبل التوقّف»
+     بلغ الحدّ               ⇒ أحمر: «متوقّف — راجع الإدارة»
+
+   والتحذير قبل الحجب هو الغرض: أن يسدّد الكابتن باختياره لا بعد أن يخسر
+   ليلته. وأرجّح أن هذه وحدها تُحصّل أكثر ممّا يُحصّله الحجب نفسه.
+   ═══════════════════════════════════════════════════════════════════════════ */
+.dbtb{display:flex;align-items:center;gap:11px;padding:12px 14px;border-radius:16px;
+  margin-bottom:12px;cursor:pointer;border:1.5px solid transparent;
+  transition:transform .15s ease;}
+.dbtb:active{transform:scale(.985);}
+.dbtb.warn{background:#FFF7ED;border-color:#FDBA74;}
+.dbtb.stop{background:#FEF2F2;border-color:#FCA5A5;}
+.dbtb-ic{font-size:22px;flex-shrink:0;line-height:1;}
+.dbtb-tx{flex:1;min-width:0;}
+.dbtb-t{font-size:.92rem;font-weight:900;line-height:1.35;}
+.dbtb.warn .dbtb-t{color:var(--warn-dp);}
+.dbtb.stop .dbtb-t{color:var(--bad-dp);}
+.dbtb-s{font-size:.72rem;font-weight:700;color:#78716C;margin-top:3px;line-height:1.5;}
+.dbtb-ar{font-size:19px;color:#A8A29E;flex-shrink:0;font-weight:900;}
+/* نبضة على الحالة الحمراء وحدها — تُطفأ لمن يطلب تقليل الحركة */
+.dbtb.stop .dbtb-ic{animation:dbtbP 1.7s ease-in-out infinite;}
+@keyframes dbtbP{0%,100%{transform:scale(1)}50%{transform:scale(1.14)}}
+@media (prefers-reduced-motion:reduce){.dbtb.stop .dbtb-ic{animation:none}
   --r-sm:10px; --r:14px; --r-lg:16px; --r-xl:20px; --r-pill:99px;
   --ease:cubic-bezier(.22,1,.36,1);
   --bounce:cubic-bezier(.34,1.56,.64,1);
@@ -817,6 +850,16 @@ window.__SND={alert:"UklGRvaoAABXQVZFZm10IBAAAAABAAEAIlYAAESsAAACABAAZGF0YdKoAAA
   </div>
 
   <div class="wrap">
+    <!-- 💰 [N-13.0] شريط الدَّين — يظهر عند الاقتراب من الحدّ ويتحوّل أحمر عند بلوغه -->
+    <div id="debtBar" class="dbtb" style="display:none" onclick="openDebtInfo()">
+      <div class="dbtb-ic" id="dbtbIc">⚠️</div>
+      <div class="dbtb-tx">
+        <div class="dbtb-t" id="dbtbT">—</div>
+        <div class="dbtb-s" id="dbtbS">—</div>
+      </div>
+      <div class="dbtb-ar">‹</div>
+    </div>
+
     <div class="stats">
       <div class="stat" onclick="openLedger()">
         <div class="stat-i" style="color:var(--ok-dp);"><svg class="si si-s" viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg></div>
@@ -1452,6 +1495,10 @@ setInterval(()=>{ if(isOnline) updateLinkPill(); }, 5000);
 /* [PERM-7/ق٣٦] أُعلنت أعلاه قبل markFix — كانت هنا وهي تُكتب في 1352. */
 let lastHtml="";
 let readySet=new Set(), rejToday=0, doneToday=0, earnToday=0, lifetime=0, debtNow=0;
+/* 💰 [N-13.0] الرسم التشغيلي — دَينٌ ثانٍ مستقلّ عن عمولة المناصفة.
+   والحدّ يطابق TUNE.DEBT_BLOCK_LIMIT في المحرّك: غيّرهما معاً أو لا تغيّر. */
+let debtOps=0;
+const DEBT_LIMIT=5000;
 let queue=JSON.parse(localStorage.getItem('hut_offline_queue')||'[]'), qBusy=false;
 let chatOpen=false, chatMsgs={}, chatMeta={}, chatSeen=0;
 let shownMsgs=JSON.parse(localStorage.getItem('suf_shown_msgs')||'[]');
@@ -2854,11 +2901,60 @@ function level(n){
   if(n>=10)return{c:'lv1',t:'🥉 برونزي'};
   return{c:'lv0',t:'🌱 جديد'};
 }
+/* 💰 [N-13.0] يُنادى من refreshDash مع كل تغيّر في الدفتر. */
+function renderDebtBar(){
+  const bar=document.getElementById('debtBar');
+  if(!bar) return;
+  const total=(Number(debtNow)||0)+(Number(debtOps)||0);
+  const stop = total>=DEBT_LIMIT;
+  const warn = !stop && total>=DEBT_LIMIT*0.6;
+
+  if(!stop && !warn){ bar.style.display='none'; return; }
+  bar.style.display='flex';
+  bar.className='dbtb '+(stop?'stop':'warn');
+  document.getElementById('dbtbIc').textContent = stop?'🚫':'⚠️';
+
+  const T=document.getElementById('dbtbT'), S=document.getElementById('dbtbS');
+  if(stop){
+    T.textContent='توقّف استلام الطلبات — دَينك '+total.toLocaleString('ar-EG')+' د.ع';
+    S.textContent='راجع الإدارة للتسديد، ويعود التوزيع فوراً بعد التسجيل.';
+  }else{
+    const left=DEBT_LIMIT-total;
+    T.textContent='دَينك '+total.toLocaleString('ar-EG')+' د.ع — اقتربتَ من الحدّ';
+    S.textContent='عند '+DEBT_LIMIT.toLocaleString('ar-EG')+' يتوقّف استلام الطلبات. تبقّى '+left.toLocaleString('ar-EG')+' د.ع.';
+  }
+}
+
+/* تفصيل الدَّينين — لأن «٥٠٠٠» بلا تفسير تُقرأ ظلماً لا استحقاقاً. */
+window.openDebtInfo=function(){
+  const total=(Number(debtNow)||0)+(Number(debtOps)||0);
+  const lines=[];
+  lines.push('💰 تفصيل ما عليك');
+  lines.push('');
+  if(debtOps) lines.push('• رسم تشغيلي: '+Number(debtOps).toLocaleString('ar-EG')+' د.ع');
+  if(debtNow) lines.push('• عمولة المكتب: '+Number(debtNow).toLocaleString('ar-EG')+' د.ع');
+  lines.push('');
+  lines.push('المجموع: '+total.toLocaleString('ar-EG')+' د.ع');
+  lines.push('');
+  if(total>=DEBT_LIMIT){
+    lines.push('🚫 بلغتَ حدّ '+DEBT_LIMIT.toLocaleString('ar-EG')+' د.ع، فتوقّف استلام الطلبات.');
+    lines.push('');
+    lines.push('راجع الإدارة أو الليدر للتسديد. ويعود التوزيع فور تسجيل الدفعة — بلا انتظار.');
+    lines.push('');
+    lines.push('📌 والطلب الذي بيدك الآن أكمِله كالمعتاد.');
+  }else{
+    lines.push('عند بلوغ '+DEBT_LIMIT.toLocaleString('ar-EG')+' د.ع يتوقّف استلام الطلبات تلقائياً.');
+    lines.push('سدّد قبلها كي لا تخسر وقت عملك.');
+  }
+  alert(lines.join('\n'));
+};
+
 function refreshDash(){
   const lv=level(lifetime), b=document.getElementById('lvlBadge');
   if(b){b.className='lvl '+lv.c;b.innerText=lv.t;}
   document.getElementById('stOrders').innerText=lifetime;
   document.getElementById('stDebt').innerText=debtNow;
+  renderDebtBar();   /* 💰 [N-13.0] */
   const pct=Math.min(100,(doneToday/DAILY_GOAL)*100);
   document.getElementById('goalFill').style.width=pct+'%';
   document.getElementById('goalNow').innerText=doneToday;
@@ -2914,7 +3010,9 @@ function startListeners(){
     if(s.val()==='banned'){alert('⚠️ تم حظر حسابك.');clearPass();localStorage.removeItem('suf_session');sessionStorage.clear();location.reload();}
   });
   listen(()=>ref(db,`ledgers/drivers/${drv.phone}`),s=>{
-    const l=s.val()||{}; lifetime=Number(l.completed_orders||0); debtNow=Number(l.debt||0); refreshDash();
+    const l=s.val()||{}; lifetime=Number(l.completed_orders||0); debtNow=Number(l.debt||0);
+    /* 💰 [N-13.0] حقلٌ واصلٌ في نفس اللقطة — صفر قراءة إضافية. */
+    debtOps=Number(l.debt_ops||0); refreshDash();
   });
   listen(()=>ref(db,`daily_metrics/${drv.phone}/${today}/completed_orders`),s=>{doneToday=Number(s.val()||0);refreshDash();});
   listen(()=>ref(db,`daily_metrics/${drv.phone}/${today}/rejected_orders`),s=>{rejToday=Number(s.val()||0);refreshDash();});
