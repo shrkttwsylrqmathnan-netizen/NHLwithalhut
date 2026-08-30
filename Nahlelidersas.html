@@ -114,7 +114,8 @@ button,input,select,textarea{font-family:'Cairo',sans-serif;}
 /* 🖼️ [LDR-2] وجه البطل — سطرٌ واحد بدل اسمٍ مجرّد. وأثره معنويّ وهو
    مقصود اللوحة أصلاً: من يُهنَّأ يُعرَف. */
 .hof-who{display:flex;align-items:center;gap:9px;}
-.hof-av{width:34px;height:34px;border-radius:50%;flex-shrink:0;overflow:hidden;
+/* 🖼️ [LDR-4] 34 ← 46 — وجه البطل يستحقّ أن يُرى. */
+.hof-av{width:46px;height:46px;border-radius:50%;flex-shrink:0;overflow:hidden;
   border:2px solid rgba(255,255,255,.9);box-shadow:0 2px 7px rgba(0,0,0,.1);background:#fff;}
 .hof-who .hof-name{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
 .hof-card.c1{background:#fffdf5;border-color:#f3e6bf;}
@@ -170,9 +171,14 @@ button,input,select,textarea{font-family:'Cairo',sans-serif;}
 .crew-card.off::before{background:var(--ink4);}
 .crew-card.busy::before{background:var(--red);}
 .crew-top{display:flex;align-items:center;gap:10px;margin-bottom:10px;}
-.crew-av{width:40px;height:40px;border-radius:11px;background:#fff;border:1px solid var(--line);
-  display:flex;align-items:center;justify-content:center;font-size:17px;flex-shrink:0;font-weight:900;color:var(--ink2);
-  overflow:hidden;}
+/* 🖼️ [LDR-4] 40 ← 60: الأربعون كانت أيقونةً لا وجهاً — لا يُميَّز صاحبها
+   إلا بتدقيق. والليدر يمسح القائمة بنظرةٍ عابرة عشرات المرّات يومياً،
+   فإن لم يُعرَف الوجه في تلك النظرة فالصورة زينةٌ لا معلومة.
+   ⚠️ والحدّ 60 لا أكثر: البطاقة تحمل تحته سطرين (المدّة · الدَّين) وثلاثة
+      أزرار، فتكبيرٌ فوقه يدفعها إلى ارتفاعٍ يُقلّل ما يُرى في الشاشة. */
+.crew-av{width:60px;height:60px;border-radius:15px;background:#fff;border:1px solid var(--line);
+  display:flex;align-items:center;justify-content:center;font-size:24px;flex-shrink:0;font-weight:900;color:var(--ink2);
+  overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,.07);}
 .crew-id{flex:1;min-width:0;}
 .crew-nm{font-size:.86rem;font-weight:900;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 .crew-ph{font-size:.67rem;font-weight:700;color:var(--ink4);direction:ltr;}
@@ -285,9 +291,13 @@ button,input,select,textarea{font-family:'Cairo',sans-serif;}
 /* 🖼️ [LDR-3] الوجه في القلب والحالة في الإطار.
    الحلقة الملوّنة تُرسم بـbox-shadow لا بـborder — فالبورder الأبيض يفصل
    الوجه عن الخريطة، والحلقة تُضاف **خارجه** بلا أن تُنقص قطر الصورة. */
-.drv-marker.has-photo{padding:0;overflow:hidden;background:#fff;}
-.drv-marker.has-photo.free{box-shadow:0 0 0 2.5px var(--green),0 2px 7px rgba(0,0,0,.3);}
-.drv-marker.has-photo.busy{box-shadow:0 0 0 2.5px var(--red),0 2px 7px rgba(0,0,0,.3);}
+/* 🖼️ [LDR-4] العلامة ذات الوجه أكبر — والحرفُ يبقى بحجمه.
+   ⚠️ ولا تُكبَّر بلا حدّ: الخريطة تحمل عشرين علامة، وكلّما كبرت تراكبت
+      فاختفى ما تحتها. و44 هو ما يجعل الوجه يُميَّز ولا يبتلع جاره. */
+.drv-marker.has-photo{width:44px;height:44px;padding:0;overflow:hidden;background:#fff;
+  margin:-6px;}
+.drv-marker.has-photo.free{box-shadow:0 0 0 3px var(--green),0 2px 8px rgba(0,0,0,.32);}
+.drv-marker.has-photo.busy{box-shadow:0 0 0 3px var(--red),0 2px 8px rgba(0,0,0,.32);}
 .srch-w{position:relative;margin-bottom:13px;}
 .srch-w .si{position:absolute;right:12px;top:50%;transform:translateY(-50%);color:var(--ink4);pointer-events:none;font-size:13px;}
 .srch{width:100%;background:var(--surface);border:1.5px solid var(--line);border-radius:var(--r4);padding:11px 38px 11px 13px;font-size:.81rem;font-weight:700;color:var(--ink);outline:none;transition:border-color .15s;}
@@ -540,7 +550,8 @@ button,input,select,textarea{font-family:'Cairo',sans-serif;}
 /* 🔧 زر العودة: يظهر داخل الخيط في **كل** الأحجام — كان مخفياً على الكمبيوتر */
 .cc-back{display:none;}
 .cc-panel.thread .cc-back{display:inline-flex;}
-.cc-avatar-hd{width:40px;height:40px;border-radius:13px;background:rgba(255,255,255,.14);
+/* 🖼️ [LDR-4] 40 ← 48 — كرأس المحادثة في أي تطبيق مراسلة. */
+.cc-avatar-hd{width:48px;height:48px;border-radius:15px;background:rgba(255,255,255,.14);
   display:none;align-items:center;justify-content:center;font-size:1.2rem;flex-shrink:0;
   border:1px solid rgba(255,255,255,.16);overflow:hidden;}
 .cc-panel.thread .cc-avatar-hd{display:flex;}
