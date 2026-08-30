@@ -111,6 +111,12 @@ button,input,select,textarea{font-family:'Cairo',sans-serif;}
 .hof-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;}
 @media(max-width:560px){.hof-grid{grid-template-columns:1fr;}}
 .hof-card{background:var(--surface2);border-radius:13px;padding:14px;border:1px solid var(--line);}
+/* 🖼️ [LDR-2] وجه البطل — سطرٌ واحد بدل اسمٍ مجرّد. وأثره معنويّ وهو
+   مقصود اللوحة أصلاً: من يُهنَّأ يُعرَف. */
+.hof-who{display:flex;align-items:center;gap:9px;}
+.hof-av{width:34px;height:34px;border-radius:50%;flex-shrink:0;overflow:hidden;
+  border:2px solid rgba(255,255,255,.9);box-shadow:0 2px 7px rgba(0,0,0,.1);background:#fff;}
+.hof-who .hof-name{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
 .hof-card.c1{background:#fffdf5;border-color:#f3e6bf;}
 .hof-card.c2{background:#f6f9fe;border-color:#d8e5fb;}
 .hof-card.c3{background:#f2fbf6;border-color:#c9ecd8;}
@@ -165,7 +171,8 @@ button,input,select,textarea{font-family:'Cairo',sans-serif;}
 .crew-card.busy::before{background:var(--red);}
 .crew-top{display:flex;align-items:center;gap:10px;margin-bottom:10px;}
 .crew-av{width:40px;height:40px;border-radius:11px;background:#fff;border:1px solid var(--line);
-  display:flex;align-items:center;justify-content:center;font-size:17px;flex-shrink:0;font-weight:900;color:var(--ink2);}
+  display:flex;align-items:center;justify-content:center;font-size:17px;flex-shrink:0;font-weight:900;color:var(--ink2);
+  overflow:hidden;}
 .crew-id{flex:1;min-width:0;}
 .crew-nm{font-size:.86rem;font-weight:900;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 .crew-ph{font-size:.67rem;font-weight:700;color:var(--ink4);direction:ltr;}
@@ -485,7 +492,7 @@ button,input,select,textarea{font-family:'Cairo',sans-serif;}
 .cc-panel.thread .cc-back{display:inline-flex;}
 .cc-avatar-hd{width:40px;height:40px;border-radius:13px;background:rgba(255,255,255,.14);
   display:none;align-items:center;justify-content:center;font-size:1.2rem;flex-shrink:0;
-  border:1px solid rgba(255,255,255,.16);}
+  border:1px solid rgba(255,255,255,.16);overflow:hidden;}
 .cc-panel.thread .cc-avatar-hd{display:flex;}
 
 /* ── شريط الأدوات (القائمة فقط) ── */
@@ -1174,6 +1181,16 @@ let _onlineCache=null,_onlineCacheAt=0;
 const PERM_ASSIGN="assign";
 let liveOrd=[],actDrv=new Set(),gDrivers=[],liveLed={drivers:{}};
 let drvLocs={},rfilt="all",pendCnt=0,fbConn=true,fbL=[];
+/* 🖼️ [LDR-2] رقم مطبَّع ⇒ رابط صورة. يُملأ من مستمع drivers_locations. */
+let drvPhoto={};
+/* الوسم يُبنى بـescAttr، والقاعدة تشترط بدايةَ https — فلا يمرّ من هنا
+   جافاسكربت متنكّر في هيئة صورة. والحجم قرارُ الحاوية لا قرارُ المُنادي،
+   فيتغيّر من مكانٍ واحد ولا يتباعد عن CSS. */
+function drvAvatar(phone){
+  const u=drvPhoto[nP(phone)];
+  if(!u||!/^https:\/\//.test(u))return "";
+  return `<img src="${esc(u)}" alt="" loading="lazy" style="width:100%;height:100%;object-fit:cover;display:block;border-radius:inherit">`;
+}
 let radarHtml="";
 let rawOrders={};        /* خريطة الطلبات الخام (للمسار الزمني) */
 let dailyMetrics={};     /* daily_metrics للوحة الشرف والرادار العكسي */
@@ -1722,8 +1739,19 @@ function attachDataListeners(){
   /* Driver locations — قراءة لأي مصادَق */
   listen("drivers_locations",snap=>{
     const locs=snap.val()||{};drvLocs=locs;dnInvalidate();const now=Date.now();actDrv.clear();
+    /* 🖼️ [LDR-2] وجه الكابتن — كان الحقل يصل ويُهمَل.
+       ───────────────────────────────────────────────────────────────────
+       الصورة تعيش في drivers_locations/{phone}/photo، وهذا المستمع يقرأ
+       العقدة كاملةً كل ثانية أصلاً. فالبيانات كانت تمرّ من هنا وتُرمى:
+       لوحة المطعم ولوحة الإدارة تعرضان الوجه، ولوحة **الليدر** — وهي التي
+       تقول عن الأسطول «هؤلاء الكباتن في أمانتك» — لا تعرفه.
+
+       ومن يعيّن سيادياً ويسحب ويراسل أولى الناس بأن يعرف من يخاطب.
+       ⚡ والكلفة صفر: لا قراءة إضافية ولا قاعدة جديدة — التقاطُ حقلٍ واصل. */
+    drvPhoto={};
     Object.keys(locs).forEach(phone=>{
       const d=locs[phone];const stale=(d.last_update?(now-new Date(d.last_update).getTime()):999999)>420000;
+      if(d&&d.photo)drvPhoto[nP(phone)]=String(d.photo);
       if(d.status==="active"&&d.lat&&d.lng&&!stale)actDrv.add(nP(phone));
     });
     document.getElementById("vDrv").textContent=actDrv.size;
@@ -1796,7 +1824,7 @@ function renderHallOfFame(){
     const card1=top1?`
       <div class="hof-card c1">
         <span class="hof-badge b1">🥇 الأكثر إنجازاً</span>
-        <div class="hof-name">${esc(top1.name)}</div>
+        <div class="hof-who">${drvAvatar(top1.phone)?`<div class="hof-av">${drvAvatar(top1.phone)}</div>`:""}<div class="hof-name">${esc(top1.name)}</div></div>
         <div class="hof-metric">${top1IsLedger?top1.ledgerTotal:top1.completed}</div>
         <div class="hof-sub">${top1IsLedger?"إجمالي تراكمي":"طلب اليوم"}</div>
         ${congBtn(top1)}
@@ -1805,7 +1833,7 @@ function renderHallOfFame(){
     const card2=fast?`
       <div class="hof-card c2">
         <span class="hof-badge b2">⚡ الأسرع استجابة</span>
-        <div class="hof-name">${esc(fast.name)}</div>
+        <div class="hof-who">${drvAvatar(fast.phone)?`<div class="hof-av">${drvAvatar(fast.phone)}</div>`:""}<div class="hof-name">${esc(fast.name)}</div></div>
         <div class="hof-metric">${fast.avg}<span style="font-size:.7rem;font-weight:800"> د/طلب</span></div>
         <div class="hof-sub">${fast.completed} طلب اليوم</div>
         ${congBtn(fast)}
@@ -1820,7 +1848,7 @@ function renderHallOfFame(){
     const card3=commit?`
       <div class="hof-card c3">
         <span class="hof-badge b3">🛡️ الأكثر التزاماً</span>
-        <div class="hof-name">${esc(commit.name)}</div>
+        <div class="hof-who">${drvAvatar(commit.phone)?`<div class="hof-av">${drvAvatar(commit.phone)}</div>`:""}<div class="hof-name">${esc(commit.name)}</div></div>
         <div class="hof-metric">صفر</div>
         <div class="hof-sub">رفض · ${commit.completed} طلب منجز</div>
         ${congBtn(commit)}
@@ -1986,7 +2014,7 @@ function renderCrew(){
       const trackBtn=c.online?`<button class="crew-b crew-b-track" onclick="trackDriver('${ej(c.phone)}','')" title="تتبع على الخريطة">📍</button>`:'';
       html+=`<div class="crew-card ${stCls}">
         <div class="crew-top">
-          <div class="crew-av">${esc(initial)}</div>
+          <div class="crew-av">${drvAvatar(c.phone)||esc(initial)}</div>
           <div class="crew-id">
             <div class="crew-nm">${esc(c.name)}</div>
             <div class="crew-ph">${esc(c.phone)}</div>
@@ -2522,6 +2550,9 @@ function _uiBackToList(){
   const p=document.getElementById("ccPanel");if(p)p.classList.remove("thread");
   const t=document.getElementById("ccTitle");if(t)t.textContent="💬 رسائل الكباتن";
   const sb=document.getElementById("ccSub");if(sb)sb.textContent="محادثات الأسطول المباشرة";
+  /* 🖼️ [LDR-2] أعِد الأيقونة — وإلا بقي وجه آخر كابتنٍ فُتحت محادثته
+     معلّقاً في رأس القائمة العامّة، فيبدو كأنه صاحبها. */
+  const _av=document.getElementById("ccAvatar");if(_av)_av.innerHTML="🛵";
   _ccListSig="";renderChatList();
 }
 function _uiCloseCenter(){
@@ -3109,6 +3140,11 @@ window.openThread=function(phone){
   const c=_ccChats[phone]||{};
   document.getElementById("ccTitle").textContent="🛵 "+(c.driver_name||"كابتن");
   document.getElementById("ccSub").textContent=phone;
+  /* 🖼️ [LDR-2] وجه المُخاطَب في رأس المحادثة — كالمعتاد في كل مراسلة.
+     ونستعمل innerHTML هنا لا textContent لأن drvAvatar تُرجع وسماً، ومصدرها
+     محصورٌ بروابط https من عقدةٍ يكتبها الكابتن نفسه عبر Storage. */
+  const _ccAv=document.getElementById("ccAvatar");
+  if(_ccAv)_ccAv.innerHTML=drvAvatar(phone)||"🛵";
   db.ref(`driver_chats/${phone}/unread_leader`).set(0).catch(()=>{});
   const inp=document.getElementById("ctInput");
   inp.value=_ccDrafts[phone]||"";inp.style.height='auto';
