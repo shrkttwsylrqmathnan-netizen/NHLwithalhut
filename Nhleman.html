@@ -38,7 +38,7 @@ try{if(localStorage.getItem(VK)!==V){localStorage.setItem(VK,V);if("caches"in wi
 
    📌 ارفع هذا الرقم كلّما غيّرت الملف — وإلا لم يصل تغييرك.
    ═══════════════════════════════════════════════════════════════════════════ */
-const ADMIN_APP_VERSION = "6.3-Nahla-Profile";
+const ADMIN_APP_VERSION = "6.4-Nahla-OpsDebt";
 try {
   if (localStorage.getItem('hut_adm_version') !== ADMIN_APP_VERSION) {
     var _rk='hut_adm_version_reload_ts', _last=Number(localStorage.getItem(_rk)||0);
@@ -1780,6 +1780,11 @@ function setupFB(){
     snap.forEach(ch=>{
       out[ch.key]={
         debt:             ch.child("debt").val()||0,
+        /* 💰 [N-13.0] الرسم التشغيلي — حقلٌ منفصل عن debt عمداً (يمحوه
+           restoreLedgersFromArchive لو خُلطا). واللوحة كانت تعرض debt وحده،
+           فيرى المدير 1,500 والحقيقة 3,500 — أي نصف الدَّين.
+           ⚡ وهو واصلٌ في نفس اللقطة: صفر قراءة إضافية. */
+        debt_ops:         ch.child("debt_ops").val()||0,
         completed_orders: ch.child("completed_orders").val()||0,
         balance:          ch.child("balance").val()||0
       };
@@ -1859,7 +1864,7 @@ function updBadges(type,list){
   });
   const moEl=document.getElementById(p+"-mostOrders");if(moEl)moEl.textContent=cnt.all;
   const ledM=type==="RES"?liveLed.restaurants:liveLed.drivers;
-  let dc=0;list.slice(1).forEach(i=>{if(i[type==="RES"?R.STATUS:D.STATUS]==="deleted")return;if((ledM?.[nP(i[2])]?.debt||0)>0)dc++;});
+  let dc=0;list.slice(1).forEach(i=>{if(i[type==="RES"?R.STATUS:D.STATUS]==="deleted")return;if(((ledM?.[nP(i[2])]?.debt||0)+(ledM?.[nP(i[2])]?.debt_ops||0))>0)dc++;});
   const mdEl=document.getElementById(p+"-mostDebt");if(mdEl)mdEl.textContent=dc;
   ["pending","active","inactive","banned"].forEach(k=>{const el=document.getElementById(p+"-"+k);if(el)el.textContent=cnt[k];});
 }
@@ -1870,7 +1875,7 @@ function patchCards(type){
     const l=ledM[phone]||{};
     const card=document.getElementById(`card-${type}-${phone}`);if(!card)return;
     const ov=card.querySelector(".ls-ord"),dv=card.querySelector(".ls-debt");
-    const no=String(l.completed_orders||0),nd=(l.debt||0).toLocaleString("ar-EG")+" د.ع";
+    const no=String(l.completed_orders||0),nd=((l.debt||0)+(l.debt_ops||0)).toLocaleString("ar-EG")+" د.ع";
     if(ov&&ov.textContent!==no){ov.textContent=no;ov.closest(".lm")?.classList.add("pulse");setTimeout(()=>ov.closest(".lm")?.classList.remove("pulse"),500);}
     if(dv&&dv.textContent!==nd){dv.textContent=nd;dv.closest(".lm")?.classList.add("pulse");setTimeout(()=>dv.closest(".lm")?.classList.remove("pulse"),500);}
   });
@@ -1890,7 +1895,12 @@ function filtEnt(type){
   let list=(type==="RES"?gD.restaurants:gD.drivers).slice(1).filter(i=>(type==="RES"?i[R.STATUS]:i[D.STATUS])!=="deleted");
   if(q)list=list.filter(i=>String(i[1]).toLowerCase().includes(q)||String(i[2]).toLowerCase().includes(q));
   if(filter==="mostOrders"){const lM=type==="RES"?liveLed.restaurants:liveLed.drivers;list.sort((a,b)=>((lM?.[nP(b[2])]?.completed_orders)||0)-((lM?.[nP(a[2])]?.completed_orders)||0));}
-  else if(filter==="mostDebt"){const lM=type==="RES"?liveLed.restaurants:liveLed.drivers;list.sort((a,b)=>((lM?.[nP(b[2])]?.debt)||0)-((lM?.[nP(a[2])]?.debt)||0));}
+  else if(filter==="mostDebt"){const lM=type==="RES"?liveLed.restaurants:liveLed.drivers;
+    /* 💰 [N-13.0] الفرز على المجموع — كان يرتّب بـdebt وحده، فيسبق كابتنٌ
+       عليه 1500 عمولة زميلَه الذي عليه 4000 رسوم. أي أن «الأكثر ديناً» كان
+       يعرض غير الأكثر ديناً. */
+    const _t=x=>((lM?.[nP(x[2])]?.debt)||0)+((lM?.[nP(x[2])]?.debt_ops)||0);
+    list.sort((a,b)=>_t(b)-_t(a));}
   else if(filter==="pending"||filter==="waiting")list=list.filter(i=>(type==="RES"?i[R.STATUS]:i[D.STATUS])==="pending"||(type==="RES"?i[R.STATUS]:i[D.STATUS])==="waiting");
   else if(filter==="active"&&type==="DRV")list=list.filter(i=>i[D.STATUS]==="active"&&actDrv.has(nP(i[D.PHONE])));
   else if(["active","inactive","banned"].includes(filter))list=list.filter(i=>(type==="RES"?i[R.STATUS]:i[D.STATUS])===filter);
@@ -1905,6 +1915,8 @@ function filtEnt(type){
     const n=nP(phone);
     const l=type==="RES"?(liveLed.restaurants?.[n]||{}):(liveLed.drivers?.[n]||{});
     const orders=l.completed_orders||0,debt=l.debt||0;
+    /* المجموع هو ما يقيسه الحظر في المحرّك حرفياً (debt + debt_ops). */
+    const dops=l.debt_ops||0, dtot=debt+dops;
     const cid=`card-${type}-${n}`;toR.add(cid);
     let spC="sp-a";
     if(status==="inactive")spC="sp-i";
@@ -1946,7 +1958,12 @@ function filtEnt(type){
       if(ex.querySelector(".sp"))ex.querySelector(".sp").textContent=spL;
       const ov=ex.querySelector(".ls-ord"),dv=ex.querySelector(".ls-debt");
       if(ov)ov.textContent=orders.toLocaleString("ar-EG");
-      if(dv)dv.textContent=debt.toLocaleString("ar-EG")+" د.ع";
+      if(dv)dv.textContent=dtot.toLocaleString("ar-EG")+" د.ع";
+      /* والتفصيل يتجدّد معه — وإلا بقي سطرٌ يقول «عمولة 1500» تحت رقمٍ يقول 3500. */
+      const bk=ex.querySelector(".ls-dbrk");
+      if(bk)bk.textContent = (type==="DRV"&&dops)
+        ? ("عمولة "+debt.toLocaleString("ar-EG")+" · رسوم "+dops.toLocaleString("ar-EG"))
+        : "عمولة مستحقة";
       /* 🍽️ [N-10.0] البطاقة القائمة تُرقَّع ولا تُعاد بناءً — فلولا هذا السطر
          لبقي لون الزرّ على حاله حتى إعادة تحميل اللوحة. */
       if(type==="RES"){const pb=ex.querySelector(".ea-pref");
@@ -1967,7 +1984,7 @@ function filtEnt(type){
       ${type==="DRV"&&drvShift[n] ? `<div class="ec-ph" style="color:#0369a1;font-weight:700">🕐 ${esc(drvShift[n])}</div>` : ""}
       <div class="ls">
         <div class="lm"><div class="lv b ls-ord">${orders.toLocaleString("ar-EG")}</div><div class="ll">طلبات منجزة</div></div>
-        <div class="lm"><div class="lv r ls-debt">${debt.toLocaleString("ar-EG")} د.ع</div><div class="ll">عمولة مستحقة</div></div>
+        <div class="lm"><div class="lv r ls-debt">${dtot.toLocaleString("ar-EG")} د.ع</div><div class="ll ls-dbrk">${type==="DRV"&&dops?("عمولة "+debt.toLocaleString("ar-EG")+" · رسوم "+dops.toLocaleString("ar-EG")):"عمولة مستحقة"}</div></div>
       </div>
       <div class="ec-acts">
         <div style="display:flex;gap:4px">
@@ -2132,13 +2149,21 @@ function doAct(cmd,type,id,el){
 window.rstDebt=function(type,id,el){
   const n=nP(id);const lM=type==="RES"?liveLed.restaurants:liveLed.drivers;
   const debt=lM?.[n]?.debt||0;
+  /* 💰 [N-13.0] التأكيد يقول المجموع لا نصفه.
+     ⚠️ وRESET_DEBT في Code.gs يستعمل fbPut — أي **دهسٌ كامل** للعقدة،
+        فيمحو debt_ops وops_days معاً. وهذا سلوكٌ متّسق مع «تصفير الديون»،
+        لكنّ النافذة كانت تعرض debt وحده — فيضغط المدير موافقاً على 1,500
+        وهو يُسقط 3,500. */
+  const dops=lM?.[n]?.debt_ops||0, dtot=debt+dops;
   const list=type==="RES"?gD?.restaurants:gD?.drivers;
   const nm=list?.find(i=>nP(i[2])===n)?.[1]||id;
-  if(!confirm(`تصفير ديون ${nm} (${debt.toLocaleString("ar-EG")} د.ع)؟`))return;
+  if(!confirm(`تصفير ديون ${nm}؟\n\nالمجموع: ${dtot.toLocaleString("ar-EG")} د.ع`
+    + (dops?`\n   • عمولة: ${debt.toLocaleString("ar-EG")}\n   • رسوم تشغيلية: ${dops.toLocaleString("ar-EG")}`:"")
+    + `\n\nسيُصفَّر كلّه.`))return;
   if(el){el.disabled=true;}
   const apiType=type==="RES"?"RESTAURANT":"DRIVER";
   fetch(API,{method:"POST",headers:{"Content-Type":"text/plain"},body:JSON.stringify({action:"RESET_DEBT",type:apiType,id,token:TOK,pass:MP})})
-    .then(r=>r.json()).then(d=>{if(d&&d.success){toast("تم التصفير ✅");logAudit("resetDebt",`تصفير ${type==="DRV"?"كابتن":"مطعم"}: ${nm} — ${debt} د.ع`);}else toast("فشل التصفير","e");})
+    .then(r=>r.json()).then(d=>{if(d&&d.success){toast("تم التصفير ✅");logAudit("resetDebt",`تصفير ${type==="DRV"?"كابتن":"مطعم"}: ${nm} — ${dtot} د.ع (عمولة ${debt} · رسوم ${dops})`);}else toast("فشل التصفير","e");})
     .catch(()=>toast("تم الإرسال")).finally(()=>{if(el)el.disabled=false;});
 };
 
