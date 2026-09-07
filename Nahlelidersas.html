@@ -158,6 +158,7 @@ button,input,select,textarea{font-family:'Cairo',sans-serif;}
 /* ═══ 👥 الكباتن المتصلون اليوم ═══ */
 .crew{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:14px;margin-bottom:14px;}
 .crew-head{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:12px;}
+.crew-count.has-late{color:var(--red);font-weight:900;}
 .crew-ttl{font-size:.95rem;font-weight:900;display:flex;align-items:center;gap:8px;}
 .crew-count{background:var(--green-l);color:var(--green-d);font-size:.7rem;font-weight:900;
   padding:4px 11px;border-radius:99px;}
@@ -198,6 +199,19 @@ button,input,select,textarea{font-family:'Cairo',sans-serif;}
 .crew-time-v{color:var(--ink);font-variant-numeric:tabular-nums;}
 .crew-dur{background:var(--blue-l);border:1px solid #d8e5fb;border-radius:8px;padding:6px 8px;
   text-align:center;font-size:.68rem;font-weight:900;color:var(--blue-d);margin-bottom:10px;}
+/* 🕐 [LDR-5] شارة الشفت — الموعد دائماً، والتأخّر حمراء. */
+.sh-chip{display:inline-flex;align-items:center;gap:5px;margin-top:7px;
+  background:var(--surface3);border:1px solid var(--line);border-radius:9px;
+  padding:5px 10px;font-size:.7rem;font-weight:800;color:var(--ink3);
+  font-variant-numeric:tabular-nums;}
+.sh-chip.late{background:var(--red-l);border-color:rgba(225,25,0,.24);color:var(--red);}
+
+/* والبطاقة نفسها تُعلَّم — فتُرى في المسح السريع قبل قراءة الشارة.
+   ⚠️ والشريط الجانبي (::before) يبقى للحالة (متصل/مشغول/خارج): لونان
+      مختلفان لمعنيين مختلفين، فلا يُخفي التأخّرُ الانشغال. */
+.crew-card.late{background:#FFF5F4;border-color:rgba(225,25,0,.22);}
+.crew-card.late .crew-nm{color:var(--red-d,#a11);}
+
 .crew-acts{display:flex;gap:6px;}
 
 /* 💰 [N-13.0] شارة الدَّين — والحالة تُقرأ باللون قبل الرقم.
@@ -2070,6 +2084,40 @@ function crewToday(){
     }else if(d.first_seen_today){
       c.openTime=d.first_seen_today;
     }
+    /* ═══════════════════════════════════════════════════════════════════════
+       🕐 [LDR-5] موعد الشفت والتأخّر
+       ───────────────────────────────────────────────────────────────────────
+       الحقول واصلةٌ في نفس اللقطة (shift_h · shift_len · shift_next) — فصفر
+       قراءة إضافية. والترقية سيرفرية: المحرّك يرقّي shift_next إلى shift_h
+       أوّلَ دورةٍ في يومه، فنقرأ shift_h وحدها ولا نُرقّي هنا (لوحةٌ تقرأ
+       ولا تكتب).
+
+       ⏰ والتأخّر لا يُقاس بالساعة وحدها بل بثلاثة شروط معاً:
+          ① له موعدٌ محدَّد أصلاً (بلا موعد لا تأخّر — والحرّ ليس متأخّراً)
+          ② مضت على موعده أكثر من مهلة السماح
+          ③ **ولم ينزل بعد**: لا متصلٌ الآن ولا فتح التطبيق اليوم
+       فمن نزل ثم استراح ليس متأخّراً — أدّى ما عليه. والمقياس «لم يأتِ»
+       لا «ليس على الخطّ الآن»، وبينهما فرقٌ يظلم نصف الأسطول لو خُلط.
+
+       ⚠️ ولا تأخّر في وضع الطوارئ: الشفتات موقوفة فلا موعد يُتأخَّر عنه.
+       ═══════════════════════════════════════════════════════════════════════ */
+    if(window._shiftsOff!==true){
+      const sh=Number(d.shift_h), sl=Number(d.shift_len);
+      if(Number.isFinite(sh)&&sh>=0&&sh<=23&&Number.isFinite(sl)&&sl>0){
+        c.shiftH=sh; c.shiftLen=sl;
+        /* ساعة بغداد الآن — نفس الإزاحة التي يحسب بها المحرّك، فلا يختلف الحدّان. */
+        const bg=new Date(new Date().toLocaleString("en-US",{timeZone:"Asia/Baghdad"}));
+        const minsNow=bg.getHours()*60+bg.getMinutes();
+        let late=minsNow-(sh*60);
+        /* موعدٌ بعد منتصف الليل: من موعده 23 والساعة 1 فجراً ليس متأخّراً 22 ساعة. */
+        if(late<-720)late+=1440; else if(late>720)late-=1440;
+        const came=c.online||!!c.openTime;
+        if(!came&&late>SHIFT_LATE_GRACE_MINS&&late<sl*60){
+          c.lateMins=late;
+        }
+      }
+    }
+
     /* مدة العمل: من الفتح حتى آخر ظهور (أو الآن إن متصل) */
     if(c.openTime){
       const startMs=new Date(c.openTime).getTime();
@@ -2101,6 +2149,29 @@ function crewToday(){
       الطلب يُردّ من الخادم لا من هنا.
    ═══════════════════════════════════════════════════════════════════════════ */
 const DEBT_LIMIT = 5000;   /* ⚠️ يطابق TUNE.DEBT_BLOCK_LIMIT — غيّرهما معاً */
+
+/* 🕐 [LDR-5] مهلة السماح قبل عدّ الكابتن متأخّراً.
+   عشرون دقيقة: أطول من زحمة طريقٍ أو تأخّر نبضة، وأقصر من أن يمرّ نصف
+   الشفت قبل أن يُرى. ⚠️ ولا تُشدَّد بلا داعٍ — شارةٌ حمراء تظهر على الجميع
+   كل صباح تُقرأ مرّةً ثم تُتجاهَل، فتصير زينةً لا إشارة. */
+const SHIFT_LATE_GRACE_MINS = 20;
+
+/* «10 ص ← 8 س» — صيغةٌ يقرؤها الليدر بلمحة. */
+function hLabel12(h){
+  const hh=((h%24)+24)%24;
+  const ampm=hh<12?"ص":"م";
+  const h12=hh%12===0?12:hh%12;
+  return h12+" "+ampm;
+}
+function shiftChipHtml(c){
+  if(c.shiftH===undefined) return "";
+  const late=c.lateMins;
+  const lbl=hLabel12(c.shiftH)+" ← "+c.shiftLen+" س";
+  if(late===undefined) return `<span class="sh-chip">🕐 ${lbl}</span>`;
+  const hh=Math.floor(late/60), mm=late%60;
+  const dur=(hh?hh+" س ":"")+mm+" د";
+  return `<span class="sh-chip late">⏰ ${lbl} · متأخّر ${dur}</span>`;
+}
 
 function canClearDebt(){ return Array.isArray(EMP_PERMS) && EMP_PERMS.indexOf("assign") > -1; }
 
@@ -2169,7 +2240,13 @@ function renderCrew(){
   /* العدّاد يعكس الكل (قبل الفلترة) ليبقى دقيقاً */
   const onlineCount=list.filter(c=>c.online).length;
   const cc=document.getElementById("crewCount");
-  if(cc)cc.textContent=`${onlineCount} متصل · ${list.length} اليوم`;
+  /* 🕐 [LDR-5] المتأخّرون في العدّاد — فيُرى الرقم قبل النزول للبطاقات.
+     ولا يظهر إن كان صفراً: عدّادٌ يقول «0 متأخّر» كل يوم يصير خلفيّةً
+     لا تُقرأ، وحين يصير ٥ لا يُنتبَه إليه. */
+  const lateCount=list.filter(c=>c.lateMins!==undefined).length;
+  if(cc)cc.textContent=`${onlineCount} متصل · ${list.length} اليوم`
+    +(lateCount?` · ⏰ ${lateCount} متأخّر`:"");
+  if(cc)cc.classList.toggle("has-late",lateCount>0);
 
   /* 🔍 فلترة البحث: بالاسم أو الرقم (لا تؤثر على العدّاد) */
   const q=_crewSearch.trim().toLowerCase();
@@ -2187,7 +2264,7 @@ function renderCrew(){
       const stTxt=c.busy?"🔴 مشغول":(c.online?"🟢 متصل":"⚫ غير متصل");
       const initial=c.name!=="غير محدد"?c.name.charAt(0):"🛵";
       const trackBtn=c.online?`<button class="crew-b crew-b-track" onclick="trackDriver('${ej(c.phone)}','')" title="تتبع على الخريطة">📍</button>`:'';
-      html+=`<div class="crew-card ${stCls}">
+      html+=`<div class="crew-card ${stCls}${c.lateMins!==undefined?" late":""}">
         <div class="crew-top">
           <div class="crew-av">${drvAvatar(c.phone)||esc(initial)}</div>
           <div class="crew-id">
@@ -2206,6 +2283,7 @@ function renderCrew(){
           <div class="crew-time"><div class="crew-time-l">👁 آخر ظهور</div><div class="crew-time-v">${fmtClock(c.lastSeen)}</div></div>
         </div>
         <div class="crew-dur">⏱️ مدة العمل اليوم: ${fmtDur(c.workedMin)}</div>
+        ${shiftChipHtml(c)}
         ${debtRowHtml(c)}
         <div class="crew-acts">
           <button class="crew-b crew-b-call" onclick="waOpen('${ej(c.phone)}')">💬 واتساب</button>
