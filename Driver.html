@@ -49,7 +49,7 @@
      الآن: رقمٌ واحد يُشتقّ منه كل شيء — الشاشة والإعدادات ومسح الكاش.
      **وأي تسليم جديد يجب أن يرفعه، وإلا لم يصل.**
      ═══════════════════════════════════════════════════════════════════════ */
-  const CURRENT_APP_VERSION = "18.9-Nahla-Debt";   /* 🔧 V2.2 — لا تنسَ رفعه مع كل تسليم يمسّ هذا الملف */
+  const CURRENT_APP_VERSION = "19.0-Nahla-FreeShift";   /* 🔧 V2.2 — لا تنسَ رفعه مع كل تسليم يمسّ هذا الملف */
   window.APP_VERSION = CURRENT_APP_VERSION;
   /* اطبعه في شاشة الدخول فور جهوز الصفحة — نصّاً واحداً لا نسختين. */
   document.addEventListener('DOMContentLoaded', function(){
@@ -2339,13 +2339,30 @@ window.toggleOnline=async function(){
       toast('أكمل صورتك وموعد شفتك قبل النزول','warn');
       openOnboarding(true); return;
     }
-    const s=myShift(), w=inWindowLocal(s.h, s.len, srvNow());
-    if(!w.inside){
-      document.getElementById('onlineTog').checked=false;
-      const hh=Math.floor(w.opensInMins/60), mm=w.opensInMins%60;
-      toast('🕐 شفتك يبدأ '+hLabel(s.h)+' — يتبقّى '+(hh?hh+' س ':'')+mm+' د','warn');
-      try{ track('shift_gate_blocked',{ms:w.opensInMins}); }catch(_){}
-      return;
+    /* ═══════════════════════════════════════════════════════════════════════
+       🆓 [N-13.2] بوّابة النزول تحترم وضع الطوارئ
+       ───────────────────────────────────────────────────────────────────────
+       العطب الذي كشفه سؤالك: التطبيق **يعرف** بالمفتاح ويعرضه ولا يطيعه.
+       كان يقرأ shifts_enabled (س٣٠٣٥) ويحترمه في ثلاثة مواضع — عدّاد الوقت
+       المتبقّي، وشارة «دوام حر ♾️»، وإنذار قرب الانتهاء — **ونسيه هنا**.
+       وهذه وحدها هي التي تمنع فعلاً.
+
+       فكانت النتيجة تناقضاً كاملاً: تُشغّل الطوارئ فيقبل المحرّكُ الكابتنَ،
+       وتقول اللوحةُ «دوام حر»، ويتوقّف العدّاد — ثم لا يستطيع النزول أصلاً.
+
+       📌 وهو الصنف نفسه الذي أُصلح في المحرّك قبله: مفتاحٌ يُقرأ في ثلاثة
+          مواضع ويُنسى في الرابع — والرابع هو الحاسم. لا يُقاس الإنفاذ بعدد
+          المواضع التي تعرف، بل بالموضع الذي يمنع.
+       ═══════════════════════════════════════════════════════════════════════ */
+    if(window._shiftsOff!==true){
+      const s=myShift(), w=inWindowLocal(s.h, s.len, srvNow());
+      if(!w.inside){
+        document.getElementById('onlineTog').checked=false;
+        const hh=Math.floor(w.opensInMins/60), mm=w.opensInMins%60;
+        toast('🕐 شفتك يبدأ '+hLabel(s.h)+' — يتبقّى '+(hh?hh+' س ':'')+mm+' د','warn');
+        try{ track('shift_gate_blocked',{ms:w.opensInMins}); }catch(_){}
+        return;
+      }
     }
   }
   isOnline=document.getElementById('onlineTog').checked;
@@ -2364,7 +2381,18 @@ window.toggleOnline=async function(){
     if(!drv.shiftEnd||new Date(drv.shiftEnd)<=new Date()){
       try{
         const r=await gasFetch(`${API_URL}?action=START_SHIFT&phone=${drv.phone}&token=${API_TOKEN}&stoken=${encodeURIComponent(getStoken())}`); const d=await r.json();
-        if(d.success){drv.shiftEnd=d.shift_end;localStorage.setItem('suf_session',JSON.stringify(drv));}
+        /* 🆓 [N-13.2] shift_end يُخزَّن كما ورد — و«أ» تعني null في الطوارئ.
+           وCode.gs يُرجع بالفعل shift_end:null و shifts_disabled:true حين
+           يكون المفتاح مطفأً، فيتّسق الطرفان: **غياب shift_end يعني «بلا
+           انتهاء»** في المحرّك أيضاً (`if (driver.shift_end && …)`).
+           ⚠️ والحارس ?? null مقصود: undefined يُلقى من JSON.stringify فلا
+              يُمحى الختمُ القديم من التخزين المحلي، فيعود الكابتن مقيّداً
+              بوقتِ أمس بعد إعادة فتح التطبيق — وهو نصفُ الطوارئ لا كلّها. */
+        if(d.success){
+          drv.shiftEnd = d.shift_end ?? null;
+          if(d.shifts_disabled === true) window._shiftsOff = true;
+          localStorage.setItem('suf_session',JSON.stringify(drv));
+        }
         /* ═══════════════════════════════════════════════════════════════
            🚨 [V15.9] **فشل START_SHIFT لم يعد يمنع العمل.**
            ───────────────────────────────────────────────────────────────
