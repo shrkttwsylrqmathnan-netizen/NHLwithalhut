@@ -204,13 +204,14 @@ button,input,select,textarea{font-family:'Cairo',sans-serif;}
   background:var(--surface3);border:1px solid var(--line);border-radius:9px;
   padding:5px 10px;font-size:.7rem;font-weight:800;color:var(--ink3);
   font-variant-numeric:tabular-nums;}
-.sh-chip.late{background:var(--red-l);border-color:rgba(225,25,0,.24);color:var(--red);}
+.sh-chip.left{background:var(--red-l);border-color:rgba(225,25,0,.24);color:var(--red);}
+.sh-gone{opacity:.7;font-weight:700;}
 
 /* والبطاقة نفسها تُعلَّم — فتُرى في المسح السريع قبل قراءة الشارة.
    ⚠️ والشريط الجانبي (::before) يبقى للحالة (متصل/مشغول/خارج): لونان
       مختلفان لمعنيين مختلفين، فلا يُخفي التأخّرُ الانشغال. */
-.crew-card.late{background:#FFF5F4;border-color:rgba(225,25,0,.22);}
-.crew-card.late .crew-nm{color:var(--red-d,#a11);}
+.crew-card.left-early{background:#FFF5F4;border-color:rgba(225,25,0,.22);}
+.crew-card.left-early .crew-nm{color:var(--red-d,#a11);}
 
 .crew-acts{display:flex;gap:6px;}
 
@@ -2085,35 +2086,38 @@ function crewToday(){
       c.openTime=d.first_seen_today;
     }
     /* ═══════════════════════════════════════════════════════════════════════
-       🕐 [LDR-5] موعد الشفت والتأخّر
+       🕐 [LDR-5] موعد الشفت والانسحاب المبكر
        ───────────────────────────────────────────────────────────────────────
-       الحقول واصلةٌ في نفس اللقطة (shift_h · shift_len · shift_next) — فصفر
-       قراءة إضافية. والترقية سيرفرية: المحرّك يرقّي shift_next إلى shift_h
-       أوّلَ دورةٍ في يومه، فنقرأ shift_h وحدها ولا نُرقّي هنا (لوحةٌ تقرأ
-       ولا تكتب).
+       الحقول واصلةٌ في نفس اللقطة — صفر قراءة إضافية. والترقية سيرفرية:
+       المحرّك يرقّي shift_next إلى shift_h، فنقرأ ولا نكتب.
 
-       ⏰ والتأخّر لا يُقاس بالساعة وحدها بل بثلاثة شروط معاً:
-          ① له موعدٌ محدَّد أصلاً (بلا موعد لا تأخّر — والحرّ ليس متأخّراً)
-          ② مضت على موعده أكثر من مهلة السماح
-          ③ **ولم ينزل بعد**: لا متصلٌ الآن ولا فتح التطبيق اليوم
-       فمن نزل ثم استراح ليس متأخّراً — أدّى ما عليه. والمقياس «لم يأتِ»
-       لا «ليس على الخطّ الآن»، وبينهما فرقٌ يظلم نصف الأسطول لو خُلط.
+       🔴 والأحمر للانسحاب المبكر: **جاء ثم أغلق قبل انتهاء شفته.**
+          وهو ما يهمّ الليدر فعلاً — لأنه يترك فجوةً في التغطية وهو على
+          الورق «نازل». والمتأخّر عن الحضور يُرى بغيابه من القائمة أصلاً.
 
-       ⚠️ ولا تأخّر في وضع الطوارئ: الشفتات موقوفة فلا موعد يُتأخَّر عنه.
+       ⏱️ والمصدر shift_end لا (shift_h + shift_len): هو ختمٌ سيرفري تكتبه
+          START_SHIFT، فيحمل الاستراحات والتمديد. والحساب من الساعتين يخالفه
+          كلّما عاد الكابتن من استراحة.
+
+       ⚠️ ومهلةٌ قبل الحكم — وهي الفرق بين إشارةٍ وظلم: c.online تنطفئ بعد
+          سبع دقائق من انقطاع النبض، وانقطاعُ شبكةٍ في قبوٍ أو نفقٍ يبلغها.
+          فمن غاب عشر دقائق ليس منسحباً، ومن غاب نصف ساعة انسحب.
        ═══════════════════════════════════════════════════════════════════════ */
     if(window._shiftsOff!==true){
       const sh=Number(d.shift_h), sl=Number(d.shift_len);
       if(Number.isFinite(sh)&&sh>=0&&sh<=23&&Number.isFinite(sl)&&sl>0){
         c.shiftH=sh; c.shiftLen=sl;
-        /* ساعة بغداد الآن — نفس الإزاحة التي يحسب بها المحرّك، فلا يختلف الحدّان. */
-        const bg=new Date(new Date().toLocaleString("en-US",{timeZone:"Asia/Baghdad"}));
-        const minsNow=bg.getHours()*60+bg.getMinutes();
-        let late=minsNow-(sh*60);
-        /* موعدٌ بعد منتصف الليل: من موعده 23 والساعة 1 فجراً ليس متأخّراً 22 ساعة. */
-        if(late<-720)late+=1440; else if(late>720)late-=1440;
-        const came=c.online||!!c.openTime;
-        if(!came&&late>SHIFT_LATE_GRACE_MINS&&late<sl*60){
-          c.lateMins=late;
+      }
+      if(d.shift_end&&d.last_shift_date===t){
+        const endMs=new Date(d.shift_end).getTime();
+        if(!isNaN(endMs)){
+          const remain=Math.floor((endMs-now)/60000);
+          const goneMin=lastMs?Math.floor((now-lastMs)/60000):99999;
+          /* جاء (له ختم فتح) · غادر · وشفته لم ينتهِ بعد */
+          if(remain>0&&!isOnline&&c.openTime&&goneMin>=EARLY_LEAVE_GRACE_MINS){
+            c.leftEarlyMins=remain;
+            c.goneMins=goneMin;
+          }
         }
       }
     }
@@ -2150,11 +2154,12 @@ function crewToday(){
    ═══════════════════════════════════════════════════════════════════════════ */
 const DEBT_LIMIT = 5000;   /* ⚠️ يطابق TUNE.DEBT_BLOCK_LIMIT — غيّرهما معاً */
 
-/* 🕐 [LDR-5] مهلة السماح قبل عدّ الكابتن متأخّراً.
-   عشرون دقيقة: أطول من زحمة طريقٍ أو تأخّر نبضة، وأقصر من أن يمرّ نصف
-   الشفت قبل أن يُرى. ⚠️ ولا تُشدَّد بلا داعٍ — شارةٌ حمراء تظهر على الجميع
-   كل صباح تُقرأ مرّةً ثم تُتجاهَل، فتصير زينةً لا إشارة. */
-const SHIFT_LATE_GRACE_MINS = 20;
+/* 🕐 [LDR-5] كم يغيب الكابتن قبل أن يُعَدّ منسحباً؟
+   عشرون دقيقة: c.online تنطفئ بعد سبعٍ من انقطاع النبض، وانقطاعُ شبكةٍ
+   في قبوٍ أو مصعدٍ يبلغها. فثلاثٌ وعشرون دقيقةَ سماحٍ فوقها.
+   ⚠️ ولا تُشدَّد: شارةٌ حمراء تظهر على نصف الأسطول كل مساء تُقرأ مرّةً ثم
+      تُتجاهَل — فتصير زينةً لا إشارة. */
+const EARLY_LEAVE_GRACE_MINS = 20;
 
 /* «10 ص ← 8 س» — صيغةٌ يقرؤها الليدر بلمحة. */
 function hLabel12(h){
@@ -2163,14 +2168,16 @@ function hLabel12(h){
   const h12=hh%12===0?12:hh%12;
   return h12+" "+ampm;
 }
+const durMin = m => { const h=Math.floor(m/60), x=m%60; return (h?h+" س ":"")+x+" د"; };
+
 function shiftChipHtml(c){
-  if(c.shiftH===undefined) return "";
-  const late=c.lateMins;
-  const lbl=hLabel12(c.shiftH)+" ← "+c.shiftLen+" س";
-  if(late===undefined) return `<span class="sh-chip">🕐 ${lbl}</span>`;
-  const hh=Math.floor(late/60), mm=late%60;
-  const dur=(hh?hh+" س ":"")+mm+" د";
-  return `<span class="sh-chip late">⏰ ${lbl} · متأخّر ${dur}</span>`;
+  const lbl = (c.shiftH===undefined) ? "" : hLabel12(c.shiftH)+" ← "+c.shiftLen+" س";
+  /* الانسحاب يُعرض ولو لم يُعرَف الموعد — فالحكم من shift_end لا من الساعتين. */
+  if(c.leftEarlyMins!==undefined){
+    return `<span class="sh-chip left">🔴 ${lbl?lbl+" · ":""}انسحب مبكراً — بقي ${durMin(c.leftEarlyMins)}`
+         + ` <b class="sh-gone">(غاب ${durMin(c.goneMins)})</b></span>`;
+  }
+  return lbl ? `<span class="sh-chip">🕐 ${lbl}</span>` : "";
 }
 
 function canClearDebt(){ return Array.isArray(EMP_PERMS) && EMP_PERMS.indexOf("assign") > -1; }
@@ -2243,10 +2250,10 @@ function renderCrew(){
   /* 🕐 [LDR-5] المتأخّرون في العدّاد — فيُرى الرقم قبل النزول للبطاقات.
      ولا يظهر إن كان صفراً: عدّادٌ يقول «0 متأخّر» كل يوم يصير خلفيّةً
      لا تُقرأ، وحين يصير ٥ لا يُنتبَه إليه. */
-  const lateCount=list.filter(c=>c.lateMins!==undefined).length;
+  const leftCount=list.filter(c=>c.leftEarlyMins!==undefined).length;
   if(cc)cc.textContent=`${onlineCount} متصل · ${list.length} اليوم`
-    +(lateCount?` · ⏰ ${lateCount} متأخّر`:"");
-  if(cc)cc.classList.toggle("has-late",lateCount>0);
+    +(leftCount?` · 🔴 ${leftCount} انسحب`:"");
+  if(cc)cc.classList.toggle("has-late",leftCount>0);
 
   /* 🔍 فلترة البحث: بالاسم أو الرقم (لا تؤثر على العدّاد) */
   const q=_crewSearch.trim().toLowerCase();
@@ -2264,7 +2271,7 @@ function renderCrew(){
       const stTxt=c.busy?"🔴 مشغول":(c.online?"🟢 متصل":"⚫ غير متصل");
       const initial=c.name!=="غير محدد"?c.name.charAt(0):"🛵";
       const trackBtn=c.online?`<button class="crew-b crew-b-track" onclick="trackDriver('${ej(c.phone)}','')" title="تتبع على الخريطة">📍</button>`:'';
-      html+=`<div class="crew-card ${stCls}${c.lateMins!==undefined?" late":""}">
+      html+=`<div class="crew-card ${stCls}${c.leftEarlyMins!==undefined?" left-early":""}">
         <div class="crew-top">
           <div class="crew-av">${drvAvatar(c.phone)||esc(initial)}</div>
           <div class="crew-id">
