@@ -49,7 +49,7 @@
      الآن: رقمٌ واحد يُشتقّ منه كل شيء — الشاشة والإعدادات ومسح الكاش.
      **وأي تسليم جديد يجب أن يرفعه، وإلا لم يصل.**
      ═══════════════════════════════════════════════════════════════════════ */
-  const CURRENT_APP_VERSION = "19.0-Nahla-FreeShift";   /* 🔧 V2.2 — لا تنسَ رفعه مع كل تسليم يمسّ هذا الملف */
+  const CURRENT_APP_VERSION = "18.9-Nahla-Debt";   /* 🔧 V2.2 — لا تنسَ رفعه مع كل تسليم يمسّ هذا الملف */
   window.APP_VERSION = CURRENT_APP_VERSION;
   /* اطبعه في شاشة الدخول فور جهوز الصفحة — نصّاً واحداً لا نسختين. */
   document.addEventListener('DOMContentLoaded', function(){
@@ -149,7 +149,7 @@
      تتطلّب نقلها إلى ملفات أو ختمها بـ nonce — مشروع لاحق موثّق. -->
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://*.firebasedatabase.app https://*.firebaseio.com https://www.gstatic.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: blob: https:; media-src 'self' data: blob:; connect-src 'self' https://*.firebasedatabase.app https://*.firebaseio.com wss://*.firebasedatabase.app wss://*.firebaseio.com https://script.google.com https://script.googleusercontent.com https://*.googleapis.com https://securetoken.googleapis.com https://*.cloudfunctions.net https://*.run.app; object-src 'none'; base-uri 'none'; form-action 'none'">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-<title>كباتن نحلة | V14</title>
+<title>كباتن نحلة | V16-Consent</title>
 <meta name="theme-color" content="#FFB300">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -1319,18 +1319,52 @@ const LEGAL_DOCS={
 window.discAccept=function(){
   try{localStorage.setItem('suf_loc_disclosed','1');}catch(e){}
   const o=document.getElementById('discOv');if(o)o.classList.add('dn');
+  const inApp = !!(window.AndroidRadar && AndroidRadar.onLocationConsent);
+  if(inApp){
+    /* [ن٢٢] لا getCurrentPosition داخل التطبيق: كانت تُطلق حوار WebView
+       متراكباً مع حوار النظام، فيُلغي أندرويد أحدهما ويبقى الكابتن بلا إذن.
+       الطبقة الأصلية تتولّى السلسلة كاملةً، وتعود إلينا بـ__onPermissionsReady. */
+    try{ AndroidRadar.onLocationConsent(); }catch(e){}
+    return;
+  }
   try{
     if(navigator.geolocation)
       navigator.geolocation.getCurrentPosition(()=>{},()=>{},{enableHighAccuracy:true,maximumAge:0});
   }catch(e){}
-  /* الطبقة الأصلية تطلب إذن الخلفية بعد الموافقة فقط */
-  try{ if(window.AndroidRadar&&AndroidRadar.onLocationConsent) AndroidRadar.onLocationConsent(); }catch(e){}
+  _resumeToggleIfPending();
 };
+
+/* [ن٢٥] استئناف تفعيل الشفت بعد اكتمال الأذونات — ينادينا MainActivity. */
+window.__onPermissionsReady=function(fine,bg){
+  try{
+    if(!fine){
+      window._discResume=false;
+      if(typeof toast==='function')toast('لم يُمنح إذن الموقع — لا يمكن بدء الشفت','warn');
+      return;
+    }
+    if(typeof startGeoWatchSafe==='function')startGeoWatchSafe();
+    _resumeToggleIfPending();
+  }catch(e){}
+};
+
+function _resumeToggleIfPending(){
+  if(!window._discResume)return;
+  window._discResume=false;
+  const t=document.getElementById('onlineTog');
+  if(t && !t.checked){ t.checked=true; try{toggleOnline();}catch(e){} }
+}
 window.discLater=function(){
   const o=document.getElementById('discOv');if(o)o.classList.add('dn');
+  /* [ن٢٣] كانت تُخفي الطبقة وتنتهي، والمفتاح يبقى بصرياً كما تركه الكابتن.
+     الآن يعود إلى «في استراحة» فعلياً — لا شفت بلا موافقة. */
+  window._discResume=false;
+  try{
+    const t=document.getElementById('onlineTog');
+    if(t && t.checked){ t.checked=false; toggleOnline(); }
+  }catch(e){}
   try{
     if(typeof toast==='function')
-      toast('لن تصلك طلبات بدون تفعيل الموقع. يمكنك الموافقة لاحقاً من الإعدادات.','warn');
+      toast('لن تصلك طلبات بدون تفعيل الموقع. يمكنك الموافقة لاحقاً من مفتاح «متاح للطلبات».','warn');
   }catch(e){}
 };
 window.discReadMore=function(){
@@ -1342,20 +1376,11 @@ window.showLocationDisclosure=function(){
   const o=document.getElementById('discOv');if(o)o.classList.remove('dn');
 };
 
-/* 🚦 عرض الإفصاح عند أول تشغيل — من سكربت مستقل لا من وحدة فايربيس.
-   لو ربطناه بالوحدة لاختفى الإفصاح كلّما تعذّر تحميل الـSDK، وقد يفتح
-   مراجع المتجر التطبيق بشبكة ضعيفة فيرى تطبيقاً يطلب الموقع بلا إفصاح. */
-(function(){
-  const run=()=>{
-    try{
-      if(localStorage.getItem('suf_loc_disclosed')==='1')return;
-      const o=document.getElementById('discOv');
-      if(o)setTimeout(()=>o.classList.remove('dn'),600);
-    }catch(e){}
-  };
-  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',run);
-  else run();
-})();
+/* 🔴 [ن٢١] حُذف العرض التلقائي عند تحميل الصفحة.
+   الإفصاح صار مربوطاً بمفتاح «متاح للطلبات» — وهذا هو «سياق الميزة» الذي
+   تشترطه السياسة. وعرضُه على شاشة الدخول كان يُنتج مخالفةً أعمق: السلسلة
+   تنطلق قبل الدخول فينتهي بها الأمر إلى تشغيل التتبّع بلا شفت — أي أن
+   التطبيق يناقض نصّ الإفصاح نفسه («الجمع يعمل فقط حين تكون متاحاً»). */
 
 window.openLegal=function(k){
   const d=LEGAL_DOCS[k];if(!d)return;
@@ -1927,11 +1952,11 @@ mins_since_pickup:m,attempts:1,   /* [V15.8] لا increment: القاعدة تس
 
 /* ══════════════ الدخول ══════════════ */
 window.initAuth=function(){unlock();
-if('Notification' in window&&Notification.permission!=='granted')Notification.requestPermission();
-/* 🚦 لا يُطلب إذن الموقع إلا بعد الموافقة على الإفصاح — شرط Google Play.
-   عرضُ الإفصاح نفسه يتولّاه سكربت مستقل كي يظهر مهما فشل تحميل هذه الوحدة. */
-if(localStorage.getItem('suf_loc_disclosed')==='1'&&navigator.geolocation){
-  navigator.geolocation.getCurrentPosition(()=>{},()=>{},{enableHighAccuracy:true,maximumAge:0});
+/* 🔴 [ن٢٥] حُذف طلب الموقع عند تسجيل الدخول. الدخول ليس الميزة التي تبرّر
+   الإذن — الشفت هو. وإذن إشعارات المتصفّح يُطلب في المتصفّح وحده؛ داخل
+   التطبيق تتولّاه سلسلة الأذونات الأصلية في موضعها من الترتيب. */
+if(!(window.AndroidRadar) && 'Notification' in window && Notification.permission!=='granted'){
+  try{Notification.requestPermission();}catch(e){}
 }
 doAuth();};
 
@@ -2334,35 +2359,26 @@ window.toggleOnline=async function(){
      ولا تُطبَّقان على الانصراف أبداً: منعُ كابتنٍ من الانصراف يُبقيه في
      الأسطول وهو في بيته — وهو أسوأ من أي شيء تحرسه هذه البوّابة. */
   if(document.getElementById('onlineTog').checked && drv){
+    /* 🚦 [ن٢٤] الإفصاح البارز في سياق الميزة — قبل أي طلب إذن.
+       هذه هي النقطة الوحيدة التي يبدأ منها التتبّع، فهي وحدها موضع الإفصاح. */
+    if(localStorage.getItem('suf_loc_disclosed')!=='1'){
+      document.getElementById('onlineTog').checked=false;
+      window._discResume=true;
+      const _o=document.getElementById('discOv'); if(_o)_o.classList.remove('dn');
+      return;
+    }
     if(!profileComplete()){
       document.getElementById('onlineTog').checked=false;
       toast('أكمل صورتك وموعد شفتك قبل النزول','warn');
       openOnboarding(true); return;
     }
-    /* ═══════════════════════════════════════════════════════════════════════
-       🆓 [N-13.2] بوّابة النزول تحترم وضع الطوارئ
-       ───────────────────────────────────────────────────────────────────────
-       العطب الذي كشفه سؤالك: التطبيق **يعرف** بالمفتاح ويعرضه ولا يطيعه.
-       كان يقرأ shifts_enabled (س٣٠٣٥) ويحترمه في ثلاثة مواضع — عدّاد الوقت
-       المتبقّي، وشارة «دوام حر ♾️»، وإنذار قرب الانتهاء — **ونسيه هنا**.
-       وهذه وحدها هي التي تمنع فعلاً.
-
-       فكانت النتيجة تناقضاً كاملاً: تُشغّل الطوارئ فيقبل المحرّكُ الكابتنَ،
-       وتقول اللوحةُ «دوام حر»، ويتوقّف العدّاد — ثم لا يستطيع النزول أصلاً.
-
-       📌 وهو الصنف نفسه الذي أُصلح في المحرّك قبله: مفتاحٌ يُقرأ في ثلاثة
-          مواضع ويُنسى في الرابع — والرابع هو الحاسم. لا يُقاس الإنفاذ بعدد
-          المواضع التي تعرف، بل بالموضع الذي يمنع.
-       ═══════════════════════════════════════════════════════════════════════ */
-    if(window._shiftsOff!==true){
-      const s=myShift(), w=inWindowLocal(s.h, s.len, srvNow());
-      if(!w.inside){
-        document.getElementById('onlineTog').checked=false;
-        const hh=Math.floor(w.opensInMins/60), mm=w.opensInMins%60;
-        toast('🕐 شفتك يبدأ '+hLabel(s.h)+' — يتبقّى '+(hh?hh+' س ':'')+mm+' د','warn');
-        try{ track('shift_gate_blocked',{ms:w.opensInMins}); }catch(_){}
-        return;
-      }
+    const s=myShift(), w=inWindowLocal(s.h, s.len, srvNow());
+    if(!w.inside){
+      document.getElementById('onlineTog').checked=false;
+      const hh=Math.floor(w.opensInMins/60), mm=w.opensInMins%60;
+      toast('🕐 شفتك يبدأ '+hLabel(s.h)+' — يتبقّى '+(hh?hh+' س ':'')+mm+' د','warn');
+      try{ track('shift_gate_blocked',{ms:w.opensInMins}); }catch(_){}
+      return;
     }
   }
   isOnline=document.getElementById('onlineTog').checked;
@@ -2381,18 +2397,7 @@ window.toggleOnline=async function(){
     if(!drv.shiftEnd||new Date(drv.shiftEnd)<=new Date()){
       try{
         const r=await gasFetch(`${API_URL}?action=START_SHIFT&phone=${drv.phone}&token=${API_TOKEN}&stoken=${encodeURIComponent(getStoken())}`); const d=await r.json();
-        /* 🆓 [N-13.2] shift_end يُخزَّن كما ورد — و«أ» تعني null في الطوارئ.
-           وCode.gs يُرجع بالفعل shift_end:null و shifts_disabled:true حين
-           يكون المفتاح مطفأً، فيتّسق الطرفان: **غياب shift_end يعني «بلا
-           انتهاء»** في المحرّك أيضاً (`if (driver.shift_end && …)`).
-           ⚠️ والحارس ?? null مقصود: undefined يُلقى من JSON.stringify فلا
-              يُمحى الختمُ القديم من التخزين المحلي، فيعود الكابتن مقيّداً
-              بوقتِ أمس بعد إعادة فتح التطبيق — وهو نصفُ الطوارئ لا كلّها. */
-        if(d.success){
-          drv.shiftEnd = d.shift_end ?? null;
-          if(d.shifts_disabled === true) window._shiftsOff = true;
-          localStorage.setItem('suf_session',JSON.stringify(drv));
-        }
+        if(d.success){drv.shiftEnd=d.shift_end;localStorage.setItem('suf_session',JSON.stringify(drv));}
         /* ═══════════════════════════════════════════════════════════════
            🚨 [V15.9] **فشل START_SHIFT لم يعد يمنع العمل.**
            ───────────────────────────────────────────────────────────────
@@ -2642,16 +2647,37 @@ if(isOnline)fbStatus('active', availEpoch);document.getElementById('permOv').cla
 function startSystem(){
   if(isOnline){awake();adjustHB();}
   startListeners();
-  if(navigator.geolocation){
-    navigator.geolocation.getCurrentPosition(p=>{lastLat=p.coords.latitude;lastLng=p.coords.longitude;
-      if(drv){drv.currentLat=p.coords.latitude;drv.currentLng=p.coords.longitude;drv.gpsAccuracy=p.coords.accuracy;}fbStatus(isOnline?'active':'inactive');},
-      ()=>document.getElementById('permOv').classList.remove('dn'),{enableHighAccuracy:true,timeout:10000});
-    navigator.geolocation.watchPosition(p=>{document.getElementById('permOv').classList.add('dn');
-      lastLat=p.coords.latitude;lastLng=p.coords.longitude;
-      if(drv){drv.currentLat=p.coords.latitude;drv.currentLng=p.coords.longitude;drv.gpsAccuracy=p.coords.accuracy;}fbStatus(isOnline?'active':'inactive');},
-      ()=>document.getElementById('permOv').classList.remove('dn'),{enableHighAccuracy:true,maximumAge:5000});
-  }
+  startGeoWatchSafe();
 }
+
+/* ═══════════════ [ن٢٦ ← ج٢١] الطريق المسدود الذي يصنعه التأجيل ═══════════════
+   startSystem تُنادى فور الدخول وكانت تطلب الموقع فوراً. حين كان الإذن
+   ممنوحاً منذ الإقلاع كانت تنجح. وبعد تأجيل الإذن إلى الشفت **عمداً** صارت
+   تفشل، فترفع permOv — طبقةً ملء الشاشة زرّها الوحيد location.reload().
+   والتحديث يُعيد الدورة: دخولٌ محفوظ ← startSystem ← فشل ← حجب. فلا سبيل
+   إلى مفتاح «متاح للطلبات» الذي يعرض الإفصاح الذي يمنح الإذن الذي يرفع الحجب.
+
+   مبدآن:
+   ① لا يُلمس الموقع قبل الموافقة إطلاقاً.
+   ② permOv تعني «أنت في شفت ولا يصلنا موقعك» — فلا تظهر خارج الشفت.
+      الكابتن خارج الشفت لا ينتظر طلباً، وحجبه كذبٌ عليه.
+   ═════════════════════════════════════════════════════════════════════════ */
+window.startGeoWatchSafe=function(){
+  try{
+    if(localStorage.getItem('suf_loc_disclosed')!=='1')return;
+    if(!navigator.geolocation)return;
+    if(window._geoWatching)return;
+    window._geoWatching=true;
+    const hide=()=>{const o=document.getElementById('permOv');if(o)o.classList.add('dn');};
+    const fail=()=>{ if(!isOnline)return;
+      const o=document.getElementById('permOv');if(o)o.classList.remove('dn'); };
+    const take=p=>{hide();lastLat=p.coords.latitude;lastLng=p.coords.longitude;
+      if(drv){drv.currentLat=p.coords.latitude;drv.currentLng=p.coords.longitude;drv.gpsAccuracy=p.coords.accuracy;}
+      fbStatus(isOnline?'active':'inactive');};
+    navigator.geolocation.getCurrentPosition(take,fail,{enableHighAccuracy:true,timeout:10000});
+    navigator.geolocation.watchPosition(take,fail,{enableHighAccuracy:true,maximumAge:5000});
+  }catch(e){}
+};
 
 /* ═══════════════════════════════════════════════════════════════════════════
    🖼️🕐 [N-12.0] ملفّ الكابتن — الصورة وموعد الشفت
