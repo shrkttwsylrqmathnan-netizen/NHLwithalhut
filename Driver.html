@@ -49,7 +49,7 @@
      الآن: رقمٌ واحد يُشتقّ منه كل شيء — الشاشة والإعدادات ومسح الكاش.
      **وأي تسليم جديد يجب أن يرفعه، وإلا لم يصل.**
      ═══════════════════════════════════════════════════════════════════════ */
-  const CURRENT_APP_VERSION = "18.9-Nahla-Debt";   /* 🔧 V2.2 — لا تنسَ رفعه مع كل تسليم يمسّ هذا الملف */
+  const CURRENT_APP_VERSION = "19.0-Nahla-FreeShift";   /* 🔧 V2.2 — لا تنسَ رفعه مع كل تسليم يمسّ هذا الملف */
   window.APP_VERSION = CURRENT_APP_VERSION;
   /* اطبعه في شاشة الدخول فور جهوز الصفحة — نصّاً واحداً لا نسختين. */
   document.addEventListener('DOMContentLoaded', function(){
@@ -2372,13 +2372,19 @@ window.toggleOnline=async function(){
       toast('أكمل صورتك وموعد شفتك قبل النزول','warn');
       openOnboarding(true); return;
     }
-    const s=myShift(), w=inWindowLocal(s.h, s.len, srvNow());
-    if(!w.inside){
-      document.getElementById('onlineTog').checked=false;
-      const hh=Math.floor(w.opensInMins/60), mm=w.opensInMins%60;
-      toast('🕐 شفتك يبدأ '+hLabel(s.h)+' — يتبقّى '+(hh?hh+' س ':'')+mm+' د','warn');
-      try{ track('shift_gate_blocked',{ms:w.opensInMins}); }catch(_){}
-      return;
+    /* 🆓 [N-13.2] بوّابة النزول تحترم وضع الطوارئ.
+       التطبيق كان يقرأ shifts_enabled ويطيعه في العدّاد والشارة والإنذار —
+       ونسيه هنا، وهذه وحدها التي تمنع. فكان يقول «دوام حر ♾️» ثم لا يدع
+       الكابتن ينزل. لا يُقاس الإنفاذ بالمواضع التي تعرف بل بالذي يمنع. */
+    if(window._shiftsOff!==true){
+      const s=myShift(), w=inWindowLocal(s.h, s.len, srvNow());
+      if(!w.inside){
+        document.getElementById('onlineTog').checked=false;
+        const hh=Math.floor(w.opensInMins/60), mm=w.opensInMins%60;
+        toast('🕐 شفتك يبدأ '+hLabel(s.h)+' — يتبقّى '+(hh?hh+' س ':'')+mm+' د','warn');
+        try{ track('shift_gate_blocked',{ms:w.opensInMins}); }catch(_){}
+        return;
+      }
     }
   }
   isOnline=document.getElementById('onlineTog').checked;
@@ -2397,7 +2403,13 @@ window.toggleOnline=async function(){
     if(!drv.shiftEnd||new Date(drv.shiftEnd)<=new Date()){
       try{
         const r=await gasFetch(`${API_URL}?action=START_SHIFT&phone=${drv.phone}&token=${API_TOKEN}&stoken=${encodeURIComponent(getStoken())}`); const d=await r.json();
-        if(d.success){drv.shiftEnd=d.shift_end;localStorage.setItem('suf_session',JSON.stringify(drv));}
+        /* 🆓 [N-13.2] ?? null لا | — undefined يُلقى من JSON.stringify فيبقى
+           ختمُ أمس محفوظاً، فيعود الكابتن مقيّداً بعد إعادة فتح التطبيق. */
+        if(d.success){
+          drv.shiftEnd = d.shift_end ?? null;
+          if(d.shifts_disabled === true) window._shiftsOff = true;
+          localStorage.setItem('suf_session',JSON.stringify(drv));
+        }
         /* ═══════════════════════════════════════════════════════════════
            🚨 [V15.9] **فشل START_SHIFT لم يعد يمنع العمل.**
            ───────────────────────────────────────────────────────────────
