@@ -38,7 +38,7 @@ try{if(localStorage.getItem(VK)!==V){localStorage.setItem(VK,V);if("caches"in wi
 
    📌 ارفع هذا الرقم كلّما غيّرت الملف — وإلا لم يصل تغييرك.
    ═══════════════════════════════════════════════════════════════════════════ */
-const ADMIN_APP_VERSION = "6.4-Nahla-OpsDebt";
+const ADMIN_APP_VERSION = "6.5-Nahla-FullArch";
 try {
   if (localStorage.getItem('hut_adm_version') !== ADMIN_APP_VERSION) {
     var _rk='hut_adm_version_reload_ts', _last=Number(localStorage.getItem(_rk)||0);
@@ -1081,7 +1081,8 @@ button,input,select,textarea{font-family:'Cairo',sans-serif;}
     </div>
     <div id="pg-orders" class="pg tab-p">
       <div class="pg-ttl">سجل اليوم</div>
-      <div class="arch-alert">📌 يعرض طلبات اليوم النشطة + الأيام السابقة من الأرشيف. المحاسبة النهائية تُحتسب في التقرير الليلي.</div>
+      <div class="arch-alert">📌 يعرض كل الطلبات الباقية في الأرشيف (آخر ٣٥ يوماً). المحاسبة النهائية تُحتسب في التقرير الليلي.
+        <div id="archProg" style="margin-top:5px;font-weight:800;font-size:.72rem"></div></div>
       <div class="arch-kpi">
         <div class="ak akb"><div class="ak-ic b">✅</div><div class="ak-n" id="akC">0</div><div class="ak-l">طلبات منجزة</div></div>
         <div class="ak aka"><div class="ak-ic a">❌</div><div class="ak-n" id="akX">0</div><div class="ak-l">طلبات ملغية</div></div>
@@ -1809,26 +1810,83 @@ function setupFB(){
       el.textContent=age<300000?"مستقر":"متأخر";el.style.color=age<300000?"var(--jade)":"var(--amber)";}
   };
   listen(()=>db.ref("system_settings/health_check"),hcCb);
-  const _days=[];
-  for(let i=0;i<3;i++){const d=new Date();d.setDate(d.getDate()-i);_days.push(d.toISOString().split("T")[0]);}
+  /* ═══════════════════════════════════════════════════════════════════════
+     📚 [ADM-7] الأرشيف كلّه — كل ما بقي في فايربيس، لا ثلاثة أيام
+     ───────────────────────────────────────────────────────────────────────
+     كانت اللوحة تحمّل ثلاثة أيام فقط، والأرشيف يحفظ خمسةً وثلاثين
+     (RETAIN.completed_orders في index.js). فاثنان وثلاثون يوماً من الطلبات
+     موجودةٌ في قاعدة البيانات ولا تُرى.
+
+     ⚡ والكلفة هي ما يحكم التصميم — لا الرقم:
+        خمسةٌ وثلاثون **مستمعاً حيّاً** كانت ستعني خمسةً وثلاثين قناةً مفتوحة
+        تُعيد الإرسال مع كل تغيير. لكنّ الأيام الماضية **لا تتغيّر** — طلبٌ
+        أُرشف أمس لا يُكتب فوقه. فيكفيها قراءةٌ واحدة (once).
+          • اليوم الجاري  ← مستمعٌ حيّ (الطلبات ما زالت تصل)
+          • الأيام الماضية ← قراءةٌ واحدة، بدفعاتٍ من خمسة، بالخلفية
+        ⇒ تظهر طلبات اليوم فوراً، ويمتلئ التاريخ خلفها بلا انتظار.
+
+     🔴 وعطبٌ صغير أُصلح معه: المفاتيح كانت تُبنى بـtoISOString() — أي
+        بتاريخ **UTC**. والأرشيف يُفهرس **باليوم التجاري** (بغداد − ٤ ساعات)
+        كما يكتبه index.js. مخططان مختلفان لليوم نفسه، فطلبات ما بعد منتصف
+        الليل كانت تقع في يومٍ لا تُقرأ منه. وكانت الأيام الثلاثة المتداخلة
+        تُخفي ذلك؛ أمّا عند حدود النطاق فكانت تضيع.
+     ═══════════════════════════════════════════════════════════════════════ */
+  const ARCH_DAYS = 35;   /* ⚠️ يطابق RETAIN.completed_orders في index.js */
+  const bizDayKey = off => {
+    const bg=new Date(new Date().toLocaleString("en-US",{timeZone:"Asia/Baghdad"}));
+    bg.setHours(bg.getHours()-4);
+    bg.setDate(bg.getDate()-off);
+    return bg.getFullYear()+"-"+String(bg.getMonth()+1).padStart(2,"0")+"-"+String(bg.getDate()).padStart(2,"0");
+  };
+  const toRows = (obj, day) => {
+    const arr=[];
+    if(obj)Object.values(obj).forEach(o=>{
+      if(!o.id&&!o.restaurant)return;
+      arr.push([o.id||"",o.restaurant||"مطعم",o.area||"غير محدد",o.details||"طلب توصيل",
+        o.price||0,o.status||"completed",o.driverPhone||"",
+        o.last_update||o.completed_at||day+"T00:00:00Z",o.photoUrl||"",o.is_sovereign||false,
+        o.last_update||"",o.last_offered_to||"",false,o.comm??null,o.payType||"",false,o.resPhone||""]);
+    });
+    return arr;
+  };
   compArch=[];compByDay={};
-  _days.forEach(day=>{
-    const cCb=snap=>{
-      const obj=snap.val();const arr=[];
-      if(obj)Object.values(obj).forEach(o=>{
-        if(!o.id&&!o.restaurant)return;
-        arr.push([o.id||"",o.restaurant||"مطعم",o.area||"غير محدد",o.details||"طلب توصيل",
-          o.price||0,o.status||"completed",o.driverPhone||"",
-          o.last_update||o.completed_at||day+"T00:00:00Z",o.photoUrl||"",o.is_sovereign||false,
-          o.last_update||"",o.last_offered_to||"",false,o.comm??null,o.payType||"",false,o.resPhone||""]);
-      });
-      compByDay[day]=arr;
-      compArch=[].concat.apply([],Object.values(compByDay));
-      renderArch();
-      updDayCounts();   /* [N-9.2] وصول أرشيف اليوم يغيّر العدّ أيضاً */
-    };
-    listen(()=>db.ref("completed_orders/"+day),cCb);
+  /* إعادة الرسم مؤجّلة: خمسٌ وثلاثون دفعةً تصل متتابعة، ورسمُ كلٍّ منها
+     يكرّر العمل نفسه. فنجمعها في رسمةٍ واحدة كل ثلث ثانية. */
+  const _archRefresh = debounce(()=>{
+    compArch=[].concat.apply([],Object.values(compByDay));
+    renderArch();
+    updDayCounts();   /* [N-9.2] وصول الأرشيف يغيّر العدّ أيضاً */
+  },300);
+
+  /* ① اليوم الجاري — حيّ */
+  const today=bizDayKey(0);
+  listen(()=>db.ref("completed_orders/"+today),snap=>{
+    compByDay[today]=toRows(snap.val(),today);
+    _archRefresh();
   });
+
+  /* ② الأيام الماضية — قراءةٌ واحدة، بدفعات */
+  let _archLoaded=1;
+  const _archProg=()=>{
+    const el=document.getElementById("archProg");
+    if(!el)return;
+    el.textContent=_archLoaded>=ARCH_DAYS
+      ? "📚 الأرشيف كاملاً: "+ARCH_DAYS+" يوماً"
+      : "⏳ يُحمَّل الأرشيف… "+_archLoaded+" من "+ARCH_DAYS+" يوماً";
+  };
+  _archProg();
+  (async()=>{
+    const past=[];for(let i=1;i<ARCH_DAYS;i++)past.push(bizDayKey(i));
+    for(let i=0;i<past.length;i+=5){
+      await Promise.all(past.slice(i,i+5).map(day=>
+        db.ref("completed_orders/"+day).once("value")
+          .then(snap=>{compByDay[day]=toRows(snap.val(),day);})
+          .catch(e=>{console.warn("arch "+day+":",e&&e.message);})
+          .finally(()=>{_archLoaded++;_archProg();})
+      ));
+      _archRefresh();
+    }
+  })();
   /* 🗑️ كان يُعيد بناء **كل** علامات المطاعم على الخريطة مع كل لقطة
      (removeLayer + L.marker لكل مطعم). الآن: تخزين فقط. */
     const _rlDebounced=debounce(()=>{
