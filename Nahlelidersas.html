@@ -998,13 +998,12 @@ button,input,select,textarea{font-family:'Cairo',sans-serif;}
     <div class="cd-card">
       <div class="cd-nm" id="cdName">—</div>
       <div class="cd-ph" id="cdPhone">—</div>
-      <div class="cd-tot">الدَّين الكلّي: <b id="cdTotal">—</b></div>
+      <div class="cd-tot">الدَّين: <b id="cdTotal">—</b></div>
     </div>
 
     <label class="cd-lb" for="cdAmount">المبلغ المستلَم</label>
     <input type="text" id="cdAmount" class="cd-in" inputmode="numeric" autocomplete="off" placeholder="0">
-    <div class="cd-hint">المبلغ كاملٌ مبدئياً — عدّله إن كان السداد جزئياً.
-      ويُخصم من الرسوم أولاً ثم المناصفة.</div>
+    <div class="cd-hint">المبلغ كاملٌ مبدئياً — عدّله إن كان السداد جزئياً.</div>
 
     <button class="cd-go" onclick="submitClearDebt(this)">تأكيد الاستلام</button>
     <button class="sheet-cancel" onclick="clSheet('clearDebtSheet')">إلغاء</button>
@@ -2039,10 +2038,9 @@ function crewToday(){
       online:false,busy:false,
       openTime:null,lastSeen:null,workedMin:null,
       ledgerTotal:liveLed.drivers?.[n]?.completed_orders||0,
-      /* 💰 [N-13.0] الدَّينان — من نفس liveLed المستمَع إليه أصلاً، فلا
-         قراءة إضافية. والمجموع هو ما يقيسه الحظر في المحرّك حرفياً. */
-      debt:Number(liveLed.drivers?.[n]?.debt||0),
-      debtOps:Number(liveLed.drivers?.[n]?.debt_ops||0)
+      /* 💰 [N-13.0] الدَّين — من نفس liveLed المستمَع إليه أصلاً، فلا قراءة
+         إضافية. وهو ما يقيسه الحظر في المحرّك حرفياً. */
+      debt:Number(liveLed.drivers?.[n]?.debt||0)
     };
     return map[n];
   };
@@ -2183,18 +2181,15 @@ function shiftChipHtml(c){
 function canClearDebt(){ return Array.isArray(EMP_PERMS) && EMP_PERMS.indexOf("assign") > -1; }
 
 function debtRowHtml(c){
-  const total = (c.debt||0) + (c.debtOps||0);
+  const total = c.debt||0;
   if(total <= 0 && !canClearDebt()) return "";
   const blocked = total >= DEBT_LIMIT;
-  const parts = [];
-  if(c.debtOps) parts.push("رسوم " + c.debtOps.toLocaleString());
-  if(c.debt)    parts.push("مناصفة " + c.debt.toLocaleString());
   return `<div class="crew-debt ${blocked?"blocked":""}">
       <div class="cd-l">
         <span class="cd-ic">${blocked?"🚫":"💰"}</span>
         <div>
           <div class="cd-t">${total.toLocaleString()} د.ع</div>
-          <div class="cd-s">${blocked?"محجوب — لا تصله طلبات":(parts.join(" · ")||"لا دين")}</div>
+          <div class="cd-s">${blocked?"محجوب — لا تصله طلبات":(total?"عمولة المكتب":"لا دين")}</div>
         </div>
       </div>
       ${canClearDebt() && total>0

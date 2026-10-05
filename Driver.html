@@ -49,7 +49,7 @@
      الآن: رقمٌ واحد يُشتقّ منه كل شيء — الشاشة والإعدادات ومسح الكاش.
      **وأي تسليم جديد يجب أن يرفعه، وإلا لم يصل.**
      ═══════════════════════════════════════════════════════════════════════ */
-  const CURRENT_APP_VERSION = "19.0-Nahla-FreeShift";   /* 🔧 V2.2 — لا تنسَ رفعه مع كل تسليم يمسّ هذا الملف */
+  const CURRENT_APP_VERSION = "19.1-Nahla-OneDebt";   /* 🔧 V2.2 — لا تنسَ رفعه مع كل تسليم يمسّ هذا الملف */
   window.APP_VERSION = CURRENT_APP_VERSION;
   /* اطبعه في شاشة الدخول فور جهوز الصفحة — نصّاً واحداً لا نسختين. */
   document.addEventListener('DOMContentLoaded', function(){
@@ -1324,7 +1324,7 @@ window.discAccept=function(){
     /* [ن٢٢] لا getCurrentPosition داخل التطبيق: كانت تُطلق حوار WebView
        متراكباً مع حوار النظام، فيُلغي أندرويد أحدهما ويبقى الكابتن بلا إذن.
        الطبقة الأصلية تتولّى السلسلة كاملةً، وتعود إلينا بـ__onPermissionsReady. */
-    try{ AndroidRadar.onLocationConsent(); }catch(e){}
+    try{ AndroidRadar.onLocationConsent(); }catch(_){ /* جسرٌ أصلي — غيابه ليس خطأ */ }
     return;
   }
   try{
@@ -1344,14 +1344,14 @@ window.__onPermissionsReady=function(fine,bg){
     }
     if(typeof startGeoWatchSafe==='function')startGeoWatchSafe();
     _resumeToggleIfPending();
-  }catch(e){}
+  }catch(e){ console.warn('[consent] onPermissionsReady:',e&&e.message); }
 };
 
 function _resumeToggleIfPending(){
   if(!window._discResume)return;
   window._discResume=false;
   const t=document.getElementById('onlineTog');
-  if(t && !t.checked){ t.checked=true; try{toggleOnline();}catch(e){} }
+  if(t && !t.checked){ t.checked=true; try{toggleOnline();}catch(e){ console.warn('[consent] resume toggle:',e&&e.message); } }
 }
 window.discLater=function(){
   const o=document.getElementById('discOv');if(o)o.classList.add('dn');
@@ -1361,7 +1361,7 @@ window.discLater=function(){
   try{
     const t=document.getElementById('onlineTog');
     if(t && t.checked){ t.checked=false; toggleOnline(); }
-  }catch(e){}
+  }catch(e){ console.warn('[consent] decline reset:',e&&e.message); }
   try{
     if(typeof toast==='function')
       toast('لن تصلك طلبات بدون تفعيل الموقع. يمكنك الموافقة لاحقاً من مفتاح «متاح للطلبات».','warn');
@@ -1520,9 +1520,9 @@ setInterval(()=>{ if(isOnline) updateLinkPill(); }, 5000);
 /* [PERM-7/ق٣٦] أُعلنت أعلاه قبل markFix — كانت هنا وهي تُكتب في 1352. */
 let lastHtml="";
 let readySet=new Set(), rejToday=0, doneToday=0, earnToday=0, lifetime=0, debtNow=0;
-/* 💰 [N-13.0] الرسم التشغيلي — دَينٌ ثانٍ مستقلّ عن عمولة المناصفة.
-   والحدّ يطابق TUNE.DEBT_BLOCK_LIMIT في المحرّك: غيّرهما معاً أو لا تغيّر. */
-let debtOps=0;
+/* 💰 [N-13.0] حدّ الحظر المالي — يطابق TUNE.DEBT_BLOCK_LIMIT في المحرّك:
+   غيّرهما معاً أو لا تغيّر. والدَّين حقلٌ واحد (debtNow) منذ حذف الرسم
+   التشغيلي في N-13.6. */
 const DEBT_LIMIT=5000;
 let queue=JSON.parse(localStorage.getItem('hut_offline_queue')||'[]'), qBusy=false;
 let chatOpen=false, chatMsgs={}, chatMeta={}, chatSeen=0;
@@ -1956,7 +1956,7 @@ window.initAuth=function(){unlock();
    الإذن — الشفت هو. وإذن إشعارات المتصفّح يُطلب في المتصفّح وحده؛ داخل
    التطبيق تتولّاه سلسلة الأذونات الأصلية في موضعها من الترتيب. */
 if(!(window.AndroidRadar) && 'Notification' in window && Notification.permission!=='granted'){
-  try{Notification.requestPermission();}catch(e){}
+  try{Notification.requestPermission();}catch(_){ /* غير مدعومة في كل متصفّح */ }
 }
 doAuth();};
 
@@ -2971,7 +2971,7 @@ function level(n){
 function renderDebtBar(){
   const bar=document.getElementById('debtBar');
   if(!bar) return;
-  const total=(Number(debtNow)||0)+(Number(debtOps)||0);
+  const total=Number(debtNow)||0;
   const stop = total>=DEBT_LIMIT;
   const warn = !stop && total>=DEBT_LIMIT*0.6;
 
@@ -2991,16 +2991,13 @@ function renderDebtBar(){
   }
 }
 
-/* تفصيل الدَّينين — لأن «٥٠٠٠» بلا تفسير تُقرأ ظلماً لا استحقاقاً. */
+/* تفسير الدَّين — لأن «٥٠٠٠» بلا تفسير تُقرأ ظلماً لا استحقاقاً. */
 window.openDebtInfo=function(){
-  const total=(Number(debtNow)||0)+(Number(debtOps)||0);
+  const total=Number(debtNow)||0;
   const lines=[];
-  lines.push('💰 تفصيل ما عليك');
+  lines.push('💰 ما عليك');
   lines.push('');
-  if(debtOps) lines.push('• رسم تشغيلي: '+Number(debtOps).toLocaleString('ar-EG')+' د.ع');
-  if(debtNow) lines.push('• عمولة المكتب: '+Number(debtNow).toLocaleString('ar-EG')+' د.ع');
-  lines.push('');
-  lines.push('المجموع: '+total.toLocaleString('ar-EG')+' د.ع');
+  lines.push('• عمولة المكتب: '+total.toLocaleString('ar-EG')+' د.ع');
   lines.push('');
   if(total>=DEBT_LIMIT){
     lines.push('🚫 بلغتَ حدّ '+DEBT_LIMIT.toLocaleString('ar-EG')+' د.ع، فتوقّف استلام الطلبات.');
@@ -3076,9 +3073,7 @@ function startListeners(){
     if(s.val()==='banned'){alert('⚠️ تم حظر حسابك.');clearPass();localStorage.removeItem('suf_session');sessionStorage.clear();location.reload();}
   });
   listen(()=>ref(db,`ledgers/drivers/${drv.phone}`),s=>{
-    const l=s.val()||{}; lifetime=Number(l.completed_orders||0); debtNow=Number(l.debt||0);
-    /* 💰 [N-13.0] حقلٌ واصلٌ في نفس اللقطة — صفر قراءة إضافية. */
-    debtOps=Number(l.debt_ops||0); refreshDash();
+    const l=s.val()||{}; lifetime=Number(l.completed_orders||0); debtNow=Number(l.debt||0); refreshDash();
   });
   listen(()=>ref(db,`daily_metrics/${drv.phone}/${today}/completed_orders`),s=>{doneToday=Number(s.val()||0);refreshDash();});
   listen(()=>ref(db,`daily_metrics/${drv.phone}/${today}/rejected_orders`),s=>{rejToday=Number(s.val()||0);refreshDash();});
