@@ -1,0 +1,920 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<title>عيادة نحلة — فحص جهاز الكابتن</title>
+<meta name="theme-color" content="#FFB300">
+<!--
+  ═══════════════════════════════════════════════════════════════════════════
+  🏥 عيادة نحلة — أداة تشخيصٍ لجهاز الكابتن
+  ───────────────────────────────────────────────────────────────────────────
+  لماذا ملفٌّ منفصل لا كتلةٌ داخل Driver.html؟
+
+  ① لأن أداة التشخيص يجب أن تعمل **حين يكون المريض معطوباً**. ولو سكنت
+     داخل التطبيق لماتت بموته: سكربتٌ واحد، فإن انهار انهارا معاً.
+  ② ولأن كل تعديلٍ على Driver.html خطر — وقد كُسر مرّتين في يومٍ واحد.
+     صفرُ تعديلٍ عليه = صفرُ خطر.
+  ③ وتُحدَّث في ثانية بلا رفع تطبيقٍ ولا رقم إصدارٍ ولا مسح كاش.
+
+  ⚠️ وتُرفع **في المجلَّد نفسه** الذي فيه Driver.html — وهذا شرطٌ لا تفضيل:
+     localStorage مقيَّدٌ بالأصل (origin). فبالجوار تقرأ ما خزّنه التطبيق
+     (nahla_session · nahla_pass_p · hut_offline_queue …) بلا أن يكتب الكابتن
+     حرفاً. وفي مجالٍ آخر لا ترى شيئاً وتصير نصف عمياء.
+
+  🛡️ وتستعمل سكربتات **كلاسيكية** لا وحدات ES — عمداً. فإن كان عطبُ الجهاز
+     في تحميل الوحدات (وهو محتمَل على WebView قديم) لم تُصَب الأداة بما
+     جاءت لتقيسه. ولو فشل تحميل فايربيس كلّياً، تكمل بقيّةُ الفحوص وتُعلن
+     الفشل — لأنه **هو نفسه نتيجة**.
+
+  🔒 ولا تُرسل كلمة مرورٍ ولا تعرضها ولا تحفظها. تفحص **شكلها** لا محتواها:
+     تقول «المحرف رقم ٩ رمزه U+200F» ولا تقول ما هو النصّ.
+     ولا تكتب حرفاً في قاعدتك — سوى صفٍّ واحدٍ اختياري في سجلّ التشخيص.
+  ═══════════════════════════════════════════════════════════════════════════
+-->
+<style>
+:root{
+  --bg:#f1f5f9; --card:#fff; --ink:#0f172a; --dim:#64748b; --line:#e2e8f0;
+  --ok:#047857; --okbg:#ecfdf5; --warn:#b45309; --warnbg:#fffbeb;
+  --bad:#b91c1c; --badbg:#fef2f2; --na:#64748b; --nabg:#f8fafc;
+  --blue:#1d4ed8; --bluebg:#eff6ff;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:"Segoe UI",system-ui,-apple-system,Tahoma,Arial,sans-serif;
+  font-size:15px;line-height:1.7;padding:0 0 90px}
+header{background:linear-gradient(135deg,#1e3a8a,#1d4ed8);color:#fff;padding:18px 16px 20px}
+h1{margin:0;font-size:1.18rem;font-weight:800;letter-spacing:-.2px}
+header p{margin:6px 0 0;font-size:.8rem;opacity:.9}
+.wrap{padding:14px 12px;max-width:640px;margin:0 auto}
+
+.big{background:var(--card);border-radius:16px;padding:16px;margin-bottom:14px;
+  border:2px solid var(--line);box-shadow:0 1px 3px rgba(0,0,0,.05)}
+.big.ok{border-color:#6ee7b7;background:var(--okbg)}
+.big.warn{border-color:#fcd34d;background:var(--warnbg)}
+.big.bad{border-color:#fca5a5;background:var(--badbg)}
+.big h2{margin:0 0 4px;font-size:1.05rem}
+.big .sub{font-size:.82rem;color:var(--dim);line-height:1.8}
+
+.card{background:var(--card);border:1px solid var(--line);border-radius:13px;
+  padding:12px 13px;margin-bottom:9px}
+.card.ok{border-right:5px solid var(--ok)}
+.card.warn{border-right:5px solid var(--warn)}
+.card.bad{border-right:5px solid var(--bad)}
+.card.na{border-right:5px solid var(--na);opacity:.75}
+.ct{display:flex;align-items:center;gap:8px;font-weight:700;font-size:.94rem}
+.ct .ic{font-size:1.05rem}
+/* القيمة قد تكون شيفرةً لاتينية أو نصّاً عربياً. وفرضُ LTR كان يبعثر العربي
+   («4 مفتاحاً · ~8 ك.بايت» تُقرأ مقلوبة). plaintext يختار الاتجاه من أوّل
+   حرفٍ قويّ في النصّ — فيصحّ الشكلان بلا تدخّل. */
+.cv{font-family:"Consolas",ui-monospace,monospace;font-size:.82rem;color:var(--blue);
+  margin-top:3px;unicode-bidi:plaintext;text-align:start;word-break:break-all}
+.cw{font-size:.79rem;color:var(--dim);margin-top:5px;line-height:1.75}
+.sec{font-size:.78rem;font-weight:800;color:var(--dim);margin:16px 4px 7px;
+  letter-spacing:.4px}
+
+button{font-family:inherit;font-size:.92rem;font-weight:700;border:0;border-radius:11px;
+  padding:13px 16px;cursor:pointer;width:100%;margin-top:9px}
+.b1{background:var(--blue);color:#fff}
+.b2{background:#e2e8f0;color:#0f172a}
+.b3{background:var(--ok);color:#fff}
+input[type=password],input[type=text]{width:100%;padding:12px;border:2px solid var(--line);
+  border-radius:11px;font-size:1rem;font-family:inherit;margin-top:7px;background:#fff}
+.code{background:#0f172a;color:#a5f3fc;padding:11px;border-radius:10px;
+  font-family:ui-monospace,monospace;font-size:.74rem;direction:ltr;text-align:left;
+  word-break:break-all;margin-top:9px;line-height:1.65}
+.foot{position:fixed;bottom:0;left:0;right:0;background:#fff;border-top:1px solid var(--line);
+  padding:9px 12px;display:flex;gap:8px;box-shadow:0 -2px 10px rgba(0,0,0,.07)}
+.foot button{margin:0}
+.hint{font-size:.74rem;color:var(--dim);margin-top:6px;line-height:1.7}
+.pill{display:inline-block;padding:2px 8px;border-radius:20px;font-size:.7rem;font-weight:700}
+.pill.ok{background:#d1fae5;color:var(--ok)}
+.pill.bad{background:#fee2e2;color:var(--bad)}
+.pill.warn{background:#fef3c7;color:var(--warn)}
+.banner{border-radius:14px;padding:14px 15px;margin-bottom:13px;border:2px solid;
+  font-size:.84rem;line-height:1.85}
+.banner.stop{background:#fef2f2;border-color:#ef4444;color:#7f1d1d}
+.banner.hold{background:#fffbeb;border-color:#f59e0b;color:#78350f}
+.banner b{font-weight:800}
+.banner .bh{font-size:1rem;font-weight:800;margin-bottom:5px;display:block}
+.banner code{background:rgba(0,0,0,.07);padding:1px 6px;border-radius:5px;
+  font-family:ui-monospace,monospace;font-size:.78rem;direction:ltr;
+  display:inline-block;word-break:break-all}
+</style>
+</head>
+<body>
+
+<header>
+  <h1>🏥 عيادة نحلة</h1>
+  <p>فحصٌ شاملٌ لجهاز الكابتن — لا يحتاج تسجيل دخول، ولا يغيّر شيئاً.</p>
+</header>
+
+<div class="wrap">
+  <div id="originBanner"></div>
+  <div id="verdict" class="big"><h2>⏳ جارٍ الفحص…</h2>
+    <div class="sub">ثوانٍ قليلة. أبقِ الصفحة مفتوحة.</div></div>
+
+  <div class="sec">🔑 الجلسة والمصادقة</div><div id="g_sess"></div>
+  <div class="sec">🕐 الساعة والزمن</div><div id="g_clock"></div>
+  <div class="sec">🌐 الاتصال والشبكة</div><div id="g_net"></div>
+  <div class="sec">💾 التخزين</div><div id="g_store"></div>
+  <div class="sec">📍 الموقع والإشعارات</div><div id="g_perm"></div>
+  <div class="sec">📱 الجهاز والنسخة</div><div id="g_env"></div>
+  <div class="sec">📮 الطابور المعلّق</div><div id="g_queue"></div>
+
+  <div class="sec">⌨️ فحص الكيبورد — اختياري</div>
+  <div class="card">
+    <div class="ct"><span class="ic">⌨️</span> اكتب كلمة مرورك هنا</div>
+    <div class="cw">
+      <b>لا تُرسَل ولا تُعرَض ولا تُحفَظ.</b> تُفحص <b>حروفها</b> فقط: هل فيها
+      محرفٌ خفيّ يزرعه بعض الكيبوردات المزخرفة؟ ذلك المحرف يمنع حفظ الجلسة
+      فيصير التطبيق فارغاً.
+      <br>⚠️ <b>اكتبها بيدك ولا تلصقها</b> — اللصق قد ينظّفها فيضيع الدليل.
+    </div>
+    <input type="password" id="kbIn" placeholder="اكتب هنا ثم اضغط فحص" autocomplete="off">
+    <button class="b2" onclick="kbTest()">🔍 افحص الحروف</button>
+    <div id="kbOut"></div>
+  </div>
+
+  <div class="sec">📋 النتيجة المختصرة</div>
+  <div class="card">
+    <div class="cw">انسخ هذا السطر وأرسله للإدارة:</div>
+    <div id="codeBox" class="code">…</div>
+    <button class="b3" onclick="copyCode()">📋 نسخ</button>
+    <div id="sentMsg" class="hint"></div>
+  </div>
+</div>
+
+<div class="foot">
+  <button class="b2" style="flex:1" onclick="location.reload()">↻ إعادة الفحص</button>
+  <button class="b1" style="flex:2" onclick="sendReport()">📤 إرسال للإدارة</button>
+</div>
+
+<script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-database-compat.js"></script>
+<script>
+/* ═══════════════════════════════════════════════════════════════════════════
+   الإعدادات — مطابقة لما في Driver.html
+   ═══════════════════════════════════════════════════════════════════════════ */
+var API_URL   = "https://script.google.com/macros/s/AKfycbyiFprfbDKMwOG75eZl-V5_M7XmqLkmK49YBQjhHKr_Gka77Gmdgt6uU6K5KeXilMViDw/exec";
+var API_TOKEN = "NAHLA_APP_4E9C71B8A6D3F250E1AC8B37D94F6021";
+var FB = { apiKey:"AIzaSyAsmQKlCCZpCgfJG8AZM7fWmYPWVZkpjSQ",
+           authDomain:"nahla-delivery-6b06f.firebaseapp.com",
+           databaseURL:"https://nahla-delivery-6b06f-default-rtdb.europe-west1.firebasedatabase.app",
+           projectId:"nahla-delivery-6b06f" };
+
+var REAL_UID = "";     /* هوية فايربيس الحقيقية — لا الحكم عليها */
+var R = [];            /* كل نتائج الفحص */
+var CODE = {};         /* الشيفرة المختصرة */
+
+/* ════════════════════════════════════════════════════════════════════════════
+   ①أ حارس الأصل — أوّل ما تفعله العيادة قبل أن تنطق بحرف
+   ────────────────────────────────────────────────────────────────────────────
+   🔴 هذا العيب وقع فعلاً — وهو **ثالث** مرّة أقع فيها في النمط نفسه:
+      أوّل تقريرين وردا من `content://com.whatsapp.provider…` — أي أن
+      الكابتن فتح الملفّ من واتساب لا من رابط التطبيق. وتخزين المتصفّح
+      مقيَّدٌ بالأصل (origin)، فلم تر العيادة شيئاً من تخزين نحلة،
+      فأصدرت: ses=0 · pw=- · stk=0 · **fbu=MISMATCH**.
+      وكلّها كاذبة. و«لا أرى» ليست «لا يوجد».
+
+      وهو عينُ الخطأ الذي كلّفنا أياماً في |healfail (وسمٌ يُكتب دائماً)
+      وفي fbu=NONE (قراءةٌ من localStorage وحده والـSDK يحفظ في IndexedDB).
+      فالقاعدة تُكتب هنا مرّةً واحدة: **ما لا يُقرأ يُعلَن «غير مقروء»،
+      ولا يدخل الحكم، ولا يُصدَّر في الشيفرة رقماً يُقرأ كنتيجة.**
+
+   ودرجتا عمى:
+     · OFF_ORIGIN — يقينيّ: البروتوكول ليس http(s) (content: · file: · blob:).
+       لا يمكن لهذه الصفحة أن ترى تخزين التطبيق بحالٍ من الأحوال.
+     · NO_APP_DATA — ترجيحيّ: صفحةُ ويب لكن لا أثر لأيّ مفتاحٍ من مفاتيح
+       نحلة الستّة. إمّا أنها ليست صفحة التطبيق، وإمّا أن التخزين مُسِح
+       بالكامل. ولا تُميَّز الحالتان من هنا — وفي كلتيهما تظهر شاشةُ
+       الدخول، فالنصيحة واحدة. أمّا الحالة القاتلة (جلسةٌ بلا مفتاح)
+       فليست خواءً، ولذلك تبقى مكشوفةً كما هي.
+   ════════════════════════════════════════════════════════════════════════════ */
+/* 🔴 تصحيحٌ فرضه الميدان قبل النشر بدقائق:
+   ورد تقريرٌ من الأصل الصحيح فيه sto=FAIL بـSecurityError. وحينها تُرجع
+   LS() فارغاً في كل مفتاح — فيظنّ الحارسُ الذي كتبتُه للتوّ أنه «لا أثر
+   لنحلة» ويُعلن نفسه أعمى… فيكتم **أهمّ نتيجةٍ أنتجها ذلك الجهاز**:
+   أن تخزينه محجوب. ⇒ لا يُقاس الخواء قبل التأكّد من أن القراءة ممكنة:
+     تخزينٌ يعمل + لا مفاتيح  = خواء (احتمال العمى)
+     تخزينٌ محجوب             = **سببٌ مؤكَّد** لا عمى، ولا يُخفَّف. */
+function probeStore_(){
+  var k = "__clinic_probe__";
+  try{
+    localStorage.setItem(k, "x");
+    var ok = (localStorage.getItem(k) === "x");
+    localStorage.removeItem(k);
+    return { ok: ok, err: ok ? "" : "قراءةٌ لا تطابق الكتابة" };
+  }catch(e){
+    return { ok:false, err: String((e && (e.name || e.message)) || "غير معروف").slice(0,40) };
+  }
+}
+var __PS = probeStore_();
+var STORE_OK  = __PS.ok;
+var STORE_ERR = __PS.err;
+
+/* [N-14] مفاتيح الدخول لتطبيق كباتن نحلة. الأساسيّ = nahla_session · nahla_pass_p · nahla_stoken (يكتبها Driver.html
+   الجديد، ويمسح nahla_session عند الخروج)، والقديم suf_* (صفحة Driver.html المنشورة اليوم) نسخةٌ تبقى ولا تُحذف.
+   فتُقرأ nahla_* أولاً، ولا يُرجَع إلى suf_* إلا قبل الترحيل (علَم nahla_keys_migrated غائب)؛ بعده يعني غيابُ nahla_*
+   «خرج الكابتن» لا «استعمل القديم» — وإلا ظهرت جلسةٌ بعد الخروج. */
+var APP_KEYS = ["nahla_session","nahla_pass_p","nahla_stoken",
+                "suf_session","suf_pass_p","suf_stoken",
+                "hut_app_version","hut_offline_queue","hut_dead_queue"];
+function APPLS(name){
+  var v = LS("nahla_" + name);
+  if (v !== null && v !== undefined) return v;
+  if (LS("nahla_keys_migrated") !== null) return null;   /* رُحِّلت المفاتيح: الغياب حقيقيّ */
+  return LS("suf_" + name);
+}
+var PROTO = "", HOSTL = "";
+try{ PROTO = String(location.protocol || ""); HOSTL = String(location.host || ""); }catch(e){}
+var IS_WEB      = (PROTO === "https:" || PROTO === "http:");
+/* جسر الأندرويد = العلامة الوحيدة على أننا داخل WebView التطبيق. */
+var IN_APP      = (function(){ try{ return typeof AndroidRadar !== "undefined"; }catch(e){ return false; } })();
+var OFF_ORIGIN  = !IS_WEB;
+var NO_APP_DATA = false;
+if (IS_WEB && STORE_OK){
+  NO_APP_DATA = true;
+  for (var _i=0;_i<APP_KEYS.length;_i++){ if (LS(APP_KEYS[_i]) !== null){ NO_APP_DATA = false; break; } }
+}
+/* عمياءُ عن التخزين — بأيٍّ من السببين. */
+var STORAGE_BLIND = OFF_ORIGIN || NO_APP_DATA;
+CODE.org = OFF_ORIGIN ? (PROTO || "?") : (HOSTL || "?");
+
+var BLIND_WHY = "";
+function renderOriginBanner(){
+  var el = document.getElementById("originBanner");
+  if (!el) return;
+  if (!OFF_ORIGIN && !STORE_OK){
+    el.className = "banner stop";
+    el.innerHTML = '<span class="bh">\ud83d\udd34 تخزين هذا المتصفّح محجوب</span>' +
+      'الصفحة على الأصل الصحيح، لكن الكتابة في التخزين تُرفض (<code>' + esc(STORE_ERR) +
+      '</code>). <b>وهذا وحده يكفي لمنع وصول أيّ طلب:</b> لا تُحفظ الجلسة ولا مفتاحُها، ' +
+      'فلا مصادقة \u21d2 لا رادار \u21d2 لا بطاقة \u2014 ولا السيادية.' +
+      '<br><b>الحلّ:</b> اسمح ببيانات المواقع لهذا الموقع من إعدادات المتصفّح، واخرج من ' +
+      'التصفّح الخفيّ إن كنت فيه. والتفصيل في بطاقة «التخزين» أدناه.';
+    return;
+  }
+  if (!STORAGE_BLIND) return;
+  if (OFF_ORIGIN){
+    BLIND_WHY = "فُتحت هذه الصفحة من <code>" + esc(PROTO) + "</code> — أي من ملفٍّ محفوظ " +
+      "(واتساب أو التنزيلات)، لا من موقع التطبيق. وتخزين المتصفّح مقيَّدٌ بالأصل، " +
+      "فلا ترى هذه النسخة شيئاً ممّا حفظه نحلة.";
+    el.className = "banner stop";
+    el.innerHTML = '<span class="bh">⛔ فحصٌ ناقص — الصفحة ليست على أصل التطبيق</span>' +
+      BLIND_WHY +
+      '<br><br><b>ولذلك لا تُصدِر العيادة حكماً على الجلسة</b> ولا على المفتاح ولا التوكن ' +
+      'ولا نسخة التطبيق ولا الطابور — وتضع مكانها <b>«غير مقروء»</b>، لا صفراً.' +
+      '<br><br><b>الصواب:</b> افتح العيادة من <b>رابط التطبيق نفسه</b> ' +
+      '(العنوان الذي فيه <code>Driver.html</code>، وبجواره <code>clinic.html</code>) — ' +
+      'ومن <b>داخل تطبيق نحلة</b> إن أمكن. عندها وحدها يصحّ فحص الجلسة.';
+  } else if (!IN_APP) {
+    /* ═══════════════════════════════════════════════════════════════════
+       🔴 الاحتمال الثالث — وهو الواقع في أغلب الحالات، وقد أغفلتُه.
+       ───────────────────────────────────────────────────────────────────
+       ورد فحصٌ من الأصل الصحيح (shrkttwsylrqmathnan-netizen.github.io) وقال «لا أثر
+       لنحلة»، وشرحتُ احتمالين: صفحةٌ خاطئة، أو تخزينٌ مُسِح. وكلاهما خطأ.
+
+       تطبيقُ نحلة يعمل في **WebView خاصّ به** داخل الـAPK. وكروم متصفّحٌ
+       آخر. وتخزين المتصفّح مقيَّدٌ بالأصل **وبالمتصفّح معاً** — فلكلٍّ
+       وعاؤه، ولو تطابق العنوان حرفاً بحرف.
+       ⇒ فتحُ العيادة في كروم لا يرى جلسة التطبيق أبداً. ليس عطباً، ولا
+         خواءً، ولا صفحةً خاطئة — بل **متصفّحان**.
+
+       والعلامة كانت أمامي: inapp=0 (لا جسر AndroidRadar). قِستُها وعرضتُها
+       في بطاقةٍ أسفل الصفحة، ولم أربطها باللافتة التي تُفسّر. قياسٌ صحيحٌ
+       في مكانٍ واحد لا يُغني عن استعماله حيث يُحتاج.
+       ═══════════════════════════════════════════════════════════════════ */
+    BLIND_WHY = "الصفحة على <code>" + esc(HOSTL) + "</code> — وهو الأصل الصحيح — " +
+      "لكنها فُتحت في <b>متصفّحٍ خارج التطبيق</b>.";
+    el.className = "banner hold";
+    el.innerHTML = '<span class="bh">⚠ هذه ليست ذاكرة التطبيق</span>' +
+      BLIND_WHY +
+      '<br><br>تطبيق نحلة يعمل في <b>WebView خاصّ به</b>، وله وعاءُ تخزينٍ ' +
+      'مستقلّ عن كروم — <b>ولو تطابق العنوان حرفاً بحرف</b>. فما تراه هنا ذاكرةُ ' +
+      'كروم الفارغة، لا ذاكرة التطبيق.' +
+      '<br><br><b>الحلّ:</b> افتح العيادة <b>من داخل تطبيق نحلة</b>. عندها وحدها ' +
+      'تصحّ فحوص الجلسة والمفتاح والتوكن.' +
+      '<br><br><b>وما قِيس هنا صحيحٌ رغم ذلك:</b> الساعة · سرعة المقبس · الشبكة · ' +
+      'الجهاز · عتاد الموقع — فهذه للجهاز لا للمتصفّح.';
+  } else {
+    BLIND_WHY = "الصفحة على <code>" + esc(HOSTL) + "</code> داخل التطبيق، ولا أثر فيها لمفاتيح نحلة.";
+    el.className = "banner hold";
+    el.innerHTML = '<span class="bh">⚠ لا أثر لنحلة في ذاكرة التطبيق</span>' +
+      BLIND_WHY + ' وأنت <b>داخل التطبيق</b>، فالاحتمال واحد:' +
+      '<br>تخزينه مُسِح بالكامل (حذف التطبيق · تفريغ البيانات · ضغط ذاكرة). ' +
+      'وفي هذه الحال <b>تظهر شاشة الدخول</b>، والعلاج تسجيل دخولٍ عادي.' +
+      '<br><br><b>ملاحظة:</b> العطب الذي نطارده ليس خواءً — بل <b>جلسةٌ موجودة ' +
+      'ومفتاحٌ مفقود</b>. ولو كان هذا الجهاز فيه لظهر هنا أحمرَ صريحاً.';
+  }
+}
+
+/* addOD — فحصٌ يعتمد على أصل الصفحة. حين تكون العيادة عمياء لا يُصدَّر
+   رقمٌ يُقرأ كنتيجة، بل NA صريحة. وهي الفرق بين «لا يوجد» و«لا أرى». */
+function addOD(group, status, icon, title, value, why, codeKey, codeVal){
+  if (STORAGE_BLIND){
+    add(group, "na", "❔", title + " — غير مقروء هنا", "—",
+      "<b>لم تُقرأ، ولم تُنفَ.</b> التفصيل في اللافتة أعلى الصفحة.",
+      codeKey, "NA");
+    return;
+  }
+  add(group, status, icon, title, value, why, codeKey, codeVal);
+}
+
+/* ── أدوات ────────────────────────────────────────────────────────────── */
+function esc(s){ return String(s==null?"":s)
+  .replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;"); }
+function LS(k){ try{ return localStorage.getItem(k); }catch(e){ return null; } }
+function SS(k){ try{ return sessionStorage.getItem(k); }catch(e){ return null; } }
+
+/* status: ok | warn | bad | na */
+/* ⚠️ الوزن يفصل **السبب** عن **السياق**. فبلا هذا الفصل يتصدّر «إذن
+   الإشعارات» قائمةَ الحكم فوق «مفتاح كلمة المرور مفقود» — وكلاهما أحمر،
+   وأحدهما وحده يفسّر «لا تصلني طلبات». وإنذارٌ يساوي بينهما يُدرَّب على
+   تجاهله، وهو الخطأ الذي وقعتُ فيه في جرد المونيتور قبل ساعات. */
+var PRIMARY = { "g_sess":1, "g_clock":1, "g_net":1, "g_store":1 };
+function add(group, status, icon, title, value, why, codeKey, codeVal, primOv){
+  /* primOv === false يُنزل البطاقة من قائمة الأسباب مع إبقاء لونها.
+     يُستعمل حين تصف بطاقتان **السبب نفسه**: يُحسب مرّةً لا مرّتين، وإلّا
+     بدا العطب الواحد عطبين وصار الحكم يُقرأ كحشو. */
+  R.push({ group:group, status:status, title:title, value:value, why:why,
+           prim: (primOv === false) ? false : !!PRIMARY[group] });
+  if (codeKey) CODE[codeKey] = codeVal;
+  var g = document.getElementById(group);
+  if (!g) return;
+  var d = document.createElement("div");
+  d.className = "card " + status;
+  d.innerHTML = '<div class="ct"><span class="ic">' + icon + '</span>' + esc(title) + '</div>' +
+    (value ? '<div class="cv">' + esc(value) + '</div>' : '') +
+    (why   ? '<div class="cw">' + why + '</div>' : '');
+  g.appendChild(d);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   ① الجلسة — أهمّ فحصٍ في الأداة كلّها
+   ───────────────────────────────────────────────────────────────────────────
+   الحالة القاتلة: توجد جلسة (nahla_session) ولا يوجد مفتاح كلمة المرور
+   (nahla_pass_p). عندها:
+     · checkSession ترى الجلسة ⇒ تعرض اللوحة
+     · ولا تنادي fbAuth لأن المفتاح غائب ⇒ لا مصادقة فايربيس
+     · فتُرفض كل قراءة ⇒ رادارٌ فارغ وإحصائياتٌ صفر
+     · وخمسةُ مساراتٍ للتعافي كلّها معلّقة على المفتاح نفسه ⇒ لا شفاء
+     · والجلسة تنجو من كل إغلاق ⇒ لا شاشة دخول ⇒ لا علاج إلا حذف التطبيق
+   ⇒ ولهذا يُفحص وجودُهما **معاً**، لا كلٌّ على حدة.
+   ═══════════════════════════════════════════════════════════════════════════ */
+function checkSession(){
+  /* عمياء ⇒ لا شيء من هذا الفحص صالح. تُعلَن أربعتها «غير مقروءة» وتُقفل
+     الدالّة. ولا تُقرأ جلسة فايربيس أصلاً — فمقارنة uid بهاتفٍ فارغ هي
+     بعينها ما أنتج fbu=MISMATCH الكاذبة. */
+  /* الأصل صحيحٌ والتخزين محجوب ⇒ لا يُقال «غير مقروء» بل يُقال السبب.
+     فالمفتاح لا يغيب صدفةً هنا: التطبيق **لا يستطيع** حفظه أصلاً. */
+  if (!OFF_ORIGIN && !STORE_OK){
+    CODE.ph = "BLOCKED"; CODE.pw = "BLOCKED";
+    CODE.stk = "BLOCKED"; CODE.fbu = "BLOCKED";
+    add("g_sess","bad","\ud83d\udd34","تخزين المتصفّح محجوب \u2014 ولذلك لا جلسة له",
+      STORE_ERR,
+      "<b>هذا هو السبب، لا عَرَضه.</b> يسجّل الدخول بنجاح، ثم يحاول التطبيق حفظ " +
+      "الجلسة والمفتاح فيُرفض الحفظ بصمت. وعند أوّل إعادة تشغيل لا يجد شيئاً: " +
+      "لا جلسة \u00b7 لا مفتاح \u00b7 لا إحصائيات \u00b7 لا مصادقة فايربيس " +
+      "\u21d2 <b>لا تصله طلبات إطلاقاً \u2014 ولا السيادية</b>.<br>" +
+      "<b>الحلّ:</b> اسمح ببيانات المواقع لهذا الموقع من إعدادات المتصفّح " +
+      "(كروم \u2190 الإعدادات \u2190 إعدادات المواقع \u2190 ملفّات تعريف الارتباط)، " +
+      "واخرج من التصفّح الخفيّ إن كنت فيه.",
+      "ses","BLOCKED");
+    renderCode(); return;
+  }
+
+  if (STORAGE_BLIND){
+    CODE.ph = "NA";
+    addOD("g_sess","na","\ud83d\udeaa","الجلسة المحفوظة","","","ses","0");
+    addOD("g_sess","na","\ud83d\udd11","مفتاح كلمة المرور","","","pw","-");
+    addOD("g_sess","na","\ud83c\udfab","توكن الجلسة (stoken)","","","stk","0");
+    addOD("g_sess","na","\u2705","جلسة فايربيس المحفوظة","","","fbu","");
+    renderCode(); return;
+  }
+  var sess = APPLS("session"), pass = APPLS("pass_p"), stok = APPLS("stoken");   /* [N-14] nahla_* أولاً */
+  var phone = "", name = "";
+  if (sess){ try{ var o = JSON.parse(sess); phone = o.phone || ""; name = o.name || ""; }catch(e){} }
+
+  if (!sess){
+    add("g_sess","na","🚪","لا توجد جلسة محفوظة","—",
+      "لم يسجّل الدخول على هذا المتصفّح/التطبيق بعد — أو خرج منه. وهذا وضعٌ سليم: شاشة الدخول ستظهر.",
+      "ses","0");
+  } else {
+    add("g_sess","ok","👤","جلسة محفوظة", phone + (name ? "  ·  " + name : ""),
+      "التطبيق يعرف من أنت على هذا الجهاز.", "ses","1");
+  }
+  CODE.ph = phone || "-";
+
+  if (sess && !pass){
+    add("g_sess","bad","🔴","مفتاح كلمة المرور مفقود","nahla_pass_p = غير موجود",
+      "<b>هذه هي حالة العطب بعينها.</b> توجد جلسة ولا يوجد مفتاح، فيعرض التطبيق " +
+      "لوحته ولا يستطيع مصادقة نفسه ⇒ رادارٌ فارغ وإحصائياتٌ صفر، ولا يظهر خطأ ولا " +
+      "شاشة دخول. ومسارات التعافي الخمسة كلّها تحتاج هذا المفتاح، فلا شفاء. " +
+      "<br><b>الحلّ الفوري:</b> تسجيل خروج ثم دخول (لا حاجة لحذف التطبيق).",
+      "pw","MISSING");
+  } else if (pass){
+    var okDec = false, rt = false, bad = -1;
+    try{ var dec = atob(pass); okDec = true;
+         try{ rt = (btoa(dec) === pass); }catch(e2){ rt = false; }
+         for (var i=0;i<dec.length;i++){ if (dec.charCodeAt(i) > 255){ bad = i; break; } }
+    }catch(e){ okDec = false; }
+    if (!okDec){
+      add("g_sess","bad","🔴","المفتاح موجود لكنه تالف","atob فشلت",
+        "القيمة المحفوظة ليست base64 صالحة ⇒ ستفشل كل محاولة مصادقة. " +
+        "<b>الحلّ:</b> تسجيل خروج ثم دخول.", "pw","CORRUPT");
+    } else {
+      add("g_sess","ok","🔑","مفتاح كلمة المرور سليم","محفوظ · " + pass.length + " حرفاً · فكُّه ناجح",
+        "المصادقة تستطيع أن تُجدَّد تلقائياً بعد كل إعادة تشغيل." +
+        (rt ? "" : " <b>⚠️ لكنّه لا يعود كما كان عند إعادة الترميز</b> — قد يحمل محرفاً غير لاتيني."),
+        "pw", rt ? "OK" : "ODD");
+    }
+  } else {
+    CODE.pw = "-";
+  }
+
+  add("g_sess", stok ? "ok" : "warn", stok ? "🎫" : "🎟️",
+    stok ? "توكن الجلسة (stoken) موجود" : "لا يوجد توكن جلسة",
+    stok ? "محفوظ" : "غير موجود",
+    stok ? "نداءات الشفت والقبول تحمل هويةً موقَّعة."
+         : "نداءاته تمرّ بالتوكن العامّ فقط. لا يمنع العمل اليوم، لكنه يُسجَّل رفضاً في بوّابة الجلسة.",
+    "stk", stok ? "1" : "0");
+
+  /* ═══════════════════════════════════════════════════════════════════════
+     جلسة فايربيس المحفوظة — وأين تسكن؟
+     ───────────────────────────────────────────────────────────────────────
+     🔴 كتبتُ أوّلاً قراءةً من localStorage وحده. وذلك خطأ: منذ الإصدار ٩
+        يحفظ الـSDK الجلسة في **IndexedDB** أوّلاً (قاعدة firebaseLocalStorageDb)
+        ولا يرتدّ إلى localStorage إلا حين يتعذّر ذلك. والتطبيق على 10.8.0.
+        ⇒ كنتُ سأقول «لا جلسة فايربيس» لكل جهازٍ سليم — إنذارٌ كاذب يشبه
+          تماماً وسم |healfail الذي أضاع على هذا المشروع أياماً.
+     فتُقرأ الاثنتان، وما لم يُقرأ يُعلَن «غير معلوم» لا «مفقود».
+     ═══════════════════════════════════════════════════════════════════════ */
+  var fkey = "firebase:authUser:" + FB.apiKey + ":[DEFAULT]";
+  function uidFrom(raw){
+    if (!raw) return "";
+    try{ var o = (typeof raw === "string") ? JSON.parse(raw) : raw;
+         if (o && o.value) o = o.value;                 /* شكل IndexedDB */
+         return (o && o.uid) || ""; }catch(e){ return ""; }
+  }
+  /* الـuid الحقيقي يُحفظ على حدة ولا يدخل الشيفرة المختصرة: الشيفرة
+     تُلصق في واتساب، والـuid رقمُ هاتفٍ في الغالب. ويُرسَل في خانة uid
+     وحدها — وهي تُقارَن بالهاتف عند الإدارة. */
+  function reportFb(uid, src){
+    REAL_UID = uid || "";
+    if (!uid){
+      add("g_sess","na","❔","جلسة فايربيس — غير معلومة","—",
+        "تعذّرت قراءتها من التخزين. لا يعني ذلك غيابها؛ بعض الأجهزة تمنع " +
+        "الاطّلاع عليها من صفحةٍ أخرى. اعتمد على بقيّة الفحوص.", "fbu","UNKNOWN");
+      renderCode(); return;
+    }
+    /* 🔴 حارسٌ ثانٍ: uid موجودٌ وهاتفٌ فارغ ⇒ المقارنة بلا معنى، ومع ذلك
+       كانت تُخرج «مختلف». وهي عين fbu=MISMATCH التي وردت في تقرير الميدان.
+       فلا يُقارَن ما لا مرجع له. */
+    if (!phone){
+      add("g_sess","na","\u2754","جلسة فايربيس موجودة \u2014 ولا هاتف لمقارنتها",
+        "uid = " + uid,
+        "الجلسة محفوظة على هذا المتصفّح، لكن لا توجد جلسة نحلة (nahla_session)" +
+        "لتُقارن بها. <b>ليست نتيجةً ولا عطباً</b> — بيانٌ ناقص فحسب.",
+        "fbu","NA-NOPHONE");
+      renderCode(); return;
+    }
+    var match = (String(uid).replace(/\D/g,"") === String(phone).replace(/\D/g,""));
+    add("g_sess", match ? "ok" : "bad", match ? "✅" : "🔴",
+      "جلسة فايربيس محفوظة", "uid = " + uid + (match ? "  ✓ تطابق الهاتف" : "  ✗ لا تطابق") +
+      "  ·  " + src,
+      match ? "الهوية سليمة على هذا الجهاز."
+            : "<b>الهوية لا تطابق الهاتف</b> — جلسةٌ محفوظة لحسابٍ آخر. القواعد سترفض كل قراءة.",
+      "fbu", match ? "MATCH" : "MISMATCH");
+    renderCode();
+  }
+
+  var uidLS = uidFrom(LS(fkey));
+  if (uidLS){ reportFb(uidLS, "localStorage"); return; }
+
+  if (!window.indexedDB){ reportFb("", ""); return; }
+  var req;
+  try{ req = indexedDB.open("firebaseLocalStorageDb"); }catch(e){ reportFb("",""); return; }
+  var settled = false;
+  var give = setTimeout(function(){ if(!settled){ settled=true; reportFb("",""); } }, 4000);
+  req.onerror = function(){ if(!settled){ settled=true; clearTimeout(give); reportFb("",""); } };
+  req.onsuccess = function(){
+    if (settled) return;
+    try{
+      var db = req.result;
+      if (db.objectStoreNames.contains("firebaseLocalStorage") === false){
+        settled=true; clearTimeout(give); reportFb("",""); return;
+      }
+      var g = db.transaction("firebaseLocalStorage","readonly")
+                .objectStore("firebaseLocalStorage").get(fkey);
+      g.onsuccess = function(){ if(settled) return; settled=true; clearTimeout(give);
+        reportFb(uidFrom(g.result), "IndexedDB"); };
+      g.onerror = function(){ if(settled) return; settled=true; clearTimeout(give); reportFb("",""); };
+    }catch(e){ if(!settled){ settled=true; clearTimeout(give); reportFb("",""); } }
+  };
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   ② الساعة — تُقاس بفارق الخادم، وتُترجَم إلى «كم ثانية سيرى البطاقة»
+   ═══════════════════════════════════════════════════════════════════════════ */
+/* «١٨٠ ثانية» رقمٌ يُقرأ ولا يُحسّ. و«٣ دقائق» يفهمها الكابتن فوراً. */
+function fmtDur(sec){
+  if (sec < 60) return sec + " ثانية";
+  var m = Math.floor(sec/60), r = sec % 60;
+  return m + " دقيقة" + (r ? " و" + r + " ثانية" : "");
+}
+function clockVerdict(offMs){
+  var s = Math.round(offMs/1000);
+  var age = -offMs;                    /* عمرٌ يراه التطبيق لطلبٍ عمره صفر */
+  var win16 = Math.max(10000, 60000 - Math.max(0, age));
+  var win19 = (60000 - Math.max(0, age)) < 15000 ? 0 : (60000 - Math.max(0, age));
+  var abs = Math.abs(s);
+  var st = abs <= 5 ? "ok" : abs <= 20 ? "warn" : "bad";
+  add("g_clock", st, abs<=5?"🕐":"⏰",
+    "فارق ساعة الجهاز عن الخادم",
+    (abs<=1 ? "مضبوطة \u2014 لا فارق" : (s>0?"الجهاز متأخّر ":"الجهاز متقدّم ") + fmtDur(abs)),
+    (abs<=5 ? "ساعته مضبوطة. لا أثر على نافذة الرنين."
+     : "<b>ساعته منحرفة " + fmtDur(abs) + ".</b> والتطبيق يحسب عمر الطلب بالطرح بين " +
+       "ساعته وختم الخادم، فينقص عمرُ النافذة بقدر الانحراف.<br>" +
+       "نافذة الرنين عنده: <b>" + Math.round(win16/1000) + " ثانية</b> بدل ٥٥ " +
+       "(وعلى نسخة V31.19 كانت <b>" + (win19?Math.round(win19/1000)+" ث":"صفر — لا بطاقة إطلاقاً") + "</b>).<br>" +
+       "<b>الحلّ:</b> الإعدادات ← التاريخ والوقت ← فعّل الضبط التلقائي."),
+    "clk", (s>0?"+":"") + s + "s");
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   ③ الاتصال — .info/connected و.info/serverTimeOffset يُقرآن **بلا مصادقة**
+      فيعملان حتى في الحالة التي تموت فيها الجلسة. وهذا سبب اختيارهما.
+   ═══════════════════════════════════════════════════════════════════════════ */
+function checkFirebase(done){
+  if (typeof firebase === "undefined" || !firebase.database){
+    add("g_net","bad","🔴","تعذّر تحميل مكتبة فايربيس","لم تُحمَّل من gstatic",
+      "<b>وهذه نتيجةٌ بحدّ ذاتها:</b> الجهاز لا يصل إلى مكتبات جوجل — حجبٌ أو شبكة " +
+      "أو WebView قديم جداً. والتطبيق نفسه لن يعمل في هذه الحال.", "fb","LOADFAIL");
+    clockVerdict(0); CODE.clk="?"; done(); return;
+  }
+  var t0 = Date.now(), settled = false;
+  try{ firebase.initializeApp(FB); }catch(e){}
+  var db = firebase.database();
+
+  var tmo = setTimeout(function(){
+    if (settled) return; settled = true;
+    add("g_net","bad","🔴","لم يتّصل بقاعدة البيانات خلال ١٥ ثانية","مهلة",
+      "<b>هذا يوافق عطب write_timeout:</b> المقبس لا يُفتح، فتنتهي مهلةُ كل كتابة. " +
+      "الكابتن يضغط «متاح» فيرى «لم يتأكّد التفعيل».<br>" +
+      "جرّب: شبكةً أخرى · إطفاء موفّر البيانات · إطفاء VPN إن وُجد.", "con","TIMEOUT");
+    CODE.clk = "?"; clockVerdict(0); done();
+  }, 15000);
+
+  db.ref(".info/connected").on("value", function(sn){
+    if (settled || !sn.val()) return;
+    settled = true; clearTimeout(tmo);
+    var ms = Date.now() - t0;
+    var st = ms < 2000 ? "ok" : ms < 6000 ? "warn" : "bad";
+    add("g_net", st, ms<2000?"⚡":"🐢", "زمن فتح المقبس", ms + " مِلّي ثانية",
+      ms < 2000 ? "وصلٌ سريع. الكتابة ستصل قبل انتهاء مهلتها."
+      : "<b>بطيء.</b> ومهلة كتابة الحالة ١٨ ثانية — فإن تعثّر الوصل أكثر من ذلك ظهر " +
+        "«لم يتأكّد التفعيل» رغم أن الحساب سليم. وهذا أشيع أسباب الشكوى.",
+      "con", ms + "ms");
+
+    db.ref(".info/serverTimeOffset").once("value").then(function(s2){
+      var off = Number(s2.val()) || 0;
+      clockVerdict(off); done();
+    }).catch(function(){ CODE.clk="?"; clockVerdict(0); done(); });
+  }, function(){
+    if (settled) return; settled = true; clearTimeout(tmo);
+    add("g_net","bad","🔴","رُفضت قراءة حالة الاتصال","خطأ",
+      "غير متوقّع — .info مقروءٌ بلا مصادقة عادةً.", "con","DENIED");
+    CODE.clk="?"; clockVerdict(0); done();
+  });
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   ④ التخزين — تخزينٌ ممتلئ أو محجوب يُنتج **عين** أعراض الجلسة الميتة:
+      setItem ترمي، وsetPass تبتلع الاستثناء، فلا مفتاح ⇒ لوحةٌ فارغة.
+   ═══════════════════════════════════════════════════════════════════════════ */
+function checkStorage(){
+  var okW = STORE_OK, err = STORE_ERR;
+  var isSec = /Security/i.test(err), isQuo = /Quota|Exceed/i.test(err);
+
+  /* حتى اختبارُ الكتابة نفسه مقيَّدٌ بالأصل: نجاحُه هنا لا يعني نجاحه في
+     صفحة التطبيق، وفشلُه هنا قد يكون قيداً على content:// لا عطباً. */
+  if (!okW && !OFF_ORIGIN){
+    /* على الأصل الصحيح هذا **حكم** لا «غير مقروء» \u2014 ولذلك add لا addOD. */
+    add("g_store","bad","\ud83d\udd34","التخزين المحلّي لا يعمل", "فشل: " + (err || "غير معروف"),
+      "<b>سببٌ مباشر للعطب:</b> لا يستطيع التطبيق حفظ جلستك ولا مفتاحها، فيفرغ عند كل " +
+      "إعادة تشغيل.<br>" +
+      (isSec ? "<b>و<code>SecurityError</code> تعني حجباً بإعدادٍ لا ضيقَ مساحة:</b> " +
+               "منعُ بيانات المواقع أو ملفّات الارتباط، أو تصفّحٌ خفيّ \u2014 " +
+               "<b>ولذلك لا تنفع فيه زيادةُ المساحة</b>. اسمح ببيانات المواقع لهذا الموقع."
+       : isQuo ? "<b>والخطأ يقول امتلاءً:</b> فرّغ مساحةً في الهاتف."
+       : "الأسباب المحتملة: منع تخزين المواقع \u00b7 تصفّحٌ خفيّ \u00b7 امتلاء الذاكرة."),
+      "sto","FAIL", false);   /* الوصف التقني لسببٍ ذُكر في بطاقة الجلسة */
+  } else {
+    /* حتى اختبارُ الكتابة مقيَّدٌ بالأصل: فشلُه على content:// قيدٌ لا عطب. */
+    addOD("g_store", okW ? "ok" : "bad", okW ? "\ud83d\udcbe" : "\ud83d\udd34",
+      okW ? "التخزين المحلّي يعمل" : "التخزين المحلّي لا يعمل",
+      okW ? "كتابة وقراءة ناجحة" : ("فشل: " + (err || "غير معروف")),
+      okW ? "التطبيق يستطيع حفظ جلستك ومفتاحك." : "",
+      "sto", okW ? "ok" : "FAIL");
+  }
+
+  var used = 0, n = 0;
+  try{ for (var i=0;i<localStorage.length;i++){
+        var key = localStorage.key(i); n++;
+        used += (key.length + (localStorage.getItem(key)||"").length) * 2; } }catch(e){}
+  addOD("g_store","ok","📦","ما يشغله نحلة من التخزين",
+    (n===0 ? "لا مفاتيح" : n===1 ? "مفتاح واحد" : n===2 ? "مفتاحان"
+      : n<11 ? (n + " مفاتيح") : (n + " مفتاحاً")) +
+    "  \u00b7  " + (used < 1024 ? (used + " بايت") : (Math.round(used/1024) + " ك.بايت")),
+    "", "lsn", String(n));
+
+  if (navigator.storage && navigator.storage.estimate){
+    navigator.storage.estimate().then(function(est){
+      var freeMB = Math.round(((est.quota||0) - (est.usage||0)) / 1048576);
+      var st = freeMB > 200 ? "ok" : freeMB > 50 ? "warn" : "bad";
+      add("g_store", st, freeMB>200?"✅":"⚠️","المساحة المتاحة للتطبيق",
+        freeMB + " ميغابايت",
+        freeMB > 200 ? "كافية." :
+        "<b>ضيّقة.</b> عند امتلاء الذاكرة يبدأ النظام بمسح تخزين التطبيقات، فتضيع جلستك " +
+        "بلا إنذار ويفرغ التطبيق. <b>الحلّ:</b> فرّغ مساحةً في الهاتف.",
+        "free", freeMB + "MB");
+    }).catch(function(){});
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   ⑤ الأذونات — الموقع سببٌ مؤكَّد لإخفاق التفعيل (no_gps في سجلّ البلاغات)
+   ═══════════════════════════════════════════════════════════════════════════ */
+function checkPerms(){
+  var np = ("Notification" in window) ? Notification.permission : "غير مدعوم";
+  /* إذن الإشعارات يُمنح **لكل أصلٍ على حدة**. فقولُ «granted» في صفحةٍ
+     غريبة لا يعني أن التطبيق يُشعِر، وقولُ «denied» فيها لا يُدين التطبيق.
+     وقد ورد granted في تقرير الميدان من content:// فأوهم بسلامةٍ لا دليل عليها. */
+  addOD("g_perm", np==="granted"?"ok":np==="denied"?"bad":"warn",
+    np==="granted"?"🔔":"🔕", "إذن الإشعارات", np,
+    np==="granted" ? "تصله تنبيهات الطلبات."
+    : np==="denied" ? "<b>محجوب.</b> لن يسمع تنبيه أي طلب — يجب تفعيله من إعدادات التطبيق."
+    : "لم يُطلب بعد. اطلبه من داخل التطبيق.", "notif", np);
+
+  var br = (typeof AndroidRadar !== "undefined");
+  add("g_perm", br?"ok":"na", br?"📲":"🌐",
+    br ? "يعمل داخل تطبيق نحلة" : "يعمل في متصفّح (لا داخل التطبيق)",
+    br ? "جسر أندرويد متاح" : "لا جسر",
+    br ? "خدمة الموقع والإشعارات الأصلية متاحة."
+       : "<b>لتشخيصٍ دقيق افتح هذه الصفحة من داخل التطبيق</b> — بعض الفحوص تختلف في المتصفّح.",
+    "inapp", br?"1":"0");
+
+  if (!navigator.geolocation){
+    add("g_perm","bad","🔴","لا خدمة موقع في هذا الجهاز","—","", "gps","NONE"); return;
+  }
+  var t0 = Date.now(), done = false;
+  var gt = setTimeout(function(){
+    if (done) return; done = true;
+    add("g_perm","bad","🔴","لم يصل الموقع خلال ١٢ ثانية","مهلة",
+      "<b>هذا سببٌ مؤكَّد لـ«لم يتأكّد التفعيل»</b> — ظهر في سجلّ البلاغات باسم no_gps. " +
+      "التطبيق لا يفعّل الرادار بلا موقع.<br>" +
+      "الحلّ: فعّل GPS · دقّة عالية · واخرج للعراء لحظةً.", "gps","TIMEOUT");
+  }, 12000);
+  navigator.geolocation.getCurrentPosition(function(p){
+    if (done) return; done = true; clearTimeout(gt);
+    var ms = Date.now()-t0, acc = Math.round(p.coords.accuracy);
+    var st = (acc<=100 && ms<6000) ? "ok" : "warn";
+    add("g_perm", st, "📍","الموقع", "دقّة ~" + acc + " م · خلال " + ms + " مِلّي ثانية",
+      st==="ok" ? "سليم." :
+      "بطيء أو ضعيف الدقّة. التطبيق ينتظر الموقع قبل التفعيل، فقد تنتهي مهلته.",
+      "gps", acc + "m/" + ms + "ms");
+  }, function(e){
+    if (done) return; done = true; clearTimeout(gt);
+    var msg = e.code===1 ? "الإذن مرفوض" : e.code===2 ? "الموقع غير متاح" : "انتهت المهلة";
+    /* الرفض (code 1) إذنُ صفحةٍ لا إذنُ تطبيق. أمّا 2 و3 فعتادٌ وإشارة،
+       وهما صحيحان في أيّ أصلٍ كان — فيبقيان حُكماً. */
+    if (STORAGE_BLIND && e.code===1){
+      add("g_perm","na","\u2754","إذن الموقع مرفوض \u2014 لهذه الصفحة وحدها","\u2014",
+        "الإذن يُمنح لكل صفحةٍ على حدة، وهذه ليست صفحة التطبيق. " +
+        "<b>لا يُستدلّ منه على إذن الموقع في نحلة.</b>", "gps","NA");
+      return;
+    }
+    add("g_perm","bad","🔴","فشل الموقع", msg,
+      e.code===1 ? "<b>الإذن مرفوض</b> — لن يعمل الرادار إطلاقاً. فعّله من إعدادات التطبيق ← الأذونات ← الموقع."
+                 : "GPS مطفأ أو الإشارة ضعيفة.", "gps","ERR" + e.code);
+  }, { enableHighAccuracy:true, timeout:11000, maximumAge:0 });
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   ⑥ البيئة — WebView قديمٌ يفسّر أعطاباً لا تظهر في أي فحصٍ آخر
+   ═══════════════════════════════════════════════════════════════════════════ */
+function checkEnv(){
+  var ua = navigator.userAgent || "";
+  var m = ua.match(/Android\s+([\d.]+)/);
+  var w = ua.match(/Chrome\/(\d+)/);
+  var mod = ua.match(/;\s*([^;)]+)\s+Build\//);
+  var wv = w ? parseInt(w[1],10) : 0;
+
+  add("g_env","ok","📱","الجهاز", (mod?mod[1].trim():"غير معروف") + (m ? "  ·  أندرويد " + m[1] : ""),
+    "", "dev", (mod?mod[1].trim().replace(/\s+/g,""):"?"));
+
+  add("g_env", wv===0?"warn": wv<80?"bad": wv<100?"warn":"ok",
+    wv<80?"🔴":"🌐", "محرّك العرض (WebView)", w ? ("Chrome " + w[1]) : "غير معروف",
+    wv===0 ? "تعذّر تحديده." :
+    wv<80  ? "<b>قديم جداً.</b> كثيرٌ من دوالّ التطبيق الحديثة قد تفشل عليه بصمت. " +
+             "حدّث «Android System WebView» و«Chrome» من المتجر."
+    : wv<100 ? "قديمٌ نسبياً — يُنصح بتحديثه من المتجر." : "حديث.",
+    "wv", String(wv));
+
+  var v = LS("hut_app_version");
+  addOD("g_env", v?"ok":"warn", "🏷️","نسخة تطبيق نحلة على هذا الجهاز", v || "غير مسجّلة",
+    v ? "" : "لم يفتح التطبيق على هذا المتصفّح بعد.", "ver", v || "-");
+
+  var c = navigator.connection || {};
+  if (c.effectiveType){
+    var slow = (c.effectiveType==="2g" || c.effectiveType==="slow-2g");
+    add("g_net", slow?"warn":"ok", slow?"🐌":"📶","نوع الشبكة الآن",
+      c.effectiveType + (c.rtt?("  ·  زمن ذهاب وإياب " + c.rtt + " مِلّي ثانية"):""),
+      slow ? "شبكةٌ بطيئة — تُطيل كل كتابة وقد تُنهي مهلتها." : "",
+      "net", c.effectiveType);
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   ⑦ الطابور — رفضٌ عالقٌ يعني طلباً حبيساً باسمه عند الخادم
+   ═══════════════════════════════════════════════════════════════════════════ */
+function checkQueue(){
+  var q = [], dq = [];
+  try{ q  = JSON.parse(LS("hut_offline_queue") || "[]") || []; }catch(e){}
+  try{ dq = JSON.parse(LS("hut_dead_queue")   || "[]") || []; }catch(e){}
+  var oldest = 0;
+  q.forEach(function(a){ if (a && a.ts){ var g = Date.now()-a.ts; if (g>oldest) oldest = g; } });
+  var mins = Math.round(oldest/60000);
+  var st = q.length===0 ? "ok" : mins>5 ? "bad" : "warn";
+  addOD("g_queue", st, q.length?"📮":"✅",
+    q.length ? ("طابورٌ معلّق: " + q.length + " إجراء") : "لا إجراءات معلّقة",
+    q.length ? ("أقدمها منذ " + mins + " دقيقة") : "نظيف",
+    q.length===0 ? "كل ما ضغطه وصل إلى الخادم."
+    : "<b>إجراءاتٌ لم تصل الخادم.</b> إن كان بينها رفضُ طلب، فالطلب ما زال محبوساً " +
+      "باسمه والمطعم ينتظر. سببه انقطاع شبكة أو مقبسٌ لا يُفتح.",
+    "q", String(q.length));
+  if (dq.length) add("g_queue","warn","🪦","إجراءات أُسقطت نهائياً", dq.length + " إجراء",
+    "فشلت مراراً فأُسقطت. تُفيد الإدارة في معرفة ما ضاع.", "dq", String(dq.length));
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   ⑧ فحص الكيبورد — يفحص الشكل لا المحتوى
+   ───────────────────────────────────────────────────────────────────────────
+   بعض الكيبوردات العربية المزخرفة تزرع علامات اتجاه (U+200F) أو روابط
+   صفرية داخل الحقول. وهي غير مرئية، وتمرّ في تسجيل الدخول (الخادم يجزّئ
+   بـUTF-8 ويقبل أي محرف) — **لكن btoa ترمي عليها**، فلا يُحفظ المفتاح،
+   فتموت الجلسة عند أوّل إعادة تشغيل.
+   ولذلك يُفحص ما يكتبه بيده: نبحث عن محارف فوق U+00FF ونذكر **موضعها
+   ورمزها** ولا نذكر النصّ.
+   ═══════════════════════════════════════════════════════════════════════════ */
+function kbTest(){
+  var el = document.getElementById("kbIn"), out = document.getElementById("kbOut");
+  var v = el.value || "";
+  if (!v){ out.innerHTML = '<div class="hint">اكتب شيئاً أوّلاً.</div>'; return; }
+  var bad = [];
+  for (var i=0;i<v.length;i++){
+    var c = v.charCodeAt(i);
+    if (c > 255) bad.push({ i:i+1, u:"U+" + c.toString(16).toUpperCase().padStart(4,"0"),
+      inv:(c===0x200E||c===0x200F||c===0x200B||c===0x200C||c===0x200D||c===0xFEFF) });
+  }
+  var btoaOk = true; try{ btoa(v); }catch(e){ btoaOk = false; }
+  CODE.kb = bad.length ? ("BAD" + bad.length) : "ok";
+
+  if (!bad.length && btoaOk){
+    out.innerHTML = '<div class="card ok" style="margin-top:9px"><div class="ct">' +
+      '<span class="ic">✅</span>الحروف سليمة</div><div class="cw">' +
+      'لا محرف خفيّ، و<code>btoa</code> تنجح ⇒ ستُحفظ جلستك. الكيبورد ليس السبب.' +
+      '</div></div>';
+  } else {
+    var inv = bad.filter(function(b){ return b.inv; }).length;
+    out.innerHTML = '<div class="card bad" style="margin-top:9px"><div class="ct">' +
+      '<span class="ic">🔴</span>وُجد ' + bad.length + ' محرفاً غير لاتيني</div>' +
+      '<div class="cv">' + bad.slice(0,8).map(function(b){
+          return "الموضع " + b.i + ": " + b.u + (b.inv ? " (خفيّ!)" : ""); }).join("  ·  ") +
+      (bad.length>8 ? "  …" : "") + '</div><div class="cw">' +
+      (inv ? "<b>ومنها " + inv + " محرفٌ لا يُرى إطلاقاً</b> — يزرعه الكيبورد بلا علمك. " : "") +
+      "<b>وهذا يمنع حفظ جلستك:</b> الدخول ينجح، ثم يفرغ التطبيق عند أوّل إعادة تشغيل، " +
+      "ولا يُصلحه إلا حذف التطبيق.<br><b>الحلّ:</b> بدّل الكيبورد إلى Gboard أو كيبورد " +
+      "النظام، ثم سجّل خروجاً ودخولاً و<b>اكتب</b> كلمة المرور (لا تلصقها). " +
+      "وإن تكرّر فغيّر كلمة المرور إلى أرقام وحروف إنجليزية." +
+      '</div></div>';
+  }
+  el.value = "";
+  renderCode();
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   ⑨ الحكم — يرتّب الأسباب المحتملة بحسب ما وُجد فعلاً
+   ═══════════════════════════════════════════════════════════════════════════ */
+function verdict(){
+  var bads  = R.filter(function(r){ return r.status==="bad"; });
+  var warns = R.filter(function(r){ return r.status==="warn"; });
+  var pBad  = bads.filter(function(r){ return r.prim; });
+  var sBad  = bads.filter(function(r){ return !r.prim; });
+  var box = document.getElementById("verdict");
+  var cls = bads.length ? "bad" : warns.length ? "warn" : "ok";
+  var h = "";
+
+  var strip = function(t){ return t.replace(/<[^>]+>/g,""); };
+
+  /* حكمٌ لا يعرف أنه أعمى يقول «الجهاز سليم» عن جهازٍ لم يفحص نصفه.
+     فيُعلَن النقص أوّلاً، ويُذكر ما صحّ قياسه وما لم يُقَس — بالاسم. */
+  if (STORAGE_BLIND){
+    box.className = "big warn";
+    /* لا يُكرَّر نصّ اللافتة هنا — هي فوقه مباشرةً على الشاشة. التكرار
+       يُطيل الصفحة ويدفع النتائج الحقيقية إلى الأسفل. */
+    var hb = '<h2>\u26a0 فحصٌ ناقص \u2014 لم أرَ تخزين التطبيق</h2><div class="sub">' +
+             '<b>اقرأ اللافتة أعلاه.</b> ';
+    if (pBad.length){
+      hb += '<br><br><b>ومع ذلك ظهر عطبٌ حقيقيّ فيما يصحّ قياسه:</b><br>';
+      pBad.slice(0,3).forEach(function(r,i){ hb += "<b>" + (i+1) + ". " + strip(r.title) + "</b><br>"; });
+    }
+    hb += '<br><b>ما صحّ قياسه هنا:</b> الساعة \u00b7 سرعة المقبس \u00b7 الشبكة \u00b7 ' +
+          'الجهاز ومحرّك العرض \u00b7 عتاد الموقع. وهذه لا علاقة لها بالأصل.' +
+          '<br><b>وما لم يُقَس:</b> الجلسة \u00b7 مفتاح كلمة المرور \u00b7 التوكن \u00b7 ' +
+          'جلسة فايربيس \u00b7 نسخة التطبيق \u00b7 الطابور \u2014 <b>وهي أهمّ الفحوص</b>. ' +
+          'أعد الفحص من رابط التطبيق نفسه.</div>';
+    box.innerHTML = hb;
+    renderCode(); return;
+  }
+
+  if (!bads.length && !warns.length){
+    h = '<h2>✅ الجهاز سليم</h2><div class="sub">' +
+        'لم يظهر أي عطبٍ في هذا الجهاز. إن كان الكابتن ما زال يشكو، فالسبب خارجه: ' +
+        'راجع حسابه وشفته وصلاحياته من لوحة الإدارة.</div>';
+  } else if (pBad.length){
+    cls = "bad";
+    h = '<h2>🔴 السبب على الأرجح</h2><div class="sub">';
+    pBad.slice(0,4).forEach(function(r,i){ h += "<b>" + (i+1) + ". " + strip(r.title) + "</b><br>"; });
+    h += '<span style="color:var(--dim)">وهذه تفسّر «لا تصلني طلبات» مباشرةً — ابدأ بها.</span>';
+    if (sBad.length || warns.length)
+      h += '<br><br>ومعها ' + (sBad.length + warns.length) +
+           ' ملاحظة ثانوية (إشعارات · نسخة المتصفّح · موقع) تُقرأ بعدها.';
+    h += '</div>';
+  } else {
+    cls = "warn";
+    h = '<h2>⚠️ لا سبب مباشر — ملاحظاتٌ ثانوية</h2><div class="sub">' +
+        '<b>لم يظهر عطبٌ يفسّر انقطاع الطلبات:</b> الجلسة والساعة والاتصال والتخزين سليمة.<br>' +
+        'والموجود ثانويّ:<br>';
+    sBad.concat(warns).slice(0,5).forEach(function(r,i){ h += (i+1) + ". " + strip(r.title) + "<br>"; });
+    h += '<span style="color:var(--dim)">إن كان يشكو رغم ذلك، فالسبب خارج الجهاز — راجع حسابه وشفته.</span></div>';
+  }
+  box.className = "big " + cls;
+  box.innerHTML = h;
+  renderCode();
+}
+
+function renderCode(){
+  var parts = [];
+  ["org","ph","ses","pw","stk","fbu","clk","con","sto","free","gps","notif","q","ver","wv","dev","net","kb","inapp"]
+    .forEach(function(k){ if (CODE[k] !== undefined) parts.push(k + "=" + CODE[k]); });
+  document.getElementById("codeBox").textContent = parts.join(";");
+}
+function copyCode(){
+  var t = document.getElementById("codeBox").textContent;
+  try{
+    if (navigator.clipboard) navigator.clipboard.writeText(t);
+    else { var a = document.createElement("textarea"); a.value = t; document.body.appendChild(a);
+           a.select(); document.execCommand("copy"); a.remove(); }
+    document.getElementById("sentMsg").innerHTML = "✅ نُسخ — الصقه في واتساب وأرسله للإدارة.";
+  }catch(e){ document.getElementById("sentMsg").innerHTML = "حدّد النصّ وانسخه يدوياً."; }
+}
+
+/* الإرسال إلى سجلّ التشخيص — نفس مستقبِل DIAG الذي في Apps Script.
+   لا يحتاج مصادقة فايربيس، فيعمل حتى والجلسة ميتة — وهو بيت القصيد. */
+function sendReport(){
+  var msg = document.getElementById("sentMsg");
+  var code = document.getElementById("codeBox").textContent;
+  var bads = R.filter(function(r){ return r.status==="bad"; });
+  var why  = "selftest|" + (bads.length ? bads[0].title.replace(/<[^>]+>/g,"").slice(0,60) : "نظيف");
+  var url = API_URL + "?action=DIAG&token=" + encodeURIComponent(API_TOKEN) +
+            "&ev=selftest&phone=" + encodeURIComponent(CODE.ph || "") +
+            "&why=" + encodeURIComponent(why.slice(0,80)) +
+            "&raw=" + encodeURIComponent(code.slice(0,120)) +
+            /* لا يُرسَل حكمٌ في خانة هوية. فارغٌ حين لا تُعرف — والفراغ
+               يُقرأ عند الإدارة «بلا uid»، وهو الصدق. */
+            "&uid=" + encodeURIComponent(REAL_UID) +
+            "&ver=" + encodeURIComponent(CODE.ver || "-");
+  msg.innerHTML = "⏳ جارٍ الإرسال…";
+  var t = setTimeout(function(){ msg.innerHTML = "⚠️ لم يصل الإرسال — انسخ السطر وأرسله يدوياً."; }, 12000);
+  fetch(url).then(function(){ clearTimeout(t);
+      msg.innerHTML = "✅ وصل التقرير للإدارة. اذكر اسمك في الرسالة."; })
+    .catch(function(){ clearTimeout(t);
+      msg.innerHTML = "⚠️ تعذّر الإرسال (شبكة). <b>انسخ السطر أعلاه وأرسله يدوياً</b> — النتيجة نفسها."; });
+}
+
+/* ── التشغيل ─────────────────────────────────────────────────────────── */
+(function run(){
+  try{ renderOriginBanner(); }catch(e){}
+  try{ checkSession(); }catch(e){ add("g_sess","bad","🔴","تعذّر فحص الجلسة",String(e&&e.message),""); }
+  try{ checkStorage(); }catch(e){ add("g_store","bad","🔴","تعذّر فحص التخزين",String(e&&e.message),""); }
+  try{ checkEnv();     }catch(e){}
+  try{ checkQueue();   }catch(e){}
+  try{ checkPerms();   }catch(e){}
+  checkFirebase(function(){ setTimeout(verdict, 1500); });
+  setTimeout(function(){ if (!R.length) verdict(); }, 20000);
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,829 @@
+<!DOCTYPE html>
+<!--
+  🧾 لوحة التصفير والاشتراكات — الليدر · V1.1 "Ladder + Subs"
+  ═══════════════════════════════════════════════════════════════════════
+  قسمان، وبينهما فرقٌ جوهري لا شكلي:
+
+    💰 الديون       ← ledgers/restaurants/{هاتف}/debt  · رقمٌ **حقيقي** في
+                      الدفتر. الطلب يُرفع، والمدير يُصفّره بـRESET_DEBT.
+
+    📅 الاشتراكات   ← restaurants_config/{هاتف}/comm فيه «شهري».
+                      **ليست ديناً في النظام إطلاقاً** — parseCommissionRule
+                      تُرجع res=0 للشهري، فالأرشيف لا يزيد الدفتر بدينار،
+                      وmonthlyArchiver يحسب المبلغ ويطبعه في البريد ولا
+                      يكتبه في ledgers (صفر إشارة إليها في 16,419 حرفاً).
+                      ⇒ فهذا القسم **سجلّ استلام** لا طلب تصفير: لا شيء
+                        يُصفَّر، والزرّ يوثّق ما قبضه الليدر لا أكثر.
+
+  ⚠️ ولأن الاشتراك يتكرّر كل شهر، سجلّه مفهرسٌ بالشهر لا بالهاتف:
+     sub_collections/{YYYY-MM}/{هاتف}. ولو كُتب تحت الهاتف وحده لاختفى
+     المطعم بعد أول تسجيل إلى الأبد.
+
+  🔒 ولا تُصفّر هذه اللوحة شيئاً: كلمة مرور الإدارة (Settings!B2) غير موجودة
+     فيها، وهي شرط ADMIN_ACTIONS في Code.gs.
+
+  ⚠️ يتطلّب قبله: database.rules.json V4.0
+     (قراءة restaurants_config · clearing_requests · sub_collections)
+  ═══════════════════════════════════════════════════════════════════════
+-->
+<html lang="ar" dir="rtl">
+<head>
+<!-- 🔒 CSP — منقولة عن Nahlelidersas.html وأُسقط منها ما لا تحمّله هذه الصفحة
+     (Leaflet · الخرائط · الوسائط). لا تُضِف أصلاً هنا إلا لمورد يحمّله هذا
+     الملف بعينه، لا نسخاً عن واجهة أخرى. -->
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://*.firebasedatabase.app https://*.firebaseio.com https://www.gstatic.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data:; connect-src 'self' https://*.firebasedatabase.app https://*.firebaseio.com wss://*.firebasedatabase.app wss://*.firebaseio.com https://script.google.com https://script.googleusercontent.com https://*.googleapis.com https://securetoken.googleapis.com; object-src 'none'; base-uri 'none'; form-action 'self'; frame-ancestors 'none'">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#1a1a1a">
+<title>التصفير والاشتراكات · نحلة</title>
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-database-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+/* الرموز مطابقة لـNahlelidersas.html — هذه ليست لوحة جديدة الهوية بل قسمٌ من
+   النظام نفسه، فأي انحراف لوني يجعلها تبدو صفحة غريبة. */
+:root{
+  --black:#111111;--ink:#1a1a1a;--ink2:#3d3d3d;--ink3:#767676;--ink4:#a3a3a3;
+  --bg:#f7f7f7;--surface:#ffffff;--surface2:#fbfbfb;--surface3:#f4f4f4;
+  --line:#eaeaea;--line2:#f2f2f2;
+  --green:#0aa05a;--green-d:#068048;--green-l:#eef8f2;
+  --red:#d92d20;--red-d:#b42318;--red-l:#fdf0ef;
+  --amber:#e08600;--amber-d:#b96c00;--amber-l:#fdf5e9;
+  --blue:#2563eb;--blue-d:#1d4ed8;--blue-l:#eef3fd;
+  --violet:#6d4bc4;--violet-l:#f2eefb;
+  --r:8px;--r2:12px;--r3:16px;--rf:999px;
+  --sh:0 1px 3px rgba(0,0,0,.06);
+  --sh-md:0 4px 14px rgba(0,0,0,.08);
+  --ease:cubic-bezier(.2,.7,.3,1);
+}
+*,::before,::after{box-sizing:border-box;margin:0;padding:0;}
+html,body{height:100%;background:var(--bg);font-family:'Cairo',sans-serif;color:var(--ink);
+  -webkit-tap-highlight-color:transparent;-webkit-font-smoothing:antialiased;}
+button,input,select,textarea{font-family:'Cairo',sans-serif;}
+.dn{display:none!important;}
+
+/* ── التنبيهات ── */
+#toasts{position:fixed;top:max(14px,env(safe-area-inset-top));left:50%;transform:translateX(-50%);
+  z-index:9000;display:flex;flex-direction:column;gap:8px;width:min(92vw,420px);}
+.toast{background:var(--black);color:#fff;padding:12px 16px;border-radius:var(--r2);
+  font-size:.88rem;font-weight:600;box-shadow:var(--sh-md);animation:tin .3s var(--ease);}
+.toast.e{background:var(--red-d);} .toast.w{background:var(--amber-d);}
+@keyframes tin{from{opacity:0;transform:translateY(-14px);}to{opacity:1;transform:none;}}
+
+/* ── الدخول ── */
+#login{position:fixed;inset:0;background:var(--bg);display:flex;align-items:center;
+  justify-content:center;padding:24px;z-index:100;}
+.lcard{background:var(--surface);border:1px solid var(--line);border-radius:var(--r3);
+  padding:32px 26px;width:min(100%,380px);box-shadow:var(--sh-md);}
+.lcard h1{font-size:1.25rem;font-weight:900;margin-bottom:4px;}
+.lcard p{font-size:.82rem;color:var(--ink3);margin-bottom:22px;line-height:1.7;}
+.fld{margin-bottom:14px;}
+.fld label{display:block;font-size:.76rem;font-weight:700;color:var(--ink2);margin-bottom:6px;}
+.fld input{width:100%;padding:12px 14px;border:1px solid var(--line);border-radius:var(--r2);
+  font-size:.95rem;background:var(--surface2);transition:border-color .15s var(--ease);}
+.fld input:focus{outline:none;border-color:var(--blue);background:#fff;}
+.btn{width:100%;padding:13px;border:none;border-radius:var(--r2);background:var(--black);
+  color:#fff;font-size:.92rem;font-weight:800;cursor:pointer;transition:opacity .15s var(--ease);}
+.btn:hover{opacity:.88;} .btn:disabled{opacity:.45;cursor:not-allowed;}
+.btn:focus-visible,.rq:focus-visible,.mini:focus-visible,.seg b:focus-visible{
+  outline:2px solid var(--blue);outline-offset:2px;}
+
+/* ── الهيكل ── */
+#app{display:none;flex-direction:column;height:100%;}
+header{background:var(--surface);border-bottom:1px solid var(--line);
+  padding:calc(12px + env(safe-area-inset-top)) 16px 0;position:sticky;top:0;z-index:50;}
+.hrow{display:flex;align-items:center;gap:12px;padding-bottom:11px;}
+.hrow .who{flex:1;min-width:0;}
+.hrow .who b{display:block;font-size:.92rem;font-weight:800;}
+.hrow .who span{font-size:.72rem;color:var(--ink3);}
+.mini{background:var(--surface3);border:1px solid var(--line);border-radius:var(--rf);
+  padding:7px 13px;font-size:.75rem;font-weight:700;color:var(--ink2);cursor:pointer;flex-shrink:0;}
+.mini:hover{background:var(--line2);}
+
+/* ── مبدّل القسمين ── */
+.tabs{display:flex;gap:22px;}
+.tabs b{position:relative;padding:0 0 11px;font-size:.86rem;font-weight:800;color:var(--ink4);
+  cursor:pointer;background:none;border:none;font-family:inherit;}
+.tabs b.on{color:var(--ink);}
+.tabs b.on::after{content:"";position:absolute;bottom:-1px;right:0;left:0;height:2px;
+  background:var(--black);border-radius:2px;}
+.tabs b i{font-style:normal;display:inline-block;min-width:18px;padding:1px 5px;margin-right:5px;
+  border-radius:var(--rf);background:var(--surface3);color:var(--ink3);
+  font-size:.66rem;font-weight:800;font-variant-numeric:tabular-nums;}
+.tabs b.on i{background:var(--black);color:#fff;}
+
+main{flex:1;overflow-y:auto;padding:16px 14px calc(28px + env(safe-area-inset-bottom));}
+.wrap{max-width:760px;margin:0 auto;}
+
+/* ── لوح التقدّم ──
+   الترقيم في قسم الديون يحمل معنى: الرتبة **هي** ترتيب الدين، فالليدر يعمل
+   من أثقل الديون إلى أخفّها. وفي قسم الاشتراكات لا رتبة — المبالغ متقاربة
+   وترتيبها لا يقول شيئاً، فأُسقط الرقم واكتُفي بشارة الشهر. */
+.pcard{border-radius:var(--r3);padding:20px;margin-bottom:16px;color:#fff;}
+.pcard.debt{background:var(--black);}
+.pcard.sub{background:linear-gradient(135deg,#4c3a8f,#6d4bc4);}
+.pcard .top{display:flex;align-items:baseline;justify-content:space-between;gap:12px;margin-bottom:14px;}
+.pcard .bn{font-size:.74rem;font-weight:700;opacity:.65;letter-spacing:.4px;}
+.pcard .cnt{font-size:1.9rem;font-weight:900;line-height:1;}
+.pcard .cnt small{font-size:.9rem;font-weight:700;opacity:.55;}
+.bar{height:6px;background:rgba(255,255,255,.15);border-radius:var(--rf);overflow:hidden;}
+.bar i{display:block;height:100%;background:var(--green);border-radius:var(--rf);
+  width:0;transition:width .5s var(--ease);}
+.pcard .sub-t{margin-top:12px;font-size:.76rem;opacity:.62;line-height:1.7;}
+
+/* ── مبدّل الشهر ── */
+.seg{display:flex;gap:6px;background:rgba(255,255,255,.12);padding:3px;border-radius:var(--rf);}
+.seg b{padding:6px 13px;border-radius:var(--rf);font-size:.72rem;font-weight:800;
+  cursor:pointer;color:rgba(255,255,255,.7);border:none;background:none;font-family:inherit;}
+.seg b.on{background:#fff;color:#4c3a8f;}
+
+/* ── الدفعة المكتملة ── */
+.done{background:var(--green-l);border:1px solid #bfe6d1;border-radius:var(--r3);
+  padding:22px;text-align:center;margin-bottom:16px;}
+.done b{display:block;font-size:1.05rem;font-weight:900;color:var(--green-d);margin-bottom:6px;}
+.done p{font-size:.82rem;color:var(--ink2);margin-bottom:16px;line-height:1.7;}
+.done button{background:var(--green-d);color:#fff;border:none;border-radius:var(--r2);
+  padding:12px 26px;font-size:.88rem;font-weight:800;cursor:pointer;}
+.done.plain button{display:none;}
+
+/* ── الصفوف ── */
+.row{background:var(--surface);border:1px solid var(--line);border-radius:var(--r2);
+  padding:14px;margin-bottom:9px;display:flex;align-items:center;gap:13px;
+  transition:opacity .3s var(--ease),background .2s var(--ease);}
+.row.sent{background:var(--surface2);opacity:.6;}
+.rank{width:30px;height:30px;flex-shrink:0;border-radius:var(--r);background:var(--surface3);
+  color:var(--ink3);display:flex;align-items:center;justify-content:center;
+  font-size:.78rem;font-weight:800;font-variant-numeric:tabular-nums;}
+.rank.top{background:var(--red-l);color:var(--red-d);}
+.rank.sub{background:var(--violet-l);color:var(--violet);font-size:.9rem;}
+.info{flex:1;min-width:0;}
+.info b{display:block;font-size:.9rem;font-weight:800;white-space:nowrap;
+  overflow:hidden;text-overflow:ellipsis;}
+.info span{font-size:.72rem;color:var(--ink3);font-variant-numeric:tabular-nums;}
+.tag{display:inline-block;margin-right:6px;padding:1px 7px;border-radius:var(--rf);
+  background:var(--violet-l);color:var(--violet);font-size:.63rem;font-weight:800;}
+.money{text-align:left;flex-shrink:0;}
+.money b{display:block;font-size:1.02rem;font-weight:900;color:var(--red-d);
+  font-variant-numeric:tabular-nums;line-height:1.2;}
+.money.v b{color:var(--violet);}
+.money span{font-size:.68rem;color:var(--ink4);}
+.rq{flex-shrink:0;background:var(--black);color:#fff;border:none;border-radius:var(--r);
+  padding:9px 13px;font-size:.75rem;font-weight:800;cursor:pointer;min-width:92px;}
+.rq.v{background:var(--violet);}
+.rq:hover{opacity:.85;} .rq:disabled{opacity:.5;cursor:not-allowed;}
+.badge{flex-shrink:0;padding:7px 11px;border-radius:var(--r);font-size:.71rem;
+  font-weight:800;min-width:92px;text-align:center;}
+.badge.p{background:var(--amber-l);color:var(--amber-d);}
+.badge.a{background:var(--green-l);color:var(--green-d);}
+.badge.r{background:var(--red-l);color:var(--red-d);}
+
+/* ── الفراغ والتذييل ── */
+.empty{text-align:center;padding:52px 22px;color:var(--ink3);}
+.empty b{display:block;font-size:1rem;font-weight:800;color:var(--ink2);margin-bottom:8px;}
+.empty p{font-size:.84rem;line-height:1.8;}
+.foot{margin-top:18px;padding:14px;background:var(--surface2);border:1px solid var(--line);
+  border-radius:var(--r2);font-size:.76rem;color:var(--ink3);text-align:center;line-height:1.8;}
+.foot b{color:var(--ink2);font-variant-numeric:tabular-nums;}
+.note{margin-bottom:14px;padding:12px 14px;background:var(--violet-l);border-radius:var(--r2);
+  font-size:.77rem;color:#4c3a8f;line-height:1.8;}
+
+/* ── حوار التأكيد ── */
+#modal{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:200;
+  display:flex;align-items:center;justify-content:center;padding:22px;}
+.mcard{background:var(--surface);border-radius:var(--r3);padding:24px;width:min(100%,400px);}
+.mcard h3{font-size:1.05rem;font-weight:900;margin-bottom:5px;}
+.mcard .mres{font-size:.85rem;color:var(--ink2);margin-bottom:16px;line-height:1.7;}
+.mcard .mres em{font-style:normal;font-weight:900;color:var(--red-d);
+  font-variant-numeric:tabular-nums;}
+.mcard label{display:block;font-size:.75rem;font-weight:700;color:var(--ink2);margin-bottom:6px;}
+.mcard input,.mcard textarea{width:100%;padding:11px 13px;border:1px solid var(--line);
+  border-radius:var(--r2);font-size:.88rem;background:var(--surface2);margin-bottom:13px;}
+.mcard textarea{resize:vertical;min-height:62px;}
+.mcard input:focus,.mcard textarea:focus{outline:none;border-color:var(--blue);background:#fff;}
+.mrow{display:flex;gap:9px;}
+.mrow button{flex:1;padding:12px;border:none;border-radius:var(--r2);
+  font-size:.86rem;font-weight:800;cursor:pointer;}
+.mrow .go{background:var(--green-d);color:#fff;}
+.mrow .no{background:var(--surface3);color:var(--ink2);}
+
+@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important;}}
+</style>
+</head>
+<body>
+
+<div id="toasts"></div>
+
+<!-- ════════ الدخول ════════ -->
+<div id="login">
+  <div class="lcard">
+    <h1>التصفير والاشتراكات</h1>
+    <p>ادخل بحساب الليدر. قسمٌ للديون المتراكمة، وقسمٌ لاشتراكات الشهر.</p>
+    <div class="fld"><label for="sPhone">رقم الهاتف</label>
+      <input type="tel" id="sPhone" inputmode="numeric" autocomplete="username"></div>
+    <div class="fld"><label for="sPass">كلمة المرور</label>
+      <input type="password" id="sPass" autocomplete="current-password"></div>
+    <button class="btn" id="loginBtn" onclick="doLogin()">دخول</button>
+  </div>
+</div>
+
+<!-- ════════ اللوحة ════════ -->
+<div id="app">
+  <header>
+    <div class="hrow">
+      <div class="who"><b id="hName">—</b><span id="hSub">جارٍ التحميل…</span></div>
+      <button class="mini" onclick="reload()">تحديث</button>
+      <button class="mini" onclick="logout()">خروج</button>
+    </div>
+    <div class="tabs">
+      <b id="tab-debt" class="on" onclick="goTab('debt')">الديون <i id="cDebt">0</i></b>
+      <b id="tab-sub" onclick="goTab('sub')">الاشتراكات <i id="cSub">0</i></b>
+    </div>
+  </header>
+  <main><div class="wrap">
+    <div id="panel"></div>
+    <div id="list"></div>
+    <div class="foot" id="foot"></div>
+  </div></main>
+</div>
+
+<script>
+/* ════════════════════ ثوابت ════════════════════ */
+/* ⚠️ رابط النشر نفسه المستعمل في Nahlelidersas.html — إن أعدت نشر GAS فبدّله
+   في الملفين معاً، وإلا عملت لوحةٌ وتعطّلت أخرى. */
+const API = "https://script.google.com/macros/s/AKfycbyiFprfbDKMwOG75eZl-V5_M7XmqLkmK49YBQjhHKr_Gka77Gmdgt6uU6K5KeXilMViDw/exec";
+/* توكن التطبيقات — لا ADMIN_API_TOKEN أبداً. */
+const TOK = "NAHLA_APP_4E9C71B8A6D3F250E1AC8B37D94F6021";
+
+const BATCH_SIZE = 20;
+const SS_SESSION = "staff_session";      /* مشتركٌ مع liderdodsas — دخولٌ واحد يخدم اللوحتين */
+const SS_BATCH   = "nahla_clear_batch";
+const SS_SBATCH  = "nahla_sub_batch";
+
+try{firebase.initializeApp({apiKey:"AIzaSyAsmQKlCCZpCgfJG8AZM7fWmYPWVZkpjSQ",authDomain:"nahla-delivery-6b06f.firebaseapp.com",databaseURL:"https://nahla-delivery-6b06f-default-rtdb.europe-west1.firebasedatabase.app",projectId:"nahla-delivery-6b06f",storageBucket:"nahla-delivery-6b06f.firebasestorage.app",messagingSenderId:"592782211437",appId:"1:592782211437:web:4af068aab5807926bf0264"});}catch(e){}
+const db = firebase.database();
+const auth = firebase.auth();
+
+/* ════════════════════ الحالة ════════════════════ */
+let STOKEN="", EMP_NAME="", EMP_PHONE="";
+let LEDGERS={}, CFG={}, REQS={}, RESETS={}, SUBS={};
+let BATCH=[], BATCH_NO=1, SBATCH=[], SBATCH_NO=1;
+let TAB="debt", MONTH="", MONTH_OFF=0;
+let _ready=false, _tokTimer=null;
+
+/* ════════════════════ أدوات ════════════════════ */
+function esc(s){if(s==null)return"";const d=document.createElement("div");d.textContent=String(s);return d.innerHTML;}
+/* ═══════════════════════════════════════════════════════════════════════
+   🔴 [V31 · ل-٤] هذه كانت نسخة ej **السابقة للإصلاح** — لا تُهرّب &.
+   ───────────────────────────────────────────────────────────────────────
+   والشرح في Nhleman.html:1427: محلّل HTML يفكّ &#39; إلى ' **قبل** أن يرى
+   محلّل JS النصّ، فقيمةٌ تحوي &#39; تخرج من السلسلة داخل onclick.
+   وقد أُصلحت في لوحتَي الإدارة والليدر وتُركت هذه — النمط نفسه للمرّة
+   الثالثة في هذا الملف وحده. النسخة الآن مطابقة لهما حرفاً بحرف. */
+function ej(s){ return String(s??'').replace(/&/g,'&amp;').replace(/\\/g,'\\\\')
+                                    .replace(/'/g,"\\'").replace(/"/g,'&quot;'); }
+function toast(m,t="s"){
+  const el=document.createElement("div");el.className="toast "+t;el.textContent=m;
+  document.getElementById("toasts").appendChild(el);
+  setTimeout(()=>{el.style.opacity="0";setTimeout(()=>el.remove(),300);},3400);
+}
+function num(n){return (Number(n)||0).toLocaleString("ar-EG");}
+/* مطابقة حرفية لـnormalizePhone في Code.gs و index.js — أي انحراف يُنتج
+   مفتاحاً منشقّاً لا يراه المدير ولا يمسّه التصفير. */
+function nP(raw){
+  if(!raw)return"";
+  let p=String(raw).trim();
+  const ar=['٠','١','٢','٣','٤','٥','٦','٧','٨','٩'];
+  for(let i=0;i<10;i++)p=p.split(ar[i]).join(String(i));
+  let c=p.replace(/\D/g,"");
+  if(c.indexOf("964")===0)c=c.substring(3);
+  return c.replace(/^0+/,"");
+}
+function apiGet(params){
+  const q=new URLSearchParams(Object.assign({token:TOK},params)).toString();
+  return fetch(API+"?"+q).then(r=>r.json()).catch(()=>({success:false}));
+}
+
+/* شهر بغداد بصيغة YYYY-MM. off=0 الحالي · off=-1 الماضي.
+   ⚠️ ولا نستعمل اليوم التجاري (بغداد − ٤) هنا: إزاحته تخصّ حدود اليوم لا
+      حدود الشهر، وتطبيقها يجعل الأول من الشهر قبل الرابعة فجراً ينتمي
+      للشهر الماضي — وهو ليس ما يقصده أحد حين يقول «اشتراك آب». */
+function monthKey(off){
+  const n=new Date(new Date().toLocaleString("en-US",{timeZone:"Asia/Baghdad"}));
+  const d=new Date(n.getFullYear(), n.getMonth()+(off||0), 1);
+  return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0");
+}
+const AR_MONTHS=["يناير","فبراير","مارس","أبريل","مايو","يونيو",
+                 "يوليو","أغسطس","سبتمبر","أكتوبر","نوفمبر","ديسمبر"];
+function monthLabel(k){
+  const p=String(k).split("-");
+  return (AR_MONTHS[Number(p[1])-1]||k)+" "+p[0];
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   💰 [V31 · م-٢/م-٦] كتلة المال المشتركة — منقولة **حرفياً** من
+   server/index.js (toLatinDigits:5202 · parseAmount:5281 · cleanNumber:5318 ·
+   parseCommissionRule:5328). لا تُعدَّل هنا وحدها أبداً: أي تغيير يُنقل إلى
+   الخمسة معاً (index.js · Code.gs · Nhleman.html · Restaurant.html · clearing.html).
+   ───────────────────────────────────────────────────────────────────────────
+   لماذا نُقلت؟ كان في النظام **خمسة مُحلّلات** لنفس القاعدة، اثنان منها
+   متطابقان على السيرفر وثلاثة مختلفة في اللوحات:
+
+     • Restaurant.html كان يعالج "/" وحدها ⇒ قاعدة "1000-500" تُقرأ
+       parseFloat("1000-500") = 1000، فالمطعم يرى دَيناً **ضِعف** ما يحاسبه
+       السيرفر (500). وفارقٌ في الفاتورة لا يُكتشف إلا بمراجعةٍ يدوية.
+     • pComm في لوحة الإدارة: لا "-" ولا "\"، وparseFloat على المال ⇒
+       "1.000" تُقرأ 1، و"١٠٠٠/٥٠٠" تُقرأ صفراً.
+     • مبلغ الاشتراك كان يُستخرج بـ match(/\d+/) ⇒ "شهري 50.000" = **50**،
+       و"٥٠٠٠٠" = **0**. خطأٌ بألف ضعف في فاتورةٍ شهرية.
+
+   العملة العراقية بلا كسور عملياً: كل فاصل تتبعه ٣ خانات = آلاف،
+   و"15.5" غامضٌ ⇒ يُرفض صراحةً بدل أن يُخمَّن.
+   ═══════════════════════════════════════════════════════════════════════════ */
+function toLatinDigits(s){
+  return String(s===null||s===undefined?"":s)
+    .replace(/[٠-٩]/g,function(d){return String.fromCharCode(d.charCodeAt(0)-0x0660+48);})
+    .replace(/[۰-۹]/g,function(d){return String.fromCharCode(d.charCodeAt(0)-0x06F0+48);});
+}
+function parseAmount(raw,opts){
+  opts=opts||{};
+  const s0=toLatinDigits(raw).trim();
+  if(s0==="")return{ok:false,value:null,reason:"empty"};
+  let s=s0.replace(/[\s ٬]/g,"").replace(/د\.?ع|IQD|iqd|دينار/g,"");
+  let neg=false;
+  if(/^-/.test(s)){neg=true;s=s.slice(1);}
+  else if(/-$/.test(s)){neg=true;s=s.slice(0,-1);}
+  if(s==="")return{ok:false,value:null,reason:"no_digits"};
+  if(/[^0-9.,]/.test(s))return{ok:false,value:null,reason:"bad_chars",got:s0};
+  const seps=s.match(/[.,]/g)||[];
+  if(seps.length>0){
+    const parts=s.split(/[.,]/),tail=parts.slice(1);
+    if(tail.every(function(p){return p.length===3;})&&parts[0].length>=1)s=parts.join("");
+    else if(seps.length===1&&tail[0].length>0&&tail[0].length<3)
+      return{ok:false,value:null,reason:"ambiguous_decimal",got:s0};
+    else return{ok:false,value:null,reason:"bad_separators",got:s0};
+  }
+  if(!/^\d+$/.test(s))return{ok:false,value:null,reason:"not_integer",got:s0};
+  const n=Number(s);
+  if(!isFinite(n))return{ok:false,value:null,reason:"overflow",got:s0};
+  if(neg&&opts.allowNegative!==true)return{ok:false,value:null,reason:"negative_not_allowed",got:s0};
+  return{ok:true,value:neg?-n:n,reason:null};
+}
+/* لا noteReject هنا — لا سجلّ سيرفري في اللوحة. والسلوك الرقمي مطابق. */
+function cleanNumber(val){
+  const r=parseAmount(val,{allowNegative:true});
+  return r.ok?r.value:0;
+}
+function parseCommissionRule(commStr,payTypeStr){
+  const str=String(commStr).toLowerCase().trim();
+  const pType=String(payTypeStr||"").trim();
+  let baseDrv=0,baseRes=0,isMonthly=false;
+  if(str.indexOf("شهري")>-1||str==="monthly"){
+    isMonthly=true;
+  }else if(str.indexOf("/")>-1||str.indexOf("-")>-1||str.indexOf("\\")>-1){
+    const parts=str.split(/[\/\-\\]/).map(function(x){return String(x).trim();}).filter(function(x){return x!=="";});
+    if(parts.length!==2){
+      /* صيغةٌ معطوبة ("1000-" أو "-1000"): تُعامَل رقماً مفرداً بقيمةٍ مطلقة —
+         وإلا انقلب الدوران أو صار الدَين رصيداً صامتاً لصالح المطعم. */
+      const single=Math.abs(cleanNumber(parts[0]||"0"));
+      if(pType.indexOf("مناصفة")>-1)return{drv:single/2,res:single/2,isMonthly:false,malformed:true};
+      return{drv:0,res:single,isMonthly:false,malformed:true};
+    }
+    return{drv:cleanNumber(parts[0]),res:cleanNumber(parts[1]),isMonthly:false};
+  }else{
+    const val=cleanNumber(str);
+    if(pType.indexOf("مناصفة")>-1){baseDrv=val/2;baseRes=val/2;}
+    else{baseDrv=0;baseRes=val;}
+  }
+  return{drv:baseDrv,res:baseRes,isMonthly:isMonthly};
+}
+/* 💳 [V31 · م-٢] مبلغ الاشتراك الشهري — الكلمات تُسقَط ثم يُقرأ الباقي
+   بقارئ المبالغ نفسه. كان match(/\d+/): لاتينيٌّ فقط ولا يفهم فاصل الآلاف. */
+function monthlySubAmount(commRaw){
+  const s=String(commRaw==null?"":commRaw);
+  if(s.indexOf("شهري")===-1&&s.toLowerCase().indexOf("monthly")===-1)return null;
+  return cleanNumber(s.replace(/اشتراك|شهري|monthly/gi,""));
+}
+
+/* قيمة الاشتراك من قاعدة المطعم — **بنفس منطق monthlyArchiver حرفياً**.
+   🔧 [V31 · م-٢] كان الاثنان يستعملان match(/\d+/): لاتينيٌّ فقط ولا يفهم
+   فاصل الآلاف ⇒ «شهري 50.000» تُحصَّل **50 ديناراً**، و«٥٠٠٠٠» **صفراً**.
+   نُقل الموضعان معاً إلى monthlySubAmount — والتطابق بينهما شرطُ صحّة
+   ورقة التحصيل مقابل البريد الشهري. */
+function subAmount(commRaw){ return monthlySubAmount(commRaw); }
+
+/* ════════════════════ المصادقة ════════════════════ */
+async function consumeToken(tok){
+  if(!tok)return false;
+  try{ await auth.signInWithCustomToken(tok); }catch(e){ return false; }
+  /* التوكن المخصّص يصلح ساعة. نجدّده قبل انقضائها بعشر دقائق كي لا تسقط
+     المستمعات في منتصف عمل الليدر. */
+  if(_tokTimer)clearTimeout(_tokTimer);
+  _tokTimer=setTimeout(refreshToken,50*60*1000);
+  return true;
+}
+async function refreshToken(){
+  try{
+    const s=JSON.parse(sessionStorage.getItem(SS_SESSION)||"{}");
+    if(!s.p||!s.phone)return;
+    const pass=decodeURIComponent(escape(atob(s.p)));
+    const d=await apiGet({action:"STAFF_LOGIN",phone:s.phone,password:pass});
+    if(d&&d.success){
+      if(d.token){STOKEN=d.token;s.token=d.token;sessionStorage.setItem(SS_SESSION,JSON.stringify(s));}
+      await consumeToken(d.firebase_token);
+    }
+  }catch(e){}
+}
+
+window.doLogin=async function(){
+  const phone=document.getElementById("sPhone").value.trim();
+  const pass=document.getElementById("sPass").value.trim();
+  if(!phone||!pass)return toast("أدخل الهاتف وكلمة المرور","e");
+  const btn=document.getElementById("loginBtn");btn.disabled=true;btn.textContent="جارٍ الدخول…";
+  try{
+    const d=await apiGet({action:"STAFF_LOGIN",phone,password:pass});
+    if(!d.success){toast(d.msg||"تعذّر الدخول","e");return;}
+    STOKEN=d.token;EMP_NAME=d.name;EMP_PHONE=d.phone;
+    sessionStorage.setItem(SS_SESSION,JSON.stringify({
+      token:STOKEN,name:EMP_NAME,phone:EMP_PHONE,
+      p:btoa(unescape(encodeURIComponent(pass)))
+    }));
+    const ok=await consumeToken(d.firebase_token);
+    if(!ok){toast("تعذّرت المصادقة السحابية — أعد المحاولة","e");return;}
+    enterApp();
+  } finally { btn.disabled=false;btn.textContent="دخول"; }
+};
+
+window.logout=function(){
+  sessionStorage.removeItem(SS_SESSION);
+  sessionStorage.removeItem(SS_BATCH);
+  sessionStorage.removeItem(SS_SBATCH);
+  try{auth.signOut();}catch(e){}
+  location.reload();
+};
+
+window.addEventListener("DOMContentLoaded",async ()=>{
+  const saved=sessionStorage.getItem(SS_SESSION);
+  if(!saved)return;
+  try{
+    const s=JSON.parse(saved);
+    STOKEN=s.token;EMP_NAME=s.name;EMP_PHONE=s.phone;
+    if(!s.p)return;
+    const pass=decodeURIComponent(escape(atob(s.p)));
+    const d=await apiGet({action:"STAFF_LOGIN",phone:EMP_PHONE,password:pass});
+    if(d&&d.success&&await consumeToken(d.firebase_token)) enterApp();
+  }catch(e){}
+});
+
+/* ════════════════════ الإقلاع ════════════════════ */
+function enterApp(){
+  document.getElementById("login").style.display="none";
+  document.getElementById("app").style.display="flex";
+  document.getElementById("hName").textContent=EMP_NAME||"ليدر";
+  MONTH=monthKey(0);
+  loadAll();
+  /* السجلّان مستمعان حيّان — عقدتان صغيرتان، وتحديثهما اللحظي هو ما يحوّل
+     الزرّ إلى «قيد المراجعة» بلا إعادة تحميل. */
+  db.ref("clearing_requests").on("value",
+    s=>{ REQS=s.val()||{}; if(_ready) render(); },
+    e=>{ toast("تعذّرت قراءة طلبات التصفير — راجع القواعد","e"); }
+  );
+  db.ref("sub_collections").on("value",
+    s=>{ SUBS=s.val()||{}; if(_ready) render(); },
+    e=>{ toast("تعذّرت قراءة سجلّ الاشتراكات — راجع القواعد","e"); }
+  );
+}
+
+/* الدفاتر والقواعد بقراءة واحدة لا بمستمع دائم: عقدة الدفاتر تتغيّر مع كل
+   طلب يُؤرشَف، ومستمعٌ عليها يعني تنزيلاً متكرّراً بلا فائدة للّيدر — وهو
+   يعمل بلقطةٍ واحدة ثم يرفع طلباته. زرّ «تحديث» يعيد القراءة. */
+async function loadAll(){
+  document.getElementById("hSub").textContent="جارٍ التحميل…";
+  try{
+    const [led,cfg,rst]=await Promise.all([
+      db.ref("ledgers/restaurants").once("value"),
+      db.ref("restaurants_config").once("value"),
+      db.ref("ledgers/reset_events/RESTAURANT").once("value")
+    ]);
+    LEDGERS=led.val()||{}; RESETS=rst.val()||{}; CFG=cfg.val()||{};
+    _ready=true;
+    restoreOrBuild();
+    render();
+    document.getElementById("hSub").textContent="آخر تحديث "+
+      new Date().toLocaleTimeString("ar-EG",{hour:"2-digit",minute:"2-digit"});
+  }catch(e){
+    document.getElementById("hSub").textContent="تعذّر التحميل";
+    /* الرسالة تسمّي العلاج لا العطب وحده: أشيع سبب هنا هو غياب قاعدة القراءة
+       الجذرية على restaurants_config — وهي سطرٌ واحد في database.rules.json. */
+    toast("تعذّرت قراءة الدفاتر. تأكّد من نشر قواعد فايربيس V4.0.","e");
+  }
+}
+window.reload=function(){ loadAll(); };
+
+window.goTab=function(t){
+  TAB=t;
+  document.getElementById("tab-debt").classList.toggle("on",t==="debt");
+  document.getElementById("tab-sub").classList.toggle("on",t==="sub");
+  render();
+};
+
+/* ════════════════════ قسم الديون ════════════════════ */
+
+/* هل للمطعم طلب تصفير **قائم**؟
+   ─────────────────────────────────────────────────────────────────────
+   الطلب يصير لاغياً بمجرّد أن يُصفّر المدير الدين، لأن resetDebtForEntity
+   تختم ledgers/reset_events/RESTAURANT/{الهاتف}. فنقارن الختمين: طلبٌ أقدم
+   من آخر تصفير هو طلبٌ استُهلك، والمطعم يعود إلى الطابور حين يتراكم عليه
+   دينٌ جديد. ⇒ لا يحتاج أحدٌ إلى حذف شيء يدوياً. */
+function reqActive(phone){
+  const r=REQS[phone];
+  if(!r)return false;
+  const reqAt=r.ts?new Date(r.ts).getTime():0;
+  const rstAt=RESETS[phone]?new Date(RESETS[phone]).getTime():0;
+  return reqAt>rstAt;
+}
+
+function debtPool(){
+  return Object.keys(LEDGERS)
+    .map(p=>({
+      phone:p,
+      debt:Number((LEDGERS[p]||{}).debt)||0,
+      orders:Number((LEDGERS[p]||{}).completed_orders)||0
+    }))
+    .filter(x=>x.debt>0 && !reqActive(x.phone))
+    .sort((a,b)=>b.debt-a.debt);
+}
+
+/* ════════════════════ قسم الاشتراكات ════════════════════ */
+
+/* الطابور: كل مطعم قاعدته شهرية ولم يُسجَّل استلامه لهذا الشهر.
+   ⚠️ ولا فلترة بالنشاط: restaurants_config لا تحمل حقل status إطلاقاً
+      (mirrorRestaurantConfig تكتب comm · payType · name · lat/lng · area).
+      والنشاط الشهري يعيش في Daily_Reports داخل الشيت، ولا تصله هذه الصفحة.
+      ⇒ نعرض الجميع، ونُظهر عدد الطلبات ليميّز الليدر العامل من المتوقّف. */
+function subPool(){
+  const done=SUBS[MONTH]||{};
+  return Object.keys(CFG)
+    .map(p=>({ phone:p, amount:subAmount((CFG[p]||{}).comm),
+               name:(CFG[p]||{}).name||"",
+               orders:Number((LEDGERS[p]||{}).completed_orders)||0 }))
+    .filter(x=>x.amount!==null && !done[x.phone])
+    .sort((a,b)=>b.amount-a.amount || b.orders-a.orders);
+}
+
+/* ════════════════════ تجميد الدفعة ════════════════════ */
+/* الدفعة مجمّدة عمداً: لو أُعيد بناؤها عند كل تحديث لانزلق الصفّ تحت إصبع
+   الليدر كلّما تغيّر دَينُ مطعم، فيرفع طلباً لغير من قصد. */
+function restoreOrBuild(){
+  try{
+    const a=JSON.parse(sessionStorage.getItem(SS_BATCH)||"null");
+    if(a&&Array.isArray(a.phones)&&a.phones.length){BATCH=a.phones;BATCH_NO=a.no||1;}
+    else newDebtBatch(1);
+  }catch(e){ newDebtBatch(1); }
+  try{
+    const b=JSON.parse(sessionStorage.getItem(SS_SBATCH)||"null");
+    if(b&&b.month===MONTH&&Array.isArray(b.phones)&&b.phones.length){SBATCH=b.phones;SBATCH_NO=b.no||1;}
+    else newSubBatch(1);
+  }catch(e){ newSubBatch(1); }
+}
+function newDebtBatch(no){
+  BATCH=debtPool().slice(0,BATCH_SIZE).map(x=>x.phone);
+  BATCH_NO=no||(BATCH_NO+1);
+  try{sessionStorage.setItem(SS_BATCH,JSON.stringify({phones:BATCH,no:BATCH_NO}));}catch(e){}
+}
+function newSubBatch(no){
+  SBATCH=subPool().slice(0,BATCH_SIZE).map(x=>x.phone);
+  SBATCH_NO=no||(SBATCH_NO+1);
+  try{sessionStorage.setItem(SS_SBATCH,JSON.stringify({phones:SBATCH,no:SBATCH_NO,month:MONTH}));}catch(e){}
+}
+window.nextBatch=function(){
+  if(TAB==="debt"){ newDebtBatch(); toast("الدفعة "+BATCH_NO+" جاهزة"); }
+  else { newSubBatch(); toast("الدفعة "+SBATCH_NO+" جاهزة"); }
+  render();
+};
+window.setMonth=function(off){
+  MONTH_OFF=off; MONTH=monthKey(off);
+  newSubBatch(1);
+  render();
+};
+
+/* ════════════════════ العرض ════════════════════ */
+function render(){ TAB==="debt" ? renderDebt() : renderSub(); updCounters(); }
+
+function updCounters(){
+  document.getElementById("cDebt").textContent=num(debtPool().length);
+  document.getElementById("cSub").textContent=num(subPool().length);
+}
+
+function renderDebt(){
+  const panel=document.getElementById("panel"), list=document.getElementById("list"),
+        foot=document.getElementById("foot");
+
+  const rows=BATCH.map(p=>({
+    phone:p,
+    name:(CFG[p]||{}).name||"(مطعم بلا اسم في المرآة)",
+    monthly:subAmount((CFG[p]||{}).comm)!==null,
+    debt:Number((LEDGERS[p]||{}).debt)||0,
+    orders:Number((LEDGERS[p]||{}).completed_orders)||0,
+    req:reqActive(p)?REQS[p]:null
+  }));
+
+  if(!rows.length){
+    panel.innerHTML="";
+    list.innerHTML='<div class="empty"><b>لا مطعم عليه دين</b>'+
+      '<p>كل الدفاتر مصفّرة. اضغط «تحديث» بعد أن تُؤرشَف طلبات اليوم.</p></div>';
+    foot.textContent="";
+    return;
+  }
+
+  const done=rows.filter(r=>r.req).length, total=rows.length;
+
+  panel.innerHTML=
+    '<div class="pcard debt"><div class="top">'+
+      '<div><div class="bn">الدفعة '+BATCH_NO+' · الديون</div>'+
+      '<div class="cnt">'+done+' <small>من '+total+'</small></div></div>'+
+      '<div class="bn">'+num(rows.reduce((s,r)=>s+r.debt,0))+' د.ع</div>'+
+    '</div>'+
+    '<div class="bar"><i style="width:'+Math.round(done/total*100)+'%"></i></div>'+
+    '<div class="sub-t">مرتّبة بالدين الأعلى. ارفع طلباً لكل مطعم استلمتَ منه المبلغ — '+
+    'والمدير هو من يُصفّر الدفتر بعد قبوله.</div></div>'+
+    (done===total
+      ? '<div class="done"><b>اكتملت الدفعة '+BATCH_NO+'</b>'+
+        '<p>رُفعت '+total+' طلبات إلى المدير. تظهر الآن عشرون مطعماً جديداً.</p>'+
+        '<button onclick="nextBatch()">الدفعة التالية</button></div>'
+      : '');
+
+  list.innerHTML=rows.map((r,i)=>{
+    let right;
+    if(!r.req) right='<button class="rq" onclick="askDebt(\''+ej(r.phone)+'\')">طلب تصفير</button>';
+    else if(r.req.status==="approved") right='<div class="badge a">مقبول ✓</div>';
+    else if(r.req.status==="rejected") right='<div class="badge r">مرفوض</div>';
+    else right='<div class="badge p">قيد المراجعة</div>';
+    return '<div class="row'+(r.req?" sent":"")+'">'+
+      '<div class="rank'+(i<3?" top":"")+'">'+(i+1)+'</div>'+
+      '<div class="info"><b>'+esc(r.name)+
+        (r.monthly?'<span class="tag">شهري</span>':'')+'</b>'+
+        '<span>'+esc(r.phone)+' · '+num(r.orders)+' طلب</span></div>'+
+      '<div class="money"><b>'+num(r.debt)+'</b><span>د.ع</span></div>'+
+      right+'</div>';
+  }).join("");
+
+  const rest=debtPool().slice(total);
+  foot.innerHTML='متبقٍّ في الطابور: <b>'+num(rest.length)+'</b> مطعماً'+
+    ' · إجمالي ديونهم <b>'+num(rest.reduce((s,x)=>s+x.debt,0))+'</b> د.ع';
+}
+
+function renderSub(){
+  const panel=document.getElementById("panel"), list=document.getElementById("list"),
+        foot=document.getElementById("foot");
+  const done=SUBS[MONTH]||{};
+
+  const rows=SBATCH.map(p=>({
+    phone:p,
+    name:(CFG[p]||{}).name||"(مطعم بلا اسم في المرآة)",
+    amount:subAmount((CFG[p]||{}).comm)||0,
+    orders:Number((LEDGERS[p]||{}).completed_orders)||0,
+    rec:done[p]||null
+  }));
+
+  const seg='<div class="seg">'+
+    '<b class="'+(MONTH_OFF===0?"on":"")+'" onclick="setMonth(0)">'+monthLabel(monthKey(0))+'</b>'+
+    '<b class="'+(MONTH_OFF===-1?"on":"")+'" onclick="setMonth(-1)">'+monthLabel(monthKey(-1))+'</b>'+
+    '</div>';
+
+  if(!rows.length){
+    panel.innerHTML='<div class="pcard sub"><div class="top">'+
+      '<div><div class="bn">اشتراكات '+monthLabel(MONTH)+'</div>'+
+      '<div class="cnt">اكتمل</div></div>'+seg+'</div>'+
+      '<div class="sub-t">كل مطاعم الاشتراك سُجّل استلامها لهذا الشهر.</div></div>';
+    list.innerHTML='<div class="empty"><b>لا مطعم متبقٍّ</b>'+
+      '<p>بدّل الشهر من الأعلى، أو اضغط «تحديث».</p></div>';
+    foot.textContent="";
+    return;
+  }
+
+  const d=rows.filter(r=>r.rec).length, total=rows.length;
+
+  panel.innerHTML=
+    '<div class="pcard sub"><div class="top">'+
+      '<div><div class="bn">اشتراكات '+monthLabel(MONTH)+' · الدفعة '+SBATCH_NO+'</div>'+
+      '<div class="cnt">'+d+' <small>من '+total+'</small></div></div>'+seg+
+    '</div>'+
+    '<div class="bar"><i style="width:'+Math.round(d/total*100)+'%"></i></div>'+
+    '<div class="sub-t">المبلغ المعروض هو الاشتراك <b>الكامل</b> المعلن. عدّله عند '+
+    'التسجيل إن قبضتَ أقلّ — القيمة الفعلية في تقرير المدير الشهري.</div></div>'+
+    (d===total
+      ? '<div class="done"><b>اكتملت الدفعة '+SBATCH_NO+'</b>'+
+        '<p>سُجّل استلام '+total+' اشتراكاً. تظهر الآن دفعة جديدة.</p>'+
+        '<button onclick="nextBatch()">الدفعة التالية</button></div>'
+      : '');
+
+  list.innerHTML=
+    '<div class="note">📅 الاشتراك <b>ليس ديناً في الدفتر</b> — عمولته صفر بالطلب، '+
+    'ويُحاسَب شهرياً في تقرير المدير. فهذا القسم <b>سجلّ استلام</b>: لا يُصفّر شيئاً، '+
+    'ويوثّق ما قبضتَه ليطابقه المدير بتقريره.</div>'+
+    rows.map(r=>{
+      let right;
+      if(!r.rec) right='<button class="rq v" onclick="askSub(\''+ej(r.phone)+'\')">سجّل الاستلام</button>';
+      else if(r.rec.status==="approved") right='<div class="badge a">مؤكَّد ✓</div>';
+      else if(r.rec.status==="rejected") right='<div class="badge r">مرفوض</div>';
+      else right='<div class="badge p">قيد المراجعة</div>';
+      const shown=r.rec?(Number(r.rec.amount)||0):r.amount;
+      return '<div class="row'+(r.rec?" sent":"")+'">'+
+        '<div class="rank sub">📅</div>'+
+        '<div class="info"><b>'+esc(r.name)+'</b>'+
+          '<span>'+esc(r.phone)+' · '+num(r.orders)+' طلب</span></div>'+
+        '<div class="money v"><b>'+num(shown)+'</b><span>د.ع</span></div>'+
+        right+'</div>';
+    }).join("");
+
+  const rest=subPool().slice(total);
+  foot.innerHTML='متبقٍّ لهذا الشهر: <b>'+num(rest.length)+'</b> مطعماً'+
+    ' · إجمالي اشتراكاتهم <b>'+num(rest.reduce((s,x)=>s+x.amount,0))+'</b> د.ع';
+}
+
+/* ════════════════════ الحوارات ════════════════════ */
+function openModal(html,onGo){
+  const m=document.createElement("div");m.id="modal";
+  m.innerHTML='<div class="mcard">'+html+
+    '<div class="mrow"><button class="no" onclick="closeModal()">إلغاء</button>'+
+    '<button class="go" id="mGo">تأكيد</button></div></div>';
+  document.body.appendChild(m);
+  m.addEventListener("click",e=>{if(e.target===m)closeModal();});
+  document.getElementById("mGo").onclick=onGo;
+}
+window.closeModal=function(){const m=document.getElementById("modal");if(m)m.remove();};
+
+window.askDebt=function(phone){
+  const name=(CFG[phone]||{}).name||phone;
+  const debt=Number((LEDGERS[phone]||{}).debt)||0;
+  openModal(
+    '<h3>طلب تصفير</h3>'+
+    '<div class="mres">'+esc(name)+' — الدين <em>'+num(debt)+' د.ع</em><br>'+
+      'يُرفع الطلب إلى المدير، وهو من يُصفّر الدفتر بعد قبوله.</div>'+
+    '<label for="mNote">ملاحظة للمدير (اختيارية)</label>'+
+    '<textarea id="mNote" placeholder="مثل: استُلم نقداً · أو على دفعتين"></textarea>',
+    ()=>sendDebt(phone,name,debt));
+  setTimeout(()=>{const t=document.getElementById("mNote");if(t)t.focus();},50);
+};
+
+async function sendDebt(phone,name,debt){
+  const btn=document.getElementById("mGo");btn.disabled=true;btn.textContent="جارٍ الإرسال…";
+  const note=(document.getElementById("mNote")||{}).value||"";
+  try{
+    /* الحقول الأربعة الأولى تشترطها قاعدة .validate — لا تحذف أياً منها.
+       والدين لقطةٌ للعرض؛ قرار المدير يقوم على القيمة الحيّة لا على هذه. */
+    await db.ref("clearing_requests/"+phone).set({
+      phone:phone, by:EMP_PHONE, ts:new Date().toISOString(), status:"pending",
+      name:String(name).slice(0,120), byName:String(EMP_NAME||"").slice(0,80),
+      debt_at_request:debt,
+      orders_at_request:Number((LEDGERS[phone]||{}).completed_orders)||0,
+      note:String(note).slice(0,300)
+    });
+    closeModal(); toast("رُفع طلب تصفير "+name);
+  }catch(e){ failModal(e,btn,"تأكيد"); }
+}
+
+window.askSub=function(phone){
+  const name=(CFG[phone]||{}).name||phone;
+  const amt=subAmount((CFG[phone]||{}).comm)||0;
+  openModal(
+    '<h3>تسجيل استلام اشتراك</h3>'+
+    '<div class="mres">'+esc(name)+' — اشتراك '+esc(monthLabel(MONTH))+'<br>'+
+      'لا يُصفَّر شيء في الدفتر. هذا توثيقٌ لما قبضتَه، يطابقه المدير بتقريره الشهري.</div>'+
+    '<label for="mAmt">المبلغ المستلم (د.ع)</label>'+
+    '<input type="number" id="mAmt" inputmode="numeric" min="0" value="'+amt+'">'+
+    '<label for="mNote">ملاحظة (اختيارية)</label>'+
+    '<textarea id="mNote" placeholder="مثل: نصف اشتراك — عمل نصف الشهر"></textarea>',
+    ()=>sendSub(phone,name,amt));
+  setTimeout(()=>{const t=document.getElementById("mAmt");if(t){t.focus();t.select();}},50);
+};
+
+async function sendSub(phone,name,declared){
+  const btn=document.getElementById("mGo");
+  const amt=Number((document.getElementById("mAmt")||{}).value);
+  if(!(amt>=0)||isNaN(amt)){ toast("أدخل مبلغاً صحيحاً","e"); return; }
+  btn.disabled=true;btn.textContent="جارٍ الحفظ…";
+  const note=(document.getElementById("mNote")||{}).value||"";
+  try{
+    await db.ref("sub_collections/"+MONTH+"/"+phone).set({
+      phone:phone, by:EMP_PHONE, ts:new Date().toISOString(), status:"pending",
+      month:MONTH, amount:Math.round(amt), declared:declared,
+      name:String(name).slice(0,120), byName:String(EMP_NAME||"").slice(0,80),
+      note:String(note).slice(0,300)
+    });
+    closeModal(); toast("سُجّل استلام "+name);
+  }catch(e){ failModal(e,btn,"تأكيد"); }
+}
+
+function failModal(e,btn,label){
+  btn.disabled=false;btn.textContent=label;
+  const msg=String((e&&e.message)||"");
+  if(/permission|denied/i.test(msg))
+    toast("مرفوض — العقدة غير منشورة في قواعد فايربيس","e");
+  else
+    toast("تعذّر الحفظ. تحقّق من الاتصال وأعد المحاولة.","e");
+}
+</script>
+</body>
+</html>

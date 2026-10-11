@@ -1,0 +1,969 @@
+<!DOCTYPE html>
+<!--
+  🕯️ لوحة الظلّ — قياس قبل التنفيذ (V2 · تقرأ السجلّ السيرفري)
+  ═══════════════════════════════════════════════════════════════════════════
+  هذه اللوحة ليست لوحة مقاييس. وظيفتها الوحيدة: **أن تقول لك هل يجوز أن
+  تُلقي كل مفتاح من مفاتيح التنفيذ الستّة، ولماذا لا.**
+
+  المصدر الأساسي: shadow_compare · legacy_usage · ops — فُتحت قراءتها
+  للإدارة في قواعد V3.1 (والكتابة تبقى مغلقة تماماً، فلا عميل يلوّث ما
+  يُقاس به). والسند: مرآة client_events. إن غاب أحدهما عمل الآخر، والمصدر
+  المستعمل مُعلَن في الترويسة.
+
+  وما لا يُقاس بعد يبقى مُعلَناً صراحةً — لا يُخضَّر مفتاح بلا دليل.
+
+  ثلاث حالات للمفتاح لا اثنتان:  🔴 مقفل  ·  🟡 يحتاج قراءة سيرفرية  ·  🟢 مؤهَّل
+
+  ⚠️ client_events تنمو بلا سقف — لا حدّ للمعدّل في قواعد فايربيس. أضف
+     تنظيف ما هو أقدم من ٣ أيام إلى nightlySummaryAndCleaner.
+  ═══════════════════════════════════════════════════════════════════════════
+-->
+<html lang="ar" dir="rtl">
+<head>
+<!-- 🔒 [CSP] سياسة أمان المحتوى — كانت واجهات نحلة الخمس **بلا شيء**.
+     ═══════════════════════════════════════════════════════════════════
+     قراءةٌ فقط، لكنها تقرأ السجلّ السيرفري كاملاً — والتسريب تسريب.
+
+     ⚠️ **موضعها في أعلى الترويسة شرطُ صحّة لا ترتيب.** وسم meta لا يحكم
+        إلا ما بعده — فما سبقها من كتل سكربت يبقى خارج الحماية.
+        📎 ولا تكتب وسم ترويسة أو سكربت **حرفياً** في هذا التعليق:
+           ماسحات التدقيق تبحث عن النصّ لا عن البنية، فتَعُدّه وسماً
+           حقيقياً وتُبلغ خطأً كاذباً. (وقع فعلاً في أول صياغة.)
+
+     📋 كل أصلٍ أدناه مُشتقّ من مورد يُحمَّل في هذا الملف بعينه — لا نسخاً
+        عن واجهة أخرى. تحقّق بعد أي تعديل:
+            python3 tools/csp_audit.py frontend/Monitor.html
+
+     🔴 **لا تحذف www.gstatic.com من script-src** — قد تُنذر أدوات
+        التدقيق بأنه غير مستعمل، وهو إنذار كاذب حيث تدخل وحدات فايربيس
+        عبر استيرادات ES لا عبر وسم src. حذفه ⇒ صفحة بيضاء بلا خطأ مفهوم.
+
+     📌 'unsafe-inline' لازمٌ اليوم: الشيفرة كلها كتل مضمّنة. إزالته
+        تتطلّب nonce أو نقلها إلى ملفات — مشروع لاحق موثّق.
+     📌 form-action 'self' لا 'none': لو فشلت كتلة السكربت (وهو ما تحمي
+        منه هذه السياسة) لعادت النماذج إلى الإرسال الافتراضي، و'self'
+        يجعله إعادة تحميل غير ضارّة بدل حجبٍ صامت. -->
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://www.gstatic.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: blob: https:; media-src 'self' data: blob: https://actions.google.com; connect-src 'self' https://*.firebasedatabase.app https://*.firebaseio.com wss://*.firebasedatabase.app wss://*.firebaseio.com https://script.google.com https://script.googleusercontent.com https://*.googleapis.com https://securetoken.googleapis.com https://*.cloudfunctions.net https://*.run.app; object-src 'none'; base-uri 'none'; form-action 'self'; frame-ancestors 'none'">
+
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>لوحة الظلّ — نظام نحلة</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Reem+Kufi:wght@500;600;700&family=IBM+Plex+Sans+Arabic:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#14202B; --field:#F5F3EE; --card:#FFFEFB;
+  --brass:#96762F; --signal:#146B52; --halt:#A83228;
+  --rule:#D9D4C8; --dim:#6E6A60;
+  --disp:"Reem Kufi",serif; --body:"IBM Plex Sans Arabic",sans-serif; --mono:"IBM Plex Mono",monospace;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--field);color:var(--ink);font-family:var(--body);font-size:15px;line-height:1.65;-webkit-font-smoothing:antialiased}
+.wrap{max-width:980px;margin:0 auto;padding:28px 20px 80px}
+:focus-visible{outline:2px solid var(--brass);outline-offset:3px}
+
+/* ── الترويسة ── */
+.eyebrow{font-family:var(--mono);font-size:11px;letter-spacing:.18em;color:var(--brass);text-transform:uppercase}
+h1{font-family:var(--disp);font-size:clamp(30px,6vw,46px);font-weight:700;letter-spacing:-.01em;margin:2px 0 6px}
+.sub{color:var(--dim);font-size:14px}
+.hdr{border-bottom:2px solid var(--ink);padding-bottom:16px;margin-bottom:26px}
+.bar{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-top:14px}
+button{font-family:var(--body);font-size:14px;font-weight:600;padding:9px 18px;border:1.5px solid var(--ink);
+  background:var(--ink);color:var(--field);border-radius:2px;cursor:pointer;transition:.15s}
+button:hover{background:transparent;color:var(--ink)}
+button.ghost{background:transparent;color:var(--ink)}
+button.ghost:hover{background:var(--ink);color:var(--field)}
+select,input{font-family:var(--body);font-size:14px;padding:8px 12px;border:1.5px solid var(--rule);
+  background:var(--card);color:var(--ink);border-radius:2px}
+
+/* ── لوحة المفاتيح — عنصر التوقيع ── */
+h2{font-family:var(--disp);font-size:21px;font-weight:600;margin:34px 0 4px}
+.note{color:var(--dim);font-size:13px;margin-bottom:14px}
+.gate{background:var(--card);border:1px solid var(--rule);border-radius:3px;overflow:hidden}
+.g{display:grid;grid-template-columns:6px 1fr auto;gap:0;border-bottom:1px solid var(--rule);
+  align-items:center;transition:.2s}
+.g:last-child{border-bottom:0}
+.g .flag{align-self:stretch}
+.g .mid{padding:15px 18px;min-width:0}
+.g .end{padding:15px 18px;text-align:left}
+.g .key{font-family:var(--mono);font-size:13px;font-weight:600;letter-spacing:-.02em;word-break:break-all}
+.g .why{font-size:13px;color:var(--dim);margin-top:3px}
+.g[data-s="halt"]  .flag{background:var(--halt)}
+.g[data-s="wait"]  .flag{background:var(--brass)}
+.g[data-s="go"]    .flag{background:var(--signal)}
+.g[data-s="halt"]{background:color-mix(in srgb,var(--halt) 4%,var(--card))}
+.g[data-s="go"]{background:color-mix(in srgb,var(--signal) 6%,var(--card))}
+.st{font-family:var(--disp);font-size:14px;font-weight:600;white-space:nowrap}
+.g[data-s="halt"] .st{color:var(--halt)}
+.g[data-s="wait"] .st{color:var(--brass)}
+.g[data-s="go"]   .st{color:var(--signal)}
+/* عدّاد الأيام النظيفة — سبع خانات تُقرأ لا تُزيَّن */
+.days{display:flex;gap:3px;margin-top:8px}
+.days i{width:13px;height:6px;background:var(--rule);border-radius:1px;display:block}
+.days i.on{background:var(--signal)}
+.days i.na{background:repeating-linear-gradient(45deg,var(--rule),var(--rule)2px,transparent 2px,transparent 4px)}
+.dlbl{font-family:var(--mono);font-size:10px;color:var(--dim);margin-top:4px;letter-spacing:.04em}
+
+/* ── الدليل ── */
+.grid{display:grid;gap:14px;grid-template-columns:repeat(auto-fit,minmax(270px,1fr))}
+.c{background:var(--card);border:1px solid var(--rule);border-radius:3px;padding:17px 19px}
+.c h3{font-family:var(--disp);font-size:16px;font-weight:600;margin-bottom:2px}
+.c .h3n{font-size:12px;color:var(--dim);margin-bottom:12px}
+.kv{display:flex;justify-content:space-between;align-items:baseline;gap:12px;padding:6px 0;border-bottom:1px dotted var(--rule)}
+.kv:last-child{border-bottom:0}
+.kv span{font-size:13.5px}
+.kv b{font-family:var(--mono);font-size:15px;font-weight:600}
+.kv b.bad{color:var(--halt)} .kv b.good{color:var(--signal)} .kv b.warn{color:var(--brass)}
+.big{font-family:var(--mono);font-size:34px;font-weight:600;line-height:1.1;letter-spacing:-.02em}
+.big.bad{color:var(--halt)} .big.good{color:var(--signal)} .big.warn{color:var(--brass)}
+.biglbl{font-size:12.5px;color:var(--dim);margin-top:2px}
+table{width:100%;border-collapse:collapse;margin-top:6px}
+th,td{text-align:right;padding:7px 6px;font-size:13px;border-bottom:1px solid var(--rule)}
+th{font-family:var(--mono);font-size:10.5px;letter-spacing:.08em;color:var(--dim);font-weight:500;text-transform:uppercase}
+td.n{font-family:var(--mono);font-weight:600;text-align:left;width:1%;white-space:nowrap}
+/* [V31.21] كانت .bad معرّفةً لـ«.kv b» و«.big» فقط — فوسمُ الصفّ الطاغي في
+   جرد الأحداث كان يُكتب في HTML ولا يظهر على الشاشة. أي حارسٌ صامت. */
+td.n.bad{color:var(--halt)}
+.empty{color:var(--dim);font-size:13px;padding:10px 0}
+.tag{display:inline-block;font-family:var(--mono);font-size:11px;padding:2px 7px;border:1px solid var(--rule);border-radius:2px;color:var(--dim)}
+
+/* ── الدخول ── */
+#gateway{max-width:380px;margin:14vh auto;padding:0 20px}
+#gateway .c{padding:26px}
+#gateway h1{font-size:30px;margin-bottom:4px}
+#gateway input{width:100%;margin:14px 0 12px}
+#gateway button{width:100%}
+.err{color:var(--halt);font-size:13px;margin-top:10px;font-weight:500}
+.dn{display:none!important}
+.foot{margin-top:40px;padding-top:18px;border-top:1px solid var(--rule);color:var(--dim);font-size:12.5px}
+code{font-family:var(--mono);font-size:12px;background:var(--field);padding:1.5px 5px;border-radius:2px;border:1px solid var(--rule)}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+
+<div id="gateway">
+  <div class="c">
+    <p class="eyebrow">قياس</p>
+    <h1>لوحة الظلّ</h1>
+    <p class="sub">تحتاج جلسة إدارية للقراءة.</p>
+    <input id="mp" type="password" placeholder="كلمة المرور الرئيسية" autocomplete="current-password">
+    <button id="btnIn">دخول</button>
+    <p id="gerr" class="err dn"></p>
+  </div>
+</div>
+
+<div id="app" class="wrap dn">
+  <div class="hdr">
+    <p class="eyebrow">قياس · لا تنفيذ</p>
+    <h1>لوحة الظلّ</h1>
+    <p class="sub">هل يجوز أن تُلقي كل مفتاح — ولماذا لا.</p>
+    <div class="bar">
+      <button id="btnR">تحديث</button>
+      <!-- 📋 [V31.61] تقريرٌ نصّيّ كامل بدل لقطات الشاشة -->
+      <button id="btnCopy" title="ينسخ تقريراً نصّيّاً كاملاً إلى الحافظة">📋 نسخ التقرير</button>
+      <button id="btnFile" title="يُنزّل التقرير نفسه ملفّاً نصّياً">⬇️ ملف</button>
+      <select id="win">
+        <!-- ⏱️ [V31.58] نوافذُ قصيرة: رقعةٌ نُشرت قبل ساعات لا تُرى في متوسّط ثلاثة أيام -->
+        <option value="0.25">آخر ٦ ساعات</option>
+        <option value="1">آخر ٢٤ ساعة</option>
+        <option value="7">آخر ٧ أيام</option>
+        <option value="14">آخر ١٤ يوماً</option>
+        <option value="3">آخر ٣ أيام</option>
+      </select>
+      <span id="meta" class="tag">—</span>
+    </div>
+  </div>
+
+  <h2>لوحة المفاتيح</h2>
+  <p class="note">المفتاح لا يُلقى حتى يقرأ سبعةَ أيام نظيفة متصلة. والخانات السبع أدناه هي عدّادها.</p>
+  <div id="gates" class="gate"></div>
+
+  <h2>الدليل</h2>
+  <p class="note">من <code>client_events</code>. ما لا يُقرأ من المتصفّح مُعلَّم صراحةً في لوحة المفاتيح.</p>
+  <div id="ev" class="grid"></div>
+
+  <h2>🩺 سجلّ مشاكل الكباتن</h2>
+  <p class="note">لكل كابتن: حالته الآن (الإصدار · المصدر · الساعة · نبضة الويب) وما أصابه في النافذة المختارة —
+    مترجَماً من <code>client_events</code> و<code>system_alerts</code> إلى لغةٍ تُقرأ. اضغط اسماً لتقرأ خطّ زمنه.</p>
+  <div class="bar" style="margin:8px 0 10px">
+    <input id="capQ" placeholder="ابحث بالاسم أو الرقم…" style="flex:1;min-width:180px">
+    <span id="capMeta" class="tag">—</span>
+  </div>
+  <div id="caps" class="grid"></div>
+  <div id="capDetail" class="dn" style="margin-top:14px"></div>
+
+  <p class="foot">
+    ⚠️ <code>client_events</code> يكتبها العملاء بلا حدّ معدّل في القواعد.
+    والكنس مكتوبٌ فعلاً — في <code>purgeBloatCore</code> التي تُشغّلها
+    <code>dailyBloatGuard</code>، لا <code>nightlySummaryAndCleaner</code>
+    (كانت هذه الحاشية تشير إلى الدالّة الخطأ). فإن قال السطر العلويّ إن
+    المدى يتجاوز ثلاثة أيام، فالكنّاس مكتوبٌ ولا يعمل — وذلك عطبٌ يُلاحَق،
+    لا نصيحةٌ تُنفَّذ.
+  </p>
+</div>
+
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-database-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
+<script>
+const API="https://script.google.com/macros/s/AKfycbyiFprfbDKMwOG75eZl-V5_M7XmqLkmK49YBQjhHKr_Gka77Gmdgt6uU6K5KeXilMViDw/exec";
+const TOK="NAHLA_APP_4E9C71B8A6D3F250E1AC8B37D94F6021";
+try{firebase.initializeApp({apiKey:"AIzaSyAsmQKlCCZpCgfJG8AZM7fWmYPWVZkpjSQ",authDomain:"nahla-delivery-6b06f.firebaseapp.com",databaseURL:"https://nahla-delivery-6b06f-default-rtdb.europe-west1.firebasedatabase.app",projectId:"nahla-delivery-6b06f",storageBucket:"nahla-delivery-6b06f.firebasestorage.app",messagingSenderId:"592782211437",appId:"1:592782211437:web:4af068aab5807926bf0264"});}catch(e){}
+const db=firebase.database(), auth=firebase.auth();
+const $=id=>document.getElementById(id);
+
+/* ═══════════════════════════════════════════════════════════════════════
+   🔒 [V28] esc — كانت غائبة عن هذا الملف كلياً (صفر دالة تهريب)، وهو
+   وحده من بين لوحات النظام. وكل ما يُعرض هنا يكتبه **الكابتن** في
+   client_events، والتقطيع في Driver.html:2199 يقع في العميل وحده
+   فيُلتفّ عليه بنداء REST مباشر بتوكنه.
+   ⇒ cmd = "<img src=x onerror=…>" كان يُنفَّذ في هذه الصفحة، وهي في
+   تلك اللحظة تحمل جلسة signInWithCustomToken بدور admin ⇒ المهاجم
+   يقرأ ويكتب ledgers و active_orders و drivers_locations كلها.
+   و CSP هنا تحمل 'unsafe-inline' فمعالجات onerror مسموحة.
+   الحزام الثاني في القواعد: client_events صارت قائمةً بيضاء مقفلة.
+   ═══════════════════════════════════════════════════════════════════════ */
+function esc(s){ if(s==null) return '';
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+                  .replace(/"/g,'&quot;').replace(/'/g,'&#39;'); }
+
+const fmt=n=>Number(n||0).toLocaleString('ar-EG');
+const day=ts=>String(ts||'').slice(0,10);
+const pct=(a,b)=>b>0?(a/b*100):null;
+
+/* ── الدخول: نفس مسار admin.html بلا سرّ في الملف ── */
+$('btnIn').onclick=async()=>{
+  const pass=$('mp').value.trim(); if(!pass) return;
+  const e=$('gerr'); e.classList.add('dn'); $('btnIn').disabled=true; $('btnIn').textContent='جاري…';
+  try{
+    const r=await fetch(API,{method:"POST",body:JSON.stringify({action:"VERIFY_MASTER_PASS",pass,token:TOK})});
+    const d=await r.json();
+    if(!d||!d.success) throw new Error(d&&d.msg?d.msg:'كلمة المرور خاطئة.');
+    if(!d.firebase_token) throw new Error('لم يصل رمز فايربيس — تحقّق من مفاتيح الخدمة في Script Properties.');
+    await auth.signInWithCustomToken(d.firebase_token);
+    $('gateway').classList.add('dn'); $('app').classList.remove('dn');
+    load();
+  }catch(ex){
+    e.textContent=ex.message||'تعذّر الدخول.'; e.classList.remove('dn');
+  }finally{ $('btnIn').disabled=false; $('btnIn').textContent='دخول'; }
+};
+$('mp').addEventListener('keydown',ev=>{ if(ev.key==='Enter') $('btnIn').click(); });
+$('btnR').onclick=load;
+$('win').onchange=load;
+
+/* ═══════════════════════ القراءة والحساب ═══════════════════════ */
+/* ═══════════════════════════════════════════════════════════════════════════
+   ⏳ [V31.50] القراءة بالنافذة — اللوحة كانت تُنزّل السجلّ كلّه فتبدو معطّلة
+   ───────────────────────────────────────────────────────────────────────────
+   كان: db.ref('client_events').once('value') — عقدةٌ واحدة تضمّ **كل** أحداث
+   الأسطول لثلاثة أيام (٧٠ ألف write_late_ok وحدها في قياس ٠٨/٠٩ · ١٢٥ جهازاً).
+   عشرات الميغابايتات في نداءٍ واحد ⇒ المتصفّح يعلَق دقائق أو ينفد، ولا يرمي
+   خطأً — فتبقى «جاري القراءة…» أبداً، واللوحة تبدو معطّلة وهي تعمل.
+   الآن ثلاث خطوات، كلٌّ منها صغير:
+     ① فهرس الهواتف من client_events_meta (طفلٌ واحد لكل هاتف — V31.37)،
+        وإن غاب (عملاءُ قدامى لا يكتبونه) فمن drivers_locations.
+     ② لكل هاتف: orderByKey().startAt(<الحدّ>) — والمعرّفات تبدأ بالطابع الزمني
+        بالأساس ٣٦ (Date.now().toString(36)) فهي مرتّبةٌ زمنياً معجمياً.
+        وlimitToLast(٦٠٠) سقفٌ لكل هاتف كي لا يُغرق جهازٌ واحد اللوحة.
+     ③ تقدّمٌ مرئيّ: «٣٧ / ١٢٥ هاتفاً» — فلا يُظنّ العطلُ صمتاً مرّةً أخرى.
+   والنتيجة نفسها: rows بالشكل ذاته، وكل ما بعدها بلا تغيير. */
+const READ_CAP_PER_PHONE = 600, READ_PARALLEL = 12, READ_TIMEOUT_MS = 20000;
+function withTo(p, ms, tag){ return Promise.race([p, new Promise((_,rej)=>setTimeout(()=>rej(new Error(tag||'timeout')), ms))]); }
+/* [V31.51] أربعة مصادرَ للفهرس، ولكلٍّ مهلته — والخطأ **يُسمّي** أيّها سقط ولماذا.
+   الرسالة العامّة («فارغتان أو مرفوضتان») أضاعت دقائق: السبب كان قاعدةً ناقصة
+   لـclient_events_meta لا شيئاً آخر. ما يُقال في الشاشة يجب أن يكفي للإصلاح. */
+/* ═══════════════════════════════════════════════════════════════════════════
+   📄 [V31.52] file:// لا يتصل بقاعدة البيانات — والعَرَض «مهلة» في كل مصدر
+   ───────────────────────────────────────────────────────────────────────────
+   الشاشة قالت: كل المصادر الأربعة «مهلة» — حتى client_events_meta الصغيرة. ولا
+   شيء يُنتج ذلك إلا **غياب الاتصال أصلاً**: الصفحة مفتوحة من مجلّدٍ مؤقّت
+   (file:///C:/Users/…/Temp/…/Monitor.html) لا من الموقع. مقبس RTDB لا يقوم على
+   أصلٍ file:، بينما Master وليدر تعملان لأنهما مستضافتان. فالعلاج ليس في اللوحة
+   بل في مكان فتحها. ونقولها **قبل** الانتظار لا بعد أربع مهل. */
+if(location.protocol === 'file:'){
+  document.addEventListener('DOMContentLoaded', function(){
+    const b=document.createElement('div');
+    b.style.cssText='background:#7f1d1d;color:#fff;padding:14px 18px;font-weight:800;line-height:1.9;position:sticky;top:0;z-index:99';
+    b.innerHTML='📄 هذه الصفحة مفتوحة من ملفٍّ محليّ (file://) — ولا يقوم اتصال قاعدة البيانات على هذا الأصل، فكل قراءة ستنتهي بـ«مهلة».<br>'+
+                '<span style="font-weight:600">ارفع Monitor.html إلى الموقع وافتحها من https://shrkttwsylrqmathnan-netizen.github.io/NHLwithalhut/Monitor.html — أو شغّلها محلياً على خادمٍ: '+
+                '<code style="background:#00000030;padding:2px 6px;border-radius:6px">python -m http.server 8080</code> ثم http://localhost:8080/Monitor.html</span>';
+    document.body.insertBefore(b, document.body.firstChild);
+  });
+}
+window.__idxDiag = [];
+async function phoneIndex(){
+  const sources = [
+    { name:'client_events_meta', ref:()=>db.ref('client_events_meta'),  ms:15000 },
+    { name:'drivers_locations',  ref:()=>db.ref('drivers_locations'),   ms:25000 },
+    { name:'drivers_presence',   ref:()=>db.ref('drivers_presence'),    ms:15000 },
+    { name:'daily_metrics',      ref:()=>db.ref('daily_metrics'),       ms:25000 }
+  ];
+  __idxDiag = [];
+  for(const src of sources){
+    try{
+      const snap=await withTo(src.ref().once('value'), src.ms, 'مهلة');
+      const ks=Object.keys(snap.val()||{}).filter(k=>/^\d{8,}$/.test(k));
+      __idxDiag.push(src.name+': '+ks.length);
+      if(ks.length) return ks;
+    }catch(ex){
+      const m=String(ex&&ex.message||ex);
+      __idxDiag.push(src.name+': '+(/permission|denied/i.test(m)?'مرفوض (قاعدة القراءة)':m).slice(0,40));
+    }
+  }
+  return [];
+}
+async function readWindow(days){
+  const cutMs = Date.now() - days*86400000;
+  const cutKey = cutMs.toString(36);
+  const phones = await phoneIndex();
+  if(!phones.length) throw new Error('لا فهرس هواتف · ' + (window.__idxDiag||[]).join(' · ') + ' — إن كان meta «مرفوضاً» فانشر القواعد (V31.51 تُضيف .read للإدارة)');
+  const rows=[]; let done=0;
+  for(let i=0;i<phones.length;i+=READ_PARALLEL){
+    const batch=phones.slice(i,i+READ_PARALLEL);
+    await Promise.all(batch.map(async ph=>{
+      try{
+        const snap=await withTo(db.ref('client_events/'+ph).orderByKey().startAt(cutKey).limitToLast(READ_CAP_PER_PHONE).once('value'), READ_TIMEOUT_MS, 'ph_timeout');
+        const evs=snap.val()||{};
+        Object.keys(evs).forEach(k=>{ const r=evs[k]; if(r&&r.ev){ const t=Date.parse(r.ts||''); if(!isFinite(t)||t>=cutMs) rows.push({ph,...r}); } });
+      }catch(ex){ console.warn('ph', ph, ex && ex.message); }
+      done++;
+    }));
+    $('meta').textContent='جاري القراءة… '+done+' / '+phones.length+' هاتفاً';
+  }
+  return rows;
+}
+async function load(){
+  $('meta').textContent='جاري القراءة…';
+  let rows=[];
+  try{
+    rows = await readWindow(Number($('win').value)||7);
+  }catch(ex){
+    $('meta').textContent='تعذّرت القراءة';
+    $('gates').innerHTML='<div class="g" data-s="halt"><i class="flag"></i><div class="mid">'+
+      '<div class="key">READ_FAILED</div><div class="why">'+esc(ex.message||'')+
+      ' — تحقّق أن جلستك admin وأن قواعد V3.0 منشورة.</div></div><div class="end"></div></div>';
+    $('ev').innerHTML=''; return;
+  }
+
+  /* ── [V3.1] الحسّاس الأساسي: العقد السيرفرية ──────────────────────────
+     قبل V3.1 كانت .read: false فتقرأ اللوحة مرآةً ثانوية في client_events.
+     والمرآة تفقد from→to، و legacy_usage/gate لا يُبَثّ فيها إطلاقاً — وهو
+     الشرط الوحيد لمفتاح ENFORCE_ENTITY_STOKEN. الآن نقرأ الأصل، ونُبقي
+     المرآة سنداً: إن غاب أحدهما يعمل الآخر. */
+  let SRV={shadow:{},gate:{},fallback:{},opsN:0,ok:false};
+  try{
+    /* [V31.50] وهذه الثلاثة أيضاً كانت بلا حدّ — ops تنمو بعدد الأوامر. سقفٌ ومهلة
+       كي لا تتجمّد اللوحة في القراءة الثانية بعد أن أُصلحت الأولى. */
+    const [sc,lu,op]=await Promise.all([
+      withTo(db.ref('shadow_compare').limitToLast(3000).once('value'), 15000, 'shadow_timeout'),
+      withTo(db.ref('legacy_usage').once('value'), 10000, 'legacy_timeout'),
+      withTo(db.ref('ops').limitToLast(3000).once('value'), 15000, 'ops_timeout')
+    ]);
+    SRV.shadow   = sc.val()||{};
+    const l      = lu.val()||{};
+    SRV.gate     = l.gate||{};
+    SRV.fallback = l.fallback||{};
+    SRV.opsN     = Object.keys(op.val()||{}).length;
+    SRV.ok=true;
+  }catch(ex){ SRV.ok=false; SRV.err=ex.message||''; }
+
+  const days=+$('win').value;   /* [V31.50] القراءة صارت بالنافذة أصلاً — هذا المرشّح صار سنداً لا حاجةً */
+  const cutoff=new Date(Date.now()-days*86400000).toISOString();
+  rows=rows.filter(r=>String(r.ts||'')>=cutoff);
+  /* ⚡ [V31.21] كان: String(a.ts).localeCompare(String(b.ts)).
+     و localeCompare يستدعي محرّك المقارنة اللغوية لكل زوج — أبطأ من
+     المقارنة النصّية بعشرات المرّات. ولم يكن يُلحَظ عند بضعة آلاف من
+     الأحداث؛ عند **مليون** صار يشلّ اللوحة قبل أن تُرسم.
+     وطوابع ISO تُرتَّب نصّياً ترتيباً صحيحاً بحكم شكلها (سنة-شهر-يوم،
+     كلٌّ بعرضٍ ثابت وأصفارٍ بادئة) — فالنتيجة مطابقة، والكلفة تسقط. */
+  rows.sort((a,b)=>{ const x=String(a.ts), y=String(b.ts); return x<y?-1:x>y?1:0; });
+
+  const C=ev=>rows.filter(r=>r.ev===ev).length;
+  const byDay=ev=>{ const m={}; rows.forEach(r=>{ if(r.ev===ev) m[day(r.ts)]=(m[day(r.ts)]||0)+1; }); return m; };
+
+  /* 🔴 [V31.21] الاحتفاظ المصمَّم لـclient_events ثلاثة أيام (RETAIN في
+     index.js). فوجودُ أحداثٍ أقدم من ذلك ليس تفصيلاً — هو دليلٌ على أن
+     dailyBloatGuard لا يكنس. وقد بقي هذا مخفيّاً لأن اللوحة كانت تعرض
+     المدى ولا تحكم عليه: عرضت «29-08 ← 04-09» ومرّ الأمر كأنه طبيعي. */
+  const _spanDays = rows.length
+    ? Math.round((new Date(rows[rows.length-1].ts) - new Date(rows[0].ts))/86400000) : 0;
+  const _staleKeep = _spanDays > 3 && (Number($('win').value)||7) > 3;   /* [V31.58] لا حكمَ على الكنس من نافذةٍ قصيرة */
+  $('meta').textContent=fmt(rows.length)+' حدثاً · '+
+    (rows.length?day(rows[0].ts)+' ← '+day(rows[rows.length-1].ts):'لا بيانات')+
+    ' · المصدر: '+(SRV.ok?'السجلّ السيرفري ✓':'المرآة فقط ⚠')+
+    (_staleKeep?'  ⚠ '+_spanDays+' يوماً محفوظة والمصمَّم ٣ — الكنس لا يعمل':'');
+  window.__staleKeep = _staleKeep;
+  window.__spanDays  = _spanDays;
+  window.__spanFrac  = Math.max(0.05, Number($('win').value)||1);   /* [V31.58] المدى المطلوب بأجزاء اليوم */
+
+  renderGates(rows,C,byDay,SRV);
+  renderEvidence(rows,C,SRV);
+  window.__rows = rows;
+  try{ await renderCaptains(rows); }catch(ex){ $('capMeta').textContent='تعذّر: '+(ex.message||''); }
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   🩺 [V31.36] سجلّ مشاكل الكباتن — القنوات كانت تكتب، ولم يكن لها وجهٌ باسم الكابتن
+   ───────────────────────────────────────────────────────────────────────────
+   كل ما بُني في V31.27–35 يكتب: client_events (js_error · tap_no_socket · shift_over_blocked ·
+   session_superseded · slo_write_fail …)، drivers_locations (ver · src · skew · web_at · web_disc)،
+   system_alerts (web_dead · skew · shown-rate). لكنها كانت تُقرأ في الكونسول أو مجمَّعةً.
+   هنا تُقرأ **بالاسم**: قائمةٌ مرتّبة بمن يعاني أكثر، وخطّ زمنٍ مترجَم لكلٍّ منهم، وتشخيصٌ
+   بثلاث جمل — بدل الفحص اليدوي. */
+/*@schema:dict@*/ /* مولَّدٌ من tools/events.schema.json — لا تُعدَّل يدوياً */
+const EV_DICT = {
+  js_error: { s:3, t:"خطأ برمجي في التطبيق", h:"المكدّس في Crashlytics · الإصدار والسطر في الحدث" },
+  tap_no_socket: { s:3, t:"ضغط «متاح» بلا اتصالٍ بالخادم", h:"شبكة أو VPN — راجع reason" },
+  fb_disconnected: { s:1, t:"انقطع مقبس فايربيس", h:"عابرٌ غالباً؛ يهمّ إن تكرّر" },
+  activate_fail: { s:3, t:"فشل تفعيل «متاح»", h:"raw يقول: مهلة أم رفض" },
+  write_late_ok: { s:1, t:"كتابةٌ وصلت متأخّرةً (ms)", h:"شبكة بطيئة — ليست عطباً" },
+  shift_over_blocked: { s:2, t:"ضغط «متاح» بعد انتهاء شفته", h:"صحيح — يحتاج فتح الشفت من الإدارة إن أراد" },
+  shift_degraded: { s:2, t:"تعذّر تسجيل الشفت — يعمل بلا نهاية", h:"GAS لم يستجب — why يقول السبب" },
+  shift_gate_blocked: { s:1, t:"خارج نافذة شفته", h:"رسالة لا حراسة" },
+  session_superseded: { s:2, t:"دخل من جهازٍ آخر — هذا الجهاز خرج", h:"reason = معرّف الجهاز الجديد" },
+  hard_reauth: { s:2, t:"إعادة مصادقةٍ كاملة", h:"التوكن مات وشُفي — uid/match في why" },
+  hard_reauth_nopass: { s:3, t:"مصادقةٌ ميّتة ولا مفتاح — لا شفاء", h:"قبل V31.32: كلمة عربية؛ بعدها لا يجب أن يقع" },
+  auth_banner_shown: { s:3, t:"ظهرت لافتة «انقطع الاتصال الآمن»", h:"٣ رفوض متتالية" },
+  relogin_tap: { s:1, t:"ضغط إعادة تسجيل الدخول", h:"" },
+  tok_refresh_miss: { s:2, t:"فشل التجديد الرخيص — دخولٌ كامل", h:"reason: no_session · banned · Code.gs قديم" },
+  login_get_fallback: { s:1, t:"الدخول عاد إلى GET", h:"Code.gs لم يُنشر بعد" },
+  stoken_store_fail: { s:2, t:"تعذّر حفظ الجلسة على الجهاز", h:"تخزين ممتلئ أو ممنوع" },
+  slo_write_fail: { s:2, t:"القواعد ترفض slo_events", h:"القواعد لم تُنشر" },
+  diag_write_fail: { s:2, t:"القواعد ترفض ver/skew/src", h:"القواعد لم تُنشر" },
+  tl_write_fail: { s:1, t:"القواعد ترفض order_timeline", h:"القواعد لم تُنشر" },
+  ack_write_fail: { s:2, t:"القواعد ترفض offer_ack", h:"القواعد لم تُنشر" },
+  preflight: { s:2, t:"فحص الجاهزية وجد مشكلة", h:"reason: net · vpn · auth · skew · notif · nofix" },
+  version_blocked: { s:3, t:"نسخته أقدم من الحدّ — مُنع", h:"يحتاج تحديث" },
+  stale_status_drop: { s:1, t:"أُسقطت حالةٌ قديمة (سباق)", h:"want=1 وهو يريد متاح — epoch/now في why" },
+  mirror_off_reassert: { s:2, t:"المرآة أطفأته فأعاد التشغيل", h:"قبل V31.35: تصارع الأصليّ/الويب" },
+  gps_slow: { s:1, t:"الموقع بطيء", h:"" },
+  decline: { s:0, t:"رفض/انقضاء عرض", h:"reason: manual · expired" },
+  break_fail: { s:2, t:"فشل «استراحة»", h:"" },
+  fail_net_write: { s:2, t:"فشل كتابة شبكية", h:"" },
+  fail_offline_queue_push: { s:2, t:"فشل حفظ الطابور بلا إنترنت", h:"تخزين" },
+  day_rollover: { s:0, t:"بدأ يومٌ جديد", h:"" },
+  bridge_record_fail: { s:1, t:"الجسر الأصلي لم يستجب", h:"" },
+  gas_retry: { s:1, t:"أُعيد نداء الخادم بعد خطأٍ شبكي", h:"reason = الخطأ · ms = الانتظار" },
+  bundle_hop: { s:1, t:"انتقل بين المستقرّ والكناري", h:"reason: to_canary · to_stable" },
+  bundle_defer: { s:0, t:"أُجّل الانتقال لطلبٍ نشط", h:"" },
+  tunables_applied: { s:0, t:"طُبّق ضبطٌ من الخادم", h:"reason = المفاتيح" },
+  socket_silent: { s:3, t:"مقبس فايربيس صامتٌ والشبكة قائمة", h:"ms = الثواني · reason: heal · hard · banner — هذا هو عطب «العدّادات صفر»" },
+  socket_recovered: { s:1, t:"عاد المقبس بعد صمت", h:"ms = مدّة الصمت" },
+  boot_auth_fail: { s:3, t:"فشلت المصادقة عند الإقلاع — اللافتة الحمراء", h:"reason = حالة الردّ" },
+  desired_off_external: { s:2, t:"أُطفئ من جهةٍ أخرى (مدير/إشعار)", h:"reason = by" },
+  desired_write_fail: { s:3, t:"القواعد ترفض كتابة الرغبة", h:"المُصالِح لن يراه — القواعد لم تُنشر؟" },
+  cloud_login: { s:0, t:"دخولٌ سحابي", h:"reason = الحالة" },
+  cloud_login_fallback: { s:1, t:"الدخول عاد إلى Apps Script", h:"reason: not_mirrored (طبيعيّ مرّة) · no_pepper (اضبط PW_PEPPER)" },
+  cloud_login_miss: { s:1, t:"تعذّر الدخول السحابي", h:"شبكة أو الدالّة لم تُنشر" },
+  cloud_refresh_miss: { s:1, t:"تعذّر التجديد السحابي", h:"" },
+  car_no_base: { s:2, t:"طلب سيارة بلا تسعيرة منطقة", h:"reason = المنطقة — أضف رقمها في قائمة المطعم" },
+  cloud_breaker_open: { s:2, t:"أُغلق باب السحابة ٣٠ د بعد فشلين", h:"driverLogin/refreshSession تفشلان — راجع PW_PEPPER وصلاحية createCustomToken" },
+  auto_reload: { s:0, t:"أُعيد تحميل الصفحة لالتقاط نسخةٍ جديدة", h:"ms = عمر الصفحة بالدقائق" },
+  socket_probe: { s:3, t:"فحصٌ ذاتيّ عند صمت المقبس", h:"tok= رمز الهويّة · rest= رقم الحالة · skew= انحراف الساعة من ترويسة الخادم · net= الإنترنت العامّ" },
+  hard_reauth_skipped: { s:1, t:"أُلغيت إعادة المصادقة الكاملة (وقايةً)", h:"reason: offline · no_net · no_token — لا نهدم جلسةً لا نستطيع بناءها" },
+  hard_reauth_pre_fail: { s:2, t:"فشل تجهيز الرمز قبل إعادة المصادقة", h:"الجلسة القديمة سليمة — لم يُهدم شيء" },
+  reconnect_fail: { s:2, t:"فشل إعادة بناء مقبس فايربيس", h:"goOffline/goOnline رمت" },
+  reload_deferred: { s:1, t:"أُجّلت إعادة التحميل لطلبٍ نشط", h:"" },
+  rewire_on_focus: { s:1, t:"أُعيد بناء المقبس عند فتح التطبيق", h:"كان مغلقاً والشبكة قائمة" },
+  rewire_on_online: { s:1, t:"أُعيد بناء المقبس عند عودة الشبكة", h:"" },
+  rewire_on_stall: { s:2, t:"أُعيد بناء المقبس بعد كتابةٍ متعثّرة", h:"ms = زمن الكتابة — مقبسٌ ميّتٌ وظيفياً رغم أنه «متصل»" },
+  blackbox: { s:3, t:"📦 ما جرى أثناء انقطاع المقبس (مُسجَّلٌ على القرص)", h:"يُفرَّغ عند عودة المقبس — هذا ما كان مستحيلاً رؤيته" },
+  accept_blocked_offline: { s:3, t:"مُنع القبول لانقطاع المقبس", h:"وقايةٌ من «يقبل فيختفي الطلب»" },
+  forced_off_no_socket: { s:2, t:"أُطفئت الطلبات تلقائياً لانقطاع المقبس", h:"ms = ثواني الانقطاع" },
+  native_offer: { s:1, t:"وصل عرضٌ من الطبقة الأصلية", h:"البند ① — المقبس خارج WebView" },
+  native_socket_state: { s:1, t:"حالة المقبس الأصليّ", h:"reason: up · down" },
+  native_offer_gone: { s:1, t:"سُحب الطلب (بلاغٌ أصليّ)", h:"" },
+  accept_via_native: { s:1, t:"قبولٌ عبر الطبقة الأصلية", h:"معاملةٌ ذرّية — لا قفلَ إلا بتأكيد" },
+  accept_ok_native: { s:0, t:"تأكّد القبول من الخادم", h:"" },
+  accept_rejected_native: { s:2, t:"رُفض القبول", h:"why: taken · err — الطلب لم يُقفل على شاشته" },
+  accept_native_fail: { s:2, t:"تعذّر نداء الجسر للقبول", h:"" },
+  desired_via_native: { s:0, t:"الرغبة كُتبت من الطبقة الأصلية", h:"" },
+  desired_native_fail: { s:1, t:"تعذّر نداء الجسر للرغبة", h:"" }
+};
+/*@/schema:dict@*/
+const CAP_IGNORE = new Set(['accept_local','accept_start','activate_ok','activate_guard_ok','break_ok','break_ok_retry','profile_saved','tok_refreshed','shadow_reject','shadow_err','write_late_ok','day_rollover','decline']);
+function evLbl(ev){ const d=EV_DICT[ev]; return d?d.t:ev; }
+function evSev(ev){ const d=EV_DICT[ev]; if(d) return d.s; return /fail|denied|blocked|error|err$/.test(ev)?2:1; }
+function agoTxt(iso){ if(!iso) return '—'; const m=Math.round((Date.now()-new Date(iso).getTime())/60000); if(!isFinite(m)) return '—'; if(m<1) return 'الآن'; if(m<60) return 'قبل '+m+' د'; if(m<1440) return 'قبل '+Math.round(m/60)+' س'; return 'قبل '+Math.round(m/1440)+' يوم'; }
+let CAP={ drv:{}, alerts:{}, byPhone:{} };
+
+async function renderCaptains(rows){
+  $('capMeta').textContent='جاري القراءة…';
+  const [dl, al] = await Promise.all([ db.ref('drivers_locations').once('value'), db.ref('system_alerts').limitToLast(400).once('value') ]);
+  CAP.drv = dl.val()||{}; CAP.alerts = al.val()||{};
+  const by={};
+  rows.forEach(r=>{ if(!r.ph||CAP_IGNORE.has(r.ev)) return; (by[r.ph]=by[r.ph]||[]).push(r); });
+  CAP.byPhone = by;
+  const phones = new Set([...Object.keys(by), ...Object.keys(CAP.drv).filter(p=>CAP.drv[p]&&CAP.drv[p].status==='active')]);
+  const list = [...phones].map(ph=>{
+    const d=CAP.drv[ph]||{}, evs=by[ph]||[];
+    let score=0; const kinds={};
+    evs.forEach(r=>{ const sv=evSev(r.ev); score+=sv; kinds[r.ev]=(kinds[r.ev]||0)+1; });
+    const now=Date.now();
+    const webAge = d.web_at ? Math.round((now-Date.parse(d.web_at))/60000) : null;
+    const flags=[];
+    if(d.status==='active' && webAge!==null && webAge>12) { flags.push('🧠 ويبه صامتٌ '+webAge+' د'); score+=6; }
+    if(Math.abs(Number(d.skew)||0)>30000) { flags.push('🕐 ساعته منحرفة '+Math.round(Number(d.skew)/1000)+' ث'); score+=3; }
+    if(d.src==='asset') { flags.push('📦 على الاحتياطي المدفون'); score+=2; }
+    if(d.account_status==='banned') flags.push('⛔ محظور');
+    const alerts = Object.keys(CAP.alerts).filter(k=>String((CAP.alerts[k]||{}).message||'').indexOf(ph)>-1).length;
+    score += alerts*2;
+    return { ph, name:d.name||'—', d, evs, score, kinds, flags, alerts, last: evs.length?evs[evs.length-1].ts:null };
+  }).sort((a,b)=>b.score-a.score);
+  CAP.list=list;
+  $('capMeta').textContent=list.length+' كابتناً · '+list.filter(x=>x.score>=6).length+' يحتاجون نظرة';
+  drawCapList();
+}
+function drawCapList(){
+  const q=String($('capQ').value||'').trim();
+  const rows=(CAP.list||[]).filter(x=>!q||x.ph.indexOf(q)>-1||String(x.name).indexOf(q)>-1).slice(0,60);
+  $('caps').innerHTML = rows.map(x=>{
+    const d=x.d, sev = x.score>=10?'halt':x.score>=4?'wait':'go';
+    const top=Object.entries(x.kinds).sort((a,b)=>b[1]-a[1]).slice(0,3).map(([k,c])=>esc(evLbl(k))+' ×'+c).join(' · ');
+    return '<div class="g" data-s="'+sev+'" style="cursor:pointer" onclick="showCap(\''+esc(x.ph)+'\')"><i class="flag"></i><div class="mid">'+
+      '<div class="key">'+esc(x.name)+' <span style="opacity:.6;font-weight:600">'+esc(x.ph)+'</span></div>'+
+      '<div class="why">'+(d.status==='active'?'🟢 متاح':'⚪ '+esc(d.status||'—'))+' · '+esc(d.ver||'نسخة؟')+' · '+esc(d.src||'؟')+
+        (d.web_at?' · ويب '+agoTxt(d.web_at):'')+(x.flags.length?'<br>'+x.flags.map(esc).join(' · '):'')+
+        (top?'<br>'+top:'')+(x.alerts?'<br>🔔 '+x.alerts+' إنذار باسمه':'')+'</div></div>'+
+      '<div class="end"><span class="st">'+(x.evs.length?x.evs.length+' حدث':'هادئ')+(x.last?'<br><small>'+agoTxt(x.last)+'</small>':'')+'</span></div></div>';
+  }).join('') || '<p class="note">لا كباتن في النافذة.</p>';
+}
+$('capQ').addEventListener('input', drawCapList);
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   📋 [V31.61] تقريرٌ نصّيّ كامل — بدل لقطات الشاشة
+   ───────────────────────────────────────────────────────────────────────────
+   لقطة الشاشة تقتطع، ولا تُقرأ آلياً، وتُخفي خطوط الزمن. هذا يبني نصّاً واحداً
+   يحوي: المدى والمصدر · جرد الأنواع كاملاً · أعلى الأجهزة · ملخّص كل كابتنٍ
+   يحتاج نظرة · وخطوط زمن العشرة الأسوأ كاملةً (وأيّ كابتنٍ مفتوحٍ الآن).
+   زرّان: نسخٌ إلى الحافظة، وتنزيلُ ملفّ. */
+function buildReport(){
+  const L=[], rows=window.__rows||[], days=Number($('win').value)||7;
+  const pad=(x,w)=>String(x).padEnd(w);
+  L.push('═══ تقرير لوحة الظلّ — نحلة ═══');
+  L.push('وقت التقرير: '+new Date().toISOString());
+  L.push('النافذة: '+days+' يوم · الأحداث: '+rows.length+' · الكباتن: '+((CAP.list||[]).length));
+  L.push('المصدر: '+($('meta')?$('meta').textContent:''));
+  L.push('');
+  L.push('── جرد الأنواع ──');
+  const byEv={}; rows.forEach(r=>{ byEv[r.ev]=(byEv[r.ev]||0)+1; });
+  Object.entries(byEv).sort((a,b)=>b[1]-a[1]).forEach(([k,v])=>L.push('  '+pad(k,26)+String(v).padStart(7)));
+  L.push('');
+  L.push('── الإصدارات في الأسطول ──');
+  const byVer={}; (CAP.list||[]).forEach(c=>{ const v=(c.d&&c.d.ver)||'?'; byVer[v]=(byVer[v]||0)+1; });
+  Object.entries(byVer).sort((a,b)=>b[1]-a[1]).forEach(([k,v])=>L.push('  '+pad(k,26)+String(v).padStart(5)+' كابتناً'));
+  L.push('');
+  L.push('── الكباتن (الأعلى حاجةً للنظر) ──');
+  (CAP.list||[]).slice(0,40).forEach(c=>{
+    const d=c.d||{};
+    L.push('  '+c.ph+' · '+(c.name||'—')+' · '+(d.ver||'?')+' · '+(d.status||'—')+' · src='+(d.src||'?')
+      +' · skew='+(d.skew!=null?Math.round(Number(d.skew)/1000)+'s':'?')
+      +' · web_at='+agoTxt(d.web_at)+' · fcm='+(d.fcm_token?'✓':'✗')+' · أحداث='+c.evs.length
+      +(c.flags.length?(' · '+c.flags.join(' · ')):''));
+    const top=Object.entries(c.kinds).sort((a,b)=>b[1]-a[1]).slice(0,5).map(([k,v])=>k+'×'+v).join(' · ');
+    if(top) L.push('      '+top);
+  });
+  L.push('');
+  L.push('── خطوط الزمن (أسوأ ١٠ كباتن · كل الأحداث) ──');
+  (CAP.list||[]).slice(0,10).forEach(c=>{
+    L.push('');
+    L.push('  ▶ '+c.ph+' · '+(c.name||'—')+' · '+((c.d&&c.d.ver)||'?'));
+    c.evs.slice(-120).forEach(r=>{
+      const meta=[r.why&&('why='+r.why), r.cmd&&('cmd='+r.cmd), r.ms!=null&&('ms='+r.ms), r.oid&&('#'+String(r.oid).slice(-6)), r.net, r.ver, r.ln!=null&&('ln='+r.ln)].filter(Boolean).join(' · ');
+      L.push('    '+String(r.ts||'').replace('T',' ').slice(0,19)+'  '+pad(r.ev,24)+'  '+meta);
+    });
+  });
+  return L.join('\n');
+}
+function reportName(){ return 'nahla-monitor-'+new Date().toISOString().replace(/[:.]/g,'-').slice(0,19)+'.txt'; }
+$('btnCopy').addEventListener('click', async ()=>{
+  const btn=$('btnCopy'), old=btn.textContent;
+  try{
+    const t=buildReport();
+    try{ await navigator.clipboard.writeText(t); }
+    catch(e){ const ta=document.createElement('textarea'); ta.value=t; ta.style.position='fixed'; ta.style.opacity='0';
+      document.body.appendChild(ta); ta.select(); document.execCommand('copy'); ta.remove(); }
+    btn.textContent='✅ نُسخ ('+Math.round(t.length/1024)+' ك.ب)';
+  }catch(e){ btn.textContent='⚠️ تعذّر — استعمل «ملف»'; }
+  setTimeout(()=>{ btn.textContent=old; }, 2500);
+});
+$('btnFile').addEventListener('click', ()=>{
+  try{
+    const blob=new Blob([buildReport()],{type:'text/plain;charset=utf-8'});
+    const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=reportName();
+    document.body.appendChild(a); a.click(); setTimeout(()=>{ URL.revokeObjectURL(a.href); a.remove(); }, 1000);
+  }catch(e){ alert('تعذّر التنزيل: '+(e&&e.message||e)); }
+});
+window.showCap=function(ph){
+  const x=(CAP.list||[]).find(y=>y.ph===ph); if(!x) return;
+  const d=x.d, evs=x.evs.slice(-80).reverse();
+  const alerts=Object.keys(CAP.alerts).filter(k=>String((CAP.alerts[k]||{}).message||'').indexOf(ph)>-1).map(k=>CAP.alerts[k]).sort((a,b)=>{ const x=String(a.ts||''), y=String(b.ts||''); return x<y?1:x>y?-1:0; }).slice(0,10);   /* ISO تُرتَّب نصّياً — لا localeCompare (٤-٣) */
+  /* تشخيصٌ بثلاث جمل من الأرقام لا من الحدس */
+  const dx=[];
+  const cnt=k=>x.kinds[k]||0;
+  if(d.status==='active'&&d.web_at&&(Date.now()-Date.parse(d.web_at))/60000>12) dx.push('تطبيقه صامتٌ والموقع يتحدّث ⇒ لن يُرنّ له — اتصل به ليضغط «إعادة تسجيل الدخول».');
+  if(cnt('js_error')>=3) dx.push('أخطاءٌ برمجية متكرّرة ('+cnt('js_error')+') — افتح Crashlytics على إصداره '+(d.ver||'؟')+'.');
+  if(cnt('tap_no_socket')+cnt('fb_disconnected')>=5) dx.push('شبكته تنقطع كثيراً ('+(cnt('tap_no_socket')+cnt('fb_disconnected'))+') — VPN أو تغطية.');
+  /* [V31.55] الانقطاع المتواتر ليس إزعاجاً: كل انقطاعٍ يتجاوز المهلة يُقصيه من التوزيع */
+  if(cnt('fb_disconnected')>=20) dx.push('🔌 مقبسه ينقطع كثيراً ('+cnt('fb_disconnected')+') — كل انقطاعٍ طويل يُخرجه من التوزيع. تحقّق من تغطيته ومن استثناء التطبيق من توفير البطارية.');
+  if(cnt('activate_fail')>=3) dx.push('يفشل في التفعيل مراراً ('+cnt('activate_fail')+') — راجع raw: مهلة (شبكة) أم رفض (مصادقة).');
+  if(cnt('hard_reauth')+cnt('hard_reauth_nopass')+cnt('auth_banner_shown')>=2) dx.push('مصادقته تموت وتُشفى — إن كان على نسخةٍ قبل 31.32 فكلمة مروره عربية غالباً.');
+  if(cnt('shift_over_blocked')>=2) dx.push('يحاول العودة بعد انتهاء شفته ('+cnt('shift_over_blocked')+') — افتح شفته من الإدارة إن أردت.');
+  if(cnt('session_superseded')>=1) dx.push('يدخل من أكثر من جهاز — جهازٌ واحد فقط يعمل الآن.');
+  if(Math.abs(Number(d.skew)||0)>30000) dx.push('ساعة جهازه منحرفة '+Math.round(Number(d.skew)/1000)+' ث — «الوقت التلقائي».');
+  if(d.src==='asset') dx.push('يعمل من الاحتياطي المدفون — شبكةٌ بطيئة عند الإقلاع أو استضافة.');
+  if(!dx.length) dx.push(evs.length?'لا نمطَ واضحاً — أحداثٌ متفرّقة.':'هادئ — لا مشاكل مسجّلة في النافذة.');
+  const head='<div class="g" data-s="'+(x.score>=10?'halt':x.score>=4?'wait':'go')+'"><i class="flag"></i><div class="mid">'+
+    '<div class="key">'+esc(x.name)+' · '+esc(ph)+'</div>'+
+    '<div class="why">الإصدار <b>'+esc(d.ver||'؟')+'</b> · المصدر <b>'+esc(d.src||'؟')+'</b> · الساعة <b>'+(d.skew!=null?Math.round(Number(d.skew)/1000)+' ث':'؟')+'</b> · نبضة الويب <b>'+agoTxt(d.web_at)+'</b> · النبضة <b>'+agoTxt(d.last_update)+'</b> · الحالة <b>'+esc(d.status||'—')+'</b>'+
+    (d.sess&&d.sess.dev?' · جهاز <b>'+esc(String(d.sess.dev).slice(0,8))+'</b>':'')+(d.fcm_token?' · رمز FCM ✓':' · رمز FCM ✗')+'</div>'+
+    '<div class="why" style="margin-top:6px"><b>التشخيص:</b><br>'+dx.map(esc).join('<br>')+'</div></div>'+
+    '<div class="end"><button onclick="$(\'capDetail\').classList.add(\'dn\')">إغلاق</button></div></div>';
+  const al = alerts.length ? '<h3>إنذارات باسمه</h3>'+alerts.map(a=>'<div class="g" data-s="wait"><i class="flag"></i><div class="mid"><div class="why">'+esc(String(a.ts||'').replace('T',' ').slice(0,16))+' · '+esc(a.message||'')+'</div></div><div class="end"></div></div>').join('') : '';
+  const tl = '<h3>خطّ الزمن (آخر '+evs.length+')</h3>'+(evs.map(r=>{
+    const sv=evSev(r.ev), tag=sv>=3?'halt':sv===2?'wait':'go';
+    const meta=[r.why&&('why: '+r.why), r.cmd&&('cmd: '+r.cmd), r.ms!=null&&('ms: '+r.ms), r.oid&&('#'+String(r.oid).slice(-6)), r.net&&r.net, r.ver&&r.ver, r.ln!=null&&('سطر '+r.ln)].filter(Boolean).join(' · ');
+    return '<div class="g" data-s="'+tag+'"><i class="flag"></i><div class="mid"><div class="key">'+esc(String(r.ts||'').replace('T',' ').slice(5,19))+' — '+esc(evLbl(r.ev))+'</div><div class="why">'+esc(meta)+(EV_DICT[r.ev]&&EV_DICT[r.ev].h?' <span style="opacity:.6">('+esc(EV_DICT[r.ev].h)+')</span>':'')+'</div></div><div class="end"></div></div>';
+  }).join('')||'<p class="note">لا أحداث.</p>');
+  $('capDetail').innerHTML=head+al+tl; $('capDetail').classList.remove('dn'); $('capDetail').scrollIntoView({behavior:'smooth',block:'start'});
+};
+
+/* عدد الأيام النظيفة المتصلة حتى اليوم (0..7)
+   🔴 [N-14] إصلاحٌ منقولٌ من مراقب نحلة الحيّ (Monitor.html V3.2 · cleanStreak):
+   كان يعدّ **اليوم بلا بيانات** يوماً نظيفاً — الشرط الوحيد `if(dirtyMap[d]) break;`
+   فنطاقٌ عمره أربعة أيام كان يقرأ ٧/٧. ويومٌ لم يُقَس ليس يوماً نظيفاً بل يومٌ
+   لا نعرف عنه شيئاً. الآن: اليوم نظيفٌ إن **وُجدت فيه أحداث** ولم يكن ملوّثاً.
+   🔴 [N-14·مراجعة] seenDays مطلوب كما في الحيّ: بلا خريطته لا شهادة (كان الاختياريّ يُبقي الخلل في خانتَي
+   الإلزام وحذف GAS فتُقرآن «مؤهَّل» على نطاقٍ بلا بيانات). والخانتان السيرفريّتان تمرّران seenDays أدناه. */
+function cleanStreak(dirtyMap,seenDays){
+  let s=0;
+  for(let i=0;i<7;i++){
+    const d=new Date(Date.now()-i*86400000).toISOString().slice(0,10);
+    if(dirtyMap[d]) break;
+    if(!seenDays||!seenDays[d]) break;   /* لا بيانات = لا شهادة */
+    s++;
+  }
+  return s;
+}
+const slots=(n,na)=>{ let h='<div class="days">';
+  for(let i=0;i<7;i++) h+='<i class="'+(na?'na':(i<n?'on':''))+'"></i>';
+  return h+'</div><div class="dlbl">'+(na?'غير مقروء من المتصفّح':n+' / ٧ أيام نظيفة')+'</div>'; };
+
+function gateRow(key,state,why,extra){
+  const label={halt:'مقفل',wait:'يحتاج قراءة سيرفرية',go:'مؤهَّل'}[state];
+  return '<div class="g" data-s="'+state+'"><i class="flag"></i><div class="mid">'+
+    '<div class="key">'+key+'</div><div class="why">'+why+'</div>'+(extra||'')+
+    '</div><div class="end"><span class="st">'+label+'</span></div></div>';
+}
+
+function renderGates(rows,C,byDay,SRV){
+  const rej=C('shadow_reject'), err=C('shadow_err');
+  const legacy=C('create_legacy'), fb=C('create_fallback'), unsure=C('create_unsure');
+  const dirtyShadow=byDay('shadow_reject');
+  const dirtyCreate={}; Object.assign(dirtyCreate,byDay('create_legacy'),byDay('create_fallback'));
+  /* [N-14] الأيام التي وصلت منها أحداثٌ فعلاً — شهادةُ اليوم لا تُفترض. */
+  const seenDays={}; rows.forEach(r=>{ seenDays[day(r.ts)]=1; });
+  /* [N-14] وأخطاء الظلّ تُلوّث يومها: الحاكم إن لم يعمل فلا حكم يُقرأ. */
+  const dirtyShadowAll={}; Object.assign(dirtyShadowAll,dirtyShadow,byDay('shadow_err'));
+  const sShadow=cleanStreak(dirtyShadowAll,seenDays), sCreate=cleanStreak(dirtyCreate,seenDays);
+  const hasData=rows.length>0;
+
+  let h='';
+
+  if(!hasData){
+    h+=gateRow('— لا بيانات بعد —','halt',
+      'انشر الحزمة بالترتيب الموجود في README ثم عد بعد يوم. اللوحة تقرأ ولا تخترع.','');
+    $('gates').innerHTML=h; return;
+  }
+
+  /* 🔴 [N-14] (نقلٌ من V3.2 الحيّ) الخانة كانت تقرأ «مؤهَّل» والأخطاء مرتفعة في خانةٍ أخرى؛
+     وصفرُ الرفض حين يكون الحاكم معطَّلاً غيابُ محاكمة لا براءة — فأي خطأ ظلٍّ يقفلها. */
+  h+=gateRow('SHADOW_MODE = false',
+    sShadow>=7 && rej===0 && err===0 ? 'go' : 'halt',
+    err>0
+      ? fmt(err)+' نداء ظلٍّ فشل قبل أن يُقيَّم — فالمقارنة لم تجرِ أصلاً. أصلح shadow_err أولاً: '+
+        'صفرُ الرفض هنا يعني أن الحاكم صامت، لا أن الطريقين متوافقان.'
+      : (rej>0
+        ? fmt(rej)+' حكم رفض في النطاق. اقرأ كل واحد: هل هو عطبٌ كان يقع صامتاً، أم نقصٌ في جدول الحالات؟'
+        : (sShadow>=7 ? 'صفر رفض وصفر خطأ لسبعة أيام متصلة. الجدول يوافق سلوكك الفعلي.'
+                      : 'صفر رفض حتى الآن — لكن النطاق المقيس لم يبلغ سبعة أيام بعد.')),
+    slots(sShadow,false));
+
+  /* [V3.1] صار مقيساً: legacy_usage/gate مقروء للإدارة الآن. */
+  if(SRV.ok){
+    const dirtyGate={}; let gateHits=0;
+    Object.keys(SRV.gate).forEach(d=>{
+      let n=0; Object.keys(SRV.gate[d]||{}).forEach(k=>{ if(/no_token|bad_token/.test(k)) n+=Number(SRV.gate[d][k])||0; });
+      if(n>0){ dirtyGate[d]=n; gateHits+=n; }
+    });
+    const sGate=cleanStreak(dirtyGate,seenDays);   /* [N-14] يوم بلا أحداث ≠ يوم نظيف */
+    h+=gateRow('ENFORCE_ENTITY_STOKEN = true',
+      sGate>=7 && gateHits===0 ? 'go' : 'halt',
+      gateHits>0
+        ? fmt(gateHits)+' نداء بلا توكن جلسة صالح. واجهات قديمة ما زالت تعمل — والإلزام الآن يقطعها.'
+        : (sGate>=7 ? 'صفر نداء بلا توكن لسبعة أيام. كل الواجهات ترسل stoken.'
+                    : 'صفر نداء بلا توكن حتى الآن — النطاق النظيف لم يبلغ سبعة أيام.'),
+      slots(sGate,false));
+  }else{
+    h+=gateRow('ENFORCE_ENTITY_STOKEN = true','wait',
+      'تعذّرت قراءة <code>legacy_usage</code> — انشر قواعد V3.1 أو شغّل <code>AUDIT_LegacyUsage()</code> في محرّر GAS.',
+      slots(0,true));
+  }
+
+  h+=gateRow('إزالة المسار القديم من Restaurant.html',
+    sCreate>=7 && legacy===0 && fb===0 ? 'go' : 'halt',
+    (legacy+fb)>0
+      ? fmt(legacy)+' إنشاء بالمسار القديم و '+fmt(fb)+' سقوطاً آمناً. المطاعم ما زالت تكتب مباشرةً — والإزالة الآن تُفقد طلبات.'
+      : (sCreate>=7 ? 'صفر إنشاء قديم لسبعة أيام. createOrder يحمل كل الحركة.'
+                    : 'صفر إنشاء قديم حتى الآن — النطاق النظيف لم يبلغ سبعة أيام.'),
+    slots(sCreate,false));
+
+  /* [V3.1] مفتاح جديد صار مقيساً: هل ما زالت معالجات GAS تُستعمل؟ */
+  if(SRV.ok){
+    const dirtyFb={}; let fbHits=0;
+    Object.keys(SRV.fallback).forEach(d=>{
+      let n=0; Object.keys(SRV.fallback[d]||{}).forEach(k=>{ n+=Number(SRV.fallback[d][k])||0; });
+      if(n>0){ dirtyFb[d]=n; fbHits+=n; }
+    });
+    const sFb=cleanStreak(dirtyFb,seenDays);   /* [N-14] يوم بلا أحداث ≠ يوم نظيف */
+    h+=gateRow('حذف ACCEPT/COMPLETE/DECLINE من Code.gs',
+      sFb>=7 && fbHits===0 ? 'go' : 'halt',
+      fbHits>0
+        ? fmt(fbHits)+' نداء للمسار الاحتياطي السيرفري. كباتن يعتمدون عليه فعلاً — والحذف الآن يُفقد تسليمات.'
+        : (sFb>=7 ? 'صفر نداء احتياطي لسبعة أيام. صار الحذف آمناً بقياس لا بثقة.'
+                  : 'صفر نداء احتياطي حتى الآن — النطاق النظيف لم يبلغ سبعة أيام.'),
+      slots(sFb,false));
+  }
+
+  h+=gateRow('"active_orders": { ".write": false }','halt',
+    '🔴 <b>مفتاح إيقاف لعملك.</b> يحتاج المفاتيح الثلاثة أعلاه <i>مع</i> صفر كتابة مباشرة من كل عميل — وهذا لا يُقاس من المتصفّح. اقرأ <code>diagnoseCommands</code> وتأكّد أن كل عميل حُوّل. لو نُشر مبكراً عجزت المطاعم عن إنشاء أي طلب.',
+    slots(0,true));
+
+  h+=gateRow('App Check enforcement','wait',
+    'من كونسول فايربيس ← App Check. الشرط: نسبة توثيق > ٩٥٪ <i>وبعد</i> وصول بناء أندرويد 4.0 إلى الأسطول كاملاً. الإلزام المبكّر يقطع كل جهاز لم يُحدّث.',
+    slots(0,true));
+
+  if(err>0){
+    h+=gateRow('shadow_err = '+fmt(err),'halt',
+      'نداءات الظلّ تفشل قبل أن تُقيَّم. غالباً <code>orderCommand</code> غير منشور، أو عقدة <code>ops</code> ناقصة من القواعد. فالقياس معطّل — لا نظيف.','');
+  }
+  $('gates').innerHTML=h;
+}
+
+function renderEvidence(rows,C,SRV){
+  const st=C('accept_start'), lo=C('accept_local');
+  const lost=Math.max(0,st-lo);
+  const ms=rows.filter(r=>r.ev==='accept_local'&&r.ms>0).map(r=>+r.ms).sort((a,b)=>a-b);
+  const q=p=>ms.length?ms[Math.min(ms.length-1,Math.floor(ms.length*p))]:null;
+  const bOk=C('break_ok'), bFail=C('break_fail'), bRetry=C('break_ok_retry');
+  let h='';
+
+  /* قمع القبول — العطب الذي كان سيُرى هنا قبل أشهر من الشكوى */
+  const lossPct=pct(lost,st);
+  h+='<div class="c"><h3>قمع القبول</h3><p class="h3n">من الضغط إلى التسجيل المحلي</p>'+
+     '<div class="big '+(lost>0?'bad':'good')+'">'+(st?(100-(lossPct||0)).toFixed(1)+'٪':'—')+'</div>'+
+     '<p class="biglbl">نجاح من أول محاولة · الهدف > ٩٩.٥٪</p>'+
+     '<div class="kv"><span>ضغطات القبول</span><b>'+fmt(st)+'</b></div>'+
+     '<div class="kv"><span>سُجّلت محلياً</span><b class="good">'+fmt(lo)+'</b></div>'+
+     '<div class="kv"><span>لم تُسجَّل</span><b class="'+(lost?'bad':'good')+'">'+fmt(lost)+'</b></div>'+
+     '<div class="kv"><span>الزمن الوسيط</span><b>'+(q(.5)!=null?q(.5)+' م.ث':'—')+'</b></div>'+
+     '<div class="kv"><span>نسبة ٩٥</span><b class="'+(q(.95)>2000?'bad':'')+'">'+(q(.95)!=null?q(.95)+' م.ث':'—')+'</b></div>'+
+     '</div>';
+
+  /* الاستراحة */
+  h+='<div class="c"><h3>الاستراحة</h3><p class="h3n">هل يصل الانصراف إلى الخادم؟</p>'+
+     '<div class="big '+(bFail>0?'bad':'good')+'">'+fmt(bFail)+'</div>'+
+     '<p class="biglbl">انصراف لم يتأكّد · الهدف صفر</p>'+
+     '<div class="kv"><span>تأكّد من أول محاولة</span><b class="good">'+fmt(bOk)+'</b></div>'+
+     '<div class="kv"><span>تأكّد بإعادة المحاولة</span><b class="'+(bRetry?'warn':'')+'">'+fmt(bRetry)+'</b></div>'+
+     '<div class="kv"><span>فشل أوّلي</span><b class="'+(bFail?'bad':'good')+'">'+fmt(bFail)+'</b></div>'+
+     '</div>';
+
+  /* الإنشاء */
+  const cs=C('create_server'), cd=C('create_dedup'), cl=C('create_legacy'), cf=C('create_fallback'), cu=C('create_unsure');
+  h+='<div class="c"><h3>إنشاء الطلبات</h3><p class="h3n">أي مسار يحمل الحركة؟</p>'+
+     '<div class="kv"><span>من السيرفر</span><b class="good">'+fmt(cs)+'</b></div>'+
+     '<div class="kv"><span>مُنع تكراره (cid)</span><b class="good">'+fmt(cd)+'</b></div>'+
+     '<div class="kv"><span>سقوط آمن</span><b class="'+(cf?'warn':'')+'">'+fmt(cf)+'</b></div>'+
+     '<div class="kv"><span>المسار القديم</span><b class="'+(cl?'bad':'good')+'">'+fmt(cl)+'</b></div>'+
+     '<div class="kv"><span>غير متيقَّن</span><b class="'+(cu?'bad':'')+'">'+fmt(cu)+'</b></div>'+
+     (cd>0?'<p class="h3n" style="margin-top:10px">كل «مُنع تكراره» طلبٌ مزدوج لم يحدث.</p>':'')+
+     '</div>';
+
+  /* أحكام الظلّ — الأهمّ */
+  /* [V3.1] الأصل أغنى من المرآة: يحمل from→to والدور والملكية. */
+  const gm={}; let srcLbl='المرآة (client_events)';
+  if(SRV.ok && Object.keys(SRV.shadow).length){
+    srcLbl='السجلّ السيرفري (shadow_compare)';
+    Object.keys(SRV.shadow).forEach(d=>{
+      const rec=SRV.shadow[d]||{};
+      Object.keys(rec).forEach(k=>{
+        const r=rec[k]||{};
+        if(!r.verdict||r.verdict==='allow'||r.verdict==='applied') return;
+        const key=(r.command||'?')+' · '+(r.from||'?')+' → '+(r.to||'—')+' · '+r.verdict;
+        gm[key]=(gm[key]||0)+1;
+      });
+    });
+  }else{
+    rows.filter(r=>r.ev==='shadow_reject').forEach(r=>{
+      const k=(r.cmd||'?')+' → '+(r.why||'?'); gm[k]=(gm[k]||0)+1; });
+  }
+  const gk=Object.keys(gm).sort((a,b)=>gm[b]-gm[a]);
+  h+='<div class="c" style="grid-column:1/-1"><h3>أحكام الظلّ</h3>'+
+     '<p class="h3n">كل صفٍّ هنا: طريقك القديم سمح بما يرفضه الجديد. · المصدر: '+srcLbl+'</p>';
+  if(!gk.length){
+    h+='<p class="empty">لا رفض في النطاق. الطريقان متوافقان — وهذا شرط إلقاء المفتاح الأول.</p>';
+  }else{
+    h+='<table><tr><th>الأمر ← الحكم</th><th>العدد</th></tr>';
+    /* [V28] esc: المفتاح مبنيّ من r.cmd و r.why (أو r.command/from/to/verdict)
+       وكلها نصوص يكتبها العميل. هذا كان سِنك الحقن الأول. */
+    gk.forEach(k=>h+='<tr><td><code>'+esc(k)+'</code></td><td class="n">'+fmt(gm[k])+'</td></tr>');
+    h+='</table><p class="h3n" style="margin-top:12px">اسأل عن كل واحد: <b>عطبٌ كان يقع صامتاً</b>، '+
+       'أم <b>حالةٌ مشروعة عندك ناقصة من الجدول</b>؟ الأول يُصلح العميل، والثاني يُصلح <code>FSM</code> في '+
+       '<code>index.js</code>. ولا تُلقِ المفتاح قبل أن تجيب.</p>';
+  }
+  h+='</div>';
+
+  /* حسب الشبكة — هنا كان سيظهر تعليق القبول */
+  const nm={};
+  rows.filter(r=>r.ev==='accept_start'||r.ev==='break_fail').forEach(r=>{
+    const n=r.net||'مجهول'; nm[n]=nm[n]||{s:0,f:0};
+    if(r.ev==='accept_start') nm[n].s++; else nm[n].f++;
+  });
+  const nk=Object.keys(nm).sort((a,b)=>(nm[b].s+nm[b].f)-(nm[a].s+nm[a].f));
+  h+='<div class="c" style="grid-column:1/-1"><h3>حسب نوع الشبكة</h3>'+
+     '<p class="h3n">عطب القبول الذي شخّصناه كان سيظهر هنا قفزةً على <code>2g</code> و<code>slow-2g</code>.</p>';
+  if(!nk.length) h+='<p class="empty">لا بيانات شبكة بعد.</p>';
+  else{
+    h+='<table><tr><th>الشبكة</th><th>قبول</th><th>فشل استراحة</th></tr>';
+    /* [V28] esc: n مأخوذ من r.net — نصّ يكتبه العميل. سِنك الحقن الثاني. */
+    nk.forEach(n=>h+='<tr><td><code>'+esc(n)+'</code></td><td class="n">'+fmt(nm[n].s)+
+      '</td><td class="n" style="color:'+(nm[n].f?'var(--halt)':'inherit')+'">'+fmt(nm[n].f)+'</td></tr>');
+    h+='</table>';
+  }
+  h+='</div>';
+
+  /* إشارات أخرى */
+  const dd=C('count_dedup'), el=C('enrich_late_fail'), dr=C('day_rollover'), dc=C('decline');
+  h+='<div class="c"><h3>إشارات أخرى</h3><p class="h3n">لا تحجب مفتاحاً — لكنها تُقرأ</p>'+
+     '<div class="kv"><span>مُنع عدّ مضاعف</span><b class="'+(dd?'warn':'')+'">'+fmt(dd)+'</b></div>'+
+     '<div class="kv"><span>فشل إثراء متأخّر</span><b>'+fmt(el)+'</b></div>'+
+     '<div class="kv"><span>عبور منتصف الليل</span><b>'+fmt(dr)+'</b></div>'+
+     '<div class="kv"><span>رفض طلب</span><b>'+fmt(dc)+'</b></div>'+
+     (SRV.ok?'<div class="kv"><span>مفاتيح عدم التكرار</span><b>'+fmt(SRV.opsN)+'</b></div>':'')+
+     (dd>0?'<p class="h3n" style="margin-top:10px">كل «مُنع عدّ مضاعف» زيادةٌ وهمية لم تدخل عدّادك.</p>':'')+
+     '</div>';
+
+  /* ═══════════════════════════════════════════════════════════════════════
+     🔬 [V31.21] الجرد — «لا يُعالَج ما لا يُرى»
+     ─────────────────────────────────────────────────────────────────────
+     كانت اللوحة تعرض أحداثاً **مسمّاةً سلفاً** فقط: القبول والاستراحة
+     والإنشاء وأحكام الظلّ. وذلك يفترض أننا نعرف مسبقاً ما نبحث عنه.
+     فلمّا بلغت العقدة مليون سجلّ، كان مجموع كل ما تعرضه اللوحة ≈ ٦٠ ألفاً
+     — أي أن **٩٤٪ من الأحداث لم يكن لها مكانٌ على الشاشة إطلاقاً**،
+     ولا سبيل إلى معرفة نوعها إلا بقراءة العقدة يدوياً.
+
+     ولذلك يُجرَد هنا **كل** نوع بلا قائمةٍ مسبقة: فحدثٌ جديد يُضاف إلى
+     التطبيق غداً يظهر من تلقاء نفسه، وكاتبٌ متدفّق يفضحه ترتيبُه.
+
+     وجدول «أكثر الأجهزة كتابةً» هو الذي يفرّق بين علّتين تتشابهان في
+     المجموع: حِملٌ طبيعي موزَّعٌ على الأسطول، أو **حلقةٌ مغلقة** على
+     جهازٍ أو جهازين. الأولى تُعالَج بالكنس، والثانية بإصلاح الحلقة.
+     ═══════════════════════════════════════════════════════════════════════ */
+  /* مرورٌ واحد يبني الثلاثة معاً. والبديل — مسحُ كل الصفوف لكل جهازٍ في
+     الجدول — كان O(12×n)، أي اثنا عشر مليون مقارنة على حمولة الإنتاج،
+     داخل حلقة رسم. الجرد الذي يشخّص التضخّم لا يجوز أن يكون هو نفسه
+     سبب البطء. */
+  const evM={}, phM={}, phTop={}, evByPh={};
+  rows.forEach(r=>{
+    const e=r.ev||'—'; evM[e]=(evM[e]||0)+1;
+    const p=r.ph||'—'; phM[p]=(phM[p]||0)+1;
+    const t=phTop[p]||(phTop[p]={}); t[e]=(t[e]||0)+1;
+    const g=evByPh[e]||(evByPh[e]={}); g[p]=(g[p]||0)+1;
+  });
+  /* ⚠️ [V31.21] «التركّز» لا «الحصّة» هو ما يفرّق الحلقةَ من الحِمل.
+     ─────────────────────────────────────────────────────────────────
+     أوّل ما كتبتُه هنا وسم كلَّ نوعٍ يتجاوز ١٠٪ من الحركة بالأحمر. وسقط
+     الفحص فوراً على حمولةٍ **سليمة**: accept_start وحده ٢٤٪، وهو أصحّ
+     حدثٍ في النظام. فالحصّة العالية طبيعيةٌ حين تكون الأنواع قليلة —
+     ووسمُها إنذارٌ كاذب يُدرّب القارئ على تجاهل الأحمر.
+
+     والفارق الحقيقي: الفعل البشري **يتوزّع** على الأسطول، والحلقة
+     **تتكثّف** على جهازٍ أو جهازين. فيُقاس لكل نوع: كم من أحداثه يملكها
+     أعلى جهازٍ فيه. تسعون بالمئة على جهازٍ واحد ليست حِملاً — هي حلقة. */
+  const evConc={};
+  Object.keys(evByPh).forEach(e=>{
+    const g=evByPh[e]; let top=0;
+    Object.keys(g).forEach(p=>{ if(g[p]>top) top=g[p]; });
+    evConc[e]= evM[e] ? top/evM[e] : 0;
+  });
+  const evK=Object.keys(evM).sort((a,b)=>evM[b]-evM[a]);
+  const total=rows.length||1;
+  /* ما تعرضه بقيّة اللوحة صراحةً — لنقيس ما يفلت منها */
+  const NAMED=['accept_start','accept_local','break_ok','break_fail','break_ok_retry',
+               'create_legacy','create_fallback','create_unsure','shadow_reject','shadow_err',
+               'count_dedup','enrich_late_fail','day_rollover','decline'];
+  const unseen=evK.filter(k=>NAMED.indexOf(k)===-1).reduce((a,k)=>a+evM[k],0);
+
+  h+='<div class="c" style="grid-column:1/-1"><h3>جرد أنواع الأحداث</h3>'+
+     '<p class="h3n">كل نوعٍ في النطاق، بلا قائمةٍ مسبقة. '+
+     'خارج ما تعرضه اللوحة أعلاه: <b>'+fmt(unseen)+'</b> حدثاً ('+
+     (unseen*100/total).toFixed(1)+'٪).</p>';
+  if(!evK.length) h+='<p class="empty">لا أحداث في النطاق.</p>';
+  else{
+    h+='<table><tr><th>الحدث</th><th>العدد</th><th>النسبة</th><th>لكل يوم</th><th>أعلى جهاز</th></tr>';
+    /* [V31.58] نافذةٌ أقصر من يوم: القسمة على ١ تكذب. نقسم على المدى الفعليّ بأجزاء اليوم. */
+    const dv=Math.max(0.05, Number(window.__spanFrac)||Number(window.__spanDays)||1);
+    /* esc: r.ev نصٌّ يكتبه العميل — نفس سِنك الحقن المعالَج في V28. */
+    let flagged=0;
+    evK.slice(0,40).forEach(k=>{
+      /* يُوسَم النوع حين يجتمع الأمران: حجمٌ يُعتدّ به (٢٪ فما فوق) **و**
+         تكثّفٌ على جهازٍ واحد (نصف أحداثه فأكثر). أحدهما وحده لا يكفي. */
+      const conc=evConc[k]||0;
+      const susp=(evM[k]>total*0.02)&&(conc>=0.5);
+      if(susp) flagged++;
+      h+='<tr><td><code>'+esc(k)+'</code></td>'+
+         '<td class="n'+(susp?' bad':'')+'">'+fmt(evM[k])+'</td>'+
+         '<td class="n">'+(evM[k]*100/total).toFixed(1)+'٪</td>'+
+         '<td class="n">'+fmt(Math.round(evM[k]/dv))+'</td>'+
+         '<td class="n'+(susp?' bad':'')+'">'+(conc*100).toFixed(0)+'٪</td></tr>';
+    });
+    h+='</table>';
+    if(evK.length>40) h+='<p class="h3n">…و'+fmt(evK.length-40)+' نوعاً آخر أقلّ عدداً.</p>';
+    h+='<p class="h3n" style="margin-top:12px">«أعلى جهاز» = حصّة أكثر جهازٍ كتابةً من هذا '+
+       'النوع وحده. الفعل البشري يتوزّع على الأسطول فتكون الحصّة صغيرة؛ '+
+       'والحلقة تتكثّف على جهاز. '+
+       (flagged?'<b class="bad">'+fmt(flagged)+' نوعاً موسوماً: حجمٌ معتبَر وتكثّفٌ على جهازٍ واحد.</b>'
+               :'لا نوع يجمع الحجم والتكثّف معاً.')+'</p>';
+  }
+  h+='</div>';
+
+  const phK=Object.keys(phM).sort((a,b)=>phM[b]-phM[a]);
+  const topShare = phK.length ? (phM[phK[0]]+ (phK[1]?phM[phK[1]]:0))*100/total : 0;
+  h+='<div class="c" style="grid-column:1/-1"><h3>أكثر الأجهزة كتابةً</h3>'+
+     '<p class="h3n">'+fmt(phK.length)+' جهازاً كتب في النطاق · متوسّط '+
+     fmt(Math.round(total/(phK.length||1)))+' حدثاً للجهاز. '+
+     (topShare>40?'<b class="bad">أعلى جهازين وحدهما '+topShare.toFixed(0)+'٪ — هذا شكل حلقةٍ لا شكل حِمل.</b>':'')+
+     '</p>';
+  if(!phK.length) h+='<p class="empty">لا بيانات.</p>';
+  else{
+    h+='<table><tr><th>الجهاز</th><th>الأحداث</th><th>النسبة</th><th>أكثر نوعٍ عنده</th></tr>';
+    phK.slice(0,12).forEach(p=>{
+      const own=phTop[p]||{};
+      const top=Object.keys(own).sort((a,b)=>own[b]-own[a])[0]||'—';
+      h+='<tr><td><code>'+esc(p)+'</code></td>'+
+         '<td class="n'+(phM[p]>total*0.15?' bad':'')+'">'+fmt(phM[p])+'</td>'+
+         '<td class="n">'+(phM[p]*100/total).toFixed(1)+'٪</td>'+
+         '<td><code>'+esc(top)+'</code> ('+fmt(own[top]||0)+')</td></tr>';
+    });
+    h+='</table>';
+  }
+  h+='</div>';
+
+  $('ev').innerHTML=h;
+}
+</script>
+</body>
+</html>
