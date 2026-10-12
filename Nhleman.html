@@ -3758,10 +3758,9 @@ async function initMapLazy() {
   L.control.zoom({
    position: "bottomleft"
   }).addTo(_map);
-  L.tileLayer("https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png", {
+  L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
    maxZoom: 19,
-   subdomains: "abcd",
-   attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OSM</a> &copy; <a href="https://carto.com/attributions">CARTO</a>'
+   attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
   }).addTo(_map);
   if (hint) hint.remove();
   setTimeout(() => {
@@ -3951,7 +3950,7 @@ document.addEventListener("DOMContentLoaded", () => {
  });
 });
 
-const NAHLA_TILES = "https://basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png";
+const NAHLA_TILES = "https://tile.openstreetmap.org/{z}/{x}/{y}.png";
 
 let _leafletPromise = null;
 
@@ -3998,7 +3997,7 @@ function _initEditMapCore(div) {
   }).setView([ lat, lng ], 16);
   L.tileLayer(NAHLA_TILES, {
    maxZoom: 19,
-   attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OSM</a> &copy; <a href="https://carto.com/attributions">CARTO</a>'
+   attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
   }).addTo(gMap);
   const nahlaIcon = L.divIcon({
    className: "nahla-pin-wrap",
