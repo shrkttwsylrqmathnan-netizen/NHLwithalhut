@@ -1261,6 +1261,8 @@ body.adv-on #fbSt{bottom:calc(154px + env(safe-area-inset-bottom));}
         <button class="cc-f" id="ccSortBtn" onclick="ccSetSort()" style="flex:0 0 auto">🕐 الأحدث أولاً</button>
         
         <button class="bc-btn" id="bcOpenBtn" onclick="bcOpen()" style="margin-top:0;flex:1">📣 بثّ موجّه</button>
+        
+        <button class="bc-btn" id="ofPayBtn" onclick="ofPayOpen()" style="margin-top:0;flex:1;display:none">💵 تسديد عمولة</button>
       </div>
     </div>
     <div class="cc-body" id="ccList"><div class="cc-empty">لا محادثات بعد.<br>حين يراسلك كابتن ستظهر هنا فوراً 💬</div></div>
@@ -1893,6 +1895,7 @@ function applyPermsToUi() {
  const cf = document.getElementById("chatFab");
  if (cf && _ccStarted) cf.style.display = msg ? "flex" : "none"; else if (cf && !msg) cf.style.display = "none";
  _tog("bcOpenBtn", msg);
+ _tog("ofPayBtn", canDo("opsfee"));
  _tog("ctBar", msg);
  _tog("ctQr", msg);
  try {
@@ -2224,7 +2227,7 @@ function attachDataListeners() {
  if (EMP_PHONE) listen("staff_perms/" + EMP_PHONE, snap => {
   const v = snap.val();
   if (v && typeof v === "object") {
-   EMP_PERMS = [ "assign", "withdraw", "delete", "complete", "message" ].filter(k => v[k] === true);
+   EMP_PERMS = [ "assign", "withdraw", "delete", "complete", "message", "opsfee" ].filter(k => v[k] === true);
    EMP_PERMS_ALL = false;
    _permsLoaded = true;
    applyPermsToUi();
@@ -3855,6 +3858,72 @@ function _ccCtxTarget() {
  return document.getElementById("ctCtx");
 }
 
+function _ofDebt(p) {
+ return Math.max(0, Number(((liveLed.drivers || {})[nP(p)] || {}).debt_ops || 0));
+}
+
+function _ofChip(p) {
+ const v = _ofDebt(p);
+ if (!v) return "";
+ const btn = canDo("opsfee") ? ` <button class="ctx-p" style="cursor:pointer;font-weight:900" onclick="ofPayOpen('${nP(p)}')">💵 تسديد</button>` : "";
+ return `<span class="ctx-p ${v >= 4e3 ? "off" : "warn"}">💵 تشغيليّة <b>${v.toLocaleString("en-US")}</b> د.ع</span>${btn}`;
+}
+
+window.ofPayOpen = function(phone) {
+ if (!canDo("opsfee")) {
+  alert("قبول تسديد العمولة التشغيليّة غير ممنوحٍ لحسابك — يمنحه المدير من لوحة الإدارة.");
+  return;
+ }
+ let p = nP(phone || "");
+ if (!p) {
+  const q = prompt("رقم هاتف الكابتن (07…):", "");
+  if (q === null) return;
+  p = nP(q);
+ }
+ if (!/^7\d{9}$/.test(p)) {
+  alert("رقمٌ غير صالح.");
+  return;
+ }
+ const debt = _ofDebt(p);
+ const g = (gDrivers || []).find(x => nP(x && x[2]) === p);
+ const nm = g && g[1] || (drvLocs[p] || {}).name || "…" + p.slice(-4);
+ if (!debt) {
+  alert("ما على " + nm + " عمولة تشغيليّة الآن.");
+  return;
+ }
+ const raw = prompt("💵 تسديد العمولة التشغيليّة — " + nm + "\nعليه: " + debt.toLocaleString("en-US") + " د.ع\n\nالمبلغ المستلَم (د.ع):", String(debt));
+ if (raw === null) return;
+ const amount = Math.round(Number(String(raw).replace(/[^\d]/g, "")));
+ if (!amount || amount <= 0) {
+  alert("اكتب مبلغاً صحيحاً.");
+  return;
+ }
+ if (amount > debt) {
+  alert("المبلغ أكبر من الدَّين (" + debt.toLocaleString("en-US") + " د.ع).");
+  return;
+ }
+ if (!confirm("تأكيد استلام " + amount.toLocaleString("en-US") + " د.ع من " + nm + "؟\nالمتبقّي بعده: " + (debt - amount).toLocaleString("en-US") + " د.ع")) return;
+ ofPaySend(p, amount, nm);
+};
+
+async function ofPaySend(p, amount, nm) {
+ try {
+  const d = await staffAction({
+   action: "STAFF_OPS_FEE_PAY",
+   driverPhone: p,
+   amount: amount
+  });
+  if (d && d.success) {
+   toast("✅ سُجّل تسديد " + Number(d.amount).toLocaleString("en-US") + " د.ع من " + nm + (d.after > 0 ? " — المتبقّي " + Number(d.after).toLocaleString("en-US") : " — صفر") + (d.lifted ? " · رُفع الإغلاق" : ""));
+   try {
+    renderCtx();
+   } catch (_) {}
+  } else alert(d && d.msg || "تعذّر تسجيل التسديد.");
+ } catch (e) {
+  alert("تعذّر الاتصال — أعد المحاولة.");
+ }
+}
+
 function renderCtx() {
  const el = _ccCtxTarget();
  if (!el || !_ccActive) return;
@@ -3882,7 +3951,7 @@ function renderCtx() {
   doneChip = `<span class="ctx-p">✅ اليوم <b>${dn}</b>${rj ? ` · ❌ رفض <b>${rj}</b>` : ""}</span>`;
  } catch (e) {}
  const dailyCount = Number(d.daily_count || 0);
- let h = `<div class="ctx-row">\n      <span class="ctx-p ${on ? "on" : "off"}">${on ? "🟢 متصل" : "🔴 غير متصل"}${beat !== null ? ` <b>${beat < 1 ? "الآن" : beat + " د"}</b>` : ""}</span>\n      ${shiftChip}${openChip}${doneChip}\n      <span class="ctx-p">📦 محمّل <b>${orders.length}</b>${dailyCount ? ` · عدّاد <b>${dailyCount}</b>` : ""}</span>\n      ${d.account_status === "banned" ? '<span class="ctx-p off">⛔ محظور</span>' : ""}\n      ${_ntChip()}\n    </div>`;
+ let h = `<div class="ctx-row">\n      <span class="ctx-p ${on ? "on" : "off"}">${on ? "🟢 متصل" : "🔴 غير متصل"}${beat !== null ? ` <b>${beat < 1 ? "الآن" : beat + " د"}</b>` : ""}</span>\n      ${shiftChip}${openChip}${doneChip}\n      <span class="ctx-p">📦 محمّل <b>${orders.length}</b>${dailyCount ? ` · عدّاد <b>${dailyCount}</b>` : ""}</span>\n      ${d.account_status === "banned" ? '<span class="ctx-p off">⛔ محظور</span>' : ""}\n      ${_ofChip(p)}\n      ${_ntChip()}\n    </div>`;
  if (orders.length) {
   h += `<div class="ctx-hd">الطلبات معه الآن</div>`;
   orders.slice(0, 4).forEach(o => {

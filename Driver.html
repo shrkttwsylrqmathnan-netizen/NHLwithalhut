@@ -794,7 +794,7 @@ window.__SND = {
       </div>
       <div class="stat">
         <div class="stat-i" style="color:var(--bad-dp);"><svg class="si si-s" viewBox="0 0 24 24"><path d="M21 12V7H5a2 2 0 0 1 0-4h14v4"/><path d="M3 5v14a2 2 0 0 0 2 2h16v-5"/><path d="M18 12a2 2 0 0 0 0 4h4v-4Z"/></svg></div>
-        <div class="stat-v" id="stDebt" style="color:var(--bad-dp);">0</div><div class="stat-l">عمولة المكتب</div>
+        <div class="stat-v" id="stDebt" style="color:var(--bad-dp);">0</div><div class="stat-l">عمولة المكتب</div><div class="stat-l" id="stOps" style="display:none;color:var(--bad-dp);font-weight:900"></div>
       </div>
       <div class="stat">
         <div class="stat-i" style="color:var(--royal);"><svg class="si si-s" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
@@ -5622,7 +5622,17 @@ function startListeners() {
   clearTimeout(_selfT);
   _selfT = setTimeout(_selfCommit, 60);
  }));
+ function ofShow_(v) {
+  const e = document.getElementById("stOps");
+  if (!e) return;
+  v = Math.max(0, Number(v) || 0);
+  e.style.display = v ? "" : "none";
+  e.textContent = v ? "تشغيليّة " + v.toLocaleString("en-US") + " د.ع" : "";
+ }
  listen(() => ref(db, `ledgers/drivers/${drv.phone}`), s => {
+  try {
+   ofShow_((s.val() || {}).debt_ops);
+  } catch (_) {}
   const l = s.val() || {};
   lifetime = Number(l.completed_orders || 0);
   debtNow = Number(l.debt || 0);

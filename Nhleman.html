@@ -1603,7 +1603,7 @@ let staffSessions = {}, staffLog = [], staffRoster = [], _stInit = false, stEdit
 
 let staffPerms = {};
 
-const ST_PERMS = [ [ "assign", "👑 التعيين السياديّ" ], [ "withdraw", "↩️ سحب الطلبات" ], [ "delete", "🗑 حذف الطلبات" ], [ "message", "💬 التواصل مع الكباتن" ], [ "complete", "✅ الإتمام القسريّ" ] ];
+const ST_PERMS = [ [ "assign", "👑 التعيين السياديّ" ], [ "withdraw", "↩️ سحب الطلبات" ], [ "delete", "🗑 حذف الطلبات" ], [ "message", "💬 التواصل مع الكباتن" ], [ "complete", "✅ الإتمام القسريّ" ], [ "opsfee", "💵 قبول تسديد العمولة التشغيليّة" ] ];
 
 function stPermsEff(e) {
  const rec = staffPerms[nP(e.phone)];
@@ -3231,6 +3231,8 @@ function filtEnt(type) {
     } else lt = "👑 ليدر · " + H + "س — لم يبدأ";
     extra = `<div class="dr-rt" style="background:${lc};color:#fff">${esc(lt)}</div>`;
    } else extra = `<div class="dr-rt ${rC}">${rI} ${rL}</div>` + `<div class="dm-row"><div class="dm-it ${avg > 0 && avg <= 15 ? "dm-g" : avg > 25 ? "dm-r" : ""}">⚡ ${avg > 0 ? avg + "د/ط" : "---"}</div><div class="dm-it ${rj > 2 ? "dm-r" : rj > 0 ? "dm-w" : ""}">✖ رفض:${rj}</div></div>`;
+   const dOps = Number(l.debt_ops || 0);
+   if (dOps > 0) extra += `<div class="dm-row"><div class="dm-it ${dOps >= 4e3 ? "dm-r" : "dm-w"}">💵 تشغيليّة: ${dOps.toLocaleString("ar-EG")} د.ع</div></div>`;
   }
   const ex = document.getElementById(cid);
   if (ex) {
@@ -7640,6 +7642,7 @@ window.svStaff = async function() {
      delete: false,
      complete: false,
      message: false,
+     opsfee: false,
      updated_at: (new Date).toISOString(),
      updated_by: "admin"
     });
