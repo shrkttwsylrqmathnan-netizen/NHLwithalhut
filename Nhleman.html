@@ -794,6 +794,45 @@ button,input,select,textarea{font-family:'Cairo',sans-serif;}
 .pgb:disabled{opacity:.35;cursor:default}
 .pgb:active:not(:disabled){transform:scale(.95)}
 .pgi{font-weight:800;font-size:.78rem;color:var(--ink3)}
+
+.adv-c{background:var(--base);border:1px solid var(--line);border-radius:var(--r4);box-shadow:var(--sh-xs);padding:14px 16px;margin-bottom:10px;}
+.adv-c.pend{border-right:4px solid var(--fire);}
+.adv-h{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;flex-wrap:wrap;}
+.adv-n{font-size:.9rem;font-weight:900;color:var(--ink);}
+.adv-s{font-size:.72rem;font-weight:700;color:var(--ink3);margin-top:3px;line-height:1.7;}
+.adv-amt{font-size:1.1rem;font-weight:900;color:var(--rose);text-align:left;}
+.adv-amt small{display:block;font-size:.66rem;color:var(--ink4);font-weight:700;}
+.adv-tags{display:flex;flex-wrap:wrap;gap:5px;margin-top:8px;}
+.adv-tag{font-size:.68rem;font-weight:800;padding:3px 9px;border-radius:var(--rf);background:var(--base3);color:var(--ink2);text-decoration:none;white-space:nowrap;}
+.adv-tag.w{background:var(--amber-l);color:var(--fire-d);}
+.adv-tag.r{background:var(--rose-l);color:var(--rose);}
+.adv-tag.g{background:var(--jade-l);color:var(--jade);}
+.adv-tag.b{background:var(--sky-l);color:var(--sky-d);}
+.adv-note{margin-top:8px;padding:8px 11px;background:var(--base3);border-radius:8px;font-size:.76rem;color:var(--ink2);line-height:1.7;white-space:pre-wrap;word-break:break-word;}
+.adv-acts{display:flex;gap:8px;flex-wrap:wrap;margin-top:11px;align-items:center;}
+.adv-b{border:none;border-radius:10px;padding:9px 16px;font-family:'Cairo';font-size:.8rem;font-weight:800;cursor:pointer;min-height:40px;}
+.adv-b.ok{background:var(--jade);color:#fff;}
+.adv-b.go{background:var(--sky);color:#fff;}
+.adv-b.no{background:var(--base3);color:var(--ink2);}
+.adv-b.lt{background:transparent;color:var(--ink3);border:1px solid var(--line);font-size:.72rem;min-height:34px;padding:6px 11px;}
+.adv-b:disabled{opacity:.5;cursor:default;}
+.adv-grp{font-size:.8rem;font-weight:900;color:var(--ink2);margin:14px 2px 7px;display:flex;align-items:center;gap:6px;flex-wrap:wrap;}
+.adv-sc{overflow-x:auto;}
+.adv-tb{width:100%;border-collapse:collapse;font-size:.76rem;}
+.adv-tb th{font-size:.66rem;font-weight:800;color:var(--ink4);padding:6px 8px;text-align:right;border-bottom:1px solid var(--line);white-space:nowrap;}
+.adv-tb td{padding:7px 8px;font-weight:700;color:var(--ink);border-bottom:1px solid var(--line2);text-align:right;}
+.adv-tb .num{text-align:left;direction:ltr;font-variant-numeric:tabular-nums;white-space:nowrap;}
+.adv-tb tfoot td{font-weight:900;border-top:2px solid var(--line);border-bottom:none;}
+.adv-bar{height:7px;border-radius:99px;background:var(--base3);overflow:hidden;min-width:60px;}
+.adv-bar i{display:block;height:100%;border-radius:99px;}
+.adv-empty{padding:18px;text-align:center;color:var(--ink4);font-size:.8rem;font-weight:700;background:var(--base);border:1px dashed var(--line);border-radius:var(--r4);margin-bottom:10px;}
+.adv-mode{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:10px;font-size:.78rem;font-weight:800;color:var(--ink2);}
+#eAdvNote{display:none;margin:-8px 0 14px;padding:9px 12px;border-radius:12px;background:var(--sky-l);color:var(--sky-d);font-size:.76rem;font-weight:800;line-height:1.7;border:1px solid var(--line);}
+
+.ob-row{padding:8px 0;border-bottom:1px solid var(--line2);font-size:.74rem;font-weight:700;color:var(--ink2);line-height:1.7;word-break:break-word;}
+.ob-row:last-child{border-bottom:none;}
+.ob-ph{direction:ltr;unicode-bidi:isolate;font-size:.7rem;font-weight:700;color:var(--ink4);}
+@media(max-width:420px){.bni{min-width:0;}.bni-ic{width:32px;height:32px;}.bni-lb{font-size:.52rem;white-space:nowrap;}}
 </style>
 </head>
 <body>
@@ -900,6 +939,8 @@ button,input,select,textarea{font-family:'Cairo',sans-serif;}
     <div style="width:46px;height:46px;border-radius:14px;background:var(--sky-l);display:flex;align-items:center;justify-content:center;color:var(--sky);margin:0 auto 11px;font-size:22px">✏️</div>
     <h4 id="eTitle" style="font-weight:900;text-align:center;color:var(--ink);margin-bottom:3px">تعديل البيانات</h4>
     <p id="eSub" style="font-size:.75rem;font-weight:700;color:var(--ink4);text-align:center;margin-bottom:18px">تحديث بيانات الشريك</p>
+    
+    <div id="eAdvNote"></div>
     <label class="el">الاسم الكامل / التجاري</label>
     <input type="text" id="eN" class="fc" style="margin-bottom:11px" placeholder="الاسم">
     <label class="el">رقم الهاتف</label>
@@ -1090,6 +1131,7 @@ button,input,select,textarea{font-family:'Cairo',sans-serif;}
     <button class="nb" id="nb-orders" onclick="goTab('orders',this)"><div class="ni">📊</div> سجل اليوم</button>
     <span class="sidebar-sec">إدارة الشركاء</span>
     <button class="nb" id="nb-restaurants" onclick="goTab('restaurants',this)"><div class="ni">🍽</div> إدارة المطاعم</button>
+    <button class="nb" id="nb-advisor" onclick="goTab('advisor',this)"><div class="ni">🐳</div> مستشارك<span id="nbAdv" class="badge" style="display:none;background:var(--fire)">0</span></button>
     <button class="nb" id="nb-drivers" onclick="goTab('drivers',this)"><div class="ni">🛵</div> إدارة الأسطول</button>
     <button class="nb" id="nb-staff" onclick="goTab('staff',this)">
       <div class="ni">🧑‍💼</div> إدارة الموظفين
@@ -1101,6 +1143,7 @@ button,input,select,textarea{font-family:'Cairo',sans-serif;}
     <button class="nb" id="nb-clearing" onclick="goTab('clearing',this)"><div class="ni">🧾</div> طلبات التصفير<span id="nbClrDot" style="display:none;width:7px;height:7px;border-radius:50%;background:var(--rose);margin-right:auto;flex-shrink:0"></span></button>
     <button class="nb" id="nb-posbridge" onclick="goTab('posbridge',this)"><div class="ni">🖨</div> جسر الطابعة<span id="nbPbDot" style="display:none;width:7px;height:7px;border-radius:50%;background:var(--rose);margin-right:auto;flex-shrink:0"></span></button>
     <button class="nb" id="nb-insurance" onclick="goTab('insurance',this)"><div class="ni">🛡</div> التأمينات<span id="nbInsDot" style="display:none;width:7px;height:7px;border-radius:50%;background:var(--rose);margin-right:auto;flex-shrink:0"></span></button>
+    <button class="nb" id="nb-opsblock" onclick="goTab('opsblock',this)"><div class="ni">⛔</div> الإيقاف<span id="nbObDot" style="display:none;width:7px;height:7px;border-radius:50%;background:var(--rose);margin-right:auto;flex-shrink:0"></span></button>
     <div class="sidebar-foot"><button class="sidebar-out" onclick="doLogout()">🚪 تسجيل الخروج</button></div>
   </aside>
   <main class="main">
@@ -1223,8 +1266,32 @@ button,input,select,textarea{font-family:'Cairo',sans-serif;}
         <button class="fp fg" onclick="setSF('RES','active',this)">مفعّل <span class="fc" id="br-active">0</span></button>
         <button class="fp fa" onclick="setSF('RES','inactive',this)">استراحة <span class="fc" id="br-inactive">0</span></button>
         <button class="fp fr" onclick="setSF('RES','banned',this)">موقوف <span class="fc" id="br-banned">0</span></button>
+        <button class="fp" onclick="setSF('RES','deleted',this)" title="المحذوفة — ✓ يعيد تفعيلها">🗑 محذوف <span class="fc" id="br-deleted">0</span></button>
       </div>
       <div class="eg" id="resList"></div>
+    </div>
+    
+    <div id="pg-advisor" class="pg tab-p">
+      <div class="pg-ttl">🐳 مستشارك</div>
+      <div class="arch-alert" style="margin-bottom:12px;display:block;line-height:1.8" id="advHead">🐳 جاري التحميل…</div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:12px">
+        <button class="abt" id="advRefBtn" onclick="advLoad(1)">🔄 تحديث</button>
+        <span id="advSt" style="font-size:.72rem;font-weight:700;color:var(--ink4)"></span>
+      </div>
+      <div class="arch-kpi" style="margin-bottom:14px">
+        <div class="ak aka"><div class="ak-ic a">🧾</div><div class="ak-n" id="advKCl">0</div><div class="ak-l">مطالبات معلّقة</div></div>
+        <div class="ak akb"><div class="ak-ic b">💰</div><div class="ak-n" id="advKPr">0</div><div class="ak-l">طلبات تسعيرة</div></div>
+        <div class="ak akg"><div class="ak-ic g">📍</div><div class="ak-n" id="advKLo">0</div><div class="ak-l">طلبات موقع</div></div>
+        <div class="ak akr"><div class="ak-ic r">💵</div><div class="ak-n" id="advKMo">0</div><div class="ak-l" id="advKMoL">المعتمد هذا الشهر (د.ع)</div></div>
+      </div>
+      <div class="rt"><div class="rt-dot"></div> 🧾 المطالبات المعلّقة</div>
+      <div id="advClaims" style="margin-bottom:20px"></div>
+      <div class="rt"><div class="rt-dot" style="background:var(--jade)"></div> 💵 المعتمد شهرياً لكلّ مطعم</div>
+      <div id="advMonth" style="margin-bottom:20px"></div>
+      <div class="rt"><div class="rt-dot" style="background:var(--sky)"></div> 💰📍 طلبات التسعيرة والموقع</div>
+      <div id="advReqs" style="margin-bottom:20px"></div>
+      <div class="rt"><div class="rt-dot" style="background:var(--violet)"></div> 📈 جودة ردود فريق الدعم (آخر ١٠ أيّام)</div>
+      <div id="advMeter"></div>
     </div>
     <div id="pg-drivers" class="pg tab-p">
       <div class="pg-ttl">إدارة الأسطول</div>
@@ -1236,6 +1303,7 @@ button,input,select,textarea{font-family:'Cairo',sans-serif;}
         <button class="fp fg" onclick="setSF('DRV','active',this)">بالميدان <span class="fc" id="bd-active">0</span></button>
         <button class="fp fa" onclick="setSF('DRV','inactive',this)">استراحة <span class="fc" id="bd-inactive">0</span></button>
         <button class="fp fr" onclick="setSF('DRV','banned',this)">موقوف <span class="fc" id="bd-banned">0</span></button>
+        <button class="fp" onclick="setSF('DRV','deleted',this)" title="المحذوفون — ✓ يعيد تفعيلهم">🗑 محذوف <span class="fc" id="bd-deleted">0</span></button>
       </div>
       <div class="eg" id="drvList"></div>
     </div>
@@ -1313,6 +1381,47 @@ button,input,select,textarea{font-family:'Cairo',sans-serif;}
     </div>
 
     
+    <div id="pg-opsblock" class="pg tab-p">
+      <div class="pg-ttl">⛔ الإيقاف التشغيليّ</div>
+      <div class="arch-alert" style="margin-bottom:12px;display:block;line-height:1.8" id="obHead">⛔ جاري التحميل…</div>
+      <div class="adv-mode">
+        <span>الوضع:</span>
+        <button class="adv-b lt" id="obM-off" onclick="obSetMode('off')">⏸ مُطفأ</button>
+        <button class="adv-b lt" id="obM-shadow" onclick="obSetMode('shadow')">👻 ظلّ</button>
+        <button class="adv-b lt" id="obM-live" onclick="obSetMode('live')">⛔ فعليّ الآن</button>
+      </div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:12px">
+        <button class="abt" id="obRefBtn" onclick="obLoad(1)">🔄 تحديث</button>
+        <span id="obSt" style="font-size:.72rem;font-weight:700;color:var(--ink4)"></span>
+      </div>
+      <div class="arch-kpi" style="margin-bottom:14px">
+        <div class="ak aka"><div class="ak-ic a">💡</div><div class="ak-n" id="obKSug">0</div><div class="ak-l">اقتراحات</div></div>
+        <div class="ak akr"><div class="ak-ic r">⛔</div><div class="ak-n" id="obKBlk">0</div><div class="ak-l">موقوفون الآن</div></div>
+        <div class="ak akb"><div class="ak-ic b">⏳</div><div class="ak-n" id="obKPend">0</div><div class="ak-l">مؤجَّلون</div></div>
+        <div class="ak akg"><div class="ak-ic g">👻</div><div class="ak-n" id="obKShadow">0</div><div class="ak-l">كان سيُوقَف (٣ أيّام)</div></div>
+      </div>
+      <div class="rt"><div class="rt-dot" style="background:var(--amber)"></div> 💡 اقتراحات تنتظر قرارك</div>
+      <div id="obSug" style="margin-bottom:20px"></div>
+      <div class="rt"><div class="rt-dot" style="background:var(--rose)"></div> ⛔ الموقوفون الآن</div>
+      <div id="obBlk" style="margin-bottom:20px"></div>
+      <div class="rt"><div class="rt-dot" style="background:var(--sky)"></div> ⏳ مؤجَّل حتى يُكمل طلبه</div>
+      <div id="obPend" style="margin-bottom:20px"></div>
+      <div class="rt"><div class="rt-dot" style="background:var(--violet)"></div> 👻 أيّام الظلّ — كان سيُوقَف</div>
+      <div id="obShadow" style="margin-bottom:20px"></div>
+      <div class="rt"><div class="rt-dot" style="background:var(--ink4)"></div> 📜 السجلّ (٧ أيّام)</div>
+      <div id="obLog" style="margin-bottom:20px"></div>
+      <div class="rt"><div class="rt-dot" style="background:var(--rose)"></div> ⛔ إيقاف كابتن يدوياً</div>
+      <div class="adv-c" style="margin-bottom:24px">
+        <label class="el" for="obPh">رقم الكابتن</label>
+        <input type="tel" id="obPh" class="fc" style="margin-bottom:10px" placeholder="07XX XXX XXXX" autocomplete="off">
+        <label class="el" for="obWhy">السبب (للإدارة فقط — لا يراه الكابتن)</label>
+        <input type="text" id="obWhy" class="fc" style="margin-bottom:12px" maxlength="240" placeholder="مثلاً: مخالفة متكرّرة" autocomplete="off">
+        <button class="adv-b ok" style="background:var(--rose)" id="obManBtn" onclick="obManual()">⛔ إيقاف الآن</button>
+        <div class="adv-s" style="margin-top:8px">تصله رسالة: «حسابك موقوف عن استلام الطلبات، راجع الإدارة في مكتبها». يبقى في التطبيق ويكمل طلبه، ولا تصله طلباتٌ جديدة حتى ترفع الإيقاف.</div>
+      </div>
+    </div>
+
+    
     <div id="pg-posbridge" class="pg tab-p">
       <div class="pg-ttl">جسر الطابعة</div>
       <div class="arch-alert" style="margin-bottom:12px">
@@ -1364,10 +1473,12 @@ button,input,select,textarea{font-family:'Cairo',sans-serif;}
     <div class="bni on" id="bn-live" onclick="goTab('live',this)"><div class="bni-ic">🗺</div><span class="bni-lb">الميدان</span><div class="bni-dot" id="bnDot"></div></div>
     <div class="bni" id="bn-orders" onclick="goTab('orders',this)"><div class="bni-ic">📊</div><span class="bni-lb">التقارير</span></div>
     <div class="bni" id="bn-restaurants" onclick="goTab('restaurants',this)"><div class="bni-ic">🍽</div><span class="bni-lb">المطاعم</span></div>
+    <div class="bni" id="bn-advisor" onclick="goTab('advisor',this)"><div class="bni-ic">🐳</div><span class="bni-lb">مستشارك</span><div class="bni-dot" id="bnAdvDot"></div></div>
     <div class="bni" id="bn-staff" onclick="goTab('staff',this)"><div class="bni-ic">🧑‍💼</div><span class="bni-lb">الموظفين</span><div class="bni-dot" id="bnStaffDot"></div></div>
     <div class="bni" id="bn-aiops" onclick="goTab('aiops',this)"><div class="bni-ic">⚡</div><span class="bni-lb">القيادة</span></div>
     <div class="bni" id="bn-clearing" onclick="goTab('clearing',this)"><div class="bni-ic">🧾</div><span class="bni-lb">التصفير</span><div class="bni-dot" id="bnClrDot"></div></div>
     <div class="bni" id="bn-insurance" onclick="goTab('insurance',this)"><div class="bni-ic">🛡</div><span class="bni-lb">التأمين</span></div>
+    <div class="bni" id="bn-opsblock" onclick="goTab('opsblock',this)"><div class="bni-ic">⛔</div><span class="bni-lb">الإيقاف</span><div class="bni-dot" id="bnObDot"></div></div>
     <div class="bni" id="bn-posbridge" onclick="goTab('posbridge',this)"><div class="bni-ic">🖨</div><span class="bni-lb">الطابعة</span></div>
   </nav>
 </div>
@@ -1430,13 +1541,15 @@ const TITLES = {
  live: "الرصد الميداني",
  orders: "سجل اليوم",
  restaurants: "إدارة المطاعم",
+ advisor: "مستشارك",
  drivers: "إدارة الأسطول",
  staff: "إدارة الموظفين",
  aiops: "مركز القيادة",
  audit: "سجل التدقيق",
  clearing: "طلبات التصفير",
  insurance: "التأمينات",
- posbridge: "جسر الطابعة"
+ posbridge: "جسر الطابعة",
+ opsblock: "الإيقاف التشغيليّ"
 };
 
 let MP = "", gD = null;
@@ -2133,6 +2246,8 @@ window.doAuth = async function() {
    paintCached();
    loadData();
    setupFB();
+   advPeekSoon();
+   obPeekSoon();
   } else {
    MP = "";
    toast("رمز المرور غير صحيح", "e");
@@ -2256,6 +2371,9 @@ async function loadData(attempt) {
   gdBanner(false);
   applyGD(data);
   gdCacheWrite(data);
+  try {
+   syncDriverAccounts();
+  } catch (_) {}
  } catch (e) {
   const aborted = e && e.name === "AbortError";
   if (attempt < 3) {
@@ -2971,11 +3089,15 @@ function updBadges(type, list) {
   pending: 0,
   active: 0,
   inactive: 0,
-  banned: 0
+  banned: 0,
+  deleted: 0
  };
  list.slice(1).forEach(i => {
   const st = i[type === "RES" ? R.STATUS : D.STATUS];
-  if (st === "deleted") return;
+  if (st === "deleted") {
+   cnt.deleted++;
+   return;
+  }
   cnt.all++;
   if (st === "pending" || st === "waiting") cnt.pending++;
   if (st === "active") {
@@ -2996,7 +3118,7 @@ function updBadges(type, list) {
  });
  const mdEl = document.getElementById(p + "-mostDebt");
  if (mdEl) mdEl.textContent = dc;
- [ "pending", "active", "inactive", "banned" ].forEach(k => {
+ [ "pending", "active", "inactive", "banned", "deleted" ].forEach(k => {
   const el = document.getElementById(p + "-" + k);
   if (el) el.textContent = cnt[k];
  });
@@ -3036,7 +3158,7 @@ function filtEnt(type) {
  const filter = type === "RES" ? resSF : drvSF;
  const q = document.getElementById(type === "RES" ? "sRes" : "sDrv")?.value.trim().toLowerCase() || "";
  const cont = document.getElementById(type === "RES" ? "resList" : "drvList");
- let list = (type === "RES" ? gD.restaurants : gD.drivers).slice(1).filter(i => (type === "RES" ? i[R.STATUS] : i[D.STATUS]) !== "deleted");
+ let list = (type === "RES" ? gD.restaurants : gD.drivers).slice(1).filter(i => (type === "RES" ? i[R.STATUS] : i[D.STATUS]) === "deleted" === (filter === "deleted"));
  if (q) list = list.filter(i => String(i[1]).toLowerCase().includes(q) || String(i[2]).toLowerCase().includes(q));
  if (filter === "mostOrders") {
   const lM = type === "RES" ? liveLed.restaurants : liveLed.drivers;
@@ -3064,8 +3186,8 @@ function filtEnt(type) {
   let spC = "sp-a";
   if (status === "inactive") spC = "sp-i";
   if (status === "pending" || status === "waiting") spC = "sp-p";
-  if (status === "banned") spC = "sp-b";
-  const spL = status === "active" ? "نشط" : status === "inactive" ? "استراحة" : status === "pending" || status === "waiting" ? "قيد الانتظار" : status === "banned" ? "موقوف" : status;
+  if (status === "banned" || status === "deleted") spC = "sp-b";
+  const spL = status === "active" ? "نشط" : status === "inactive" ? "استراحة" : status === "pending" || status === "waiting" ? "قيد الانتظار" : status === "banned" ? "موقوف" : status === "deleted" ? "محذوف — ✓ يعيده" : status;
   let extra = "";
   if (type === "RES") {
    const {text: text, cls: cls} = cDisp(String(item[R.COMM] || ""));
@@ -3127,7 +3249,7 @@ function filtEnt(type) {
    return;
   }
   const pj = ej(phone);
-  const html = `<div id="${cid}" class="ec ec-${status}">\n      ${extra}\n      <div class="ec-top">\n        <div class="ec-av">${type === "DRV" && drvPhoto[n] ? `<img src="${esc(drvPhoto[n])}" alt="" loading="lazy" style="width:100%;height:100%;border-radius:inherit;object-fit:cover">` : type === "RES" ? "🍽" : "🛵"}</div>\n        <span class="sp ${spC}">${esc(spL)}</span>\n      </div>\n      <div class="ec-n">${esc(name)}</div>\n      <div class="ec-ph">${esc(phone)}</div>\n      ${type === "DRV" ? `<div class="ec-ph sh-click" style="color:#0369a1;font-weight:700" title="تعديل الشفت — ساعة البدء والمدّة" onclick="opShift('${pj}')">🕐 ${drvShift[n] ? esc(drvShift[n]) : "بلا موعد — اضغط للتحديد"}</div>` : ""}\n      <div class="ls">\n        <div class="lm"><div class="lv b ls-ord">${orders.toLocaleString("ar-EG")}</div><div class="ll">طلبات منجزة</div></div>\n        <div class="lm"><div class="lv r ls-debt">${debt.toLocaleString("ar-EG")} د.ع</div><div class="ll">عمولة مستحقة</div></div>\n      </div>\n      <div class="ec-acts">\n        <div style="display:flex;gap:4px">\n          <button class="ea ea-a" title="تفعيل"   onclick="doAct('ACCEPT','${type}','${pj}',this)">✓</button>\n          <button class="ea ea-p" title="استراحة" onclick="doAct('PAUSE','${type}','${pj}',this)">⏸</button>\n          <button class="ea ea-b" title="حظر"      onclick="doAct('BAN','${type}','${pj}',this)">🚫</button>\n          ${type === "DRV" ? `<button class="ea" title="${ldrSet.has(n) ? "إلغاء صفة الليدر" : "جعله ليدر"}" style="background:${ldrSet.has(n) ? "#7c3aed" : "#e2e8f0"};color:${ldrSet.has(n) ? "#fff" : "#64748b"}" onclick="toggleLeader('${pj}',${ldrSet.has(n) ? "false" : "true"},this)">&#128081;</button>${ldrSet.has(n) ? `<button class="ea" title="مدّة نافذة هذا الليدر" style="background:#ede9fe;color:#7c3aed" onclick="pickLeaderHours('${pj}')">⏱</button>` : ""}` : ""}\n          ${type === "RES" ? `<button class="ea ea-pref" title="كباتن المطعم الثابتون" style="background:${prefCount[n] ? "#0ea5e9" : "#e2e8f0"};color:${prefCount[n] ? "#fff" : "#64748b"}" onclick="opPref('${pj}')">&#127869;</button>` : ""}\n          <button class="ea ea-d" title="حذف"      onclick="doAct('DEL','${type}','${pj}',this)">🗑</button>\n          <button class="ea ea-e" title="تعديل"   onclick="opEdit('${type}','${pj}')">✏️</button>\n        </div>\n        <div style="display:flex;gap:4px">\n          <button class="ea ea-money" title="تصفير"  onclick="rstDebt('${type}','${pj}',this)">💵</button>\n          ${type === "DRV" ? `<button class="ea" title="فتح الشفت — يبدأ شفتاً جديداً اليوم" style="background:#f59e0b;color:#fff" onclick="rstShift('${pj}',this)">🔓</button><button class="ea" title="تعديل الشفت — ساعة البدء والمدّة" style="background:var(--sky);color:#fff" onclick="opShift('${pj}')">🕐</button><button class="ea" title="${_lastLocs && _lastLocs[n] && _lastLocs[n].vehicle === "car" ? "كابتن سيارة — اضغط لإعادته دراجة" : "اجعله كابتن سيارة (لا تصله إلا طلبات السيارة)"}" style="background:${_lastLocs && _lastLocs[n] && _lastLocs[n].vehicle === "car" ? "#0ea5e9" : "#cbd5e1"};color:#fff" onclick="setVehicle('${pj}',this)">🚗</button>` : ``}\n          <button class="ea ea-c" title="اتصال"   onclick="window.open('tel:${pj}')">📞</button>\n        </div>\n      </div>\n    </div>`;
+  const html = `<div id="${cid}" class="ec ec-${status}">\n      ${extra}\n      <div class="ec-top">\n        <div class="ec-av">${type === "DRV" && drvPhoto[n] ? `<img src="${esc(drvPhoto[n])}" alt="" loading="lazy" style="width:100%;height:100%;border-radius:inherit;object-fit:cover">` : type === "RES" ? "🍽" : "🛵"}</div>\n        <span class="sp ${spC}">${esc(spL)}</span>\n      </div>\n      <div class="ec-n">${esc(name)}</div>\n      <div class="ec-ph">${esc(phone)}</div>\n      ${type === "DRV" ? `<div class="ec-ph sh-click" style="color:#0369a1;font-weight:700" title="تعديل الشفت — ساعة البدء والمدّة" onclick="opShift('${pj}')">🕐 ${drvShift[n] ? esc(drvShift[n]) : "بلا موعد — اضغط للتحديد"}</div>` : ""}\n      <div class="ls">\n        <div class="lm"><div class="lv b ls-ord">${orders.toLocaleString("ar-EG")}</div><div class="ll">طلبات منجزة</div></div>\n        <div class="lm"><div class="lv r ls-debt">${debt.toLocaleString("ar-EG")} د.ع</div><div class="ll">عمولة مستحقة</div></div>\n      </div>\n      <div class="ec-acts">\n        <div style="display:flex;gap:4px">\n          <button class="ea ea-a" title="تفعيل"   onclick="doAct('ACCEPT','${type}','${pj}',this)">✓</button>\n          <button class="ea ea-p" title="استراحة" onclick="doAct('PAUSE','${type}','${pj}',this)">⏸</button>\n          <button class="ea ea-b" title="حظر"      onclick="doAct('BAN','${type}','${pj}',this)">🚫</button>\n          ${type === "DRV" ? `<button class="ea" title="${ldrSet.has(n) ? "إلغاء صفة الليدر" : "جعله ليدر"}" style="background:${ldrSet.has(n) ? "#7c3aed" : "#e2e8f0"};color:${ldrSet.has(n) ? "#fff" : "#64748b"}" onclick="toggleLeader('${pj}',${ldrSet.has(n) ? "false" : "true"},this)">&#128081;</button>${ldrSet.has(n) ? `<button class="ea" title="مدّة نافذة هذا الليدر" style="background:#ede9fe;color:#7c3aed" onclick="pickLeaderHours('${pj}')">⏱</button>` : ""}` : ""}\n          ${type === "RES" ? `<button class="ea ea-pref" title="كباتن المطعم الثابتون" style="background:${prefCount[n] ? "#0ea5e9" : "#e2e8f0"};color:${prefCount[n] ? "#fff" : "#64748b"}" onclick="opPref('${pj}')">&#127869;</button>` : ""}\n          <button class="ea ea-d" title="حذف"      onclick="doAct('DEL','${type}','${pj}',this)">🗑</button>\n          <button class="ea ea-e" title="تعديل"   onclick="opEdit('${type}','${pj}')">✏️</button>\n        </div>\n        <div style="display:flex;gap:4px">\n          <button class="ea ea-money" title="تصفير"  onclick="rstDebt('${type}','${pj}',this)">💵</button>\n          ${type === "DRV" ? `<button class="ea" title="فتح الشفت — يبدأ شفتاً جديداً اليوم" style="background:#f59e0b;color:#fff" onclick="rstShift('${pj}',this)">🔓</button><button class="ea" title="تعديل الشفت — ساعة البدء والمدّة" style="background:var(--sky);color:#fff" onclick="opShift('${pj}')">🕐</button><button class="ea" title="${_lastLocs && _lastLocs[n] && _lastLocs[n].vehicle === "car" ? "كابتن سيارة — اضغط لإعادته دراجة" : "اجعله كابتن سيارة (تصله طلبات السيارة، والطلبات العاديّة كغيره)"}" style="background:${_lastLocs && _lastLocs[n] && _lastLocs[n].vehicle === "car" ? "#0ea5e9" : "#cbd5e1"};color:#fff" onclick="setVehicle('${pj}',this)">🚗</button>` : ``}\n          <button class="ea ea-c" title="اتصال"   onclick="window.open('tel:${pj}')">📞</button>\n        </div>\n      </div>\n    </div>`;
   cont.insertAdjacentHTML("beforeend", html);
  });
  rendered.forEach(id => {
@@ -3301,8 +3423,8 @@ function doAct(cmd, type, id, el) {
  }
  const item = (type === "RES" ? gD?.restaurants : gD?.drivers)?.find(i => nP(i[2]) === nP(id));
  const rawPhone = item ? String(item[2]).trim() : String(id);
+ const col = type === "RES" ? R.STATUS : D.STATUS, prevSt = item ? item[col] : null;
  if (type !== "ORDER") {
-  const col = type === "RES" ? R.STATUS : D.STATUS;
   if (item) item[col] = nSt;
   ovr[type === "RES" ? "r" : "d"][String(item ? item[2] : id)] = {
    status: nSt,
@@ -3316,6 +3438,16 @@ function doAct(cmd, type, id, el) {
   return toast("انتهت الجلسة", "e");
  }
  const apiType = type === "RES" ? "RESTAURANT" : type === "DRV" ? "DRIVER" : "ORDER";
+ const nm = item ? item[1] : id;
+ const undo = why => {
+  if (item && prevSt != null) {
+   item[col] = prevSt;
+   delete ovr[type === "RES" ? "r" : "d"][String(item[2])];
+   filtEnt(type);
+   updBadges(type, type === "RES" ? gD.restaurants : gD.drivers);
+  }
+  toast("⚠️ لم يتغيّر حال " + esc(nm) + (why ? " — " + esc(why) : "") + ". أعد المحاولة.", "e");
+ };
  fetch(API, {
   method: "POST",
   headers: {
@@ -3330,13 +3462,43 @@ function doAct(cmd, type, id, el) {
    pass: MP
   })
  }).then(r => r.json()).then(d => {
-  if (d && d.success) {
-   if (type === "DRV") _flPeek(rawPhone);
-   const nm = item ? item[1] : id;
-   logAudit(cmd, `${type === "RES" ? "مطعم" : "كابتن"}: ${nm} → ${nSt}`);
+  if (!(d && d.success)) {
+   undo(d && d.msg);
+   return;
   }
- }).catch(() => {}).finally(() => {
+  logAudit(cmd, `${type === "RES" ? "مطعم" : "كابتن"}: ${nm} → ${nSt}`);
+  if (type !== "DRV") return;
+  return fnCall("adminDriverAccount", {
+   items: [ {
+    phone: rawPhone,
+    status: nSt
+   } ]
+  }).then(() => {
+   if (nSt === "deleted" || nSt === "banned") toast((nSt === "deleted" ? "🗑 حُذف " : "🚫 حُظر ") + esc(nm) + " — لا يدخل ولا تصله طلبات"); else if (prevSt === "deleted" || prevSt === "banned") toast("✅ أُعيد تفعيل " + esc(nm));
+  }).catch(e => toast("⚠️ تغيّر في الشيت لكن لم يُثبَّت في النظام: " + esc(e && e.message || e), "e")).finally(() => _flPeek(rawPhone));
+ }).catch(e => undo(e && e.message)).finally(() => {
   if (el) el.disabled = false;
+ });
+}
+
+let _acctSynced = false;
+
+function syncDriverAccounts() {
+ if (_acctSynced || !gD || !gD.drivers) return;
+ _acctSynced = true;
+ const items = gD.drivers.slice(1).filter(r => r && r[D.PHONE]).map(r => ({
+  phone: String(r[D.PHONE]),
+  status: String(r[D.STATUS] || "")
+ }));
+ if (!items.length) return;
+ fnCall("adminDriverAccount", {
+  items: items
+ }).then(r => {
+  const d = r && r.data || {};
+  if (d.off) toast("🚫 أُوقف " + d.off + " حساباً محذوفاً أو محظوراً كان ما زال يعمل");
+ }).catch(e => {
+  _acctSynced = false;
+  console.warn("syncDriverAccounts:", e && e.message);
  });
 }
 
@@ -3345,7 +3507,7 @@ window.setVehicle = function(id, el) {
  const cur = _lastLocs && _lastLocs[n] && _lastLocs[n].vehicle === "car" ? "car" : "bike";
  const next = cur === "car" ? "bike" : "car";
  const nm = gD?.drivers?.find(i => nP(i[2]) === n)?.[1] || id;
- if (!confirm(next === "car" ? `جعل ${nm} كابتن سيارة؟\nلن تصله إلا طلبات السيارة (التي يفعّلها المطعم).` : `إعادة ${nm} إلى الدراجة؟`)) return;
+ if (!confirm(next === "car" ? `جعل ${nm} كابتن سيارة؟\nتصله طلبات السيارة (التي يفعّلها المطعم، ولا يأخذها إلا كباتن السيارة)، والطلبات العاديّة كغيره.` : `إعادة ${nm} إلى الدراجة؟`)) return;
  if (!MP) return toast("انتهت الجلسة", "e");
  if (el) {
   el.disabled = true;
@@ -4395,6 +4557,9 @@ window.opEdit = function(type, phone) {
  eType = type;
  ePh = phone;
  _ePhoto = null;
+ window._advEdit = null;
+ const _advN = document.getElementById("eAdvNote");
+ if (_advN) _advN.style.display = "none";
  const list = type === "DRV" ? gD?.drivers : gD?.restaurants;
  const entity = list?.find(i => nP(i[2]) === nP(phone));
  if (!entity) return toast("لم يُعثر على البيانات", "e");
@@ -4538,6 +4703,7 @@ window.svEdit = async function() {
  const btn = document.getElementById("eSvBtn");
  btn.disabled = true;
  btn.classList.add("loading");
+ const advReq = eType === "RES" && window._advEdit && window._advEdit.p === nP(ePh) ? window._advEdit : null;
  const upd = {
   name: document.getElementById("eN").value
  };
@@ -4590,6 +4756,7 @@ window.svEdit = async function() {
    logAudit("updateEntity", "تحديث " + (eType === "DRV" ? "كابتن" : "مطعم") + ": " + upd.name);
    clEdit();
    loadData();
+   if (advReq && typeof window.advAfterSave === "function") window.advAfterSave(advReq);
   } else toast((photoSaved ? "حُفظت الصورة ✅ — لكن فشل حفظ البيانات: " : "فشل الحفظ: ") + (d && d.msg || ""), "e");
  } catch (e) {
   toast(photoSaved ? "حُفظت الصورة ✅ — لكن تعذّر حفظ البيانات (الاتصال)" : "خطأ في الاتصال", "e");
@@ -4937,7 +5104,12 @@ function insStateA(cfgRaw, acc, nowMs) {
  const expectedNow = Math.min(target, (weeksPast + (dueThis >= today ? 1 : 0)) * c.weekly);
  base.expected = expectedPast;
  base.due_date = dueThis;
- if (paid < expectedPast) return Object.assign(base, {
+ const gu = /^\d{4}-\d{2}-\d{2}$/.test(String(c.grace_until || "")) ? String(c.grace_until) : "";
+ if (paid < expectedPast) return gu && today <= gu ? Object.assign(base, {
+  state: "overdue",
+  owed: expectedPast - paid,
+  block_from: add(gu, 1)
+ }) : Object.assign(base, {
   state: "blocked",
   owed: expectedPast - paid
  });
@@ -5012,12 +5184,12 @@ function insRender() {
   if (!/^7\d{9}$/.test(p)) return;
   const a = insAccs[p] || {}, s = insStateA(cfg, a, now), name = insName(p), notice = a.notice_at || (insNotices[p] && insNotices[p].at ? new Date(Number(insNotices[p].at)).toISOString() : null);
   kS += s.paid || 0;
-  if (s.state === "blocked") kB++; else if (s.state === "due_today") kT++; else if (s.state === "ok" || s.state === "complete") kO++;
+  if (s.state === "blocked" || s.state === "overdue") kB++; else if (s.state === "due_today") kT++; else if (s.state === "ok" || s.state === "complete") kO++;
   if (q && !(name.includes(q) || p.includes(q.replace(/^0/, "")))) return;
   const f = insF;
-  if (f === "due" && ![ "blocked", "due_today" ].includes(s.state)) return;
+  if (f === "due" && ![ "blocked", "overdue", "due_today" ].includes(s.state)) return;
   if (f === "today" && s.day !== todayIdx) return;
-  if (f === "blocked" && s.state !== "blocked") return;
+  if (f === "blocked" && ![ "blocked", "overdue" ].includes(s.state)) return;
   if (f === "ok" && ![ "ok", "complete" ].includes(s.state)) return;
   if (f === "notice" && !notice && !a.left_at) return;
   rows.push({
@@ -5036,6 +5208,7 @@ function insRender() {
  if (dot) dot.style.display = kB ? "" : "none";
  const ST = {
   blocked: [ "🔴 متأخّر", "eb" ],
+  overdue: [ "⚠️ متأخّر — تنبيه فقط", "ei" ],
   due_today: [ "⚠️ قسطه اليوم", "ei" ],
   upcoming: [ "🗓 قادم", "ep" ],
   ok: [ "✅ دفع هذا الأسبوع", "ea" ],
@@ -5045,12 +5218,12 @@ function insRender() {
   not_started: [ "لم يبدأ", "ep" ],
   off: [ "—", "ep" ]
  };
- rows.sort((x, y) => ([ "blocked", "due_today" ].indexOf(x.s.state) + 1 || 9) - ([ "blocked", "due_today" ].indexOf(y.s.state) + 1 || 9) || (y.s.owed || 0) - (x.s.owed || 0));
+ rows.sort((x, y) => ([ "blocked", "overdue", "due_today" ].indexOf(x.s.state) + 1 || 9) - ([ "blocked", "overdue", "due_today" ].indexOf(y.s.state) + 1 || 9) || (y.s.owed || 0) - (x.s.owed || 0));
  el.innerHTML = rows.length ? rows.map(({p: p, a: a, s: s, name: name, notice: notice}) => {
   const st = ST[s.state] || [ s.state, "ep" ], pct = s.target ? Math.min(100, Math.round((s.paid || 0) * 100 / s.target)) : 0;
   const refundDue = a.left_at ? new Date(Date.parse(a.left_at) + (Number(cfg.refund_days) || 30) * 864e5).toISOString().slice(0, 10) : null;
   const days = INS_DAYS_AR.map((d, i) => `<option value="${i}" ${i === s.day ? "selected" : ""}>${d}</option>`).join("");
-  return `<div class="ec ${st[1]}">\n      <div class="ec-top"><div><div class="ec-n">${esc(name || "كابتن")}</div><div class="ec-ph">0${esc(p)}</div></div><div style="font-size:.72rem;font-weight:900">${st[0]}</div></div>\n      <div style="height:8px;background:var(--base2);border-radius:9px;overflow:hidden;margin-bottom:6px"><div style="height:100%;width:${pct}%;background:var(--jade)"></div></div>\n      <div style="font-size:.74rem;font-weight:800;margin-bottom:6px">${insFmt(s.paid)} / ${insFmt(s.target)} د.ع ${s.owed ? `· <span style="color:var(--rose)">المطلوب ${insFmt(s.owed)}</span>` : ""}</div>\n      <div style="display:flex;gap:6px;align-items:center;margin-bottom:8px;font-size:.72rem;font-weight:800">يومه: <select onchange="insSetDay('${p}',this.value)" style="font:inherit;padding:3px 6px;border-radius:7px;border:1px solid var(--line2)">${days}</select></div>\n      ${notice ? `<div style="font-size:.72rem;font-weight:800;color:var(--amber);margin-bottom:6px">📝 أبلغ بالترك: ${esc(String(notice).slice(0, 10))}</div>` : ""}\n      ${a.left_at ? `<div style="font-size:.72rem;font-weight:800;margin-bottom:6px">🚪 ترك: ${esc(String(a.left_at).slice(0, 10))} · الإعادة مستحقّة: <b>${esc(refundDue)}</b>${a.refunded_at ? ` · ✅ أُعيدت ${esc(String(a.refunded_at).slice(0, 10))}` : ""}</div>` : ""}\n      <div style="display:flex;gap:6px;flex-wrap:wrap">\n        ${!a.left_at && s.state !== "complete" && s.state !== "exempt" ? `<button class="abt" style="background:var(--jade)" onclick="insPay('${p}')">✅ استلام ${insFmt(s.weekly || 1e4)}</button>` : ""}\n        <button class="abt" style="background:var(--base2);color:var(--ink);box-shadow:none;border:1px solid var(--line2)" onclick="insHist('${p}')">📋 السجلّ</button>\n        <button class="abt" style="background:var(--base2);color:var(--ink);box-shadow:none;border:1px solid var(--line2)" onclick="insMore('${p}')">⋯</button>\n      </div></div>`;
+  return `<div class="ec ${st[1]}">\n      <div class="ec-top"><div><div class="ec-n">${esc(name || "كابتن")}</div><div class="ec-ph">0${esc(p)}</div></div><div style="font-size:.72rem;font-weight:900">${st[0]}</div></div>\n      <div style="height:8px;background:var(--base2);border-radius:9px;overflow:hidden;margin-bottom:6px"><div style="height:100%;width:${pct}%;background:var(--jade)"></div></div>\n      <div style="font-size:.74rem;font-weight:800;margin-bottom:6px">${insFmt(s.paid)} / ${insFmt(s.target)} د.ع ${s.owed ? `· <span style="color:var(--rose)">المطلوب ${insFmt(s.owed)}</span>` : ""}</div>\n      <div style="display:flex;gap:6px;align-items:center;margin-bottom:8px;font-size:.72rem;font-weight:800">يومه: <select onchange="insSetDay('${p}',this.value)" style="font:inherit;padding:3px 6px;border-radius:7px;border:1px solid var(--line2)">${days}</select></div>\n      ${notice ? `<div style="font-size:.72rem;font-weight:800;color:var(--amber);margin-bottom:6px">📝 أبلغ بالترك: ${esc(String(notice).slice(0, 10))}</div>` : ""}\n      ${a.left_at ? `<div style="font-size:.72rem;font-weight:800;margin-bottom:6px">🚪 ترك: ${esc(String(a.left_at).slice(0, 10))} · الإعادة مستحقّة: <b>${esc(refundDue)}</b>${a.refunded_at ? ` · ✅ أُعيدت ${esc(String(a.refunded_at).slice(0, 10))}` : ""}</div>` : ""}\n      <div style="display:flex;gap:6px;flex-wrap:wrap">\n        ${!a.left_at && s.state !== "complete" && s.state !== "exempt" ? `<button class="abt" style="background:var(--jade)" onclick="insPay('${p}')">✅ استلام ${insFmt(s.weekly || 1e4)}</button>` : ""}\n        ${(notice || a.left_at) && !a.refunded_at ? `<button class="abt" style="background:var(--amber);color:#fff" title="الكابتن تراجع: يُلغى إبلاغه فيعمل كالمعتاد" onclick="insCancelNotice('${p}')">↩️ تراجع عن الترك</button>` : ""}\n        <button class="abt" style="background:var(--base2);color:var(--ink);box-shadow:none;border:1px solid var(--line2)" onclick="insHist('${p}')">📋 السجلّ</button>\n        <button class="abt" style="background:var(--base2);color:var(--ink);box-shadow:none;border:1px solid var(--line2)" onclick="insMore('${p}')">⋯</button>\n      </div></div>`;
  }).join("") : `<div class="empty-s" style="grid-column:1/-1">لا كباتن في هذا التصنيف.</div>`;
 }
 
@@ -5146,6 +5319,23 @@ window.insHist = function(p) {
  db.ref("insurance/accounts/" + p + "/payments/" + pays[i][0]).remove().then(() => toast("حُذفت الدفعة")).catch(e => toast("تعذّر: " + esc(e.message || e), "e"));
 };
 
+window.insCancelNotice = async function(p) {
+ const a = insAccs[p] || {}, nm = insName(p) || "0" + p;
+ if (a.refunded_at) return toast("أُعيدت تأميناته — لا يُلغى تركه من هنا", "e");
+ if (!confirm("الكابتن " + nm + " تراجع عن ترك العمل؟\nيُلغى إبلاغه فيعمل كالمعتاد ويستمرّ قسط تأمينه، ويستطيع الإبلاغ من جديد لاحقاً.")) return;
+ const u = {};
+ u["insurance/notices/" + p] = null;
+ u["insurance/accounts/" + p + "/notice_at"] = null;
+ if (a.left_at) u["insurance/accounts/" + p + "/left_at"] = null;
+ try {
+  await db.ref().update(u);
+  toast("↩️ أُلغي إبلاغ " + esc(nm) + " — يعمل كالمعتاد");
+  logAudit("insNoticeCancel", nm);
+ } catch (e) {
+  toast("تعذّر: " + esc(e.message || e), "e");
+ }
+};
+
 window.insMore = async function(p) {
  const a = insAccs[p] || {};
  const c = prompt("اختر لـ " + (insName(p) || "0" + p) + ":\n1) " + (a.exempt ? "إلغاء الإعفاء" : "إعفاء من التأمين") + "\n2) " + (a.left_at ? "إلغاء تسجيل الترك" : "تسجيل ترك العمل اليوم") + "\n3) تسجيل إعادة التأمينات له (تمت الإعادة)", "");
@@ -5165,6 +5355,1019 @@ window.insMore = async function(p) {
  } catch (e) {
   toast("تعذّر: " + esc(e.message || e), "e");
  }
+};
+
+const ADV_CAT_AR = {
+ order: "📦 شكوى على طلب",
+ damaged: "🍔 طلب تالف",
+ captain: "🛵 شكوى على كابتن",
+ price: "💰 تسعيرة منطقة",
+ location: "📍 موقع المطعم",
+ market: "📈 كيف السوق؟",
+ other: "💬 شيء آخر"
+};
+
+const ADV_RESP_AR = {
+ captain: "🛵 الكابتن",
+ restaurant: "🍽 المطعم",
+ company: "🏢 الشركة",
+ unknown: "❔ غير محدّدة"
+};
+
+const ADV_WHY_AR = {
+ late: "تأخّر",
+ fee: "أخذ أجرة أعلى",
+ rude: "أسلوب",
+ other: "أخرى",
+ spill: "انسكب",
+ broken: "تكسّر",
+ cold: "برد/تأخّر",
+ wrong: "غلط",
+ cash: "لم يدفع ثمن الطلب",
+ look: "مظهر",
+ here: "من المطعم (GPS)",
+ link: "رابط خرائط"
+};
+
+const ADV_HINT_RATE = .85, ADV_HINT_MIN = 20;
+
+let advClaims = {}, advReqs = {}, advAudit = {}, advCfg = {}, advMode = null, advAt = 0, advBusy = false, advMon = "", advErr = [];
+
+const advFmt = n => Math.round(Number(n) || 0).toLocaleString("en-US");
+
+function advMs(v) {
+ if (v === null || v === undefined || v === "") return 0;
+ const n = Number(v);
+ if (isFinite(n) && n > 1e11) return n;
+ const t = Date.parse(v);
+ return isFinite(t) ? t : 0;
+}
+
+function advWhen(v) {
+ const ms = advMs(v);
+ if (!ms) return "—";
+ const s = new Date(ms + 3 * 36e5).toISOString(), ago = Date.now() - ms;
+ const rel = ago < 0 ? "" : ago < 36e5 ? "منذ " + Math.max(1, Math.round(ago / 6e4)) + " د" : ago < 864e5 ? "منذ " + Math.round(ago / 36e5) + " س" : "منذ " + Math.round(ago / 864e5) + " يوم";
+ return s.slice(5, 10) + " " + s.slice(11, 16) + (rel ? " · " + rel : "");
+}
+
+const advMonthNow = () => new Date(Date.now() + 3 * 36e5).toISOString().slice(0, 7);
+
+function advClaimMonth(c) {
+ const m = String(c && c.month || "");
+ if (/^\d{4}-\d{2}$/.test(m)) return m;
+ const ms = advMs(c && c.created_at);
+ return ms ? new Date(ms + 3 * 36e5).toISOString().slice(0, 7) : "";
+}
+
+function advClaimAmt(c) {
+ const a = c ? c.amount_ok : null;
+ return a !== null && a !== undefined && a !== "" && isFinite(Number(a)) ? Number(a) : Number(c && c.food) || 0;
+}
+
+function advRes(p) {
+ p = nP(p);
+ if (!p || !gD || !gD.restaurants) return null;
+ return gD.restaurants.find(x => nP(x[R.PHONE]) === p) || null;
+}
+
+function advResName(p, fb) {
+ const r = advRes(p);
+ return r && r[R.NAME] ? String(r[R.NAME]) : fb || "0" + nP(p);
+}
+
+function advTail(id) {
+ const s = String(id || "");
+ return s.length > 8 ? "…" + s.slice(-6) : s;
+}
+
+function advDistM(a, b, c, d) {
+ const r = Math.PI / 180, x = (c - a) * r, y = (d - b) * r;
+ const h = Math.sin(x / 2) ** 2 + Math.cos(a * r) * Math.cos(c * r) * Math.sin(y / 2) ** 2;
+ return 12742e3 * Math.asin(Math.min(1, Math.sqrt(h)));
+}
+
+const advDistTxt = m => m < 1e3 ? Math.round(m) + " م" : Math.round(m / 100) / 10 + " كم";
+
+function advMapUrl(la, ln) {
+ return "https://www.google.com/maps/search/?api=1&query=" + Number(la).toFixed(6) + "," + Number(ln).toFixed(6);
+}
+
+function advNormArea(s) {
+ return String(s || "").replace(/[ً-ْـ]/g, "").replace(/[أإآ]/g, "ا").replace(/ى/g, "ي").replace(/ة/g, "ه").replace(/\s+/g, " ").trim();
+}
+
+function advPL(p) {
+ const r = advRes(p);
+ let o = {};
+ try {
+  o = JSON.parse(r && r[R.C12] || "{}") || {};
+ } catch (_) {
+  o = {};
+ }
+ return o && typeof o === "object" ? o : {};
+}
+
+function advPropPrices(q) {
+ const pr = q && q.proposed || {}, raw = {}, out = {};
+ if (Array.isArray(pr.prices)) pr.prices.forEach(x => {
+  if (x && x.area != null) raw[String(x.area).trim()] = x.price;
+ }); else Object.keys(pr).forEach(k => {
+  if (k !== "src" && k !== "note") raw[String(k).trim()] = pr[k];
+ });
+ Object.keys(raw).forEach(k => {
+  const v = parseAmount(String(raw[k]));
+  if (k && v.ok && v.value >= 0) out[k] = v.value;
+ });
+ return out;
+}
+
+function advFindArea(list, area) {
+ const n = advNormArea(area);
+ return Object.keys(list || {}).find(k => advNormArea(k) === n);
+}
+
+function advIsPend(x) {
+ return !!x && (x.status || "pending") === "pending";
+}
+
+function advErrTxt(e) {
+ const c = String(e && e.code || "") + " " + String(e && e.message || "");
+ return /permission/i.test(c) ? "القراءة مرفوضة — قواعد V34.42 لم تُنشر بعد؟" : c.trim().slice(0, 80) || "خطأ";
+}
+
+function advSt(t) {
+ const e = document.getElementById("advSt");
+ if (e) e.textContent = t || "";
+}
+
+async function advCall(act, args) {
+ const payload = Object.assign({
+  action: act
+ }, args || {});
+ let r;
+ try {
+  r = await Promise.race([ fnCall("advisorAction", payload), new Promise((_, rej) => setTimeout(() => rej(Object.assign(new Error("timeout"), {
+   code: "timeout"
+  })), 25e3)) ]);
+ } catch (e) {
+  const c = String(e && e.code || "") + " " + String(e && e.message || "");
+  if (/[؀-ۿ]/.test(String(e && e.message || ""))) return {
+   ok: false,
+   msg: String(e.message).slice(0, 120)
+  };
+  return {
+   ok: false,
+   msg: /timeout/i.test(c) ? "انتهت المهلة — حدّث القائمة لترى هل نُفّذ قبل أن تعيد" : /not-found|not_found/i.test(c) ? "دالّة advisorAction غير منشورة بعد" : /permission|unauthenticated/i.test(c) ? "الصلاحيّة مرفوضة — أعد الدخول" : c.trim().slice(0, 90) || "خطأ"
+  };
+ }
+ const d = r && r.data;
+ if (!d || d.ok === false || d.success === false) return {
+  ok: false,
+  msg: d && (d.msg || d.err) || "رفض الخادم"
+ };
+ return Object.assign({}, d, {
+  ok: true
+ });
+}
+
+async function advGetClaims() {
+ try {
+  return (await db.ref("res_claims").once("value")).val() || {};
+ } catch (e) {
+  if (!/permission/i.test(String(e && e.code || "") + String(e && e.message || ""))) throw e;
+  const ps = (gD && gD.restaurants || []).map(r => nP(r[R.PHONE])).filter(p => /^7\d{9}$/.test(p));
+  if (!ps.length) throw e;
+  const out = {};
+  let denied = 0;
+  for (let i = 0; i < ps.length; i += 10) {
+   await Promise.all(ps.slice(i, i + 10).map(p => db.ref("res_claims/" + p).once("value").then(s => {
+    const v = s.val();
+    if (v) out[p] = v;
+   }).catch(_ => {
+    denied++;
+   })));
+  }
+  if (denied === ps.length) throw e;
+  return out;
+ }
+}
+
+window.advStart = function() {
+ advLoad(false);
+};
+
+window.advLoad = async function(force) {
+ if (advBusy) return;
+ if (!force && advAt && Date.now() - advAt < 6e4) {
+  advRender();
+  return;
+ }
+ advBusy = true;
+ advSt("⏳ جارٍ التحميل…");
+ const btn = document.getElementById("advRefBtn");
+ if (btn) btn.disabled = true;
+ const run = () => Promise.allSettled([ advGetClaims(), db.ref("res_requests").once("value").then(s => s.val() || {}), db.ref("res_leader/audit").orderByKey().limitToLast(10).once("value").then(s => s.val() || {}), db.ref("system_settings/flags/res_leader_mode").once("value").then(s => s.val()), db.ref("system_settings/res_leader").once("value").then(s => s.val() || {}) ]);
+ try {
+  let r = await run();
+  const r3 = r[3].status === "rejected" ? r[3].reason : null;
+  if (r3 && /permission/i.test(String(r3.code || "") + String(r3.message || "")) && await healAdminAuth()) r = await run();
+  const names = [ "المطالبات", "طلبات التغيير", "جودة الردود", "وضع الفريق", "إعدادات الفريق" ];
+  advErr = [];
+  r.forEach((x, i) => {
+   if (x.status === "rejected") {
+    advErr.push(names[i] + ": " + advErrTxt(x.reason));
+    console.warn("advLoad " + names[i] + ":", x.reason && x.reason.message);
+   }
+  });
+  if (r[0].status === "fulfilled") advClaims = r[0].value || {};
+  if (r[1].status === "fulfilled") advReqs = r[1].value || {};
+  if (r[2].status === "fulfilled") advAudit = r[2].value || {};
+  if (r[3].status === "fulfilled") advMode = r[3].value;
+  if (r[4].status === "fulfilled") advCfg = r[4].value || {};
+  advAt = Date.now();
+ } catch (e) {
+  advErr = [ advErrTxt(e) ];
+  console.warn("advLoad:", e && e.message);
+ } finally {
+  advBusy = false;
+  if (btn) btn.disabled = false;
+ }
+ advRender();
+};
+
+function advPeekSoon() {
+ setTimeout(advPeek, 2e4);
+}
+
+async function advPeek() {
+ if (advAt) return;
+ const [c, q] = await Promise.allSettled([ db.ref("res_claims").once("value"), db.ref("res_requests").once("value") ]);
+ if (advAt) return;
+ if (c.status === "fulfilled") advClaims = c.value.val() || {}; else console.warn("advPeek res_claims:", c.reason && c.reason.message);
+ if (q.status === "fulfilled") advReqs = q.value.val() || {}; else console.warn("advPeek res_requests:", q.reason && q.reason.message);
+ advBadge();
+}
+
+function advCounts() {
+ let c = 0, pr = 0, lo = 0;
+ Object.keys(advClaims || {}).forEach(p => Object.values(advClaims[p] || {}).forEach(x => {
+  if (advIsPend(x)) c++;
+ }));
+ Object.values(advReqs || {}).forEach(x => {
+  if (advIsPend(x)) {
+   if (x.type === "location") lo++; else pr++;
+  }
+ });
+ return {
+  c: c,
+  pr: pr,
+  lo: lo
+ };
+}
+
+function advBadge() {
+ const {c: c, pr: pr, lo: lo} = advCounts(), n = c + pr + lo;
+ const b = document.getElementById("nbAdv");
+ if (b) {
+  b.textContent = n;
+  b.style.display = n > 0 ? "" : "none";
+ }
+ const d = document.getElementById("bnAdvDot");
+ if (d) d.classList.toggle("on", n > 0);
+ return {
+  c: c,
+  pr: pr,
+  lo: lo
+ };
+}
+
+window.advSetMon = function(m) {
+ advMon = m;
+ advRenderMonth();
+};
+
+function advRender() {
+ const {c: c, pr: pr, lo: lo} = advBadge();
+ [ [ "advKCl", c ], [ "advKPr", pr ], [ "advKLo", lo ] ].forEach(([id, v]) => {
+  const e = document.getElementById(id);
+  if (e) e.textContent = v;
+ });
+ const head = document.getElementById("advHead");
+ if (head) {
+  head.innerHTML = "🐳 <b>المطالبات</b>: فريق الدعم يسجّلها، و<b>أنت وحدك تعتمدها</b> — والمعتمد يُخصم من عمولة المطعم يدوياً عند التصفية. " + "<b>التسعيرة والموقع</b>: «تطبيق» يفتح نافذة التعديل معبّأةً، وحفظك فيها يكتب الشيت ويُعلّم الطلب «طُبّق»." + (advErr.length ? '<div style="margin-top:6px;color:var(--rose)">⚠️ ' + advErr.map(esc).join(" · ") + "</div>" : "");
+ }
+ advSt(advAt ? "آخر تحديث: " + new Date(advAt + 3 * 36e5).toISOString().slice(11, 16) : "");
+ advRenderClaims();
+ advRenderMonth();
+ advRenderReqs();
+ advRenderMeter();
+}
+
+function advRenderClaims() {
+ const box = document.getElementById("advClaims");
+ if (!box) return;
+ const mon = advMonthNow(), caps = Object.assign({
+  claim_food_max: 15e3,
+  claims_per_month: 2
+ }, advCfg && advCfg.caps || {});
+ const groups = [];
+ Object.keys(advClaims || {}).forEach(p => {
+  const all = advClaims[p] || {};
+  const pend = Object.keys(all).filter(id => advIsPend(all[id])).map(id => Object.assign({}, all[id], {
+   id: id
+  }));
+  if (!pend.length) return;
+  const nMon = Object.values(all).filter(x => x && advClaimMonth(x) === mon && x.status !== "rejected").length;
+  pend.sort((a, b) => advMs(a.created_at) - advMs(b.created_at));
+  groups.push({
+   p: p,
+   name: advResName(p),
+   pend: pend,
+   nMon: nMon
+  });
+ });
+ groups.sort((a, b) => advMs(a.pend[0].created_at) - advMs(b.pend[0].created_at));
+ if (!groups.length) {
+  box.innerHTML = '<div class="adv-empty">✅ لا مطالبات معلّقة.</div>';
+  return;
+ }
+ const cpm = Number(caps.claims_per_month) || 0;
+ box.innerHTML = groups.map(g => `<div class="adv-grp">🍽 ${esc(g.name)} <span class="adv-tag">${g.pend.length} معلّقة</span>` + `<span class="adv-tag ${cpm && g.nMon > cpm ? "w" : ""}" title="غير المرفوضة في الشهر الجاري${cpm ? " — السقف " + cpm : ""}">هذا الشهر: ${g.nMon}${cpm ? " / " + cpm : ""}</span></div>` + g.pend.map(x => advClaimCard(g.p, x, caps)).join("")).join("");
+}
+
+function advClaimCard(p, c, caps) {
+ const food = Number(c.food) || 0, fee = Number(c.fee) || 0, mx = Number(caps.claim_food_max) || 0, pj = ej(p), ij = ej(c.id);
+ const resp = ADV_RESP_AR[c.resp] || String(c.resp || "—"), why = c.why ? ADV_WHY_AR[c.why] || String(c.why) : "";
+ const tags = [ `<span class="adv-tag b" title="${esc(c.oid)}">الطلب <bdi>#${esc(advTail(c.oid))}</bdi></span>`, c.rid ? `<span class="adv-tag g" title="${esc(c.rid)}">♻️ البديل <bdi>#${esc(advTail(c.rid))}</bdi></span>` : "", `<span class="adv-tag">المسؤوليّة: ${esc(resp)}</span>`, c.drv ? `<span class="adv-tag">🛵 ${esc(dN(c.drv))}</span>` : "", why ? `<span class="adv-tag">السبب: ${esc(why)}</span>` : "", mx && food > mx ? `<span class="adv-tag w">فوق السقف (${advFmt(mx)})</span>` : "" ].join("");
+ return `<div class="adv-c pend">\n    <div class="adv-h"><div style="flex:1;min-width:170px">\n      <div class="adv-n">🧾 مطالبة بثمن الطعام</div>\n      <div class="adv-s">سجّلها: ${esc(c.created_name || c.created_by || "—")} · ${esc(advWhen(c.created_at))}</div></div>\n      <div class="adv-amt">${advFmt(food)}<small>د.ع · ثمن الطعام</small>${fee ? `<small>الأجرة: ${advFmt(fee)} د.ع</small>` : ""}</div></div>\n    <div class="adv-tags">${tags}</div>\n    ${c.note ? `<div class="adv-note">${esc(c.note)}</div>` : ""}\n    <div class="adv-acts">\n      <button class="adv-b ok" onclick="advClaimDecide('${pj}','${ij}','approve',this)">✅ اعتماد</button>\n      <button class="adv-b no" onclick="advClaimDecide('${pj}','${ij}','reject',this)">✖ رفض</button>\n    </div></div>`;
+}
+
+window.advClaimDecide = async function(p, id, dec, btn) {
+ const c = (advClaims[p] || {})[id];
+ if (!advIsPend(c)) return toast("المطالبة لم تعد معلّقة — حدّث القائمة", "e");
+ const nm = advResName(p), food = Math.round(Number(c.food) || 0), oid = "#" + advTail(c.oid);
+ const payload = {
+  p: String(p),
+  id: String(id),
+  decision: dec
+ };
+ if (dec === "approve") {
+  const v = prompt("اعتماد مطالبة «" + nm + "» على الطلب " + oid + "\nثمن الطعام المطلوب: " + advFmt(food) + " د.ع\n\nالمبلغ المعتمد (يُخصم من عمولة المطعم عند التصفية):", String(food));
+  if (v === null) return;
+  const a = parseAmount(v);
+  if (!a.ok || !(a.value > 0)) return toast("مبلغٌ غير صالح", "e");
+  if (a.value > food && !confirm("المبلغ المعتمد (" + advFmt(a.value) + ") أكبر من المطلوب (" + advFmt(food) + "). متابعة؟")) return;
+  payload.amount = a.value;
+ } else if (!confirm("رفض مطالبة «" + nm + "» على الطلب " + oid + " (" + advFmt(food) + " د.ع)؟")) return;
+ const bs = btn && btn.parentElement ? [ ...btn.parentElement.querySelectorAll("button") ] : [];
+ bs.forEach(b => b.disabled = true);
+ const r = await advCall("CLAIM_DECIDE", payload);
+ if (!r.ok) {
+  toast("تعذّر: " + esc(r.msg), "e");
+  bs.forEach(b => b.disabled = false);
+  return;
+ }
+ let fresh = null;
+ try {
+  fresh = (await db.ref("res_claims/" + p + "/" + id).once("value")).val();
+ } catch (e) {
+  console.warn("advClaimDecide reread:", e && e.message);
+ }
+ advClaims[p] = advClaims[p] || {};
+ advClaims[p][id] = fresh || Object.assign({}, c, {
+  status: dec === "approve" ? "approved" : "rejected",
+  decided_at: (new Date).toISOString(),
+  decided_by: "admin"
+ }, dec === "approve" ? {
+  amount_ok: payload.amount
+ } : {});
+ logAudit("advisor_claim", (dec === "approve" ? "اعتماد" : "رفض") + " مطالبة: " + nm + " " + oid + " — " + advFmt(dec === "approve" ? payload.amount : food) + " د.ع");
+ toast(dec === "approve" ? "اعتُمدت المطالبة ✅ — تُخصم من عمولة المطعم عند التصفية" : "رُفضت المطالبة");
+ advRender();
+};
+
+function advRenderMonth() {
+ const box = document.getElementById("advMonth");
+ if (!box) return;
+ const now = advMonthNow(), months = new Set([ now ]);
+ Object.values(advClaims || {}).forEach(g => Object.values(g || {}).forEach(c => {
+  const m = advClaimMonth(c);
+  if (m) months.add(m);
+ }));
+ if (!advMon || !months.has(advMon)) advMon = now;
+ const rows = [];
+ let tA = 0, tN = 0, tP = 0, tR = 0;
+ Object.keys(advClaims || {}).forEach(p => {
+  let a = 0, n = 0, pn = 0, rj = 0;
+  Object.values(advClaims[p] || {}).forEach(c => {
+   if (!c || advClaimMonth(c) !== advMon) return;
+   const st = c.status || "pending";
+   if (st === "approved") {
+    a += advClaimAmt(c);
+    n++;
+   } else if (st === "pending") pn++; else rj++;
+  });
+  if (n || pn || rj) rows.push({
+   p: p,
+   name: advResName(p),
+   a: a,
+   n: n,
+   pn: pn,
+   rj: rj
+  });
+  tA += a;
+  tN += n;
+  tP += pn;
+  tR += rj;
+ });
+ rows.sort((x, y) => y.a - x.a || y.pn - x.pn);
+ const k = document.getElementById("advKMo"), kl = document.getElementById("advKMoL");
+ if (k) k.textContent = advFmt(tA);
+ if (kl) kl.textContent = "المعتمد " + (advMon === now ? "هذا الشهر" : advMon) + " (د.ع)";
+ const sel = `<select class="fc" style="width:auto;padding:5px 10px!important;margin:0!important" onchange="advSetMon(this.value)">${[ ...months ].sort().reverse().map(m => `<option value="${esc(m)}"${m === advMon ? " selected" : ""}>${esc(m)}${m === now ? " (هذا الشهر)" : ""}</option>`).join("")}</select>`;
+ box.innerHTML = `<div class="adv-c">\n    <div class="adv-mode">الشهر: ${sel}</div>\n    <div class="arch-alert" style="margin-bottom:10px;display:block">💵 المبلغ المعتمد <b>يُخصم من عمولة المطعم عند التصفية</b> — يدوياً. الاعتماد هنا لا يمسّ الدفتر (ledgers) ولا الدين.</div>\n    ${rows.length ? `<div class="adv-sc"><table class="adv-tb"><thead><tr><th>المطعم</th><th class="num">معتمدة</th><th class="num">يُخصم من عمولته (د.ع)</th><th class="num">معلّقة</th><th class="num">مرفوضة</th></tr></thead>\n      <tbody>${rows.map(x => `<tr><td>${esc(x.name)}</td><td class="num">${x.n}</td><td class="num" style="color:var(--rose);font-weight:900">${advFmt(x.a)}</td><td class="num">${x.pn || "—"}</td><td class="num">${x.rj || "—"}</td></tr>`).join("")}</tbody>\n      <tfoot><tr><td>المجموع</td><td class="num">${tN}</td><td class="num" style="color:var(--rose)">${advFmt(tA)}</td><td class="num">${tP || "—"}</td><td class="num">${tR || "—"}</td></tr></tfoot></table></div>` : '<div class="adv-empty" style="margin:0">لا مطالبات في هذا الشهر.</div>'}\n  </div>`;
+}
+
+function advRenderReqs() {
+ const box = document.getElementById("advReqs");
+ if (!box) return;
+ const all = Object.keys(advReqs || {}).map(id => Object.assign({}, advReqs[id] || {}, {
+  id: id
+ }));
+ const pend = all.filter(advIsPend).sort((a, b) => advMs(a.created_at) - advMs(b.created_at));
+ const done = all.filter(q => q.status === "applied" || q.status === "rejected").sort((a, b) => advMs(b.decided_at || b.created_at) - advMs(a.decided_at || a.created_at)).slice(0, 10);
+ let h = pend.length ? pend.map(advReqCard).join("") : '<div class="adv-empty">✅ لا طلبات تسعيرة أو موقع معلّقة.</div>';
+ if (done.length) h += `<details style="margin-top:4px"><summary style="cursor:pointer;font-size:.76rem;font-weight:800;color:var(--ink3)">آخر القرارات (${done.length})</summary>` + done.map(q => `<div class="adv-s" style="padding:6px 4px;border-bottom:1px solid var(--line2)">${q.status === "applied" ? "✔ طُبّق" : "✖ رُفض"} · ${q.type === "location" ? "📍 موقع" : "💰 تسعيرة"} · ${esc(advResName(q.p, q.res_name))} · ${esc(advWhen(q.decided_at || q.created_at))}${q.decided_by ? " · " + esc(q.decided_by) : ""}</div>`).join("") + `</details>`;
+ box.innerHTML = h;
+}
+
+function advReqCard(q) {
+ const p = nP(q.p), name = advResName(p, q.res_name), ij = ej(q.id), ent = advRes(p);
+ const ttl = q.type === "price" ? "💰 طلب تسعيرة" : q.type === "location" ? "📍 طلب تغيير الموقع" : "❔ طلب";
+ const body = q.type === "price" ? advReqPriceHtml(q, p) : q.type === "location" ? advReqLocHtml(q, p) : `<div class="adv-note">${esc(JSON.stringify(q.proposed || {}))}</div>`;
+ const canApply = (q.type === "price" || q.type === "location") && !!ent;
+ return `<div class="adv-c pend">\n    <div class="adv-h"><div style="flex:1;min-width:170px"><div class="adv-n">${ttl} — ${esc(name)}</div>\n      <div class="adv-s">رفعه: ${esc(q.created_name || q.created_by || "—")} · ${esc(advWhen(q.created_at))}</div></div></div>\n    ${body}${q.note ? `<div class="adv-note">${esc(q.note)}</div>` : ""}\n    <div class="adv-acts">\n      ${canApply ? `<button class="adv-b go" onclick="advApply('${ij}')">✏️ تطبيق</button>` : `<span class="adv-tag w">${gD ? "المطعم غير موجود في بيانات الشيت" : "بيانات المطاعم لم تُحمَّل بعد"}</span>`}\n      <button class="adv-b no" onclick="advReqDecide('${ij}','rejected',this)">✖ رفض</button>\n      <button class="adv-b lt" title="إن طبّقتَه بنفسك من نافذة التعديل ولم يُعلَّم" onclick="advReqDecide('${ij}','applied',this)">✔ عُلِّم مطبّقاً</button>\n    </div></div>`;
+}
+
+function advReqPriceHtml(q, p) {
+ const prop = advPropPrices(q), sheet = advPL(p), cur0 = q.current && typeof q.current === "object" ? q.current : {};
+ const areas = Object.keys(prop);
+ if (!areas.length) return '<div class="adv-note">⚠️ لا أسعار صالحة في الطلب.</div>';
+ const rows = areas.map(a => {
+  const k = advFindArea(sheet, a), now = k !== undefined ? Number(sheet[k]) : NaN;
+  const k0 = advFindArea(cur0, a), w0 = k0 !== undefined ? cur0[k0] : null, was = w0 !== null && w0 !== undefined && w0 !== "" ? Number(w0) : NaN;
+  const nw = prop[a], d = isFinite(now) ? nw - now : null;
+  return `<tr><td>${esc(a)}${k === undefined ? ' <span class="adv-tag w">منطقة جديدة</span>' : k !== a ? ` <span class="adv-s">(في الشيت: ${esc(k)})</span>` : ""}</td>\n      <td class="num">${isFinite(now) ? advFmt(now) : "—"}${isFinite(was) && was !== now ? ` <span class="adv-s" title="وقت رفع الطلب">(كان ${advFmt(was)})</span>` : ""}</td>\n      <td class="num" style="color:var(--sky-d);font-weight:900">${advFmt(nw)}</td>\n      <td class="num" style="color:${d > 0 ? "var(--rose)" : d < 0 ? "var(--jade)" : "var(--ink4)"}">${d === null ? "—" : (d > 0 ? "+" : "") + advFmt(d)}</td></tr>`;
+ }).join("");
+ return `<div class="adv-sc" style="margin-top:9px"><table class="adv-tb"><thead><tr><th>المنطقة</th><th class="num">الحاليّ (الشيت)</th><th class="num">المقترح</th><th class="num">الفرق</th></tr></thead><tbody>${rows}</tbody></table></div>`;
+}
+
+function advReqLocHtml(q, p) {
+ const pr = q.proposed || {}, la = Number(pr.lat), ln = Number(pr.lng), ent = advRes(p);
+ let cla = ent ? Number(ent[R.LAT]) : NaN, cln = ent ? Number(ent[R.LNG]) : NaN;
+ if (!mapLinkOk_(cla, cln) && q.current) {
+  cla = Number(q.current.lat);
+  cln = Number(q.current.lng);
+ }
+ const okC = !!mapLinkOk_(cla, cln);
+ if (!mapLinkOk_(la, ln)) return '<div class="adv-note">⚠️ الإحداثيات المقترحة غير صالحة.</div>';
+ const d = okC ? advDistM(cla, cln, la, ln) : null, km = kmFromKirkuk(la, ln);
+ const src = pr.src === "gps" || pr.src === "here" ? "📡 من هاتف المطعم وهو فيه (GPS)" : pr.src === "link" ? "🔗 من رابط خرائط" : pr.src ? String(pr.src) : "";
+ const door = q.door_m !== undefined && q.door_m !== null && isFinite(Number(q.door_m)) ? Number(q.door_m) : null;
+ const lnk = (a, b) => `<a class="adv-tag b" href="${esc(advMapUrl(a, b))}" target="_blank" rel="noopener">🗺 خرائط جوجل</a>`;
+ return `<div class="adv-sc" style="margin-top:9px"><table class="adv-tb"><thead><tr><th></th><th class="num">Lat</th><th class="num">Lng</th><th></th></tr></thead><tbody>\n    <tr><td>الحاليّ (الشيت)</td><td class="num">${okC ? cla.toFixed(6) : "—"}</td><td class="num">${okC ? cln.toFixed(6) : "—"}</td><td>${okC ? lnk(cla, cln) : "—"}</td></tr>\n    <tr><td style="color:var(--sky-d);font-weight:900">المقترح</td><td class="num">${la.toFixed(6)}</td><td class="num">${ln.toFixed(6)}</td><td>${lnk(la, ln)}</td></tr>\n    </tbody></table></div>\n    <div class="adv-tags">\n      ${d !== null ? `<span class="adv-tag ${d > 300 ? "w" : "g"}">📏 المسافة عن الحاليّ: ${advDistTxt(d)}</span>` : '<span class="adv-tag w">لا موقع حاليّ صالح للمقارنة</span>'}\n      ${door !== null ? `<span class="adv-tag ${door > 150 ? "w" : "g"}" title="وسيط مواقع الكباتن عند «وصلت» — دليلٌ لا حكم">🚪 عن باب الكباتن: ${advDistTxt(door)}</span>` : ""}\n      ${src ? `<span class="adv-tag">${esc(src)}</span>` : ""}\n      ${pr.acc !== undefined && pr.acc !== null && isFinite(Number(pr.acc)) ? `<span class="adv-tag">دقّة GPS ±${Math.round(Number(pr.acc))} م</span>` : ""}\n      ${km > 40 ? `<span class="adv-tag r">⚠️ ${Math.round(km)} كم عن مركز كركوك</span>` : ""}\n    </div>`;
+}
+
+window.advApply = function(id) {
+ const q = advReqs[id];
+ if (!advIsPend(q)) return toast("الطلب لم يعد معلّقاً — حدّث القائمة", "e");
+ if (!gD) return toast("بيانات المطاعم لم تُحمَّل بعد — انتظر ثوانٍ", "e");
+ const p = nP(q.p), ent = advRes(p);
+ if (!ent) return toast("المطعم غير موجود في بيانات الشيت", "e");
+ if (q.type === "location" && !mapLinkOk_((q.proposed || {}).lat, (q.proposed || {}).lng)) return toast("الإحداثيات المقترحة غير صالحة", "e");
+ window.opEdit("RES", ent[R.PHONE]);
+ const mod = document.getElementById("editMod");
+ if (!mod || !mod.classList.contains("open")) return;
+ window._advEdit = {
+  id: String(id),
+  p: p,
+  type: q.type
+ };
+ let msg = "", focus = null;
+ if (q.type === "price") {
+  const prop = advPropPrices(q), names = [];
+  let rows = [ ...document.querySelectorAll("#plI .pl-row") ];
+  Object.keys(prop).forEach(a => {
+   const n = advNormArea(a);
+   let row = rows.find(r => advNormArea((r.querySelector(".pla") || {}).value) === n);
+   if (!row) {
+    row = rows.find(r => !String((r.querySelector(".pla") || {}).value || "").trim() && !String((r.querySelector(".plp") || {}).value || "").trim());
+    if (row) row.querySelector(".pla").value = a; else {
+     window.addPL(a, "");
+     row = document.querySelector("#plI .pl-row:last-child");
+     rows = [ ...document.querySelectorAll("#plI .pl-row") ];
+    }
+   }
+   if (!row) return;
+   row.querySelector(".plp").value = String(prop[a]);
+   row.style.outline = "2px solid var(--sky)";
+   row.style.outlineOffset = "2px";
+   row.style.borderRadius = "8px";
+   if (!focus) focus = row;
+   names.push(a + " ← " + advFmt(prop[a]));
+  });
+  msg = "💰 عُبّئت الأسعار المقترحة (مؤطّرة بالأزرق)، وبقيّة المناطق كما هي: " + names.join(" · ") + ".";
+ } else if (q.type === "location") {
+  setEditPos(Number(q.proposed.lat), Number(q.proposed.lng), "عُبّئ الموقع المقترح من «مستشارك»");
+  msg = "📍 عُبّئ الموقع المقترح — راجعه على المعاينة.";
+  focus = document.getElementById("mapMsg");
+ }
+ const an = document.getElementById("eAdvNote");
+ if (an) {
+  an.textContent = "🐳 طلب من «مستشارك» — " + msg + " اضغط «💾 حفظ» ليُكتب في الشيت ويُعلَّم الطلب «طُبّق». و«إلغاء» يتركه معلّقاً.";
+  an.style.display = "block";
+ }
+ if (focus) setTimeout(() => {
+  try {
+   focus.scrollIntoView({
+    block: "center",
+    behavior: "smooth"
+   });
+  } catch (_) {}
+ }, 250);
+};
+
+window.advAfterSave = async function(req) {
+ window._advEdit = null;
+ if (!req || !req.id) return;
+ const r = await advCall("REQ_DECIDE", {
+  id: String(req.id),
+  decision: "applied"
+ });
+ if (!r.ok) {
+  toast("حُفظ في الشيت ✅ — لكن تعذّر تعليم الطلب: " + esc(r.msg) + " · اضغط «✔ عُلِّم مطبّقاً» في «مستشارك»", "e");
+  return;
+ }
+ if (advReqs[req.id]) Object.assign(advReqs[req.id], {
+  status: "applied",
+  decided_at: (new Date).toISOString(),
+  decided_by: "admin"
+ });
+ logAudit("advisor_req", "طُبّق طلب " + (req.type === "location" ? "موقع" : "تسعيرة") + ": " + advResName(req.p) + " (" + req.id + ")");
+ toast("🐳 عُلِّم الطلب «طُبّق» ✅");
+ advRender();
+};
+
+window.advReqDecide = async function(id, dec, btn) {
+ const q = advReqs[id];
+ if (!advIsPend(q)) return toast("الطلب لم يعد معلّقاً — حدّث القائمة", "e");
+ const nm = advResName(q.p, q.res_name), t = q.type === "location" ? "الموقع" : "التسعيرة";
+ if (!confirm(dec === "rejected" ? "رفض طلب " + t + " لـ«" + nm + "»؟\nلا يتغيّر شيءٌ في الشيت." : "تعليم طلب " + t + " لـ«" + nm + "» «طُبّق» دون فتح نافذة التعديل؟\nاستعمله فقط إن كنتَ طبّقتَه بنفسك.")) return;
+ const bs = btn && btn.parentElement ? [ ...btn.parentElement.querySelectorAll("button") ] : [];
+ bs.forEach(b => b.disabled = true);
+ const r = await advCall("REQ_DECIDE", {
+  id: String(id),
+  decision: dec
+ });
+ if (!r.ok) {
+  toast("تعذّر: " + esc(r.msg), "e");
+  bs.forEach(b => b.disabled = false);
+  return;
+ }
+ Object.assign(q, {
+  status: dec,
+  decided_at: (new Date).toISOString(),
+  decided_by: "admin"
+ });
+ logAudit("advisor_req", (dec === "rejected" ? "رُفض" : "عُلِّم مطبّقاً") + " طلب " + t + ": " + nm + " (" + id + ")");
+ toast(dec === "rejected" ? "رُفض الطلب" : "عُلِّم الطلب «طُبّق» ✅");
+ advRender();
+};
+
+function advRate(a) {
+ const den = (a.sent || 0) + (a.edited || 0) + (a.ignored || 0);
+ return den ? {
+  r: a.sent / den,
+  den: den
+ } : {
+  r: null,
+  den: 0
+ };
+}
+
+function advRenderMeter() {
+ const box = document.getElementById("advMeter");
+ if (!box) return;
+ const mode = typeof advMode === "string" ? advMode : "off";
+ const lc = advCfg && advCfg.live_cats && typeof advCfg.live_cats === "object" ? advCfg.live_cats : {};
+ const liveActs = c => {
+  const v = lc[c];
+  if (!v) return null;
+  return Array.isArray(v) ? v.filter(Boolean) : typeof v === "object" ? Object.values(v).filter(Boolean) : [];
+ };
+ const modeTxt = mode === "live" ? "⚡ <b>ردٌّ فوريّ</b> — الفريق يردّ على المطعم فوراً، والقرارات لكم ولليدرز" : mode === "draft" ? "✍️ <b>اقتراحات</b> — الفريق يقترح الردّ، والليدرز يرسلونه" : "⏸ <b>متوقّف</b> — المحادثة بشريّة فقط";
+ const days = Object.keys(advAudit || {}).sort(), K = [ "n", "sent", "edited", "ignored", "manual" ];
+ const agg = {}, tot = {
+  n: 0,
+  sent: 0,
+  edited: 0,
+  ignored: 0,
+  manual: 0
+ };
+ const dayChips = days.map(d => {
+  const x = advAudit[d] || {}, bc = x.by_cat && typeof x.by_cat === "object" ? x.by_cat : {}, dt = {
+   n: 0,
+   sent: 0,
+   edited: 0,
+   ignored: 0,
+   manual: 0
+  };
+  Object.keys(bc).forEach(cat => {
+   const s = bc[cat] || {}, a = agg[cat] = agg[cat] || {
+    n: 0,
+    sent: 0,
+    edited: 0,
+    ignored: 0,
+    manual: 0
+   };
+   K.forEach(k => {
+    const v = Number(s[k]) || 0;
+    a[k] += v;
+    tot[k] += v;
+    dt[k] += v;
+   });
+  });
+  let r = advRate(dt).r;
+  if (r === null && x.accept_rate !== undefined && isFinite(Number(x.accept_rate))) {
+   r = Number(x.accept_rate);
+   if (r > 1) r /= 100;
+  }
+  return `<span class="adv-tag ${r === null ? "" : r >= .8 ? "g" : r >= .5 ? "w" : "r"}" title="اقتراحات: ${Number(x.drafts) || dt.n}">${esc(String(d).slice(5))}: ${r === null ? "—" : Math.round(r * 100) + "٪"}</span>`;
+ });
+ const cats = Object.keys(ADV_CAT_AR).concat(Object.keys(agg).filter(c => !ADV_CAT_AR[c]));
+ const bar = r => r === null ? '<span style="color:var(--ink4)">—</span>' : `<div style="display:flex;align-items:center;gap:6px"><div class="adv-bar" style="flex:1"><i style="width:${Math.round(r * 100)}%;background:${r >= .8 ? "var(--jade)" : r >= .5 ? "var(--amber)" : "var(--rose)"}"></i></div><b style="min-width:34px">${Math.round(r * 100)}٪</b></div>`;
+ const rowHtml = (label, a, cat) => {
+  const {r: r, den: den} = advRate(a), acts = cat ? liveActs(cat) : null;
+  const st = !cat ? "" : mode === "live" && acts ? `<span class="adv-tag g" title="${esc(acts.join("، "))}">⚡ حيّ${acts.length ? " (" + acts.length + " فعل)" : ""}</span>` : r !== null && r >= ADV_HINT_RATE && den >= ADV_HINT_MIN ? '<span class="adv-tag b" title="تلميحٌ لا تفعيل — بموافقة المالك الصريحة">⭐ جاهز للردّ الفوريّ</span>' : '<span class="adv-tag">اقتراحات</span>';
+  return `<tr><td>${label}</td><td class="num">${a.n || 0}</td><td class="num">${a.sent || 0}</td><td class="num">${a.edited || 0}</td><td class="num">${a.ignored || 0}</td><td class="num">${a.manual || 0}</td><td style="min-width:120px">${bar(r)}</td><td>${st}</td></tr>`;
+ };
+ const z = {
+  n: 0,
+  sent: 0,
+  edited: 0,
+  ignored: 0,
+  manual: 0
+ };
+ box.innerHTML = `<div class="adv-c">\n    <div class="adv-mode">الوضع الآن: ${modeTxt}</div>\n    <div class="adv-s" style="margin:-4px 0 10px">تغيير الوضع (res_leader_mode) والأنواع الحيّة (live_cats) من الكونسول — بموافقة المالك الصريحة. هنا عرضٌ فقط.</div>\n    ${days.length ? `<div class="adv-tags" style="margin:0 0 10px">${dayChips.join("")}</div>` : ""}\n    ${days.length || Object.keys(lc).length ? `<div class="adv-sc"><table class="adv-tb"><thead><tr><th>النوع</th><th class="num">اقتراحات</th><th class="num">أُرسلت كما هي</th><th class="num">عُدّلت</th><th class="num">تُجوهلت</th><th class="num">يدويّ</th><th>نسبة القبول</th><th></th></tr></thead>\n      <tbody>${cats.map(c => rowHtml(esc(ADV_CAT_AR[c] || c), agg[c] || z, c)).join("")}</tbody>\n      <tfoot>${rowHtml("الكلّ", tot, null)}</tfoot></table></div>` : '<div class="adv-empty" style="margin:0">لا سجلّ تدقيق بعد — يُحسب كلّ ليلة عن الأمس من ملاحظات الليدرز.</div>'}\n    <div class="adv-s" style="margin-top:8px">نسبة القبول = أُرسلت كما هي ÷ (أُرسلت + عُدّلت + تُجوهلت). «يدويّ» ردٌّ كتبه الليدر بنفسه، ولا يدخل النسبة.</div>\n  </div>`;
+}
+
+const OB_KIND_AR = {
+ buttons: "نسيان الأزرار بعد الإنذار الأخير",
+ cash: "مال مطعم لم يُرجَع",
+ admin: "إيقاف من الإدارة"
+};
+
+const OB_SUG_AR = {
+ abuse: "💬 إساءة",
+ protected: "🛡 حساب محميّ (ليدر/موظّف)",
+ capped: "📊 بلغ حدّ اليوم"
+};
+
+const OB_MODE_AR = {
+ off: "مُطفأ",
+ shadow: "ظلّ",
+ live: "فعليّ"
+};
+
+const OB_PH = /^7\d{9}$/;
+
+let obBlk = {}, obPend = {}, obSug = {}, obShadow = {}, obLogD = {}, obMode = null, obLiveAt = null, obDisc = {}, obAt = 0, obBusy = false, obErr = [];
+
+function obName(p) {
+ p = nP(p);
+ try {
+  if (gD && gD.drivers) {
+   const r = gD.drivers.find(d => nP(d[D.PHONE]) === p);
+   if (r && r[D.NAME]) return String(r[D.NAME]);
+  }
+ } catch (_) {}
+ return "…" + p.slice(-4);
+}
+
+const obWho = p => `${esc(obName(p))} <span class="ob-ph">0${esc(p)}</span>`;
+
+const obBag = ms => new Date(Number(ms) + 3 * 36e5).toISOString().slice(0, 16).replace("T", " ");
+
+const obHM = v => {
+ const ms = advMs(v);
+ return ms ? obBag(ms).slice(11) : "—";
+};
+
+function obKeys(o) {
+ return Object.keys(o || {}).filter(p => OB_PH.test(p)).sort((a, b) => advMs((o[b] || {}).at) - advMs((o[a] || {}).at));
+}
+
+function obEffMode() {
+ const m = [ "off", "shadow", "live" ].includes(obMode) ? obMode : "off";
+ return m === "shadow" && Number(obLiveAt) > 0 && Date.now() >= Number(obLiveAt) ? "live" : m;
+}
+
+function obErrTxt(e) {
+ const c = String(e && e.code || "") + " " + String(e && e.message || "");
+ return /permission/i.test(c) ? "القراءة مرفوضة — قواعد V34.45 لم تُنشر بعد؟" : c.trim().slice(0, 80) || "خطأ";
+}
+
+function obSt(t) {
+ const e = document.getElementById("obSt");
+ if (e) e.textContent = t || "";
+}
+
+window.obStart = function() {
+ obLoad(false);
+};
+
+window.obLoad = async function(force) {
+ if (obBusy) return;
+ if (!force && obAt && Date.now() - obAt < 6e4) {
+  obRender();
+  return;
+ }
+ obBusy = true;
+ obSt("⏳ جارٍ التحميل…");
+ const btn = document.getElementById("obRefBtn");
+ if (btn) btn.disabled = true;
+ const v = p => db.ref(p).once("value").then(s => s.val());
+ const run = () => Promise.allSettled([ v("ops_block"), v("ops_block_pending"), v("ops_block_suggest"), db.ref("ops_block_shadow").orderByKey().limitToLast(3).once("value").then(s => s.val()), db.ref("ops_block_log").orderByKey().limitToLast(7).once("value").then(s => s.val()), v("system_settings/flags/ai_block_mode"), v("system_settings/flags/ai_block_live_at") ]);
+ try {
+  let r = await run();
+  const r5 = r[5].status === "rejected" ? r[5].reason : null;
+  if (r5 && /permission/i.test(String(r5.code || "") + String(r5.message || "")) && await healAdminAuth()) r = await run();
+  const names = [ "الموقوفون", "المؤجَّلون", "الاقتراحات", "أيّام الظلّ", "السجلّ", "الوضع", "موعد الفعليّ" ];
+  obErr = [];
+  r.forEach((x, i) => {
+   if (x.status === "rejected") {
+    obErr.push(names[i] + ": " + obErrTxt(x.reason));
+    console.warn("obLoad " + names[i] + ":", x.reason && x.reason.message);
+   }
+  });
+  if (r[0].status === "fulfilled") obBlk = r[0].value || {};
+  if (r[1].status === "fulfilled") obPend = r[1].value || {};
+  if (r[2].status === "fulfilled") obSug = r[2].value || {};
+  if (r[3].status === "fulfilled") obShadow = r[3].value || {};
+  if (r[4].status === "fulfilled") obLogD = r[4].value || {};
+  if (r[5].status === "fulfilled") obMode = r[5].value;
+  if (r[6].status === "fulfilled") obLiveAt = r[6].value;
+  const ps = [ ...new Set(obKeys(obBlk).concat(obKeys(obPend))) ].slice(0, 40), disc = {};
+  await Promise.all(ps.map(p => db.ref("driver_discipline/" + p).once("value").then(s => {
+   disc[p] = s.val() || {};
+  }).catch(e => console.warn("obDisc " + p + ":", e && e.message))));
+  obDisc = disc;
+  obAt = Date.now();
+ } catch (e) {
+  obErr = [ obErrTxt(e) ];
+  console.warn("obLoad:", e && e.message);
+ } finally {
+  obBusy = false;
+  if (btn) btn.disabled = false;
+ }
+ obRender();
+};
+
+function obPeekSoon() {
+ setTimeout(obPeek, 2e4);
+}
+
+async function obPeek() {
+ if (obAt) return;
+ const [b, s] = await Promise.allSettled([ db.ref("ops_block").once("value"), db.ref("ops_block_suggest").once("value") ]);
+ if (obAt) return;
+ if (b.status === "fulfilled") obBlk = b.value.val() || {}; else console.warn("obPeek ops_block:", b.reason && b.reason.message);
+ if (s.status === "fulfilled") obSug = s.value.val() || {}; else console.warn("obPeek ops_block_suggest:", s.reason && s.reason.message);
+ obBadge();
+}
+
+function obBadge() {
+ const n = obKeys(obSug).length + obKeys(obBlk).length;
+ const t = document.getElementById("nbObDot");
+ if (t) t.style.display = n > 0 ? "" : "none";
+ const d = document.getElementById("bnObDot");
+ if (d) d.classList.toggle("on", n > 0);
+}
+
+function obRender() {
+ obBadge();
+ const eff = obEffMode(), la = Number(obLiveAt) > 0 ? Number(obLiveAt) : 0;
+ const head = document.getElementById("obHead");
+ if (head) {
+  let line;
+  if (eff === "live") line = "⛔ <b>الوضع: فعليّ</b>" + (obMode === "shadow" && la ? " (انتهت أيّام الظلّ " + esc(obBag(la)) + ")" : "") + " — الليدر الذكيّ يوقف الكابتن عند الدليل: نسيان الأزرار بعد الإنذار الأخير، أو مال مطعمٍ لم يُرجَع. ٣ إيقافات في اليوم كحدٍّ أعلى، والكابتن يكمل طلبه أوّلاً، والرفع منك وحدك."; else if (eff === "shadow") line = "👻 <b>الوضع: ظلّ</b> (يسجّل ولا يوقف)" + (la ? " حتى <b>" + esc(obBag(la)) + "</b> بتوقيت بغداد، ثم فعليّ تلقائياً." : " — بلا موعدٍ للتحوّل، يبقى ظلّاً حتى تغيّره."); else line = "⏸ <b>الوضع: مُطفأ</b> — الليدر الذكيّ لا يوقف أحداً ولا يسجّل أيّام ظلّ.";
+  head.innerHTML = line + '<div style="margin-top:4px">💡 الإساءة والحسابات المحميّة وتجاوز حدّ اليوم تصلك هنا اقتراحاتٍ — القرار لك.</div>' + (obErr.length ? '<div style="margin-top:6px;color:var(--rose)">⚠️ ' + obErr.map(esc).join(" · ") + "</div>" : "");
+ }
+ [ "off", "shadow", "live" ].forEach(m => {
+  const b = document.getElementById("obM-" + m);
+  if (b) b.className = "adv-b " + (obMode === m || m === "off" && ![ "shadow", "live" ].includes(obMode) ? "go" : "lt");
+ });
+ obSt(obAt ? "آخر تحديث: " + obBag(obAt).slice(11) : "");
+ let nSh = 0;
+ Object.values(obShadow || {}).forEach(d => {
+  nSh += obKeys(d).length;
+ });
+ [ [ "obKSug", obKeys(obSug).length ], [ "obKBlk", obKeys(obBlk).length ], [ "obKPend", obKeys(obPend).length ], [ "obKShadow", nSh ] ].forEach(([id, n]) => {
+  const e = document.getElementById(id);
+  if (e) e.textContent = n;
+ });
+ obRenderSug();
+ obRenderBlk();
+ obRenderPend();
+ const sh = document.getElementById("obShadow");
+ if (sh) sh.innerHTML = obDayList(obShadow, (p, x) => `<div class="ob-row"><b>${obWho(p)}</b> · ${esc(OB_KIND_AR[x.kind] || x.kind || "—")}<br>${esc(x.reason || "—")} · 👤 ${esc(x.by || "—")} · 🕒 ${esc(obHM(x.at))}${x.oid ? " · 📦 " + esc(advTail(x.oid)) : ""}</div>`, "لا شيء في آخر ٣ أيّام ظلّ.");
+ const lg = document.getElementById("obLog");
+ if (lg) lg.innerHTML = obDayList(obLogD, (p, x) => {
+  const st = x.state === "applied" ? `<span class="adv-tag r">⛔ طُبّق ${esc(obHM(x.applied_at || x.at))}</span>` : obPend[p] ? '<span class="adv-tag w">⏳ ينتظر إكمال طلبه</span>' : '<span class="adv-tag">⏸ أُجّل ولم يُطبَّق</span>';
+  return `<div class="ob-row"><b>${obWho(p)}</b> · ${esc(OB_KIND_AR[x.kind] || x.kind || "—")} ${st}<br>${esc(x.reason || "—")} · 👤 ${esc(x.by || "—")} · 🕒 ${esc(obHM(x.at))}</div>`;
+ }, "لا إيقافات في آخر ٧ أيّام.");
+}
+
+function obDayList(data, rowFn, empty) {
+ const html = Object.keys(data || {}).sort().reverse().map(d => {
+  const ks = obKeys(data[d]);
+  if (!ks.length) return "";
+  return `<div class="adv-grp">📅 ${esc(d)} <span class="adv-tag">${ks.length}</span></div><div class="adv-c" style="padding:4px 14px">${ks.map(p => rowFn(p, data[d][p] || {})).join("")}</div>`;
+ }).join("");
+ return html || `<div class="adv-empty">${esc(empty)}</div>`;
+}
+
+function obDiscTags(p) {
+ const d = obDisc[p];
+ if (!d) return "";
+ const out = [];
+ if (d.v && typeof d.v === "object") {
+  const since = Date.now() - 7 * 864e5, n = Object.values(d.v).filter(x => x && advMs(x.at) >= since).length;
+  out.push(`<span class="adv-tag${n ? " w" : ""}">⚠️ مخالفات ٧ أيّام: ${n}</span>`);
+ }
+ if (d.fw && d.fw.at) out.push(`<span class="adv-tag r">🟥 إنذار أخير: ${esc(advWhen(d.fw.at))}</span>`);
+ const nb = Object.keys(d.blocks || {}).length;
+ if (nb) out.push(`<span class="adv-tag">⛔ مرّات الإيقاف: ${nb}</span>`);
+ return out.join("");
+}
+
+function obRenderSug() {
+ const box = document.getElementById("obSug");
+ if (!box) return;
+ const ks = obKeys(obSug);
+ box.innerHTML = ks.length ? ks.map(p => {
+  const s = obSug[p] || {};
+  return `<div class="adv-c pend">\n      <div class="adv-h"><div><div class="adv-n">${obWho(p)}</div><div class="adv-s">${esc(s.reason || "—")}</div></div>\n        <span class="adv-tag w">${esc(OB_SUG_AR[s.kind] || s.kind || "اقتراح")}</span></div>\n      ${s.text ? `<div class="adv-note">«${esc(s.text)}»</div>` : ""}\n      <div class="adv-tags"><span class="adv-tag">🕒 ${esc(advWhen(s.at))}</span><span class="adv-tag">👤 ${esc(s.by || "—")}</span>${Number(s.count) > 1 ? `<span class="adv-tag r">🔁 ${esc(Number(s.count))} مرّات</span>` : ""}${s.oid ? `<span class="adv-tag b">📦 ${esc(advTail(s.oid))}</span>` : ""}${obBlk[p] ? '<span class="adv-tag r">⛔ موقوفٌ أصلاً</span>' : ""}</div>\n      <div class="adv-acts"><button class="adv-b ok" style="background:var(--rose)" onclick="obSugBlock('${ej(p)}')">⛔ إيقاف</button><button class="adv-b no" onclick="obSugDismiss('${ej(p)}')">تجاهل</button></div>\n    </div>`;
+ }).join("") : '<div class="adv-empty">لا اقتراحات الآن.</div>';
+}
+
+function obRenderBlk() {
+ const box = document.getElementById("obBlk");
+ if (!box) return;
+ const ks = obKeys(obBlk);
+ box.innerHTML = ks.length ? ks.map(p => {
+  const b = obBlk[p] || {};
+  return `<div class="adv-c" style="border-right:4px solid var(--rose)">\n      <div class="adv-h"><div><div class="adv-n">${obWho(p)}</div><div class="adv-s">${esc(b.reason || "—")}</div></div>\n        <span class="adv-tag r">${esc(OB_KIND_AR[b.kind] || b.kind || "—")}</span></div>\n      ${b.captain_reason ? `<div class="adv-note">للكابتن: ${esc(b.captain_reason)}</div>` : ""}\n      <div class="adv-tags"><span class="adv-tag">🕒 ${esc(advWhen(b.at))}</span><span class="adv-tag">👤 ${esc(b.by || "—")}</span>${b.oid ? `<span class="adv-tag b">📦 ${esc(advTail(b.oid))}</span>` : ""}<span class="adv-tag ${b.msg_sent ? "g" : "w"}">${b.msg_sent ? "✉️ أُبلغ" : "✉️ لم يُبلَّغ بعد"}</span>${obDiscTags(p)}</div>\n      <div class="adv-acts"><button class="adv-b ok" onclick="obLift('${ej(p)}')">🔓 رفع الإيقاف</button></div>\n    </div>`;
+ }).join("") : '<div class="adv-empty">لا أحد موقوف الآن.</div>';
+}
+
+function obRenderPend() {
+ const box = document.getElementById("obPend");
+ if (!box) return;
+ const ks = obKeys(obPend);
+ box.innerHTML = ks.length ? ks.map(p => {
+  const b = obPend[p] || {};
+  return `<div class="adv-c" style="border-right:4px solid var(--sky)">\n      <div class="adv-h"><div><div class="adv-n">${obWho(p)}</div><div class="adv-s">${esc(b.reason || "—")}</div></div>\n        <span class="adv-tag b">${esc(OB_KIND_AR[b.kind] || b.kind || "—")}</span></div>\n      <div class="adv-tags"><span class="adv-tag">⏳ ${esc(advWhen(b.pending_since || b.at))}</span><span class="adv-tag">👤 ${esc(b.by || "—")}</span>${b.oid ? `<span class="adv-tag b">📦 ${esc(advTail(b.oid))}</span>` : ""}${obDiscTags(p)}</div>\n      <div class="adv-acts"><button class="adv-b no" onclick="obPendCancel('${ej(p)}')">إلغاء</button><span class="adv-s" style="margin:0">يُطبَّق تلقائياً بعد أن يُكمل طلبه.</span></div>\n    </div>`;
+ }).join("") : '<div class="adv-empty">لا أحد ينتظر.</div>';
+}
+
+window.obSetMode = async function(m) {
+ if (![ "off", "shadow", "live" ].includes(m)) return;
+ const la = Number(obLiveAt) > 0 ? Number(obLiveAt) : 0;
+ const msg = {
+  off: "إطفاء الإيقاف التشغيليّ؟\nالليدر الذكيّ لن يوقف أحداً ولن يسجّل أيّام ظلّ.",
+  shadow: "وضع الظلّ؟ يسجّل «كان سيُوقَف» ولا يوقف أحداً." + (la ? la <= Date.now() ? "\n⚠️ موعد التحوّل (" + obBag(la) + ") مضى، فسيعمل فعلياً مباشرةً." : "\nثم فعليّ تلقائياً في " + obBag(la) + " بتوقيت بغداد." : ""),
+  live: "تشغيل الإيقاف فعلياً الآن؟\nالليدر الذكيّ يوقف الكابتن عند الدليل (٣ في اليوم كحدٍّ أعلى)، والرفع منك."
+ }[m];
+ if (!confirm(msg)) return;
+ try {
+  await db.ref("system_settings/flags/ai_block_mode").set(m);
+  logAudit("ops_block_mode", m);
+  toast("تمّ — الوضع الآن: " + OB_MODE_AR[m]);
+ } catch (e) {
+  toast("تعذّر الحفظ: " + esc(e.message || e), "e");
+ }
+ obLoad(1);
+};
+
+window.obLift = async function(p) {
+ if (!OB_PH.test(p)) return;
+ if (!confirm("رفع الإيقاف عن " + obName(p) + " (0" + p + ")؟\nيعود لاستلام الطلبات وتصله رسالة بذلك.")) return;
+ try {
+  await db.ref("ops_block/" + p).set(null);
+  logAudit("ops_block_lift", p);
+  toast("رُفع الإيقاف عن " + esc(obName(p)));
+ } catch (e) {
+  toast("تعذّر رفع الإيقاف: " + esc(e.message || e), "e");
+ }
+ obLoad(1);
+};
+
+window.obPendCancel = async function(p) {
+ if (!OB_PH.test(p)) return;
+ if (!confirm("إلغاء الإيقاف المؤجَّل عن " + obName(p) + " (0" + p + ")؟\nلن يُوقَف بعد إكمال طلبه.")) return;
+ try {
+  await db.ref("ops_block_pending/" + p).set(null);
+  logAudit("ops_block_pending_cancel", p);
+  toast("أُلغي الإيقاف المؤجَّل عن " + esc(obName(p)));
+ } catch (e) {
+  toast("تعذّر الإلغاء: " + esc(e.message || e), "e");
+ }
+ obLoad(1);
+};
+
+window.obSugBlock = async function(p) {
+ if (!OB_PH.test(p)) return;
+ const s = obSug[p] || {};
+ try {
+  const cur = (await db.ref("ops_block/" + p).once("value")).val();
+  if (cur) {
+   if (!confirm(obName(p) + " موقوفٌ أصلاً. حذف الاقتراح فقط؟")) return;
+   await db.ref("ops_block_suggest/" + p).set(null);
+   toast("حُذف الاقتراح — " + esc(obName(p)) + " موقوفٌ أصلاً");
+  } else {
+   if (!confirm("إيقاف " + obName(p) + " (0" + p + ") عن استلام الطلبات حتى يراجع المكتب؟\nالسبب: " + (s.reason || "—"))) return;
+   const u = {};
+   u["ops_block/" + p] = {
+    at: (new Date).toISOString(),
+    kind: "admin",
+    reason: String(s.reason || "اقتراح الليدر الذكيّ").slice(0, 240),
+    by: "الإدارة"
+   };
+   u["ops_block_suggest/" + p] = null;
+   await db.ref().update(u);
+   logAudit("ops_block_from_suggest", p + ": " + String(s.reason || "").slice(0, 120));
+   toast("أُوقف " + esc(obName(p)) + " — تصله رسالة المراجعة");
+  }
+ } catch (e) {
+  toast("تعذّر: " + esc(e.message || e), "e");
+ }
+ obLoad(1);
+};
+
+window.obSugDismiss = async function(p) {
+ if (!OB_PH.test(p)) return;
+ if (!confirm("تجاهل الاقتراح عن " + obName(p) + "؟")) return;
+ try {
+  await db.ref("ops_block_suggest/" + p).set(null);
+  logAudit("ops_block_suggest_dismiss", p);
+  toast("تُجوهل الاقتراح");
+ } catch (e) {
+  toast("تعذّر: " + esc(e.message || e), "e");
+ }
+ obLoad(1);
+};
+
+window.obManual = async function() {
+ const pi = document.getElementById("obPh"), wi = document.getElementById("obWhy");
+ const p = nP(pi && pi.value), why = String(wi && wi.value || "").trim();
+ if (!OB_PH.test(p)) {
+  toast("رقم غير صحيح — ١٠ أرقام تبدأ بـ7 (مثل 07701234567)", "e");
+  return;
+ }
+ if (why.length < 3) {
+  toast("اكتب سبب الإيقاف", "e");
+  return;
+ }
+ const btn = document.getElementById("obManBtn");
+ if (btn) btn.disabled = true;
+ let done = false;
+ try {
+  const cur = (await db.ref("ops_block/" + p).once("value")).val();
+  if (cur) {
+   toast(esc(obName(p)) + " موقوفٌ أصلاً", "e");
+   return;
+  }
+  const known = obName(p).charAt(0) !== "…";
+  if (!confirm("إيقاف " + obName(p) + " (0" + p + ") عن استلام الطلبات حتى يراجع المكتب؟" + (known ? "" : "\n⚠️ الرقم غير موجود في قائمة الكباتن.") + "\nالسبب: " + why)) return;
+  await db.ref("ops_block/" + p).set({
+   at: (new Date).toISOString(),
+   kind: "admin",
+   reason: why.slice(0, 240),
+   by: "الإدارة"
+  });
+  logAudit("ops_block_manual", p + ": " + why.slice(0, 120));
+  toast("أُوقف " + esc(obName(p)) + " — تصله رسالة المراجعة");
+  if (pi) pi.value = "";
+  if (wi) wi.value = "";
+  done = true;
+ } catch (e) {
+  toast("تعذّر الإيقاف: " + esc(e.message || e), "e");
+ } finally {
+  if (btn) btn.disabled = false;
+ }
+ if (done) obLoad(1);
 };
 
 window.goTab = function(name) {
@@ -5195,6 +6398,8 @@ window.goTab = function(name) {
     if (name === "drivers" && gD) filtEnt("DRV");
     if (name === "insurance") insStart();
     if (name === "posbridge") pbStart();
+    if (name === "advisor") advStart();
+    if (name === "opsblock") obStart();
     if (name === "staff") {
      loadStaffRoster();
      renderStaffOnline();

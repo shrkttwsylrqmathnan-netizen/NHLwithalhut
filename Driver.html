@@ -34,7 +34,7 @@
  } catch (_) {}
 })();
 
-const CURRENT_APP_VERSION = "34.40-Nahla";
+const CURRENT_APP_VERSION = "34.65-Nahla";
 
 window.APP_VERSION = CURRENT_APP_VERSION;
 
@@ -3850,7 +3850,9 @@ const EFF_TXT = {
  off_by_admin: "⛔ أوقفك المدير",
  off_by_break: "☕ في استراحة (من الإشعار)",
  off_by_captain: "⚪ في استراحة",
- insurance_due: "🛡️ غير مرئيّ: قسط التأمين متأخّر — سلّمه للإدارة وترجع تلقائياً"
+ insurance_due: "🛡️ غير مرئيّ: قسط التأمين متأخّر — سلّمه للإدارة وترجع تلقائياً",
+ account_off: "⛔ حسابك موقوف من الإدارة — لا تصلك طلبات. راجع الإدارة.",
+ ops_block: "⛔ حسابك موقوف عن استلام الطلبات. راجع الإدارة في مكتبها لحلّ الموضوع."
 };
 
 function setDesired(online, by) {
@@ -3912,6 +3914,10 @@ function paintEffective(reason) {
   }
   el.textContent = EFF_TXT[reason] || "غير مرئيّ: " + reason;
   el.style.color = reason === "ok" ? "#16a34a" : /off_by/.test(reason) ? "#64748b" : "#dc2626";
+  el.style.fontSize = reason === "ops_block" ? ".92rem" : ".78rem";
+  el.style.background = reason === "ops_block" ? "#fee2e2" : "";
+  el.style.borderRadius = reason === "ops_block" ? "10px" : "";
+  el.style.padding = reason === "ops_block" ? "8px 10px" : "";
  } catch (e) {
   track("eff_paint_fail");
  }
@@ -4020,7 +4026,12 @@ function insState(cfgRaw, acc, nowMs) {
  const expectedNow = Math.min(target, (weeksPast + (dueThis >= today ? 1 : 0)) * c.weekly);
  base.expected = expectedPast;
  base.due_date = dueThis;
- if (paid < expectedPast) return Object.assign(base, {
+ const gu = /^\d{4}-\d{2}-\d{2}$/.test(String(c.grace_until || "")) ? String(c.grace_until) : "";
+ if (paid < expectedPast) return gu && today <= gu ? Object.assign(base, {
+  state: "overdue",
+  owed: expectedPast - paid,
+  block_from: add(gu, 1)
+ }) : Object.assign(base, {
   state: "blocked",
   owed: expectedPast - paid
  });
@@ -4065,6 +4076,7 @@ function paintInsurance() {
    upcoming: "🗓️ قسط هذا الأسبوع (" + insFmt(s.owed) + " د.ع) يوم " + (s.due_date ? insDateAr(s.due_date) : ""),
    due_today: "⚠️ اليوم يوم قسطك (" + insFmt(s.owed) + " د.ع) — سلّمه للإدارة اليوم حتى لا يتوقّف استلامك للطلبات من باچر.",
    blocked: "🔴 قسط التأمين متأخّر (" + insFmt(s.owed) + " د.ع) — أنت غير مرئيّ للطلبات حتى تؤكّد الإدارة الاستلام.",
+   overdue: "⚠️ قسط التأمين متأخّر (" + insFmt(s.owed) + " د.ع) — سلّمه للإدارة. هذا الأسبوع تنبيهٌ فقط وطلباتك مستمرّة، ومن يوم " + (s.block_from ? insDateAr(s.block_from) : "") + " يتوقّف استلامك للطلبات حتى تؤكّد الإدارة.",
    complete: "🎉 اكتمل تأمينك بالكامل — لا أقساط بعد اليوم.",
    exempt: "ℹ️ أنت معفى من التأمين.",
    left: "ℹ️ مسجَّلٌ أنك تركت العمل — تُعاد تأميناتك بعد " + (Number(cfg.refund_days) || 30) + " يوماً من تركك.",
@@ -4072,7 +4084,7 @@ function paintInsurance() {
   };
   const se = document.getElementById("insState");
   se.innerText = ST[s.state] || "";
-  se.style.color = s.state === "blocked" ? "var(--bad-dp)" : s.state === "due_today" ? "var(--warn-dp)" : "var(--ink2)";
+  se.style.color = s.state === "blocked" ? "var(--bad-dp)" : s.state === "due_today" || s.state === "overdue" ? "var(--warn-dp)" : "var(--ink2)";
   document.getElementById("insHist").innerHTML = pays.length ? pays.map(p => "• " + insFmt(p.amount) + " د.ع — " + (p.at ? new Date(Number(p.at) + 3 * 36e5).toISOString().slice(0, 10) : "")).join("<br>") : "لا دفعات بعد.";
   const nd = Number(cfg.notice_days) || 15, rd = Number(cfg.refund_days) || 30;
   document.getElementById("insPolicy").innerText = "التأمين لتنظيم العمل وتجهيزك بالزيّ والمستلزمات المناسبة. وإذا قرّرت ترك العمل يجب أن تُبلغ الإدارة قبل " + nd + " يوماً، وتُعاد لك تأميناتك بعد " + rd + " يوماً من تركك العمل.";
@@ -4085,6 +4097,16 @@ function paintInsurance() {
   } else {
    nb.style.display = s.state === "exempt" ? "none" : "";
    nt.style.display = "none";
+  }
+  if (s.state === "overdue") {
+   const k = "nahla_ins_over_" + new Date(srvNow() + 3 * 36e5).toISOString().slice(0, 10);
+   try {
+    if (!localStorage.getItem(k)) {
+     localStorage.setItem(k, "1");
+     toast("⚠️ قسط التأمين متأخّر (" + insFmt(s.owed) + " د.ع) — سلّمه للإدارة قبل " + (s.block_from ? insDateAr(s.block_from) : ""), "warn");
+     track("ins_overdue_warn");
+    }
+   } catch (_) {}
   }
   if (s.state === "due_today") {
    const k = "nahla_ins_warn_" + (s.due_date || "");
@@ -5558,8 +5580,8 @@ function startListeners() {
   }, 6e3);
  });
  listen(() => ref(db, `drivers_locations/${drv.phone}/account_status`), s => {
-  if (s.val() === "banned") {
-   alert("⚠️ تم حظر حسابك.");
+  if (s.val() === "banned" || s.val() === "deleted") {
+   alert(s.val() === "deleted" ? "⛔ حسابك موقوف من الإدارة." : "⚠️ تم حظر حسابك.");
    clearPass();
    try {
     setWantOnline(false);

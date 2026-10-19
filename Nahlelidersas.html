@@ -462,14 +462,15 @@ button,input,select,textarea{font-family:'Cairo',sans-serif;}
   box-shadow:0 2px 8px rgba(239,68,68,.5);}
 .chat-fab .cf-bdg.on{display:flex;}
 
-#chatCenter{position:fixed;inset:0;background:rgba(8,15,30,.62);display:none;z-index:100;}
+#chatCenter,#advCenter{position:fixed;inset:0;background:rgba(8,15,30,.62);display:none;z-index:100;}
+#advCenter{z-index:101;}   
 
-#chatCenter.open{display:flex;justify-content:center;align-items:stretch;}
+#chatCenter.open,#advCenter.open{display:flex;justify-content:center;align-items:stretch;}
 
 .cc-panel{width:100%;height:100%;background:#f6f8fc;display:flex;flex-direction:column;
   overflow:hidden;}
 @media (min-width:700px){
-  #chatCenter.open{padding:20px;}
+  #chatCenter.open,#advCenter.open{padding:20px;}
   .cc-panel{width:min(760px,100%);height:calc(100% - 0px);border-radius:22px;
     box-shadow:0 32px 80px rgba(8,15,30,.45),0 0 0 1px rgba(255,255,255,.08);}
 }
@@ -581,6 +582,69 @@ button,input,select,textarea{font-family:'Cairo',sans-serif;}
 
 .ct-ctx.folded .ctx-more{display:none;}
 .ctx-more{margin-top:2px;}
+
+.sb-res{display:flex;align-items:center;gap:10px;background:#fff;border:1px solid #e7ecf4;border-radius:14px;padding:10px 12px;margin-bottom:10px;}
+.sb-rn{flex:1;min-width:0;font-size:.86rem;color:#0f172a;}
+.sb-rn b{font-weight:900;}
+.sb-rn small{display:block;font-size:.68rem;font-weight:800;color:#8896ab;margin-top:2px;}
+.sb-rb{display:flex;gap:6px;}
+.sb-rb button{width:42px;height:42px;border-radius:12px;border:1px solid #e7ecf4;background:#f8fafc;font-size:1.1rem;cursor:pointer;}
+.sb-hd{font-size:.7rem;font-weight:900;color:#64748b;margin:2px 2px 6px;display:flex;align-items:center;gap:6px;}
+.sb-hd span{background:#e0e7ff;color:#3730a3;border-radius:999px;padding:1px 8px;font-size:.66rem;}
+.sb-ords{display:flex;gap:6px;overflow-x:auto;padding-bottom:4px;margin-bottom:8px;scrollbar-width:thin;}
+.sb-oc{flex-shrink:0;display:flex;flex-direction:column;align-items:flex-start;gap:2px;min-width:118px;max-width:170px;padding:7px 12px;
+  border-radius:12px;border:1px solid #e7ecf4;background:#fff;cursor:pointer;font-family:inherit;text-align:start;position:relative;}
+.sb-oc i{position:absolute;top:9px;left:8px;width:8px;height:8px;border-radius:50%;background:#94a3b8;}
+.sb-oc b{font-size:.76rem;font-weight:900;color:#0f172a;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%;padding-left:10px;}
+.sb-oc small{font-size:.64rem;font-weight:800;color:#64748b;white-space:nowrap;}
+.sb-oc.sel{border-color:#6366f1;box-shadow:0 0 0 2px rgba(99,102,241,.18);}
+.sb-oc.t-ok i{background:#10b981;}.sb-oc.t-warn i{background:#f59e0b;}.sb-oc.t-bad i{background:#ef4444;box-shadow:0 0 0 3px rgba(239,68,68,.2);}
+.sb-ord{background:#fff;border:1px solid #e7ecf4;border-inline-start:4px solid #94a3b8;border-radius:14px;padding:11px 12px;margin-bottom:10px;}
+.sb-ord.t-ok{border-inline-start-color:#10b981;}.sb-ord.t-warn{border-inline-start-color:#f59e0b;}.sb-ord.t-bad{border-inline-start-color:#ef4444;}
+.sb-ot{display:flex;align-items:center;gap:6px;font-size:.88rem;font-weight:800;color:#0f172a;}
+.sb-ot b{font-weight:900;}
+.sb-tl{margin-inline-start:auto;border:0;background:#f1f5f9;border-radius:9px;width:32px;height:32px;cursor:pointer;font-size:.9rem;}
+.sb-steps{display:flex;margin:12px 0 8px;}
+.sb-st{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;position:relative;text-align:center;}
+.sb-st::before{content:'';position:absolute;top:6px;left:50%;width:100%;height:3px;background:#e2e8f0;}   
+.sb-st:first-child::before{display:none;}
+.sb-st i{width:15px;height:15px;border-radius:50%;background:#fff;border:3px solid #cbd5e1;position:relative;z-index:1;}
+.sb-st b{font-size:.6rem;font-weight:900;color:#94a3b8;line-height:1.3;}
+.sb-st small{font-size:.6rem;font-weight:800;color:#64748b;min-height:.9em;}
+.sb-st.done i{background:#10b981;border-color:#10b981;}.sb-st.done b{color:#0f172a;}.sb-st.done::before,.sb-st.now::before{background:#10b981;}
+.sb-st.now i{border-color:#6366f1;background:#eef2ff;animation:sbPulse 1.4s infinite;}.sb-st.now b{color:#4338ca;}
+@keyframes sbPulse{0%,100%{box-shadow:0 0 0 0 rgba(99,102,241,.35);}50%{box-shadow:0 0 0 6px rgba(99,102,241,0);}}
+@media (prefers-reduced-motion:reduce){.sb-st.now i{animation:none;}}
+.sb-sit{font-size:.8rem;font-weight:900;border-radius:10px;padding:7px 10px;background:#f1f5f9;color:#334155;line-height:1.6;}
+.sb-ord.t-ok .sb-sit{background:#ecfdf5;color:#047857;}.sb-ord.t-warn .sb-sit{background:#fffbeb;color:#b45309;}.sb-ord.t-bad .sb-sit{background:#fef2f2;color:#b91c1c;}
+.sb-drv{display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-top:8px;font-size:.76rem;font-weight:800;color:#334155;}
+.sb-drv button{margin-inline-start:auto;border:1px solid #e7ecf4;background:#fff;border-radius:10px;padding:6px 10px;font-size:.72rem;font-weight:900;cursor:pointer;font-family:inherit;}
+.sb-empty{background:#fff;border:1px dashed #cbd5e1;border-radius:12px;padding:12px;text-align:center;font-size:.76rem;font-weight:800;color:#64748b;margin-bottom:10px;}
+.sb-acts{background:linear-gradient(135deg,#eef2ff,#f5f3ff);border:1px solid #c7d2fe;border-radius:14px;padding:10px 12px;margin-bottom:10px;display:flex;flex-direction:column;gap:7px;}
+.sb-nh{font-size:.72rem;font-weight:900;color:#4338ca;}
+.sb-go,.sb-a2{width:100%;min-height:50px;border-radius:12px;cursor:pointer;font-family:inherit;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;padding:7px 10px;text-align:center;}
+.sb-go{border:0;background:linear-gradient(135deg,#4f46e5,#6366f1);color:#fff;box-shadow:0 6px 16px rgba(79,70,229,.25);}
+.sb-a2{border:1px solid #c7d2fe;background:#fff;color:#312e81;}
+.sb-go span,.sb-a2 span{font-size:.9rem;font-weight:900;}
+.sb-go small,.sb-a2 small{font-size:.66rem;font-weight:700;line-height:1.5;opacity:.85;}
+.sb-more{align-self:center;border:0;background:transparent;color:#4f46e5;font-size:.76rem;font-weight:900;cursor:pointer;font-family:inherit;padding:4px 10px;}
+.sb-calm{background:#fff;border:1px dashed #c7d2fe;border-radius:12px;padding:10px;text-align:center;font-size:.76rem;font-weight:800;color:#4338ca;}
+.sb-debt{background:#fffbeb;border:1px solid #fde68a;border-radius:14px;padding:10px 12px;margin-bottom:10px;font-size:.78rem;font-weight:800;color:#78350f;line-height:1.7;}
+.sb-debt small{display:block;font-size:.66rem;color:#b45309;}
+.sb-db{display:flex;gap:6px;margin-top:6px;}
+.sb-db button{flex:1;min-height:40px;border-radius:10px;border:1px solid #a7f3d0;background:#ecfdf5;color:#047857;font-weight:900;font-size:.78rem;cursor:pointer;font-family:inherit;}
+.sb-db button.bad{border-color:#fecaca;background:#fef2f2;color:#b91c1c;}
+.sb-nt{width:100%;display:flex;flex-direction:column;align-items:flex-start;gap:2px;background:#fff;border:1px solid #e7ecf4;border-radius:12px;padding:9px 12px;cursor:pointer;font-family:inherit;text-align:start;}
+.sb-nt span{font-size:.76rem;font-weight:900;color:#334155;}.sb-nt.hot{border-color:#fde68a;background:#fffbeb;}
+.sb-nt small{font-size:.68rem;font-weight:700;color:#8896ab;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%;}
+.av-more{display:flex;flex-direction:column;gap:7px;margin-top:6px;}
+.av-more button{display:flex;flex-direction:column;align-items:flex-start;gap:2px;border:1px solid #e7ecf4;background:#fff;border-radius:12px;padding:10px 12px;cursor:pointer;font-family:inherit;text-align:start;}
+.av-more b{font-size:.88rem;font-weight:900;color:#0f172a;}.av-more small{font-size:.72rem;font-weight:700;color:#64748b;}
+.ct-side{overflow-x:hidden;}
+.av-quick{display:flex;gap:6px;overflow-x:auto;padding:6px 10px 2px;background:#fff;border-top:1px solid #eef2f7;scrollbar-width:none;}
+.av-quick:empty{display:none;}
+.av-q{flex-shrink:0;max-width:280px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;border:1px solid #c7d2fe;background:#eef2ff;color:#3730a3;
+  border-radius:999px;padding:7px 12px;font-size:.74rem;font-weight:800;cursor:pointer;font-family:inherit;}
 .ctx-row{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px;}
 .ctx-p{display:inline-flex;align-items:center;gap:4px;background:#fff;border:1px solid #e7ecf4;
   border-radius:10px;padding:5px 9px;font-size:.7rem;font-weight:800;color:#3d4c63;
@@ -668,12 +732,12 @@ button,input,select,textarea{font-family:'Cairo',sans-serif;}
 .nt-ai{margin-top:9px;background:#f0f6ff;border:1px solid #cfe0fb;border-radius:12px;padding:8px 11px;
   font-size:.7rem;font-weight:800;color:#1e3a8a;line-height:1.65;word-break:break-word;}
 .nt-ai b{font-weight:900;}
-#ntSheet{position:fixed;inset:0;z-index:400;background:rgba(8,15,30,.55);display:none;align-items:flex-end;justify-content:center;}
-#ntSheet.open{display:flex;}
+#ntSheet,#avNtSheet{position:fixed;inset:0;z-index:400;background:rgba(8,15,30,.55);display:none;align-items:flex-end;justify-content:center;}
+#ntSheet.open,#avNtSheet.open{display:flex;}
 .nt-box{width:min(640px,100%);height:min(92vh,900px);background:#f6f8fc;border-radius:22px 22px 0 0;display:flex;
   flex-direction:column;overflow:hidden;animation:ntUp .24s var(--ease,ease);box-shadow:0 -10px 40px rgba(8,15,30,.25);}
 @keyframes ntUp{from{transform:translateY(40px)}to{transform:none}}
-@media (min-width:760px){#ntSheet{align-items:center;}.nt-box{border-radius:22px;height:min(86vh,860px);}}
+@media (min-width:760px){#ntSheet,#avNtSheet{align-items:center;}.nt-box{border-radius:22px;height:min(86vh,860px);}}
 @media (prefers-reduced-motion:reduce){.nt-box{animation:none;}}
 .nt-hd{background:#fff;padding:14px 16px 12px;border-bottom:1px solid #e7ecf4;}
 .nt-hr{display:flex;align-items:center;gap:11px;}
@@ -849,17 +913,17 @@ button,input,select,textarea{font-family:'Cairo',sans-serif;}
 
 .cc-thread,.ct-main,.ct-side{min-width:0;min-height:0;}
 .ct-main>*{min-width:0;max-width:100%;}
-.ct-bar,.ct-qr,.ct-ctx,#ccClaimZone,.ct-msgs{min-width:0;max-width:100%;box-sizing:border-box;}
+.ct-bar,.ct-qr,.ct-ctx,#ccClaimZone,#avClaimZone,.ct-msgs{min-width:0;max-width:100%;box-sizing:border-box;}
 .ct-qr-list,.ct-qr-tabs,.cc-fil{max-width:100%;}
 .cbb{max-width:min(80%,460px);overflow-wrap:anywhere;}
 .cc-lm{max-width:100%;}
 .ctx-ord{max-width:100%;box-sizing:border-box;}
 .ctx-ord .co-res{max-width:100%;min-width:0;}
-#chatCenter,.cc-panel{max-width:100vw;overflow-x:hidden;}
+#chatCenter,#advCenter,.cc-panel{max-width:100vw;overflow-x:hidden;}
 
 .cc-panel{height:100%;}
 @supports (height:100dvh){
-  #chatCenter.open{height:100dvh;}
+  #chatCenter.open,#advCenter.open{height:100dvh;}
   .cc-panel{height:100dvh;}
   @media (min-width:700px){ .cc-panel{height:calc(100dvh - 40px);} }
 }
@@ -898,7 +962,7 @@ button,input,select,textarea{font-family:'Cairo',sans-serif;}
 }
 
 @media (max-width:699px){
-  #chatCenter.open{padding:0;}
+  #chatCenter.open,#advCenter.open{padding:0;}
   .cc-panel{border-radius:0;box-shadow:none;}
   .cc-hd{padding:12px 12px;padding-top:max(12px,env(safe-area-inset-top));}
   .cc-tools{padding:10px 12px 8px;}
@@ -934,6 +998,79 @@ button,input,select,textarea{font-family:'Cairo',sans-serif;}
   .ct-qr{display:none;}          
   .cc-hd{padding-top:6px;padding-bottom:6px;}
 }
+
+.chat-fab.adv-fab{bottom:calc(86px + env(safe-area-inset-bottom));
+  background:linear-gradient(145deg,#0e7490,#134e5e);box-shadow:0 8px 24px rgba(14,116,144,.38),inset 0 1px 0 rgba(255,255,255,.2);}
+body.adv-on #fbSt{bottom:calc(154px + env(safe-area-inset-bottom));}   
+.adv-hd{background:linear-gradient(120deg,#062a33 0%,#0b4f5f 55%,#0e7490 120%);}
+.av-meter{font-size:.62rem;font-weight:900;background:rgba(255,255,255,.13);border:1px solid rgba(255,255,255,.18);
+  border-radius:999px;padding:4px 10px;white-space:nowrap;max-width:46vw;overflow:hidden;text-overflow:ellipsis;}
+.av-meter:empty{display:none;}
+.cc-panel.thread .av-meter{display:none;}
+
+#advCenter .ct-main{display:flex;flex-direction:column;}
+
+#advCenter .ct-main>.ct-ctx{flex:0 1 auto;min-height:46px;}
+#advCenter .av-mid{flex:1 0 210px;min-height:210px;display:grid;grid-template-rows:auto 1fr;position:relative;}
+#advCenter .ct-bar{flex-shrink:0;}
+#avDraft:has(.av-draft){min-height:118px;}
+#avClaimZone .ct-claim{min-height:40px;padding:8px;font-size:.78rem;margin:6px 12px 2px;}
+#avClaimZone{flex-shrink:0;}
+#advCenter .av-mid .ct-jump{bottom:14px;}
+.av-av{position:relative;background:linear-gradient(145deg,#ecfeff,#cffafe);}
+.av-dot{position:absolute;bottom:-4px;left:-4px;font-size:.8rem;font-style:normal;background:#fff;border-radius:99px;
+  width:21px;height:21px;display:flex;align-items:center;justify-content:center;box-shadow:0 1px 4px rgba(15,30,61,.2);}
+.cc-st.av-dr{background:#ccfbf1;color:#0f766e;margin-inline-start:4px;}
+.av-rt{font-size:.66rem;font-weight:900;margin-inline-start:5px;}
+.av-sys{display:flex;justify-content:center;margin:8px 0 10px;}
+.av-sys span{max-width:88%;background:#f1f5f9;border:1px dashed #cbd5e1;color:#475569;border-radius:12px;padding:5px 12px;
+  font-size:.68rem;font-weight:800;line-height:1.6;text-align:center;word-break:break-word;}
+.av-play{display:inline-flex;align-items:center;gap:6px;border:1px solid #bae6fd;background:#f0f9ff;color:#075985;border-radius:11px;
+  padding:7px 13px;font:inherit;font-size:.76rem;font-weight:900;cursor:pointer;margin:2px 0 5px;}
+.av-tr{font-size:.76rem;font-weight:700;color:#334155;background:#f8fafc;border-radius:9px;padding:6px 9px;margin:3px 0;line-height:1.65;white-space:pre-wrap;}
+.av-tr.wait{color:#94a3b8;background:transparent;padding:2px 0;font-size:.66rem;}
+.av-loc{display:inline-block;margin-top:5px;font-size:.72rem;font-weight:900;color:#0e7490;text-decoration:none;
+  background:#ecfeff;border:1px solid #a5f3fc;border-radius:9px;padding:5px 10px;}
+.av-cw{font-size:.62rem;font-weight:900;color:#0f766e;margin-bottom:4px;}
+
+#avDraft{flex:0 1 auto;min-height:0;max-height:42vh;overflow-y:auto;overscroll-behavior:contain;}
+@supports (max-height:42dvh){ #avDraft{max-height:42dvh;} }
+@media (max-height:700px),(max-width:699px){ #avDraft{max-height:32vh;} }
+.av-draft{margin:8px 12px 2px;background:#f0fdfa;border:1px solid #99f6e4;border-radius:15px;padding:10px 12px;
+  box-shadow:0 2px 10px rgba(15,118,110,.08);}
+.av-dh{display:flex;align-items:center;gap:6px;flex-wrap:wrap;font-size:.74rem;font-weight:900;color:#115e59;}
+.av-dh small{margin-inline-start:auto;font-size:.62rem;font-weight:800;color:#5f8f8a;}
+.av-ds{font-size:.73rem;font-weight:700;color:#334155;margin-top:6px;line-height:1.65;}
+.av-ds b{font-weight:900;color:#0f172a;}
+.av-dtx{background:#fff;border:1px solid #ccfbf1;border-radius:11px;padding:8px 11px;font-size:.85rem;font-weight:700;color:#0f172a;
+  white-space:pre-wrap;word-break:break-word;margin-top:7px;line-height:1.65;}
+.av-dwarn{font-size:.66rem;font-weight:900;color:#b45309;margin-top:6px;}
+.av-dbtns{display:flex;gap:6px;margin-top:9px;position:sticky;bottom:-10px;background:#f0fdfa;padding:6px 0 4px;z-index:1;}   
+.av-dbtns button{flex:1;border:0;border-radius:11px;padding:9px 4px;font:inherit;font-size:.76rem;font-weight:900;cursor:pointer;white-space:nowrap;}
+.av-dbtns button:active{transform:scale(.96);}
+.av-ok{background:#0f766e;color:#fff;box-shadow:0 3px 10px rgba(15,118,110,.25);}
+.av-ed{background:#fff;color:#0f766e;border:1px solid #5eead4!important;}
+.av-ig{background:#f1f5f9;color:#64748b;}
+.av-go{width:100%;margin-top:7px;border:1px dashed #14b8a6;background:#fff;color:#0f766e;border-radius:11px;padding:8px;
+  font:inherit;font-size:.74rem;font-weight:900;cursor:pointer;}
+.av-editbar{margin:8px 12px 2px;background:#fffbeb;border:1px solid #fde68a;border-radius:12px;padding:8px 11px;font-size:.72rem;
+  font-weight:800;color:#92400e;display:flex;align-items:center;gap:8px;}
+.av-editbar button{margin-inline-start:auto;border:0;background:transparent;color:#b91c1c;font:inherit;font-size:.7rem;font-weight:900;cursor:pointer;}
+
+.av-facts{margin-top:8px;background:#fff;border:1px solid #e7ecf4;border-radius:14px;padding:10px 12px;box-shadow:0 1px 3px rgba(15,30,61,.05);}
+.av-facts .tl-stg{padding:6px 10px;font-size:.74rem;}
+.av-facts .tl-stages{margin-bottom:8px;}
+.av-facts pre{white-space:pre-wrap;word-break:break-word;font-size:.62rem;direction:ltr;text-align:left;color:#475569;max-height:180px;overflow:auto;}
+.av-sug{border-color:#14b8a6!important;background:#f0fdfa!important;color:#0f766e!important;}
+.av-pre{background:#f0fdfa;border:1px solid #99f6e4;color:#0f766e;border-radius:11px;padding:7px 11px;font-size:.7rem;font-weight:800;margin-bottom:4px;}
+.av-prr{display:flex;gap:6px;margin-top:6px;}
+.av-prr .bc-in{flex:1;min-width:0;}
+.av-prr button{border:1px solid #fecaca;background:#fff;color:#b91c1c;border-radius:10px;padding:0 11px;cursor:pointer;font:inherit;font-weight:900;}
+.av-add{margin-top:8px;border:1px dashed #94a3b8;background:#fff;color:#334155;border-radius:10px;padding:7px 12px;font:inherit;
+  font-size:.72rem;font-weight:900;cursor:pointer;}
+.ctx-ord .co-b.adv{background:#ecfeff;border-color:#a5f3fc;color:#0e7490;flex:none;width:100%;}
+.b-adv{background:#ecfeff;color:#0e7490;}
+.t-ai{--tc:#0e7490;--tb:#ecfeff;--tl:#a5f3fc;}
 </style>
 </head>
 <body>
@@ -1151,6 +1288,58 @@ button,input,select,textarea{font-family:'Cairo',sans-serif;}
       </div>
     </div>
   </div>
+</div>
+
+<button class="chat-fab adv-fab" id="advFab" onclick="avOpenCenter()" style="display:none" title="🐳 مستشارك — دعم المطاعم" aria-label="مستشارك">🐳<span class="cf-bdg" id="advFabBdg">0</span></button>
+<div id="advCenter" onclick="if(event.target.id==='advCenter')avCloseCenter()">
+  <div class="cc-panel" id="avPanel">
+    <div class="cc-hd adv-hd">
+      <button class="cc-x cc-back" onclick="avBackToList()" title="عودة للقائمة (Esc)">→</button>
+      <div class="cc-avatar-hd" id="avAvatar">🍽</div>
+      <div style="flex:1;min-width:0">
+        <div class="cc-hd-t" id="avTitle">🐳 مستشارك</div>
+        <div class="cc-hd-s" id="avSub">دعم المطاعم — المدير والليدرز</div>
+      </div>
+      <span class="av-meter" id="avMeter"></span>
+      <button class="cc-x" onclick="avCloseCenter()" title="إغلاق">✕</button>
+    </div>
+    <div class="cc-tools" id="avTools">
+      <div class="cc-srch">
+        <span style="color:#94a3b8">🔎</span>
+        <input id="avSearch" placeholder="ابحث باسم المطعم أو رقمه أو نصّ آخر رسالة..." oninput="avSetSearch(this.value)" autocomplete="off">
+        <button class="cc-srch-x" id="avSearchX" onclick="avClearSearch()" style="display:none">✕</button>
+      </div>
+      <div class="cc-fil" id="avFil">
+        <button class="cc-f on" data-af="inbox" onclick="avSetFilter('inbox')">📥 الوارد<span class="n" id="avfInbox">0</span></button>
+        <button class="cc-f"    data-af="open"  onclick="avSetFilter('open')">🔔 بلا ليدر<span class="n" id="avfOpen">0</span></button>
+        <button class="cc-f"    data-af="mine"  onclick="avSetFilter('mine')">✅ محادثاتي<span class="n" id="avfMine">0</span></button>
+        <button class="cc-f"    data-af="all"   onclick="avSetFilter('all')">الكل<span class="n" id="avfAll">0</span></button>
+        <button class="cc-f"    data-af="closed" onclick="avSetFilter('closed')">مغلقة<span class="n" id="avfClosed">0</span></button>
+      </div>
+    </div>
+    <div class="cc-body" id="avList"><div class="cc-empty">لا محادثات بعد.<br>حين يراسل مطعمٌ «مستشارك» تظهر هنا فوراً 🐳</div></div>
+    <div class="cc-thread">
+      <div class="ct-side" id="avSide"></div>
+      <div class="ct-main">
+        <div class="ct-ctx" id="avCtx"></div>
+        <div class="av-mid">
+          <div id="avClaimZone"></div>
+          <div class="ct-msgs" id="avMsgs"></div>
+          <button class="ct-jump" id="avJump" onclick="avJumpBottom()">⬇ <span id="avJumpTxt">رسائل جديدة</span></button>
+        </div>
+        <div id="avDraft"></div>
+        <div class="av-quick" id="avQuick"></div>
+        <div class="ct-bar" id="avBar">
+          <textarea class="ct-in" id="avInput" rows="1" placeholder="اكتب ردّك للمطعم..." oninput="avComposeSave(this.value);this.style.height='auto';this.style.height=Math.min(this.scrollHeight,96)+'px'" onkeydown="avKeydown(event)"></textarea>
+          <button class="ct-send" id="avSend" onclick="avSendComposer()" title="إرسال (Enter)">➤</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="avSheet" class="sheet-bg" onclick="if(event.target.id==='avSheet')_navBack()">
+  <div class="sheet" id="avSheetBox"></div>
 </div>
 
 <div id="bcModal" onclick="if(event.target.id==='bcModal')bcClose()">
@@ -1706,6 +1895,18 @@ function applyPermsToUi() {
  _tog("bcOpenBtn", msg);
  _tog("ctBar", msg);
  _tog("ctQr", msg);
+ try {
+  const af = document.getElementById("advFab");
+  if (af && _avStarted) af.style.display = msg ? "flex" : "none"; else if (af && !msg) af.style.display = "none";
+  document.body.classList.toggle("adv-on", !!(af && af.style.display === "flex"));
+  _tog("avBar", msg);
+  _avCtxSig = "";
+  _avDraftSig = "";
+  if (_avActive) {
+   avRenderCtx();
+   avRenderDraft();
+  }
+ } catch (_) {}
  radarHtml = "";
  _hofHtml = "";
  _watchHtml = "";
@@ -2033,6 +2234,11 @@ function attachDataListeners() {
   }
  });
  startChatCenter();
+ try {
+  startAdvisorCenter();
+ } catch (e) {
+  console.warn("🐳 advisor boot:", e && e.message);
+ }
  listen("active_orders", snap => {
   const obj = snap.val();
   let active = [];
@@ -2048,6 +2254,9 @@ function attachDataListeners() {
   rawOrders = raw;
   _ordIdx = null;
   _onlineCache = null;
+  try {
+   if (typeof _avActive !== "undefined" && _avActive) avRenderCtx();
+  } catch (_) {}
   active.sort((a, b) => new Date(b[O.CREATED]) - new Date(a[O.CREATED]));
   liveOrd = active;
   const np = active.filter(o => !o[O.DRV] || [ "pending_driver", "system_routing", "manual_pending" ].includes(o[O.DRV])).length;
@@ -2881,7 +3090,12 @@ function renderRadar() {
   const okBtn = canDo("complete") ? `<button class="ob b-ok" onclick="forceComplete('${jOId}',this)" title="إكمال">✓</button>` : "";
   const delBtn = canDo("delete") ? `<button class="ob b-del" onclick="delOrder('${jOId}',this)" title="إلغاء">✕</button>` : "";
   const asgBtn = canDo("assign") ? `<button class="asel" style="cursor:pointer;display:flex;align-items:center;justify-content:center;gap:5px" onclick="openAssign('${jOId}')">👑 تعيين كابتن</button>` : "";
-  html += `<div class="oc ${clsCls}">${delH}\n      <div class="oc-head" style="${delH ? "margin-top:24px" : ""}">\n        <div><div class="oc-id">#${esc(oId)} ${dblB}${sovB}</div><div class="oc-tm">⏰ ${tF}${!delH && dMins > 0 ? ` · ${dMins} د` : ""}</div></div>\n      </div>\n      <div class="oc-acts">\n        <div style="display:flex;align-items:center;gap:4px;flex-wrap:wrap">\n          <span class="stb ${sbCls}">${sbTxt}</span>\n          ${isReady ? '<span class="stb stb-g" style="font-size:.58rem">✔ جاهز</span>' : ""}\n        </div>\n        <div style="display:flex;align-items:center;gap:4px">\n          ${trackBtn}\n          <button class="ob b-tl" onclick="openTimeline('${jOId}')" title="مسار الطلب الزمني">📜</button>\n          ${jPU ? `<button class="ob b-img" onclick="opImg('${jPU}')" title="صورة">🖼</button>` : ""}\n          ${okBtn}\n          ${delBtn}\n        </div>\n      </div>\n      <div class="oc-body">\n        <div class="oc-row"><div class="oc-res">🍽 ${esc(rN)}</div><div class="oc-pr">${Number(oP) || 0} د.ع</div></div>\n\n        <div class="oc-dr">\n          <div class="oc-dn"><div class="ocd-av">${hD && drvAvatar(dp) || "🛵"}</div><span>${esc(dn)}</span></div>\n          <div class="oc-dc">\n            ${""}${hD ? `<button class="cb-sm" onclick="waOpen('${jDP}')" title="واتساب">💬</button>` : ""}\n            ${msgBtn}\n            ${wdBtn}\n            ${asgBtn}\n          </div>\n        </div>\n\n        ${oA && oA !== "غير محدد" ? `<div class="oc-ar">📍 ${esc(oA)}${rejH}</div>` : ""}\n      </div>\n    </div>`;
+  let advBtn = "";
+  try {
+   const rp = _ccResPhone(oId);
+   if (rp && canDo("message")) advBtn = `<button class="ob b-adv" onclick="avOpenForRes('${ej(rp)}','${jOId}')" title="محادثة المطعم في مستشارك">🐳</button>`;
+  } catch (_) {}
+  html += `<div class="oc ${clsCls}">${delH}\n      <div class="oc-head" style="${delH ? "margin-top:24px" : ""}">\n        <div><div class="oc-id">#${esc(oId)} ${dblB}${sovB}</div><div class="oc-tm">⏰ ${tF}${!delH && dMins > 0 ? ` · ${dMins} د` : ""}</div></div>\n      </div>\n      <div class="oc-acts">\n        <div style="display:flex;align-items:center;gap:4px;flex-wrap:wrap">\n          <span class="stb ${sbCls}">${sbTxt}</span>\n          ${isReady ? '<span class="stb stb-g" style="font-size:.58rem">✔ جاهز</span>' : ""}\n        </div>\n        <div style="display:flex;align-items:center;gap:4px">\n          ${trackBtn}\n          <button class="ob b-tl" onclick="openTimeline('${jOId}')" title="مسار الطلب الزمني">📜</button>\n          ${advBtn}\n          ${jPU ? `<button class="ob b-img" onclick="opImg('${jPU}')" title="صورة">🖼</button>` : ""}\n          ${okBtn}\n          ${delBtn}\n        </div>\n      </div>\n      <div class="oc-body">\n        <div class="oc-row"><div class="oc-res">🍽 ${esc(rN)}</div><div class="oc-pr">${Number(oP) || 0} د.ع</div></div>\n\n        <div class="oc-dr">\n          <div class="oc-dn"><div class="ocd-av">${hD && drvAvatar(dp) || "🛵"}</div><span>${esc(dn)}</span></div>\n          <div class="oc-dc">\n            ${""}${hD ? `<button class="cb-sm" onclick="waOpen('${jDP}')" title="واتساب">💬</button>` : ""}\n            ${msgBtn}\n            ${wdBtn}\n            ${asgBtn}\n          </div>\n        </div>\n\n        ${oA && oA !== "غير محدد" ? `<div class="oc-ar">📍 ${esc(oA)}${rejH}</div>` : ""}\n      </div>\n    </div>`;
  });
  if (_total > _page.length) {
   html += `<div style="text-align:center;padding:14px 10px">\n      <button class="cc-f" style="padding:9px 20px;font-size:.8rem" onclick="_radarShown+=RADAR_PAGE*2;radarHtml='';renderRadar()">\n        ⬇ عرض المزيد — ${_total - _page.length} طلباً متبقياً</button></div>`;
@@ -3085,9 +3299,29 @@ function _navApply() {
   _ntEdit = null;
   return;
  }
+ const avs = document.getElementById("avSheet");
+ if (avs && avs.classList.contains("open")) {
+  avs.classList.remove("open");
+  return;
+ }
+ const avn = document.getElementById("avNtSheet");
+ if (avn && avn.classList.contains("open")) {
+  avn.classList.remove("open");
+  _avNtEdit = null;
+  return;
+ }
  const bc = document.getElementById("bcModal");
  if (bc && bc.classList.contains("open")) {
   bc.classList.remove("open");
+  return;
+ }
+ if (_avActive) {
+  _avUiBackToList();
+  return;
+ }
+ const adv = document.getElementById("advCenter");
+ if (adv && adv.classList.contains("open")) {
+  _avUiCloseCenter();
   return;
  }
  if (_ccActive) {
@@ -3396,7 +3630,7 @@ window.ccSetSort = function() {
 
 window.ccSetFilter = function(f) {
  _ccFilter = f;
- document.querySelectorAll(".cc-f").forEach(b => b.classList.toggle("on", b.dataset.f === f));
+ document.querySelectorAll("#chatCenter .cc-f").forEach(b => b.classList.toggle("on", b.dataset.f === f));
  _ccListSig = "";
  renderChatList();
 };
@@ -3662,7 +3896,7 @@ function renderCtx() {
    const price = Number(o[O.PRICE] || 0).toLocaleString("en-US");
    const mins = o[O.CREATED] ? Math.floor((Date.now() - new Date(o[O.CREATED]).getTime()) / 6e4) : null;
    const dblC = o[O.DOUBLE] === true ? `<span class="stb" style="background:var(--violet);color:#fff;font-size:.55rem">مزدوج</span>` : "";
-   h += `<div class="ctx-ord ${meta.cls}">\n        <div class="co-top">\n          <span class="co-id">#${esc(oid)} ${dblC}</span>\n          <span class="stb ${meta.chip}">${meta.txt}</span>\n          <span class="co-tm">⏰ ${esc(fmtHM(o[O.CREATED]))}${mins !== null && mins > 0 ? ` · ${mins} د` : ""}</span>\n        </div>\n        <div class="co-mid">\n          <span class="co-res">${rawOrders[o[O.ID]] && rawOrders[o[O.ID]].vehicle === "car" ? '<b style="color:#0ea5e9">🚗 سيارة · </b>' : ""}🍽 ${esc(o[O.RES] || "—")}</span>\n          <span class="co-pr">${price} د.ع</span>\n        </div>\n        ${o[O.AREA] && o[O.AREA] !== "غير محدد" ? `<div class="co-ar">📍 ${esc(o[O.AREA])}</div>` : ""}\n        <div class="co-acts">\n          <button class="co-b cust" ${cust ? "" : "disabled"} onclick="event.stopPropagation();ccDial('${ej(cust)}')">📞 الزبون</button>\n          <button class="co-b res"  ${resPh ? "" : "disabled"} onclick="event.stopPropagation();ccDial('${ej(resPh)}')">🍽 المطعم</button>\n          ${""}\n          ${canDo("withdraw") ? `<button class="co-b wd"   onclick="event.stopPropagation();ccWithdraw('${ej(oid)}','${ej(p)}')">↩ سحب</button>` : ""}\n          ${canDo("complete") ? `<button class="co-b fin"  onclick="event.stopPropagation();ccFinish('${ej(oid)}')">✔ إنهاء</button>` : ""}\n        </div>\n      </div>`;
+   h += `<div class="ctx-ord ${meta.cls}">\n        <div class="co-top">\n          <span class="co-id">#${esc(oid)} ${dblC}</span>\n          <span class="stb ${meta.chip}">${meta.txt}</span>\n          <span class="co-tm">⏰ ${esc(fmtHM(o[O.CREATED]))}${mins !== null && mins > 0 ? ` · ${mins} د` : ""}</span>\n        </div>\n        <div class="co-mid">\n          <span class="co-res">${rawOrders[o[O.ID]] && rawOrders[o[O.ID]].vehicle === "car" ? '<b style="color:#0ea5e9">🚗 سيارة · </b>' : ""}🍽 ${esc(o[O.RES] || "—")}</span>\n          <span class="co-pr">${price} د.ع</span>\n        </div>\n        ${o[O.AREA] && o[O.AREA] !== "غير محدد" ? `<div class="co-ar">📍 ${esc(o[O.AREA])}</div>` : ""}\n        <div class="co-acts">\n          <button class="co-b cust" ${cust ? "" : "disabled"} onclick="event.stopPropagation();ccDial('${ej(cust)}')">📞 الزبون</button>\n          <button class="co-b res"  ${resPh ? "" : "disabled"} onclick="event.stopPropagation();ccDial('${ej(resPh)}')">🍽 المطعم</button>\n          ${""}\n          ${canDo("withdraw") ? `<button class="co-b wd"   onclick="event.stopPropagation();ccWithdraw('${ej(oid)}','${ej(p)}')">↩ سحب</button>` : ""}\n          ${canDo("complete") ? `<button class="co-b fin"  onclick="event.stopPropagation();ccFinish('${ej(oid)}')">✔ إنهاء</button>` : ""}\n        </div>\n        ${resPh && canDo("message") ? `<button class="co-b adv" onclick="event.stopPropagation();avOpenForRes('${ej(resPh)}','${ej(oid)}')">🐳 محادثة المطعم</button>` : ""}\n      </div>`;
   });
  }
  h += `<div class="ctx-more">\n    <div class="ctx-hd">موقعه الآن</div>\n    <div id="ctxMapWrap">\n      <button class="ctx-a" style="width:100%" onclick="ccShowMap('${ej(p)}')">🗺️ عرض موقعه على الخريطة</button>\n    </div>\n    <div class="ctx-hd">إجراءات</div>\n    <div class="ctx-acts">\n      <button class="ctx-a" onclick="ccCall('${ej(p)}')">📞 اتصال</button>\n      <button class="ctx-a" onclick="ccWhats('${ej(p)}')">💬 واتساب</button>\n      <button class="ctx-a" onclick="ccLocate('${ej(p)}')">📍 موقعه</button>\n      <button class="ctx-a" onclick="ccPush('${ej(p)}','${ej(c.driver_name || "كابتن")}')">🔔 إشعار</button>\n    </div>\n    ${_ntCard(c)}\n  </div>`;
@@ -3925,7 +4159,25 @@ function ntWatch(phone) {
    ntRenderSheet();
   } catch (e) {}
  }, () => {});
+ if (_dcnRef) {
+  try {
+   _dcnRef.off();
+  } catch (e) {}
+ }
+ _dcnNote = "";
+ const r2 = db.ref("driver_chat_notes/" + phone);
+ _dcnRef = r2;
+ r2.on("value", sn => {
+  if (_ntPhone !== phone) return;
+  _dcnNote = String(sn.val() || "");
+  _ccCtxSig = "";
+  try {
+   renderCtx();
+  } catch (e) {}
+ }, () => {});
 }
+
+let _dcnRef = null, _dcnNote = "";
 
 function ntStop() {
  if (_ntRef) {
@@ -3933,10 +4185,17 @@ function ntStop() {
    _ntRef.off();
   } catch (e) {}
  }
+ if (_dcnRef) {
+  try {
+   _dcnRef.off();
+  } catch (e) {}
+ }
  _ntRef = null;
  _ntPhone = null;
  _ntData = {};
  _ntEdit = null;
+ _dcnRef = null;
+ _dcnNote = "";
  const sh = document.getElementById("ntSheet");
  if (sh) sh.classList.remove("open");
 }
@@ -3979,7 +4238,7 @@ function _ntItem(n, full) {
 }
 
 function _ntOld(c) {
- return String(c && c.notes || "").split("\n").map(x => x.trim()).filter(Boolean);
+ return String(_dcnNote || c && c.notes || "").split("\n").map(x => x.trim()).filter(Boolean);
 }
 
 function _ntChip() {
@@ -4186,6 +4445,9 @@ window.ccImgOpen = function(src) {
  lb.querySelector("#lbImg").src = src;
  lb.querySelector("#lbNew").href = src;
  lb.classList.remove("zoom");
+ try {
+  lb.querySelector(".lb-bar b").textContent = typeof arguments[1] === "string" && arguments[1] || "📷 صورة من الكابتن";
+ } catch (_) {}
  if (!lb.classList.contains("open")) {
   lb.classList.add("open");
   _navPush("img");
@@ -4697,6 +4959,2145 @@ window.ccRetry = function(pk) {
  const inp = document.getElementById("ctInput");
  inp.value = p.text;
  sendLeaderMsg();
+};
+
+const AV_CATS = {
+ order: {
+  i: "📦",
+  t: "شكوى على طلب"
+ },
+ damaged: {
+  i: "🍔",
+  t: "طلب تالف"
+ },
+ captain: {
+  i: "🛵",
+  t: "شكوى على كابتن"
+ },
+ price: {
+  i: "💰",
+  t: "تسعيرة منطقة"
+ },
+ location: {
+  i: "📍",
+  t: "موقع المطعم"
+ },
+ market: {
+  i: "📈",
+  t: "كيف السوق؟"
+ },
+ other: {
+  i: "💬",
+  t: "شيء آخر"
+ }
+};
+
+const AV_WHY = {
+ order: {
+  late: "تأخّر",
+  fee: "أخذ أجرة أعلى",
+  rude: "أسلوب",
+  other: "أخرى"
+ },
+ damaged: {
+  spill: "انسكب",
+  broken: "تكسّر",
+  cold: "برد/تأخّر",
+  wrong: "غلط",
+  other: "أخرى"
+ },
+ captain: {
+  cash: "لم يدفع ثمن الطلب",
+  rude: "أسلوب",
+  look: "مظهر",
+  other: "أخرى"
+ },
+ location: {
+  here: "أنا في المطعم الآن (GPS)",
+  link: "رابط خرائط"
+ }
+};
+
+const AV_RESP = {
+ captain: "الكابتن",
+ restaurant: "المطعم",
+ company: "الشركة",
+ unknown: "غير معروف"
+};
+
+const AV_ACTS = {
+ replace: {
+  t: "♻️ طلب بديل",
+  a: "REPLACE_ORDER"
+ },
+ claim: {
+  t: "🧾 مطالبة",
+  a: "CLAIM_ADD"
+ },
+ cash: {
+  t: "💵 دين مؤقّت",
+  a: "CASH_OPEN"
+ },
+ cashx: {
+  t: "✅ إغلاق دين",
+  a: "CASH_CLOSE"
+ },
+ price: {
+  t: "💰 طلب تسعيرة",
+  a: "REQ_ADD"
+ },
+ loc: {
+  t: "📍 تعديل الموقع",
+  a: "LOC_APPLY"
+ },
+ ask: {
+  t: "🛵 اسأل الكابتن",
+  a: "ASK_DRIVER"
+ }
+};
+
+const AV_D2A = {
+ replace_order: "replace",
+ claim: "claim",
+ cash_debt: "cash",
+ price_request: "price",
+ location_request: "loc",
+ ask_driver: "ask"
+};
+
+const AV_DLBL = {
+ reply_only: "ردّ فقط",
+ ask: "سؤال توضيح",
+ escalate: "إحالة للمدير",
+ replace_order: "♻️ طلب بديل",
+ claim: "🧾 مطالبة",
+ cash_debt: "💵 دين مؤقّت",
+ price_request: "💰 طلب تسعيرة",
+ location_request: "📍 تعديل الموقع",
+ ask_driver: "🛵 سؤال الكابتن"
+};
+
+const AV_MEDIA_RX = /^https:\/\/firebasestorage\.googleapis\.com\/v0\/b\/nahla-delivery-6b06f\.firebasestorage\.app\/o\/res_chat_media%2F(\d+)%2F/;
+
+const AV_PAGE = 50;
+
+let _avChats = {}, _avAI = {}, _avActive = null, _avOidSel = "", _avPrevUnread = 0, _avStarted = false, _avHealAt = 0;
+
+let _avFilter = "inbox", _avSearch = "", _avListSig = "", _avCtxSig = "", _avDraftSig = "", _avClaimSig = "";
+
+let _avCompose = {}, _avEdits = {}, _avHint = {}, _avFacts = {}, _avPending = {};
+
+let _avMsgs = {}, _avMsgRef = null, _avMsgP = null, _avMsgsLoaded = false, _avRendered = new Map, _avNewWhileUp = 0;
+
+let _avAudio = null, _avAudKey = null, _avBlobs = {}, _avLocSrc = "link";
+
+let _avCtxFolded = window.innerWidth < 1180, _avAuditAt = 0;
+
+function _avListen(path, cb) {
+ const ref = db.ref(path), ent = {
+  ref: ref,
+  cb: cb
+ };
+ fbL.push(ent);
+ ref.on("value", cb, async err => {
+  console.warn("🐳 رُفضت قراءة " + path + ":", err && err.message);
+  fbL = fbL.filter(l => l !== ent);
+  let wait = 12e4;
+  if (Date.now() - _avHealAt > 6e5) {
+   _avHealAt = Date.now();
+   try {
+    if (await healAuth()) wait = 1500;
+   } catch (_) {}
+  }
+  setTimeout(() => _avListen(path, cb), wait);
+ });
+}
+
+function startAdvisorCenter() {
+ if (_avStarted) return;
+ _avStarted = true;
+ const fab = document.getElementById("advFab");
+ if (fab) {
+  fab.style.display = canDo("message") ? "flex" : "none";
+  document.body.classList.toggle("adv-on", fab.style.display === "flex");
+ }
+ _avListen("res_chats", snap => {
+  _avChats = snap.val() || {};
+  let total = 0;
+  Object.keys(_avChats).forEach(p => {
+   total += Number((_avChats[p] || {}).unread_leader || 0);
+  });
+  const b = document.getElementById("advFabBdg");
+  if (b) {
+   b.textContent = total;
+   b.classList.toggle("on", total > 0);
+  }
+  if (total > _avPrevUnread) {
+   const last = Object.keys(_avChats).map(p => Object.assign({}, _avChats[p] || {}, {
+    p: p
+   })).sort((x, y) => (Number(y.last_msg_at) || 0) - (Number(x.last_msg_at) || 0))[0];
+   const viewing = last && _avActive === last.p && document.hasFocus();
+   if (!viewing) _ccBeep();
+   if (!viewing && last && last.last_from === "res") {
+    const nm = _avName(last.p), tx = String(last.last_msg || "");
+    toast(`🐳 ${nm}: ${tx.slice(0, 40)}`);
+    _ccNotify(`🐳 ${nm}`, tx, "hut-adv");
+   }
+  }
+  _avPrevUnread = total;
+  avRenderList();
+  if (_avActive) {
+   _avRenderHead();
+   avRenderClaim();
+   avRenderCtx();
+   avRenderDraft();
+   const c = _avChats[_avActive];
+   if (c && Number(c.unread_leader || 0) > 0) db.ref("res_chats/" + _avActive + "/unread_leader").set(0).catch(() => {});
+  }
+ });
+ _avListen("res_leader/drafts", snap => {
+  _avAI = snap.val() || {};
+  _avListSig = "";
+  avRenderList();
+  if (_avActive) {
+   _avDraftSig = "";
+   avRenderDraft();
+   _avCtxSig = "";
+   avRenderCtx();
+  }
+ });
+}
+
+function _avKey() {
+ return Date.now() + "_" + ("00000" + Math.floor(Math.random() * 60466176).toString(36)).slice(-5);
+}
+
+function _avDay() {
+ return new Date(Date.now() - 36e5).toISOString().slice(0, 10);
+}
+
+function _avN(v) {
+ const n = Number(v);
+ return v != null && v !== "" && isFinite(n) ? n.toLocaleString("en-US") : String(v == null ? "" : v);
+}
+
+function _avNum(s) {
+ s = String(s == null ? "" : s).trim();
+ if (!s) return null;
+ s = s.replace(/[٠-٩]/g, d => String(d.charCodeAt(0) - 1632)).replace(/[۰-۹]/g, d => String(d.charCodeAt(0) - 1776)).replace(/٫/g, ".").replace(/[,،\s]/g, "");
+ const x = Number(s);
+ return isFinite(x) ? x : NaN;
+}
+
+function _avMediaOk(u, p) {
+ const m = AV_MEDIA_RX.exec(String(u || ""));
+ return !!(m && String(u).length <= 600 && (!p || m[1] === String(p)));
+}
+
+function _avName(p) {
+ const c = _avChats[p] || {}, h = _avHint[p] || {};
+ if (c.res_name) return String(c.res_name);
+ if (h.name) return String(h.name);
+ try {
+  for (const id in rawOrders) {
+   const r = rawOrders[id];
+   if (r && r.resPhone && r.restaurant && nP(r.resPhone) === String(p)) return String(r.restaurant);
+  }
+ } catch (_) {}
+ return "مطعم 0" + p;
+}
+
+function _avOid(p) {
+ const c = _avChats[p] || {}, d = _avAI[p] || {};
+ return String(p === _avActive && _avOidSel || c.oid || d.oid || "").slice(0, 80);
+}
+
+function _avWhy(c) {
+ return (AV_WHY[c && c.cat] || {})[c && c.why] || "";
+}
+
+function _avCanReply(p) {
+ if (!canDo("message")) return false;
+ const c = _avChats[p];
+ return !(c && c.status === "claimed" && c.claimed_by && nP(c.claimed_by) !== nP(EMP_PHONE));
+}
+
+function _avClaimUpd() {
+ return {
+  status: "claimed",
+  claimed_by: String(EMP_PHONE).slice(0, 40),
+  claimed_by_name: String(EMP_NAME || "ليدر").slice(0, 60),
+  claimed_at: (new Date).toISOString()
+ };
+}
+
+function _avLastQ(p) {
+ if (_avMsgP === p) {
+  const mm = _avMsgs || {}, ks = Object.keys(mm).sort();
+  for (let i = ks.length - 1; i >= 0; i--) {
+   const m = mm[ks[i]];
+   if (m && m.from === "res" && !m.sys) return String(m.tr || m.text || "").slice(0, 200);
+  }
+ }
+ const c = _avChats[p] || {};
+ return c.last_from === "res" ? String(c.last_msg || "").slice(0, 200) : "";
+}
+
+function _avFeedback(p, outcome, draft, final) {
+ const c = _avChats[p] || {}, d = _avAI[p] || {};
+ let cat = String(c.cat || d.cat || "other");
+ if (!AV_CATS[cat]) cat = "other";
+ const day = _avDay(), id = db.ref("res_leader/feedback/" + day).push().key;
+ return {
+  day: day,
+  id: id,
+  rec: {
+   p: String(p),
+   cat: cat,
+   outcome: outcome,
+   draft: String(draft || "").slice(0, 1e3),
+   final: String(final || "").slice(0, 1e3),
+   q: _avLastQ(p),
+   by: String(_ntUid()).slice(0, 20),
+   ts: Date.now()
+  }
+ };
+}
+
+function _avOpenSt(c) {
+ return !c.status || c.status === "open";
+}
+
+function _avPass(c, f) {
+ if (f === "inbox") return Number(c.unread_leader || 0) > 0 || _avOpenSt(c) || !!(_avAI[c.p] && _avAI[c.p].sent);
+ if (f === "open") return _avOpenSt(c);
+ if (f === "mine") return c.status !== "closed" && !!c.claimed_by && nP(c.claimed_by) === nP(EMP_PHONE);
+ if (f === "closed") return c.status === "closed";
+ return true;
+}
+
+function _avMatch(c) {
+ if (!_avSearch) return true;
+ if ([ _avName(c.p), c.p, c.last_msg || "", c.claimed_by_name || "" ].join(" ").toLowerCase().includes(_avSearch)) return true;
+ const d = nP(_avSearch);
+ return !!(d && String(c.p).includes(d));
+}
+
+function _avLastWho(c) {
+ if (!c || c.last_from !== "leader") return "";
+ if (c.last_by && nP(c.last_by) === nP(EMP_PHONE)) return "أنت: ";
+ return esc(String(c.last_name || "ليدر").slice(0, 24)) + ": ";
+}
+
+function _avStChip(c) {
+ if (c.status === "closed") return '<span class="cc-st cl">مغلقة</span>';
+ if (c.status === "claimed") {
+  if (c.claimed_by && nP(c.claimed_by) === nP(EMP_PHONE)) return '<span class="cc-st me">✅ معي</span>';
+  const ai = c.claimed_by === "res_leader";
+  return `<span class="cc-st oth">مع ${esc(c.claimed_by_name || (ai ? "الفريق" : c.claimed_by === "admin" ? "الإدارة" : "ليدر"))}</span>`;
+ }
+ return '<span class="cc-st w">🔔 بانتظار ليدر</span>';
+}
+
+function _avSyncFil() {
+ document.querySelectorAll("#avFil .cc-f").forEach(b => b.classList.toggle("on", b.dataset.af === _avFilter));
+}
+
+window.avSetFilter = function(f) {
+ _avFilter = f;
+ _avSyncFil();
+ _avListSig = "";
+ avRenderList();
+};
+
+window.avSetSearch = function(v) {
+ _avSearch = String(v || "").trim().toLowerCase();
+ const x = document.getElementById("avSearchX");
+ if (x) x.style.display = _avSearch ? "block" : "none";
+ _avListSig = "";
+ avRenderList();
+};
+
+window.avClearSearch = function() {
+ const i = document.getElementById("avSearch");
+ if (i) {
+  i.value = "";
+  i.focus();
+ }
+ avSetSearch("");
+};
+
+function avRenderList() {
+ const el = document.getElementById("avList");
+ if (!el) return;
+ const all = Object.keys(_avChats).map(p => Object.assign({}, _avChats[p] || {}, {
+  p: p
+ })).filter(c => c.last_msg || c.res_name || c.status);
+ const cnt = {
+  inbox: 0,
+  open: 0,
+  mine: 0,
+  all: all.length,
+  closed: 0
+ };
+ all.forEach(c => {
+  [ "inbox", "open", "mine", "closed" ].forEach(f => {
+   if (_avPass(c, f)) cnt[f]++;
+  });
+ });
+ [ [ "inbox", "avfInbox" ], [ "open", "avfOpen" ], [ "mine", "avfMine" ], [ "all", "avfAll" ], [ "closed", "avfClosed" ] ].forEach(([k, id]) => {
+  const n = document.getElementById(id);
+  if (n) n.textContent = cnt[k];
+ });
+ const arr = all.filter(c => _avPass(c, _avFilter) && _avMatch(c)).sort((a, b) => (Number(b.last_msg_at) || 0) - (Number(a.last_msg_at) || 0));
+ let h = "";
+ if (!arr.length) {
+  h = _avSearch ? `<div class="cc-empty">لا نتيجة لـ «${esc(_avSearch)}»<br>جرّب اسماً أو رقماً آخر</div>` : _avFilter !== "all" ? '<div class="cc-empty">لا محادثات في هذا التصنيف</div>' : '<div class="cc-empty">لا محادثات بعد.<br>حين يراسل مطعمٌ «مستشارك» تظهر هنا فوراً 🐳</div>';
+ } else {
+  arr.forEach(c => {
+   const ub = Number(c.unread_leader || 0), cat = AV_CATS[c.cat] || AV_CATS.other, dr = !!_avAI[c.p];
+   const kind = c.last_from === "res" ? {
+    voice: "🎙️ ",
+    image: "📷 ",
+    loc: "📍 "
+   }[c.last_kind] || "" : "";
+   const rt = c.last_rating === "up" ? '<span class="av-rt" title="تقييم المطعم">⭐ 👍</span>' : c.last_rating === "down" ? '<span class="av-rt" title="تقييم المطعم">⭐ 👎</span>' : "";
+   h += `<div class="cc-conv" onclick="avOpenThread('${ej(c.p)}')">\n        <div class="cc-av av-av" title="${esc(cat.t)}">${cat.i}${dr ? '<i class="av-dot" title="اقتراح ردّ جاهز">💬</i>' : ""}</div>\n        <div style="min-width:0">\n          <div class="cc-nm">${esc(_avName(c.p))}${rt}</div>\n          <div class="cc-lm">${_avLastWho(c)}${kind}${esc(c.last_msg || "...")}</div>\n          ${_avStChip(c)}${dr ? '<span class="cc-st av-dr">💬 اقتراح</span>' : ""}\n        </div>\n        <div class="cc-meta"><div class="cc-tm">${c.last_msg_at ? fmtHM(Number(c.last_msg_at)) : ""}</div>${ub > 0 ? `<div class="cc-ub">${ub}</div>` : ""}</div>\n      </div>`;
+  });
+ }
+ if (h === _avListSig) return;
+ _avListSig = h;
+ el.innerHTML = h;
+}
+
+function _avLoadAudit() {
+ const now = Date.now();
+ if (now - _avAuditAt < 18e5) return;
+ _avAuditAt = now;
+ db.ref("res_leader/audit").orderByKey().limitToLast(1).once("value").then(s => {
+  const v = s.val() || {}, day = Object.keys(v)[0], a = day && v[day], el = document.getElementById("avMeter");
+  if (!el) return;
+  if (!a || typeof a !== "object") {
+   el.textContent = "";
+   return;
+  }
+  let r = Number(a.accept_rate);
+  if (!isFinite(r)) {
+   let n = 0, ok = 0;
+   Object.values(a.by_cat || {}).forEach(x => {
+    if (!x) return;
+    n += Number(x.n) || 0;
+    ok += Number(x.sent) || 0;
+   });
+   r = n ? ok / n : NaN;
+  }
+  if (!isFinite(r)) {
+   el.textContent = "";
+   return;
+  }
+  const y = new Date(Date.now() - 36e5 - 864e5).toISOString().slice(0, 10);
+  el.textContent = `اعتماد الاقتراحات: ${Math.round(r <= 1 ? r * 100 : r)}٪ (${day === y ? "أمس" : String(day).slice(5)})`;
+  el.title = Object.keys(a.by_cat || {}).map(k => {
+   const x = a.by_cat[k] || {};
+   return (AV_CATS[k] ? AV_CATS[k].t : k) + ": أُرسلت " + (Number(x.sent) || 0) + " · عُدّلت " + (Number(x.edited) || 0) + " · تُجوهلت " + (Number(x.ignored) || 0) + " من " + (Number(x.n) || 0);
+  }).join("\n");
+ }).catch(e => {
+  _avAuditAt = 0;
+  console.warn("🐳 audit:", e && e.message);
+ });
+}
+
+window.avOpenCenter = function() {
+ const ac = document.getElementById("advCenter");
+ if (!ac || ac.classList.contains("open")) return;
+ ac.classList.add("open");
+ _navPush("adv");
+ _avSyncFil();
+ _avListSig = "";
+ avRenderList();
+ _avLoadAudit();
+ setTimeout(() => {
+  const q = document.getElementById("avSearch");
+  if (q && window.innerWidth >= 1180 && !_avActive) q.focus();
+ }, 80);
+};
+
+window.avCloseCenter = function() {
+ if (_avActive) {
+  _navBack();
+  setTimeout(() => _navBack(), 80);
+ } else _navBack();
+};
+
+window.avBackToList = function() {
+ _navBack();
+};
+
+function _avUiBackToList() {
+ _avActive = null;
+ _avOidSel = "";
+ _avCtxSig = "";
+ _avDraftSig = "";
+ _avClaimSig = "";
+ _avStopMsgs();
+ try {
+  avNtStop();
+ } catch (_) {}
+ _avAudioStop();
+ const pn = document.getElementById("avPanel");
+ if (pn) pn.classList.remove("thread");
+ const t = document.getElementById("avTitle");
+ if (t) t.textContent = "🐳 مستشارك";
+ const s = document.getElementById("avSub");
+ if (s) s.textContent = "دعم المطاعم — المدير والليدرز";
+ const a = document.getElementById("avAvatar");
+ if (a) a.textContent = "🍽";
+ [ "avDraft", "avClaimZone", "avCtx", "avSide" ].forEach(id => {
+  const e = document.getElementById(id);
+  if (e) e.innerHTML = "";
+ });
+ _avListSig = "";
+ avRenderList();
+}
+
+function _avUiCloseCenter() {
+ const ac = document.getElementById("advCenter");
+ if (ac) ac.classList.remove("open");
+ if (_avActive) _avUiBackToList();
+}
+
+window.avOpenForRes = function(phone, oid) {
+ const p = nP(phone);
+ if (!p) return toast("لا رقم مطعم محفوظ لهذا الطلب", "e");
+ const r = oid && rawOrders ? rawOrders[oid] : null;
+ if (r && r.restaurant) _avHint[p] = Object.assign({}, _avHint[p], {
+  name: String(r.restaurant)
+ });
+ avOpenCenter();
+ setTimeout(() => {
+  try {
+   avOpenThread(p, oid);
+  } catch (e) {
+   console.warn("🐳 open:", e && e.message);
+  }
+ }, 60);
+};
+
+function _avRenderHead() {
+ const p = _avActive;
+ if (!p) return;
+ const c = _avChats[p] || {}, cat = AV_CATS[c.cat];
+ const t = document.getElementById("avTitle");
+ if (t) t.textContent = "🍽 " + _avName(p);
+ const s = document.getElementById("avSub");
+ if (s) s.textContent = "0" + p + (cat ? " · " + cat.i + " " + cat.t : "");
+ const a = document.getElementById("avAvatar");
+ if (a) a.textContent = cat ? cat.i : "🍽";
+}
+
+window.avOpenThread = function(phone, oid) {
+ const p = nP(phone);
+ if (!p) return;
+ if (_avActive === p) {
+  if (oid) {
+   _avOidSel = String(oid).slice(0, 80);
+   _avCtxSig = "";
+   avRenderCtx();
+  }
+  return;
+ }
+ if (_avActive) {
+  _avStopMsgs();
+  try {
+   avNtStop();
+  } catch (_) {}
+  _avAudioStop();
+ } else _navPush("advthread");
+ _avActive = p;
+ _avOidSel = String(oid || "").slice(0, 80);
+ _avCtxSig = "";
+ _avDraftSig = "";
+ _avClaimSig = "";
+ _avNewWhileUp = 0;
+ _avUpdJump();
+ document.getElementById("avPanel").classList.add("thread");
+ _avRenderHead();
+ const c = _avChats[p];
+ if (c && Number(c.unread_leader || 0) > 0) db.ref("res_chats/" + p + "/unread_leader").set(0).catch(() => {});
+ const inp = document.getElementById("avInput");
+ if (inp) {
+  inp.value = _avCompose[p] || "";
+  inp.style.height = "auto";
+ }
+ const m = document.getElementById("avMsgs");
+ if (m) {
+  m.innerHTML = '<div class="cc-empty" style="padding:30px">⏳ جارٍ تحميل الرسائل…</div>';
+  m.dataset.lastDay = "";
+  m.dataset.lastOid = "";
+ }
+ _avRendered = new Map;
+ _avWatchMsgs(p);
+ try {
+  avNtWatch(p);
+ } catch (_) {}
+ avRenderClaim();
+ avRenderDraft();
+ requestAnimationFrame(() => {
+  if (_avActive === p) avRenderCtx();
+ });
+};
+
+function _avWatchMsgs(p) {
+ _avStopMsgs();
+ _avMsgP = p;
+ _avMsgs = {};
+ _avMsgsLoaded = false;
+ const r = db.ref("res_chat_msgs/" + p).limitToLast(AV_PAGE);
+ _avMsgRef = r;
+ r.on("value", sn => {
+  if (_avMsgP !== p) return;
+  _avMsgs = sn.val() || {};
+  _avMsgsLoaded = true;
+  avRenderThread();
+  _avDraftSig = "";
+  avRenderDraft();
+ }, err => {
+  if (_avMsgP !== p) return;
+  console.warn("🐳 res_chat_msgs:", err && err.message);
+  const m = document.getElementById("avMsgs");
+  if (m) m.innerHTML = '<div class="cc-empty" style="padding:30px">🔒 تعذّرت قراءة الرسائل — تحقّق من الصلاحيّة ثم أعد فتح المحادثة</div>';
+ });
+}
+
+function _avStopMsgs() {
+ if (_avMsgRef) {
+  try {
+   _avMsgRef.off();
+  } catch (_) {}
+ }
+ _avMsgRef = null;
+ _avMsgP = null;
+ _avMsgs = {};
+ _avMsgsLoaded = false;
+}
+
+function _avAudioStop() {
+ try {
+  if (_avAudio) _avAudio.pause();
+ } catch (_) {}
+ _avAudio = null;
+ _avAudKey = null;
+ Object.keys(_avBlobs).forEach(k => {
+  try {
+   URL.revokeObjectURL(_avBlobs[k]);
+  } catch (_) {}
+ });
+ _avBlobs = {};
+}
+
+function _avUpdJump() {
+ const j = document.getElementById("avJump"), t = document.getElementById("avJumpTxt");
+ if (!j || !t) return;
+ if (_avNewWhileUp > 0) {
+  t.textContent = _avNewWhileUp + " رسالة جديدة";
+  j.classList.add("on");
+ } else j.classList.remove("on");
+}
+
+window.avJumpBottom = function() {
+ const m = document.getElementById("avMsgs");
+ if (!m) return;
+ m.scrollTo({
+  top: m.scrollHeight,
+  behavior: "smooth"
+ });
+ _avNewWhileUp = 0;
+ _avUpdJump();
+};
+
+window.avImgLoaded = function() {
+ const m = document.getElementById("avMsgs");
+ if (m && m.scrollHeight - m.scrollTop - m.clientHeight < 320) m.scrollTop = m.scrollHeight;
+};
+
+function _avBindScroll() {
+ const m = document.getElementById("avMsgs");
+ if (!m || m.dataset.bound) return;
+ m.dataset.bound = "1";
+ m.addEventListener("scroll", () => {
+  if (m.scrollHeight - m.scrollTop - m.clientHeight < 60) {
+   _avNewWhileUp = 0;
+   _avUpdJump();
+  }
+ }, {
+  passive: true
+ });
+}
+
+function _avSig(m) {
+ return String(m.tr || "").length + "|" + (m.img ? 1 : 0) + "|" + (m.aud ? 1 : 0) + "|" + String(m.text || "").length;
+}
+
+function _avBubble(k, m) {
+ const t = fmtHM(Number(m.ts) || Date.now()), p = _avActive;
+ if (m.sys) return `<div class="av-sys" id="avm-${k}"><span>${esc(m.text)} · ${esc(t)}</span></div>`;
+ if (m.from === "leader") {
+  const byMe = !m.ai && !!m.by && nP(m.by) === nP(EMP_PHONE);
+  const tag = (m.draft && !m.ai ? " · اقتراح" + (byMe ? " أرسلتَه" : "") : "") + (m.edited ? " · ✏️ معدّلة" : "") + (byMe && !m.draft ? " (أنت)" : "");
+  return `<div class="cbb cbb-me${byMe ? "" : " cbb-peer"}" id="avm-${k}"><div class="cbb-nm">👤 ${esc(m.name || "ليدر")}${esc(tag)}</div><div>${esc(m.text)}</div><div class="cbb-tm">${esc(t)}</div></div>`;
+ }
+ let b = "";
+ const cat = m.cat && AV_CATS[m.cat];
+ if (cat) {
+  const w = (AV_WHY[m.cat] || {})[m.why] || "";
+  b += `<div class="av-cw">${cat.i} ${esc(cat.t)}${w ? " · " + esc(w) : ""}</div>`;
+ }
+ const img = _avMediaOk(m.img, p), aud = _avMediaOk(m.aud, p);
+ if (img) b += `<img class="cbb-img" loading="lazy" src="${esc(m.img)}" alt="صورة من المطعم" onload="avImgLoaded()" onclick="ccImgOpen(this.src,'📷 صورة من المطعم')">`;
+ if (aud) b += `<button class="av-play" id="avpl-${k}" onclick="avPlay('${ej(k)}')">▶ تشغيل${Number(m.dur) > 0 ? " · " + Math.round(Number(m.dur)) + " ث" : ""}</button>`;
+ if (m.tr) b += `<div class="av-tr">📝 ${esc(m.tr)}</div>`; else if (aud) b += '<div class="av-tr wait">⏳ التفريغ لم يصل بعد</div>';
+ const hide = img && /^📷/.test(String(m.text)) || aud && /^🎙/.test(String(m.text));
+ if (!hide) b += `<div>${esc(m.text)}</div>`;
+ const la = Number(m.lat), lo = Number(m.lng);
+ if (m.lat != null && m.lng != null && la >= -90 && la <= 90 && lo >= -180 && lo <= 180) b += `<a class="av-loc" href="https://www.google.com/maps?q=${la},${lo}" target="_blank" rel="noopener">📍 فتح في الخرائط</a>`;
+ return `<div class="cbb cbb-dr" id="avm-${k}"><div class="cbb-nm">🍽 ${esc(m.name || _avName(p))}</div>${b}<div class="cbb-tm">${esc(t)}</div></div>`;
+}
+
+function avRenderThread() {
+ if (!_avActive) return;
+ const msgs = document.getElementById("avMsgs");
+ if (!msgs) return;
+ _avBindScroll();
+ const mm = _avMsgs || {}, keys = Object.keys(mm).sort();
+ const first = _avRendered.size === 0;
+ const atBottom = msgs.scrollHeight - msgs.scrollTop - msgs.clientHeight < 80;
+ let lastDay = msgs.dataset.lastDay || "", lastOid = msgs.dataset.lastOid || "", buf = "", added = false;
+ keys.forEach(k => {
+  const m = mm[k];
+  if (!m || typeof m !== "object" || !m.text) return;
+  const sig = _avSig(m);
+  if (_avRendered.has(k)) {
+   if (_avRendered.get(k) !== sig) {
+    _avRendered.set(k, sig);
+    const el = document.getElementById("avm-" + k);
+    if (el) el.outerHTML = _avBubble(k, m);
+   }
+   return;
+  }
+  _avRendered.set(k, sig);
+  if (m.from === "leader" && m.cid && _avPending[m.cid]) {
+   const g = document.getElementById("avp-" + m.cid);
+   if (g) g.remove();
+   delete _avPending[m.cid];
+  }
+  const d = new Date(Number(m.ts) || Date.now()), dk = d.toDateString();
+  if (dk !== lastDay) {
+   lastDay = dk;
+   let lb = "";
+   try {
+    lb = _FMT_DAY.format(d);
+   } catch (_) {}
+   buf += `<div class="ct-day"><span>${esc(lb)}</span></div>`;
+  }
+  if (m.from === "res" && m.oid && String(m.oid) !== lastOid) {
+   lastOid = String(m.oid);
+   buf += `<div class="ct-oidsep"><span>📦 …${esc(String(m.oid).slice(-6))}${m.otag ? " · " + esc(String(m.otag)) : ""}</span></div>`;
+  }
+  buf += _avBubble(k, m);
+  added = true;
+ });
+ if (buf) {
+  const e = msgs.querySelector(".cc-empty");
+  if (e) e.remove();
+  msgs.insertAdjacentHTML("beforeend", buf);
+ }
+ msgs.dataset.lastDay = lastDay;
+ msgs.dataset.lastOid = lastOid;
+ if (!_avRendered.size && !msgs.querySelector(".cbb")) {
+  const em = _avMsgsLoaded ? "💬 لا رسائل بعد — اختر ردّاً جاهزاً من تحت أو اكتب، وردّك يبدأ المحادثة" : "⏳ جارٍ تحميل الرسائل…";
+  msgs.innerHTML = '<div class="cc-empty" style="padding:30px">' + esc(em) + "</div>";
+ }
+ if (added && (atBottom || first)) {
+  msgs.scrollTop = msgs.scrollHeight;
+  _avNewWhileUp = 0;
+  _avUpdJump();
+ } else if (added) {
+  _avNewWhileUp++;
+  _avUpdJump();
+ }
+}
+
+window.avPlay = async function(k) {
+ const p = _avActive, m = (_avMsgs || {})[k];
+ if (!p || !m || !_avMediaOk(m.aud, p)) return;
+ if (_avAudio && _avAudKey === k && !_avAudio.paused) {
+  _avAudio.pause();
+  return;
+ }
+ const btn = document.getElementById("avpl-" + k);
+ try {
+  let u = _avBlobs[k];
+  if (!u) {
+   if (btn) btn.textContent = "⏳ تحميل…";
+   let r = await fetch(m.aud);
+   if (r.status === 401 || r.status === 403) {
+    const tk = auth.currentUser ? await auth.currentUser.getIdToken() : "";
+    r = await fetch(String(m.aud).split("?")[0] + "?alt=media", {
+     headers: {
+      Authorization: "Firebase " + tk
+     }
+    });
+   }
+   if (!r.ok) throw new Error("http_" + r.status);
+   u = _avBlobs[k] = URL.createObjectURL(await r.blob());
+  }
+  if (_avActive !== p) return;
+  if (_avAudio) {
+   try {
+    _avAudio.pause();
+   } catch (_) {}
+  }
+  const a = new Audio(u);
+  _avAudio = a;
+  _avAudKey = k;
+  a.onended = a.onpause = () => {
+   const b = document.getElementById("avpl-" + k);
+   if (b) b.textContent = "▶ تشغيل";
+  };
+  await a.play();
+  const b2 = document.getElementById("avpl-" + k);
+  if (b2) b2.textContent = "⏸ إيقاف";
+ } catch (e) {
+  const b = document.getElementById("avpl-" + k);
+  if (b) b.textContent = "▶ تشغيل";
+  console.warn("🐳 صوت:", e && (e.name || e.message));
+  toast(/NotSupported/i.test(String(e && (e.name || e.message))) ? "صيغة الصوت غير مدعومة في هذا المتصفّح" : "تعذّر تشغيل الرسالة الصوتيّة", "e");
+ }
+};
+
+function avRenderClaim() {
+ const zone = document.getElementById("avClaimZone");
+ if (!zone || !_avActive) return;
+ const c = _avChats[_avActive], me = nP(EMP_PHONE);
+ let h, en = true, hint = "";
+ if (!c) {
+  h = '<div class="ct-note">👋 أوّل محادثة مع هذا المطعم — ردّك يبدؤها باسمك.</div>';
+ } else if (c.status === "claimed" && c.claimed_by && nP(c.claimed_by) === me) {
+  h = '<button class="ct-claim" style="background:linear-gradient(135deg,#64748b,#475569);box-shadow:none" onclick="avCloseConv()">🔒 إغلاق المحادثة</button>';
+ } else if (c.status === "claimed") {
+  const ai = c.claimed_by === "res_leader", nm = c.claimed_by_name || (ai ? "الفريق" : "ليدر آخر");
+  h = `<div class="ct-note">👁 مراقبة فقط — المحادثة مع <b>${esc(nm)}</b>.\n      <button onclick="avTakeOver()" style="margin-inline-start:8px;border:0;background:#b45309;color:#fff;border-radius:8px;padding:4px 11px;font-size:.7rem;font-weight:900;cursor:pointer;font-family:inherit">استحواذ</button></div>`;
+  en = false;
+  hint = `المحادثة مع ${nm} — اضغط «استحواذ» للردّ`;
+ } else if (c.status === "closed") {
+  h = '<div class="ct-note">المحادثة مغلقة — ردّك يعيد فتحها باسمك.</div>';
+ } else {
+  h = '<button class="ct-claim" onclick="avClaim()">✅ استلام المحادثة باسمك</button>';
+ }
+ if (!canDo("message")) {
+  en = false;
+  hint = "مراقبة فقط — لا تملك صلاحيّة المراسلة";
+ }
+ if (h !== _avClaimSig) {
+  _avClaimSig = h;
+  zone.innerHTML = h;
+ }
+ const inp = document.getElementById("avInput"), btn = document.getElementById("avSend");
+ if (inp && btn) {
+  inp.disabled = !en;
+  btn.disabled = !en;
+  inp.placeholder = en ? "اكتب ردّك للمطعم..." : hint || "مراقبة فقط";
+  inp.style.opacity = en ? "1" : ".6";
+ }
+}
+
+window.avClaim = function() {
+ if (!_avActive || !needPerm("message", "مراسلة المطاعم")) return;
+ db.ref("res_chats/" + _avActive).update(_avClaimUpd()).then(() => toast("استلمت المحادثة ✅")).catch(() => toast("تعذّر الاستلام", "e"));
+};
+
+window.avTakeOver = function() {
+ if (!_avActive || !needPerm("message", "مراسلة المطاعم")) return;
+ const c = _avChats[_avActive] || {}, ai = c.claimed_by === "res_leader";
+ if (!confirm(`المحادثة الآن مع ${c.claimed_by_name || "ليدر آخر"}.\n\nالاستحواذ ينقلها إليك ويُسجَّل باسمك. متأكد؟`)) return;
+ db.ref("res_chats/" + _avActive).update(_avClaimUpd()).then(() => toast("انتقلت المحادثة إليك ✅")).catch(() => toast("تعذّر الاستحواذ", "e"));
+};
+
+window.avCloseConv = function() {
+ if (!_avActive || !needPerm("message", "مراسلة المطاعم")) return;
+ if (!confirm("إغلاق هذه المحادثة؟ (رسالة جديدة من المطعم تعيد فتحها)")) return;
+ db.ref("res_chats/" + _avActive).update({
+  status: "closed"
+ }).then(() => {
+  toast("أُغلقت المحادثة");
+  avBackToList();
+ }).catch(() => toast("تعذّر الإغلاق", "e"));
+};
+
+function _avArgsTxt(a) {
+ if (!a || typeof a !== "object") return "";
+ const o = [];
+ if (a.price != null) o.push("السعر " + _avN(a.price));
+ if (a.food != null) o.push("قيمة الطعام " + _avN(a.food));
+ if (a.amount != null) o.push("المبلغ " + _avN(a.amount));
+ if (a.resp) o.push("على: " + (AV_RESP[a.resp] || a.resp));
+ if (Array.isArray(a.prices) && a.prices.length) o.push("الأسعار: " + a.prices.slice(0, 6).map(x => String(x && x.area || "?") + " " + _avN(x && x.price)).join("، "));
+ if (a.lat != null && a.lng != null && isFinite(Number(a.lat)) && isFinite(Number(a.lng))) o.push("الموقع " + Number(a.lat).toFixed(5) + ", " + Number(a.lng).toFixed(5));
+ if (a.driver_text) o.push("للكابتن: «" + String(a.driver_text).slice(0, 80) + "»");
+ return o.join(" · ");
+}
+
+function _avNewerThanDraft(p, d) {
+ if (_avMsgP !== p || !d) return false;
+ const mm = _avMsgs || {}, ks = Object.keys(mm).sort();
+ let lk = "";
+ for (let i = ks.length - 1; i >= 0; i--) {
+  const m = mm[ks[i]];
+  if (m && m.from === "res" && !m.sys) {
+   lk = ks[i];
+   break;
+  }
+ }
+ if (!lk) return false;
+ if (d.msg_id) return lk > String(d.msg_id);
+ const at = _tlMs(d.at);
+ return isFinite(at) && (Number(mm[lk].ts) || 0) > at + 2e3;
+}
+
+function avRenderDraft() {
+ const box = document.getElementById("avDraft");
+ if (!box) return;
+ const p = _avActive;
+ if (!p) {
+  if (box.innerHTML) box.innerHTML = "";
+  _avDraftSig = "";
+  return;
+ }
+ const d = _avAI[p], ed = _avEdits[p];
+ let h = "";
+ if (ed) {
+  const newer = d && d.msg_id && ed.msg_id && String(d.msg_id) !== String(ed.msg_id);
+  h = `<div class="av-editbar"><span>✏️ تعدّل اقتراح <b>${esc(ed.persona || "الفريق")}</b> — الإرسال من الحقل أدناه يُسجَّل «معدّلة»${newer ? "<br>🐳 وصلت مسوّدةٌ أحدث — ألغِ التعديل لعرضها" : ""}</span><button onclick="avEditCancel()">إلغاء التعديل</button></div>`;
+ } else if (d && typeof d === "object" && d.sent) {
+  const act = String(d.action || ""), kind = AV_D2A[act], args = _avArgsTxt(d.args), dc = AV_CATS[d.cat];
+  const okAct = kind && canDo("message");
+  h = `<div class="av-draft" style="border-color:#a7f3d0;background:#f0fdf4">\n      <div class="av-dh">💬 ${esc(d.persona || "الفريق")} ردّ على المطعم ✓${dc ? ` · ${dc.i} ${esc(dc.t)}` : ""}<small>${d.at ? esc(fmtHM(d.at)) : ""}</small></div>\n      ${d.text ? `<div class="av-dtx" style="opacity:.8">${esc(d.text)}</div>` : ""}\n      <div class="av-ds" style="font-size:.8rem"><b>${kind ? "⚡ القرار لكم — الخطوة المقترحة:" : "🙋 يحتاج ليدراً:"}</b> ${kind ? esc(AV_DLBL[act] || act) + (args ? " — " + esc(args) : "") : ""}</div>\n      ${d.summary ? `<div class="av-ds"><b>الملخّص:</b> ${esc(String(d.summary).slice(0, 300))}</div>` : ""}\n      ${d.tr ? `<div class="av-ds"><b>🎙️ التفريغ:</b> ${esc(String(d.tr).slice(0, 600))}</div>` : ""}\n      ${okAct ? `<button class="av-go" onclick="avAct('${kind}')">⚡ نفّذ: ${esc(AV_ACTS[kind].t)}</button>` : ""}\n      <div class="av-dbtns"><button class="av-ig" onclick="avSugDone()">✔ تمّ — ارفع البطاقة</button></div>\n    </div>`;
+ } else if (d && typeof d === "object" && (d.text || d.summary)) {
+  const can = _avCanReply(p);
+  const confT = "";
+  const act = String(d.action || ""), kind = AV_D2A[act], args = _avArgsTxt(d.args), dc = AV_CATS[d.cat];
+  h = `<div class="av-draft">\n      <div class="av-dh">💬 اقتراح ردّ من ${esc(d.persona || "الفريق")}${dc ? ` · ${dc.i} ${esc(dc.t)}` : ""}<small>${d.at ? esc(fmtHM(d.at)) : ""}${confT}</small></div>\n      ${d.text ? `<div class="av-dtx">${esc(d.text)}</div>` : ""}\n      ${_avNewerThanDraft(p, d) ? '<div class="av-dwarn">⚠️ وصلت من المطعم رسالةٌ أحدث من هذا الاقتراح — راجعه قبل الإرسال</div>' : ""}\n      ${can ? `<div class="av-dbtns">\n          <button class="av-ok" onclick="avDraftSend()" ${d.text ? "" : "disabled"}>✅ أرسل</button>\n          <button class="av-ed" onclick="avDraftEdit()" ${d.text ? "" : "disabled"}>✏️ عدّل</button>\n          <button class="av-ig" onclick="avDraftIgnore()">✖ تجاهل</button>\n        </div>` : `<div class="av-dwarn" style="color:#64748b">👁 للاطّلاع — ${canDo("message") ? "المحادثة مع غيرك (استحوذ للردّ)" : "لا تملك صلاحيّة المراسلة"}</div>`}\n      ${d.summary ? `<div class="av-ds"><b>الملخّص:</b> ${esc(String(d.summary).slice(0, 300))}</div>` : ""}\n      ${act ? `<div class="av-ds"><b>الفعل المقترح:</b> ${esc(AV_DLBL[act] || act)}${args ? " — " + esc(args) : ""}</div>` : ""}\n      ${d.tr ? `<div class="av-ds"><b>🎙️ التفريغ:</b> ${esc(String(d.tr).slice(0, 600))}</div>` : ""}\n      ${can && kind ? `<button class="av-go" onclick="avAct('${kind}')">⚡ نفّذ الفعل المقترح: ${esc(AV_ACTS[kind].t)}</button>` : ""}\n    </div>`;
+ }
+ if (h === _avDraftSig) return;
+ _avDraftSig = h;
+ box.innerHTML = h;
+}
+
+window.avDraftSend = function() {
+ const p = _avActive, d = p && _avAI[p];
+ if (!d || !d.text) return;
+ if (!needPerm("message", "مراسلة المطاعم")) return;
+ if (!_avCanReply(p)) return toast("المحادثة مع غيرك — استحوذ أوّلاً", "e");
+ delete _avEdits[p];
+ _avSend(p, String(d.text), {
+  persona: String(d.persona || "الفريق"),
+  outcome: "sent",
+  draftText: String(d.text),
+  clearDraft: true
+ });
+};
+
+window.avDraftEdit = function() {
+ const p = _avActive, d = p && _avAI[p];
+ if (!d || !d.text) return;
+ if (!needPerm("message", "مراسلة المطاعم")) return;
+ if (!_avCanReply(p)) return toast("المحادثة مع غيرك — استحوذ أوّلاً", "e");
+ _avEdits[p] = {
+  persona: String(d.persona || "الفريق"),
+  text: String(d.text),
+  msg_id: String(d.msg_id || "")
+ };
+ const inp = document.getElementById("avInput");
+ if (inp) {
+  inp.value = String(d.text);
+  _avCompose[p] = inp.value;
+  inp.style.height = "auto";
+  inp.style.height = Math.min(inp.scrollHeight, 96) + "px";
+  inp.focus();
+ }
+ _avDraftSig = "";
+ avRenderDraft();
+};
+
+window.avEditCancel = function() {
+ const p = _avActive;
+ if (!p) return;
+ delete _avEdits[p];
+ delete _avCompose[p];
+ const inp = document.getElementById("avInput");
+ if (inp) {
+  inp.value = "";
+  inp.style.height = "auto";
+ }
+ _avDraftSig = "";
+ avRenderDraft();
+};
+
+window.avSugDone = async function() {
+ const p = _avActive, d = p && _avAI[p];
+ if (!d) return;
+ try {
+  await db.ref("res_leader/drafts/" + p).remove();
+  toast("✔ رُفعت البطاقة");
+ } catch (e) {
+  toast("تعذّر — تحقّق من الاتصال أو الصلاحيّة", "e");
+ }
+};
+
+window.avDraftIgnore = async function() {
+ const p = _avActive, d = p && _avAI[p];
+ if (!d) return;
+ if (!needPerm("message", "مراسلة المطاعم")) return;
+ const fb = _avFeedback(p, "ignored", d.text || "", ""), u = {};
+ u["res_leader/drafts/" + p] = null;
+ u["res_leader/feedback/" + fb.day + "/" + fb.id] = fb.rec;
+ try {
+  await db.ref().update(u);
+  toast("تُجوهل الاقتراح");
+ } catch (e) {
+  console.warn("🐳 تجاهل:", e && e.message);
+  try {
+   await db.ref("res_leader/drafts/" + p).remove();
+   toast("أُزيل الاقتراح", "e");
+  } catch (e2) {
+   toast("تعذّر التجاهل — تحقّق من الاتصال أو الصلاحيّة", "e");
+  }
+ }
+};
+
+async function _avSend(p, txt, o) {
+ txt = String(txt || "").trim().slice(0, 1e3);
+ if (!p || !txt) return false;
+ const c = _avChats[p] || {}, me = nP(EMP_PHONE), now = Date.now(), key = _avKey(), cid = key;
+ const persona = o.persona ? String(o.persona).slice(0, 60) : "";
+ const msg = {
+  from: "leader",
+  name: String(persona || EMP_NAME || "الليدر").slice(0, 60),
+  by: String(me).slice(0, 20),
+  text: txt,
+  ts: now,
+  cid: cid
+ };
+ if (persona) msg.draft = persona;
+ if (o.edited) msg.edited = true;
+ const base = "res_chats/" + p, u = {};
+ u["res_chat_msgs/" + p + "/" + key] = msg;
+ u[base + "/last_msg"] = txt.slice(0, 60);
+ u[base + "/last_msg_at"] = now;
+ u[base + "/last_from"] = "leader";
+ u[base + "/last_kind"] = "text";
+ u[base + "/last_name"] = msg.name;
+ u[base + "/last_by"] = msg.by;
+ u[base + "/last_ai"] = null;
+ u[base + "/unread_res"] = firebase.database.ServerValue.increment(1);
+ u[base + "/unread_leader"] = 0;
+ if (!(c.status === "claimed" && c.claimed_by && nP(c.claimed_by) === me)) {
+  const cl = _avClaimUpd();
+  Object.keys(cl).forEach(k => {
+   u[base + "/" + k] = cl[k];
+  });
+ }
+ const core = Object.assign({}, u);
+ if (o.clearDraft) u["res_leader/drafts/" + p] = null;
+ const fb = _avFeedback(p, o.outcome, o.draftText, txt);
+ u["res_leader/feedback/" + fb.day + "/" + fb.id] = fb.rec;
+ _avPending[cid] = {
+  p: p,
+  text: txt,
+  o: o
+ };
+ if (_avActive === p) {
+  const ms = document.getElementById("avMsgs");
+  if (ms) {
+   const e = ms.querySelector(".cc-empty");
+   if (e) e.remove();
+   ms.insertAdjacentHTML("beforeend", `<div class="cbb cbb-me sending" id="avp-${esc(cid)}"><div class="cbb-nm">👤 ${esc(msg.name)}</div><div>${esc(txt)}</div><div class="cbb-tm">جارٍ الإرسال…</div></div>`);
+   ms.scrollTop = ms.scrollHeight;
+  }
+ }
+ try {
+  await db.ref().update(u);
+  return true;
+ } catch (e) {
+  console.warn("🐳 الإرسال الكامل رُفض — أُعيد بالأساس وحده:", e && e.message);
+  try {
+   await db.ref().update(core);
+   toast("أُرسلت للمطعم — وتعذّر تسجيل التعلّم", "e");
+   return true;
+  } catch (e2) {
+   const g = document.getElementById("avp-" + cid);
+   if (g) {
+    g.classList.remove("sending");
+    g.classList.add("failed");
+    const fh = `<div>${esc(txt)}</div><div class="cbb-rt" onclick="avRetry('${ej(cid)}')">⟳ لم تُرسل — اضغط لإعادة المحاولة</div>`;
+    g.innerHTML = fh;
+   }
+   toast("لم تُرسل — تحقّق من الاتصال أو الصلاحيّة", "e");
+   return false;
+  }
+ }
+}
+
+window.avRetry = function(cid) {
+ const pd = _avPending[cid];
+ if (!pd) return;
+ const g = document.getElementById("avp-" + cid);
+ if (g) g.remove();
+ delete _avPending[cid];
+ _avSend(pd.p, pd.text, pd.o);
+};
+
+window.avComposeSave = function(v) {
+ if (_avActive) _avCompose[_avActive] = v;
+};
+
+window.avKeydown = function(e) {
+ const touch = window.matchMedia && window.matchMedia("(pointer:coarse)").matches;
+ if (e.key === "Enter" && !e.shiftKey && !touch) {
+  e.preventDefault();
+  avSendComposer();
+  return;
+ }
+ if (e.key === "Escape") {
+  e.preventDefault();
+  avBackToList();
+ }
+};
+
+window.avSendComposer = function() {
+ const p = _avActive;
+ if (!p) return;
+ if (!needPerm("message", "مراسلة المطاعم")) return;
+ if (!_avCanReply(p)) return toast("المحادثة مع غيرك — استحوذ أوّلاً", "e");
+ const inp = document.getElementById("avInput");
+ const txt = String(inp && inp.value || "").trim();
+ if (!txt) return;
+ const ed = _avEdits[p], d = _avAI[p];
+ let o;
+ if (ed) {
+  const same = txt === String(ed.text || "").trim();
+  const clr = !d || !ed.msg_id || !d.msg_id || String(d.msg_id) === String(ed.msg_id);
+  o = {
+   persona: ed.persona,
+   outcome: same ? "sent" : "edited",
+   draftText: ed.text,
+   edited: !same,
+   clearDraft: clr
+  };
+ } else {
+  o = {
+   outcome: "manual",
+   draftText: d && d.text ? String(d.text) : ""
+  };
+ }
+ if (inp) {
+  inp.value = "";
+  inp.style.height = "auto";
+ }
+ delete _avCompose[p];
+ delete _avEdits[p];
+ _avDraftSig = "";
+ avRenderDraft();
+ _avSend(p, txt, o);
+};
+
+async function avCall(action, args, _retry) {
+ try {
+  const u = auth.currentUser;
+  if (!u) return {
+   ok: false,
+   err: "no_auth",
+   msg: "لم تكتمل المصادقة بعد — أعد المحاولة بعد ثوانٍ"
+  };
+  const tok = await u.getIdToken();
+  let pid = "nahla-delivery-6b06f";
+  try {
+   pid = (firebase.app().options || {}).projectId || pid;
+  } catch (_) {}
+  const ctrl = new AbortController, tm = setTimeout(() => ctrl.abort(), 3e4);
+  let r;
+  try {
+   r = await fetch("https://europe-west1-" + pid + ".cloudfunctions.net/advisorAction", {
+    method: "POST",
+    headers: {
+     "Content-Type": "application/json",
+     "Authorization": "Bearer " + tok
+    },
+    body: JSON.stringify({
+     data: Object.assign({
+      action: action
+     }, args || {})
+    }),
+    signal: ctrl.signal
+   });
+  } finally {
+   clearTimeout(tm);
+  }
+  let j = null;
+  try {
+   j = await r.json();
+  } catch (_) {}
+  if (j && j.error) {
+   const st = String(j.error.status || "");
+   if (st === "UNAUTHENTICATED" && !_retry) {
+    try {
+     if (await healAuth()) return avCall(action, args, true);
+    } catch (_) {}
+   }
+   return {
+    ok: false,
+    err: st || "http_" + r.status,
+    msg: String(j.error.message || "رفض الخادم الطلب")
+   };
+  }
+  if (!r.ok) return {
+   ok: false,
+   err: "http_" + r.status,
+   msg: "تعذّر الوصول إلى الخادم (" + r.status + ")"
+  };
+  const res = j && j.result;
+  return res && typeof res === "object" ? res : {
+   ok: false,
+   err: "empty",
+   msg: "ردٌّ فارغ من الخادم"
+  };
+ } catch (e) {
+  const to = e && e.name === "AbortError";
+  return {
+   ok: false,
+   err: to ? "timeout" : "net",
+   msg: to ? "انتهت المهلة — أعد المحاولة" : "تعذّر الاتصال بالخادم"
+  };
+ }
+}
+
+window.avFacts = async function() {
+ const p = _avActive;
+ if (!p) return;
+ const oid = _avOid(p);
+ if (!oid) return toast("لا طلب محدّد في هذه المحادثة", "e");
+ if (!needPerm("message", "أفعال الدعم")) return;
+ const k = p + "|" + oid;
+ if (_avFacts[k] && _avFacts[k].loading) return;
+ _avFacts[k] = {
+  loading: true
+ };
+ _avCtxSig = "";
+ avRenderCtx();
+ const r = await avCall("FACTS", {
+  p: p,
+  oid: oid
+ });
+ _avFacts[k] = r;
+ if (_avActive === p) {
+  _avCtxSig = "";
+  avRenderCtx();
+ }
+ if (r.ok === false) toast(r.msg || "تعذّر جلب الحقائق", "e");
+};
+
+function _avFactsHtml(p, oid) {
+ const f0 = _avFacts[p + "|" + oid];
+ if (!f0) return "";
+ if (f0.loading) return '<div class="av-facts"><div class="nt-empty">⏳ جارٍ جلب حقائق الطلب من الخادم…</div></div>';
+ if (f0.ok === false) return `<div class="av-facts"><div class="nt-empty">تعذّر جلب الحقائق: ${esc(f0.msg || f0.err || "خطأ")} <button class="nt-ab" onclick="avFacts()">↻ إعادة</button></div></div>`;
+ const f = f0.facts && typeof f0.facts === "object" ? f0.facts : f0;
+ const ord = f.order && typeof f.order === "object" ? f.order : {};
+ const tl = f.timeline || f.tl || ord.timeline || {};
+ const at = (...ks) => {
+  for (const k of ks) {
+   let v;
+   if (Array.isArray(tl)) {
+    const e = tl.filter(x => x && (x.ev === k || x.k === k)).pop();
+    v = e ? e.ts != null ? e.ts : e.t != null ? e.t : e.at : undefined;
+   } else v = tl[k];
+   const t = _tlMs(v);
+   if (isFinite(t)) return t;
+  }
+  return NaN;
+ };
+ const steps = [ [ "⏺ أُنشئ", at("created", "create") ], [ "🍳 جهز", at("ready") ], [ "✅ قُبل", at("accepted", "accept") ], [ "🏪 وصل", at("arrived") ], [ "📦 استلم", at("picked", "picked_up") ], [ "🏁 سلّم", at("delivered", "staff_done", "done") ] ].filter(s => isFinite(s[1])).sort((a, b) => a[1] - b[1]);
+ let rows = "", prev = NaN;
+ steps.forEach(([lb, t]) => {
+  const gap = isFinite(prev) ? Math.max(0, Math.round((t - prev) / 6e4)) : null;
+  rows += `<div class="tl-stg"><span>${lb} · ${esc(_tlHM(t))}</span><b>${gap != null ? "+" + gap + " د" : ""}</b></div>`;
+  prev = t;
+ });
+ if (steps.length > 1) rows += `<div class="tl-stg"><span>⏱ المجموع</span><b>${esc(_tlDur(steps[steps.length - 1][1] - steps[0][1]))}</b></div>`;
+ const num = v => {
+  const n = Number(v);
+  return v != null && v !== "" && isFinite(n) ? n : null;
+ };
+ const fee = f.fee && typeof f.fee === "object" ? f.fee : {};
+ const pick = (...vs) => {
+  for (const v of vs) {
+   if (v != null && v !== "") return v;
+  }
+  return null;
+ };
+ const feeC = num(pick(f.fee_at_creation, fee.at_creation, fee.stamped, ord.fee_at_creation));
+ const feeL = num(pick(f.fee_list, f.fee_expected, fee.list, fee.expected, fee.now));
+ let chips = "";
+ if (feeC != null) chips += `<span class="ctx-p">💵 الأجرة عند الإنشاء <b>${_avN(feeC)}</b></span>`;
+ if (feeL != null) chips += `<span class="ctx-p">📋 أجرة القائمة الآن <b>${_avN(feeL)}</b></span>`;
+ if (feeC != null && feeL != null && feeC !== feeL) chips += `<span class="ctx-p warn">⚠️ الفرق <b>${_avN(feeC - feeL)}</b></span>`;
+ const price = num(pick(f.price, ord.price));
+ if (price != null) chips += `<span class="ctx-p">🧾 مبلغ الطلب <b>${_avN(price)}</b></span>`;
+ const area = pick(f.area, ord.area);
+ if (area) chips += `<span class="ctx-p">📍 ${esc(String(area).slice(0, 40))}</span>`;
+ const st = pick(f.status, ord.status);
+ if (st) chips += `<span class="ctx-p">${esc(statusLabel(String(st)))}</span>`;
+ const dv = f.driver && typeof f.driver === "object" ? f.driver : f.captain && typeof f.captain === "object" ? f.captain : {};
+ const dPh = nP(pick(dv.phone, dv.drv, f.drv, ord.driverPhone) || "");
+ const dNm = String(pick(dv.name, f.drv_name) || (dPh ? dN(dPh) : ""));
+ const cmp = num(pick(dv.complaints_30d, dv.complaints, f.complaints_30d, f.complaints));
+ const nts = num(pick(dv.notes_30d, dv.notes, f.notes_30d));
+ let drv = "";
+ if (dPh || dNm) drv = `<div class="ctx-row" style="margin:8px 0 0"><span class="ctx-p">🛵 <b>${esc(dNm || "كابتن")}</b></span>${dPh ? `<button class="ctx-p nt-chip" onclick="ccDial('${ej(dPh)}')">📞 0${esc(dPh)}</button>` : ""}${cmp != null ? `<span class="ctx-p ${cmp > 0 ? "warn" : ""}">🗂 شكاوى ٣٠ يوماً <b>${cmp}</b></span>` : ""}${nts != null ? `<span class="ctx-p">📝 ملاحظات <b>${nts}</b></span>` : ""}</div>`;
+ const lines = Array.isArray(f.lines) ? f.lines.slice(0, 12).map(x => `<div class="nt-empty" style="padding:2px">• ${esc(String(x).slice(0, 200))}</div>`).join("") : "";
+ const any = rows || chips || drv || lines;
+ return `<div class="av-facts"><div class="nt-top"><div class="nt-ttl">📋 حقائق الطلب #${esc(String(oid).slice(-8))}</div><button class="nt-ab" onclick="avFacts()" title="تحديث">↻</button></div>\n    ${rows ? `<div class="tl-stages" style="margin-top:8px">${rows}</div>` : ""}\n    ${chips ? `<div class="ctx-row" style="margin:6px 0 0">${chips}</div>` : ""}${drv}${lines}\n    ${any ? "" : `<div class="nt-empty">لم أفهم شكل الردّ — الخام:</div><pre>${esc(JSON.stringify(f).slice(0, 1500))}</pre>`}\n  </div>`;
+}
+
+function _avCtxTarget() {
+ const side = document.getElementById("avSide");
+ if (window.innerWidth >= 1180 && side) return side;
+ return document.getElementById("avCtx");
+}
+
+window.avToggleCtx = function() {
+ _avCtxFolded = !_avCtxFolded;
+ const el = document.getElementById("avCtx");
+ if (el) el.classList.toggle("folded", _avCtxFolded);
+ const b = document.getElementById("avFoldBtn");
+ if (b) b.textContent = _avCtxFolded ? "▸ أفعال ومزيد" : "▾ إخفاء الأفعال";
+};
+
+const AV_STEPS = [ [ "created", "أُنشئ" ], [ "accepted", "قبله كابتن" ], [ "arrived", "وصل المطعم" ], [ "picked", "استلم" ], [ "delivered", "سلّم" ] ];
+
+function _avHasDrv(o) {
+ return !!(o && o.driverPhone && [ "pending_driver", "system_routing", "manual_pending", "" ].indexOf(String(o.driverPhone)) < 0);
+}
+
+function _avAreaTxt(o) {
+ return String(o && o.area || "").replace(/\(.*?\)/g, "").replace(/\s+/g, " ").trim();
+}
+
+function _avResOrders(p) {
+ const out = [];
+ Object.keys(rawOrders || {}).forEach(k => {
+  const o = rawOrders[k];
+  if (!o || nP(o.resPhone || "") !== p) return;
+  const st = String(o.status || "");
+  if (st === "deleted" && Date.now() - (_tlMs(o.last_update) || 0) > 36e5) return;
+  out.push(Object.assign({
+   _id: String(o.id || k)
+  }, o));
+ });
+ const live = o => [ "completed", "deleted" ].indexOf(String(o.status || "")) < 0;
+ out.sort((a, b) => live(b) - live(a) || (_tlMs(b.timestamp) || 0) - (_tlMs(a.timestamp) || 0));
+ return out;
+}
+
+function _avStepIdx(st) {
+ st = String(st || "");
+ if (st === "completed") return 4;
+ if (st === "picked_up" || st === "في الطريق") return 3;
+ if (st === "arrived_at_res") return 2;
+ if (st === "accepted" || st === "heading") return 1;
+ return 0;
+}
+
+function _avDrvKm(o) {
+ const d = (drvLocs || {})[nP(o && o.driverPhone || "")];
+ const la = Number(d && d.lat), lo = Number(d && d.lng), rl = Number(o && o.resLat), rg = Number(o && o.resLng);
+ if (!(la && lo && rl && rg)) return null;
+ const R = 6371, r = x => x * Math.PI / 180, a = Math.sin(r(rl - la) / 2) ** 2 + Math.cos(r(la)) * Math.cos(r(rl)) * Math.sin(r(rg - lo) / 2) ** 2;
+ return Math.round(2 * R * Math.asin(Math.sqrt(a)) * 10) / 10;
+}
+
+function _avTimes(p, o) {
+ const f0 = _avFacts[p + "|" + o._id], f = f0 && f0.ok !== false ? f0.facts && typeof f0.facts === "object" ? f0.facts : f0 : {};
+ const tl = f && f.timeline || {}, g = k => _tlMs(tl[k]);
+ return {
+  created: _tlMs(o.timestamp) || g("created"),
+  accepted: _tlMs(o.accepted_at) || g("accepted"),
+  arrived: g("arrived"),
+  picked: g("picked"),
+  delivered: _tlMs(o.completed_at) || g("delivered"),
+  ready: _tlMs(o.ready_ts) || g("ready")
+ };
+}
+
+function _avSit(o, T) {
+ const st = String(o.status || ""), m = t => isFinite(t) && t > 0 ? Math.max(0, Math.round((Date.now() - t) / 6e4)) : null;
+ if (st === "deleted") return {
+  tone: "mut",
+  t: "✖ أُلغي الطلب"
+ };
+ if (st === "completed") return {
+  tone: "ok",
+  t: "✅ سُلّم للزبون" + (isFinite(T.delivered) ? " الساعة " + _tlHM(T.delivered) : "")
+ };
+ if (st === "manual_pending") return {
+  tone: "warn",
+  t: "📳 يرنّ الآن عند الكابتن " + dN(o.driverPhone)
+ };
+ if (!_avHasDrv(o)) {
+  const a = m(T.created);
+  return {
+   tone: a >= 8 ? "bad" : a >= 4 ? "warn" : "ok",
+   t: (a >= 4 ? "⚠️ " : "🔎 ") + "بلا كابتن" + (a != null ? " منذ " + a + " د" : "") + " — الرادار يبحث",
+   next: a >= 4 ? "assign" : null
+  };
+ }
+ if (st === "accepted" || st === "heading") {
+  const a = m(T.accepted), km = _avDrvKm(o);
+  return {
+   tone: a >= 15 ? "bad" : a >= 10 ? "warn" : "ok",
+   km: km,
+   t: "🛵 متوجّه للمطعم" + (a != null ? " منذ " + a + " د" : "") + (km != null ? " · يبعد " + km + " كم" : ""),
+   next: a >= 12 ? "ask" : null
+  };
+ }
+ if (st === "arrived_at_res") {
+  const a = m(T.arrived);
+  return {
+   tone: a >= 12 ? "bad" : a >= 7 ? "warn" : "ok",
+   t: "🏪 الكابتن عند المطعم" + (a != null ? " منذ " + a + " د" : "") + (o.ready_for_pickup ? " · الطلب جاهز ✓" : " · الطلب لم يُعلَن جاهزاً"),
+   next: !o.ready_for_pickup && a >= 5 ? "ready" : null
+  };
+ }
+ if (st === "picked_up" || st === "في الطريق") {
+  const a = m(T.picked || T.accepted);
+  return {
+   tone: a >= 35 ? "bad" : a >= 25 ? "warn" : "ok",
+   t: "📦 مع الكابتن للزبون" + (a != null ? " منذ " + a + " د" : ""),
+   next: a >= 30 ? "ask" : null
+  };
+ }
+ return {
+  tone: "mut",
+  t: statusLabel(st)
+ };
+}
+
+const AV_EXPLAIN = {
+ replace: "يعاد إرسال الطلب نفسه للزبون — للتالف أو الغلط",
+ claim: "نسجّل خسارة المطعم، والإدارة تعتمدها",
+ cash: "مبلغ على الكابتن للمطعم، ونذكّره حتى يرجّعه",
+ cashx: "الكابتن رجّع المبلغ، أو ما رجّعه بعد الموعد",
+ price: "تغيير سعر توصيل منطقة — تطبّقه الإدارة",
+ loc: "تثبيت موقع المطعم الصحيح ليصل الكابتن لبابه",
+ ask: "رسالة للكابتن عن طلبه، وجوابه في محادثته"
+};
+
+let _avCash = {};
+
+function _avCashLoad(p) {
+ const c = _avCash[p];
+ if (c && (c.busy || Date.now() - c.at < 12e4)) return;
+ _avCash[p] = {
+  at: Date.now(),
+  busy: true,
+  v: c && c.v || {}
+ };
+ db.ref("res_cash/" + p).once("value").then(s => {
+  _avCash[p] = {
+   at: Date.now(),
+   v: s.val() || {}
+  };
+  if (_avActive === p) {
+   _avCtxSig = "";
+   avRenderCtx();
+  }
+ }).catch(() => {
+  _avCash[p] = {
+   at: Date.now(),
+   v: {}
+  };
+ });
+}
+
+function _avOpenDebts(p) {
+ const v = _avCash[p] && _avCash[p].v || {};
+ return Object.keys(v).map(k => Object.assign({
+  oid: k
+ }, v[k])).filter(x => x && (x.status === "open" || x.status === "escalated"));
+}
+
+window.avDebtClose = async function(oid, st) {
+ const p = _avActive;
+ if (!p || !needPerm("message", "أفعال الدعم")) return;
+ if (st === "unpaid" && !confirm("⛔ تأكيد: المطعم أكّد أنّ الكابتن لم يُرجع المبلغ بعد الموعد؟\nسيُوقَف الكابتن عن استلام الطلبات حتى يراجع الإدارة في مكتبها (بعد أن يُكمل طلبه الحاليّ).")) return;
+ const r = await avCall("CASH_CLOSE", {
+  p: p,
+  oid: String(oid),
+  status: st
+ });
+ if (r && r.ok !== false) {
+  toast(st === "unpaid" ? "⛔ سُجّل «ما رجّعه» — والإيقاف بيد الإدارة" : "✅ سُجّل: الكابتن رجّع المبلغ");
+  delete _avCash[p];
+  _avCtxSig = "";
+  avRenderCtx();
+ } else toast(r && (r.msg || r.err) || "تعذّر التنفيذ", "e");
+};
+
+window.avMoreActs = function() {
+ const box = document.getElementById("avSheetBox");
+ if (!box || !_avActive) return;
+ box.innerHTML = `<div class="sheet-handle"></div><div class="sheet-title">＋ إجراء آخر</div><div class="sheet-sub">اختر ما تريد — وتراجع التفاصيل قبل التنفيذ</div>\n    <div class="av-more">${Object.keys(AV_ACTS).map(k => `<button onclick="avAct('${k}')"><b>${esc(AV_ACTS[k].t)}</b><small>${esc(AV_EXPLAIN[k] || "")}</small></button>`).join("")}</div>`;
+ const sh = document.getElementById("avSheet");
+ if (sh && !sh.classList.contains("open")) {
+  sh.classList.add("open");
+  _navPush("avsheet");
+ }
+};
+
+function _avSmartActs(p, o, sit, c, d) {
+ const out = [], seen = new Set, add = (k, a) => {
+  if (!seen.has(k) && a) {
+   seen.add(k);
+   out.push(a);
+  }
+ };
+ const kind = d && AV_D2A[d.action];
+ if (kind && AV_ACTS[kind]) add(kind, {
+  t: AV_ACTS[kind].t,
+  on: `avAct('${kind}')`,
+  hint: "اقتراح " + (d.persona || "الفريق") + (d.summary ? ": " + String(d.summary).slice(0, 80) : ""),
+  primary: true
+ });
+ if (o) {
+  const st = String(o.status || ""), live = [ "completed", "deleted" ].indexOf(st) < 0, hasD = _avHasDrv(o);
+  if (live && !hasD && canDo("assign")) add("assign", {
+   t: "🎯 إسناد كابتن الآن",
+   on: `openAssign('${ej(o._id)}')`,
+   hint: "تختار كابتناً ويرنّ عنده فوراً",
+   primary: sit && sit.next === "assign"
+  });
+  if (sit && sit.next === "ready") add("readyq", {
+   t: "💬 اسأل المطعم: شكد يحتاج؟",
+   on: `avQuickPut(${JSON.stringify("🏪 الكابتن عندكم ينتظر — شكد يحتاج الطلب يجهز؟")})`,
+   hint: "الكابتن ينتظر والطلب لم يُعلَن جاهزاً",
+   primary: true
+  });
+  if (live && hasD && (sit && sit.next === "ask" || String(c && c.cat || "") === "order")) add("ask", {
+   t: "🛵 اسأل الكابتن وين صار",
+   on: `avAct('ask')`,
+   hint: "تصله رسالة في تطبيقه",
+   primary: sit && sit.next === "ask"
+  });
+ }
+ const cat = String(c && c.cat || ""), why = String(c && c.why || "");
+ if (cat === "damaged") {
+  add("replace", {
+   t: "♻️ أعد إرسال الطلب للزبون",
+   on: `avAct('replace')`,
+   hint: AV_EXPLAIN.replace,
+   primary: true
+  });
+  add("claim", {
+   t: "🧾 سجّل خسارة المطعم",
+   on: `avAct('claim')`,
+   hint: AV_EXPLAIN.claim
+  });
+ }
+ if (cat === "captain" && why === "cash" && !_avOpenDebts(p).length) add("cash", {
+  t: "💵 سجّل المبلغ على الكابتن",
+  on: `avAct('cash')`,
+  hint: AV_EXPLAIN.cash,
+  primary: true
+ });
+ if (cat === "price") add("price", {
+  t: "💰 ارفع طلب تعديل السعر",
+  on: `avAct('price')`,
+  hint: AV_EXPLAIN.price,
+  primary: true
+ });
+ if (cat === "location") add("loc", {
+  t: "📍 ثبّت موقع المطعم",
+  on: `avAct('loc')`,
+  hint: AV_EXPLAIN.loc,
+  primary: true
+ });
+ out.sort((a, b) => (b.primary ? 1 : 0) - (a.primary ? 1 : 0));
+ if (out.length) out.forEach((a, i) => {
+  a.primary = i === 0;
+ });
+ return out.slice(0, 3);
+}
+
+function _avNtRow() {
+ const l = _avNtList(), w = l.filter(n => n.tag === "warn").length, f = l[0];
+ return `<button class="sb-nt${w ? " hot" : ""}" onclick="avNtOpen()"><span>📝 ملاحظات الليدرز عن المطعم${l.length ? ` <b>${l.length}</b>` : ""}${w ? ` · ⚠️ <b>${w}</b>` : ""}</span>\n    <small>${f ? esc(String(f.text || "").slice(0, 70)) : "لا ملاحظات بعد — اضغط لتضيف (لا يراها المطعم)"}</small></button>`;
+}
+
+function _avQuickList(p, o, sit) {
+ const L = [];
+ if (o) {
+  const st = String(o.status || ""), drv = _avHasDrv(o) ? String(dN(o.driverPhone)).split(/\s+/)[0] : "", a = _avAreaTxt(o);
+  const tg = a ? "طلب " + a : "الطلب", lt = a ? "لطلب " + a : "للطلب";
+  if (st === "completed") L.push("✅ " + tg + " تسلّم للزبون" + (sit && sit.t && /الساعة/.test(sit.t) ? " " + sit.t.replace(/^✅ سُلّم للزبون ?/, "") : "") + " 🌹"); else if (st === "manual_pending" || !_avHasDrv(o)) L.push("🔎 " + tg + ": الرادار يدوّر كابتن هسه، وأوّل ما يقبل نبلّغكم 🙏"); else if (st === "accepted" || st === "heading") L.push("🛵 الكابتن " + drv + " بالطريق إلكم " + lt + (sit && sit.km != null ? "، يبعد " + sit.km + " كم" : "")); else if (st === "arrived_at_res") L.push("🏪 الكابتن " + drv + " عندكم ينتظر " + tg + " — شكد يحتاج؟"); else if (st === "picked_up" || st === "في الطريق") L.push("📦 الكابتن " + drv + " استلم " + tg + " وبالطريق للزبون");
+ }
+ L.push("تدلل، هسه نتابعها ويّاكم 🙏");
+ L.push("يعطيكم العافية 🌹 أي شي تحتاجونه إحنا موجودين");
+ return L;
+}
+
+window.avQuickPut = function(txt) {
+ const inp = document.getElementById("avInput");
+ if (!inp) return;
+ if (inp.disabled) return toast("المحادثة مع غيرك — استحوذ أوّلاً", "e");
+ inp.value = String(txt || "");
+ if (_avActive) _avCompose[_avActive] = inp.value;
+ inp.style.height = "auto";
+ inp.style.height = Math.min(inp.scrollHeight, 96) + "px";
+ inp.focus();
+};
+
+window.avPickOrd = function(oid) {
+ _avOidSel = String(oid || "").slice(0, 80);
+ _avCtxSig = "";
+ avRenderCtx();
+};
+
+function _avRenderQuick(p, o, sit) {
+ const box = document.getElementById("avQuick");
+ if (!box) return;
+ if (!p || !_avCanReply(p)) {
+  if (box.innerHTML) box.innerHTML = "";
+  return;
+ }
+ const h = _avQuickList(p, o, sit).map(t => `<button class="av-q" onclick='avQuickPut(${esc(JSON.stringify(t))})'>${esc(t)}</button>`).join("");
+ if (box.innerHTML !== h) box.innerHTML = h;
+}
+
+function avRenderCtx() {
+ const el = _avCtxTarget();
+ if (!el || !_avActive) return;
+ const p = _avActive, c = _avChats[p] || {}, d = _avAI[p] || null;
+ const cat = AV_CATS[c.cat], why = _avWhy(c) || (c.why ? String(c.why) : "");
+ const ords = _avResOrders(p);
+ let oid = _avOid(p);
+ if (!oid && ords.length && [ "completed", "deleted" ].indexOf(String(ords[0].status || "")) < 0) {
+  oid = ords[0]._id;
+  _avOidSel = oid;
+ }
+ let o = oid ? ords.find(x => x._id === oid) || ((rawOrders || {})[oid] ? Object.assign({
+  _id: oid
+ }, rawOrders[oid]) : null) : null;
+ if (o && canDo("message") && !_avFacts[p + "|" + o._id] && _avOid(p) === o._id) {
+  try {
+   avFacts();
+  } catch (_) {}
+ }
+ const T = o ? _avTimes(p, o) : null, sit = o ? _avSit(o, T) : null;
+ let h = `<div class="sb-res"><div class="sb-rn">🍽 <b>${esc(_avName(p))}</b><small>${cat ? cat.i + " " + esc(cat.t) + (why ? " · " + esc(why) : "") : "0" + esc(p)}</small></div>\n    <div class="sb-rb"><button onclick="ccCall('${ej(p)}')" title="اتصال">📞</button><button onclick="ccWhats('${ej(p)}')" title="واتساب">💬</button></div></div>`;
+ if (ords.length) {
+  h += `<div class="sb-hd">طلبات المطعم الآن <span>${ords.length}</span></div><div class="sb-ords">` + ords.slice(0, 8).map(x => {
+   const s = _avSit(x, _avTimes(p, x)), dr = _avHasDrv(x) ? String(dN(x.driverPhone)).split(/\s+/)[0] : "—";
+   return `<button class="sb-oc t-${s.tone}${o && x._id === o._id ? " sel" : ""}" onclick="avPickOrd('${ej(x._id)}')"><i></i><b>${esc(_avAreaTxt(x) || "طلب")}</b><small>🛵 ${esc(dr)} · ${esc(fmtHM(x.timestamp))}</small></button>`;
+  }).join("") + `</div>`;
+ }
+ if (o) {
+  const cur = _avStepIdx(o.status), dead = String(o.status || "") === "deleted";
+  const steps = AV_STEPS.map(([k, lb], i) => {
+   const t = T[k], st = dead ? "" : i < cur || i === cur && cur === 4 ? "done" : i === cur ? "now" : "";
+   return `<div class="sb-st ${st}"><i></i><b>${lb}</b><small>${isFinite(t) && t > 0 ? esc(_tlHM(t)) : ""}</small></div>`;
+  }).join("");
+  const pr = Number(o.price), hasD = _avHasDrv(o), km = sit.km != null ? sit.km : _avDrvKm(o);
+  h += `<div class="sb-ord t-${sit.tone}">\n      <div class="sb-ot">📍 <b>${esc(_avAreaTxt(o) || "طلب")}</b>${isFinite(pr) && pr > 0 ? ` · 💵 ${_avN(pr)}` : ""}<button class="sb-tl" onclick="openTimeline('${ej(o._id)}')" title="المسار الكامل">📜</button></div>\n      <div class="sb-steps">${steps}</div>\n      <div class="sb-sit">${esc(sit.t)}</div>\n      ${hasD ? `<div class="sb-drv">🛵 <b>${esc(dN(o.driverPhone))}</b><button onclick="ccDial('${ej(nP(o.driverPhone))}')">📞 اتصل بالكابتن</button></div>` : ""}\n    </div>`;
+ } else h += `<div class="sb-empty">${ords.length ? "اختر طلباً من فوق لترى قصّته" : "لا طلبات لهذا المطعم الآن — المحادثة عامّة"}</div>`;
+ _avCashLoad(p);
+ if (canDo("message")) h += _avOpenDebts(p).slice(0, 3).map(x => {
+  const due = Number(x.due_at) || 0, late = due && Date.now() >= due, nm = String(x.drv_name || "").split(/\s+/).slice(0, 2).join(" ") || "…" + String(x.drv || "").slice(-4);
+  return `<div class="sb-debt"><div>💵 <b>دين مفتوح</b> على الكابتن <b>${esc(nm)}</b> — ${_avN(x.amount)} د.ع${x.area ? " · " + esc(x.area) : ""}<small>${due ? (late ? "⏰ فات موعد الإرجاع " : "⏳ موعد الإرجاع ") + esc(fmtHM(due)) : ""}</small></div>\n      <div class="sb-db"><button onclick="avDebtClose('${ej(x.oid)}','returned')">✅ رجّعه</button>${late ? `<button class="bad" onclick="avDebtClose('${ej(x.oid)}','unpaid')">⛔ ما رجّعه</button>` : ""}</div></div>`;
+ }).join("");
+ if (canDo("message")) {
+  const sa = _avSmartActs(p, o, sit, c, d);
+  h += `<div class="sb-acts"><div class="sb-nh">⚡ ماذا تفعل الآن</div>` + (sa.length ? sa.map(a => `<button class="${a.primary ? "sb-go" : "sb-a2"}" onclick="${esc(a.on)}"><span>${esc(a.t)}</span><small>${esc(a.hint || "")}</small></button>`).join("") : '<div class="sb-calm">✓ لا شيء عاجل — طمّن المطعم بردٍّ جاهز من تحت</div>') + `<button class="sb-more" onclick="avMoreActs()">＋ إجراء آخر</button></div>`;
+ }
+ h += `<div class="ctx-more">${_avNtRow()}</div>`;
+ _avRenderQuick(p, o, sit);
+ if (h === _avCtxSig) return;
+ _avCtxSig = h;
+ const mob = el.id === "avCtx";
+ el.innerHTML = (mob ? `<button class="ctx-fold" onclick="avToggleCtx()" id="avFoldBtn">${_avCtxFolded ? "▸ أفعال ومزيد" : "▾ إخفاء الأفعال"}</button>` : "") + h;
+ if (mob) el.classList.toggle("folded", _avCtxFolded);
+ const other = mob ? document.getElementById("avSide") : document.getElementById("avCtx");
+ if (other && other !== el) other.innerHTML = "";
+}
+
+function _avFld(id, label, val, type, ph, extra) {
+ const num = type === "num";
+ return `<div class="bc-lbl">${label}</div><input class="bc-in" id="${id}" type="text"${num ? ' inputmode="decimal"' : ""} value="${esc(val == null ? "" : val)}" placeholder="${esc(ph || "")}" autocomplete="off"${extra || ""}>`;
+}
+
+function _avSel(id, label, opts, val) {
+ return `<div class="bc-lbl">${label}</div><select class="bc-in" id="${id}">${Object.keys(opts).map(k => `<option value="${esc(k)}"${k === val ? " selected" : ""}>${esc(opts[k])}</option>`).join("")}</select>`;
+}
+
+function _avPrRow(area, price) {
+ return `<div class="av-prr"><input class="bc-in" data-k="a" placeholder="المنطقة" value="${esc(area || "")}" autocomplete="off"><input class="bc-in" data-k="p" inputmode="decimal" placeholder="السعر" value="${esc(price != null ? price : "")}" autocomplete="off"><button type="button" onclick="this.parentNode.remove()" aria-label="حذف">✕</button></div>`;
+}
+
+window.avPrAdd = function() {
+ const b = document.getElementById("avPrRows");
+ if (b && b.children.length < 20) b.insertAdjacentHTML("beforeend", _avPrRow("", ""));
+};
+
+function _avLastLoc(p) {
+ if (_avMsgP !== p) return null;
+ const mm = _avMsgs || {}, ks = Object.keys(mm).sort();
+ for (let i = ks.length - 1; i >= 0; i--) {
+  const m = mm[ks[i]];
+  if (m && m.from === "res" && m.lat != null && m.lng != null) {
+   const la = Number(m.lat), lo = Number(m.lng);
+   if (isFinite(la) && isFinite(lo)) return {
+    lat: la,
+    lng: lo
+   };
+  }
+ }
+ return null;
+}
+
+window.avParseLoc = function(v) {
+ const s = String(v || "");
+ const m = s.match(/@(-?\d{1,2}\.\d+),\s*(-?\d{1,3}\.\d+)/) || s.match(/[?&](?:q|query|ll|destination)=(-?\d{1,2}\.\d+)(?:,|%2C)\s*(-?\d{1,3}\.\d+)/i) || s.match(/(-?\d{1,2}\.\d{3,})\s*[,،]\s*(-?\d{1,3}\.\d{3,})/);
+ if (!m) return;
+ const la = document.getElementById("avfLat"), lo = document.getElementById("avfLng");
+ if (la) la.value = m[1];
+ if (lo) lo.value = m[2];
+ _avLocSrc = "link";
+};
+
+window.avAct = function(kind) {
+ const A = AV_ACTS[kind], p = _avActive;
+ if (!A || !p) return;
+ if (!needPerm("message", "أفعال الدعم")) return;
+ const c = _avChats[p] || {}, d = _avAI[p] || {}, a = d.args && typeof d.args === "object" ? d.args : {};
+ const oid = _avOid(p), why = _avWhy(c), respDef = a.resp && AV_RESP[a.resp] ? a.resp : "unknown";
+ const pre = Object.keys(a).length ? `<div class="av-pre">💬 معبّأة من اقتراح ${esc(d.persona || "الفريق")} — راجعها قبل التنفيذ</div>` : "";
+ let f = "", sub = "";
+ if (kind === "replace") {
+  sub = "طلبٌ بديل بالمنطقة والتفاصيل نفسها، ومطالبةٌ معلّقة إن كُتبت قيمة الطعام";
+  f = _avFld("avfOid", "رقم الطلب الأصليّ", oid, "text", "") + _avFld("avfPrice", "سعر البديل (فارغ = سعر الأصل)", a.price, "num", "سعر الأصل") + _avFld("avfFood", "قيمة الطعام للمطالبة (اختياريّ)", a.food, "num", "بلا مطالبة") + _avSel("avfResp", "على من؟", AV_RESP, respDef) + _avFld("avfWhy", "السبب", why, "text", "انسكب، تكسّر…") + _avFld("avfNote", "ملاحظة للإدارة (اختياريّ)", "", "text", "");
+ } else if (kind === "claim") {
+  sub = "مطالبةٌ معلّقة — المدير وحده يعتمدها في لوحة الإدارة";
+  f = _avFld("avfOid", "رقم الطلب", oid, "text", "") + _avFld("avfFood", "قيمة الطعام (د.ع)", a.food, "num", "مثال: 12000") + _avSel("avfResp", "على من؟", AV_RESP, respDef) + _avFld("avfWhy", "السبب", why, "text", "") + _avFld("avfNote", "ملاحظة (اختياريّ)", "", "text", "");
+ } else if (kind === "cash") {
+  sub = "دَينٌ مؤقّت على الكابتن بموعد، ورسالةٌ له في محادثته، ونتابعه حتى يرجّعه";
+  f = _avFld("avfOid", "رقم الطلب", oid, "text", "") + _avFld("avfAmt", "المبلغ (د.ع)", a.amount, "num", "مثال: 15000");
+ } else if (kind === "cashx") {
+  sub = "إغلاق الدَّين المؤقّت لهذا الطلب";
+  f = _avFld("avfOid", "رقم الطلب", oid, "text", "") + _avSel("avfSt", "النتيجة", {
+   returned: "✅ سلّم الكابتن المبلغ",
+   unpaid: "⛔ لم يُرجِعه بعد الموعد (المطعم أكّد) — يُوقَف",
+   escalated: "⬆️ تصعيد للإدارة",
+   cancelled: "✖ إلغاء الدَّين"
+  }, "returned");
+ } else if (kind === "price") {
+  sub = "طلب تغييرٍ معلّق — المدير يطبّقه من لوحة الإدارة (لا تُكتب الأسعار من هنا)";
+  const rows = (Array.isArray(a.prices) && a.prices.length ? a.prices : [ {} ]).slice(0, 12);
+  f = `<div class="bc-lbl">المنطقة والسعر المقترح</div><div id="avPrRows">${rows.map(r => _avPrRow(r && r.area, r && r.price)).join("")}</div>\n      <button type="button" class="av-add" onclick="avPrAdd()">＋ منطقة</button>` + _avFld("avfNote", "ملاحظة (اختياريّ)", "", "text", "");
+ } else if (kind === "loc") {
+  sub = "يُطبَّق فوراً على المطعم والطلبات المفتوحة والشيت — يتحقّق الخادم أنّه داخل كركوك، ويسجّل الإزاحة والبعد عن «باب الكباتن»";
+  const ll = _avLastLoc(p), la = ll ? ll.lat : a.lat != null ? a.lat : "", lo = ll ? ll.lng : a.lng != null ? a.lng : "";
+  _avLocSrc = ll ? "here" : "link";
+  f = (ll ? '<div class="av-pre">📍 من آخر «موقعي الآن» أرسله المطعم</div>' : "") + _avFld("avfLink", "رابط خرائط أو «خطّ، طول» (اختياريّ — يملأ الحقلين)", "", "text", "https://www.google.com/maps?q=…", ' oninput="avParseLoc(this.value)"') + _avFld("avfLat", "خطّ العرض (lat)", la, "num", "35.46…") + _avFld("avfLng", "خطّ الطول (lng)", lo, "num", "44.39…") + _avFld("avfNote", "ملاحظة (اختياريّ)", "", "text", "");
+ } else if (kind === "ask") {
+  sub = "رسالةٌ للكابتن في محادثته باسمك، عن هذا الطلب";
+  f = _avFld("avfOid", "رقم الطلب", oid, "text", "") + `<div class="bc-lbl">نصّ السؤال</div><textarea class="bc-ta" id="avfText" maxlength="500" placeholder="مثال: المطعم يقول إنّك لم تدفع ثمن الطلب — ما الذي حدث؟">${esc(a.driver_text || "")}</textarea>`;
+ }
+ const box = document.getElementById("avSheetBox");
+ if (!box) return;
+ const sheet = `<div class="sheet-handle"></div><div class="sheet-title">${esc(A.t)}</div><div class="sheet-sub">${esc(sub)} · ${esc(_avName(p))}</div>${pre}${f}\n    <div class="bc-acts"><button class="bc-cx" onclick="_navBack()">إلغاء</button><button class="bc-go" id="avActGo" onclick="avActGo('${ej(kind)}')">تنفيذ</button></div>`;
+ box.innerHTML = sheet;
+ const sh = document.getElementById("avSheet");
+ if (sh && !sh.classList.contains("open")) {
+  sh.classList.add("open");
+  _navPush("avsheet");
+ }
+};
+
+window.avActGo = async function(kind) {
+ const A = AV_ACTS[kind], p = _avActive;
+ if (!A || !p) return;
+ if (!needPerm("message", "أفعال الدعم")) return;
+ const v = id => {
+  const e = document.getElementById(id);
+  return e ? String(e.value || "").trim() : "";
+ };
+ const args = {
+  p: p
+ };
+ let okMsg = "تمّ ✅";
+ const oid = v("avfOid").slice(0, 80);
+ if ([ "replace", "claim", "cash", "cashx", "ask" ].includes(kind)) {
+  if (!oid) return toast("اكتب رقم الطلب", "e");
+  args.oid = oid;
+ }
+ const note = v("avfNote").slice(0, 300);
+ if (kind === "replace") {
+  const pr = _avNum(v("avfPrice")), fd = _avNum(v("avfFood"));
+  if (Number.isNaN(pr) || pr != null && pr <= 0) return toast("سعر البديل غير صالح", "e");
+  if (Number.isNaN(fd) || fd != null && fd < 0) return toast("قيمة الطعام غير صالحة", "e");
+  if (pr != null) args.price = pr;
+  if (fd) args.food = fd;
+  args.resp = v("avfResp") || "unknown";
+  const w = v("avfWhy");
+  if (w) args.why = w.slice(0, 120);
+  if (note) args.note = note;
+  okMsg = "♻️ أُنشئ الطلب البديل";
+ } else if (kind === "claim") {
+  const fd = _avNum(v("avfFood"));
+  if (!(fd > 0)) return toast("اكتب قيمة الطعام", "e");
+  args.food = fd;
+  args.resp = v("avfResp") || "unknown";
+  const w = v("avfWhy");
+  if (w) args.why = w.slice(0, 120);
+  if (note) args.note = note;
+  okMsg = "🧾 سُجّلت المطالبة — بانتظار اعتماد المدير";
+ } else if (kind === "cash") {
+  const am = _avNum(v("avfAmt"));
+  if (!(am > 0)) return toast("اكتب المبلغ", "e");
+  args.amount = am;
+  okMsg = "💵 فُتح الدَّين المؤقّت وأُبلغ الكابتن";
+ } else if (kind === "cashx") {
+  args.status = v("avfSt") || "returned";
+  okMsg = "✅ أُغلق الدَّين";
+  if (args.status === "unpaid") {
+   if (!confirm("⛔ تأكيد: المطعم أكّد أنّ الكابتن لم يُرجع المبلغ بعد الموعد؟\nسيُوقَف الكابتن عن استلام الطلبات حتى يراجع الإدارة في مكتبها (بعد أن يُكمل طلبه الحاليّ).")) return;
+   okMsg = "⛔ سُجّل «لم يُرجِع» وطُلب إيقاف الكابتن — الإدارة ترفعه";
+  }
+ } else if (kind === "price") {
+  const prop = {};
+  let bad = false;
+  document.querySelectorAll("#avPrRows .av-prr").forEach(r => {
+   const ar = String((r.querySelector('[data-k="a"]') || {}).value || "").trim().replace(/[.#$\[\]\/]/g, " ").slice(0, 60);
+   const pv = _avNum((r.querySelector('[data-k="p"]') || {}).value);
+   if (!ar && pv == null) return;
+   if (!ar || !(pv > 0)) {
+    bad = true;
+    return;
+   }
+   prop[ar] = pv;
+  });
+  if (bad) return toast("أكمل كلّ صفّ: منطقةٌ وسعرٌ صحيح", "e");
+  if (!Object.keys(prop).length) return toast("أضف منطقةً وسعراً واحداً على الأقلّ", "e");
+  args.type = "price";
+  args.proposed = prop;
+  if (note) args.note = note;
+  okMsg = "💰 أُرسل طلب التسعيرة للمدير";
+ } else if (kind === "loc") {
+  const la = _avNum(v("avfLat")), lo = _avNum(v("avfLng"));
+  if (!(la >= -90 && la <= 90) || !(lo >= -180 && lo <= 180) || la === 0 || lo === 0) return toast("إحداثيات غير صالحة", "e");
+  args.proposed = {
+   lat: la,
+   lng: lo,
+   src: _avLocSrc
+  };
+  if (note) args.note = note;
+  okMsg = "📍 تعدّل موقع المطعم الآن";
+ } else if (kind === "ask") {
+  const tx = v("avfText").slice(0, 500);
+  if (!tx) return toast("اكتب نصّ السؤال", "e");
+  args.text = tx;
+  okMsg = "🛵 وصل سؤالك للكابتن في محادثته";
+ }
+ const go = document.getElementById("avActGo");
+ if (go) {
+  go.disabled = true;
+  go.textContent = "⏳ جارٍ التنفيذ…";
+ }
+ const r = await avCall(A.a, args);
+ if (go) {
+  go.disabled = false;
+  go.textContent = "تنفيذ";
+ }
+ if (r && r.ok !== false) {
+  let m = r.msg || okMsg;
+  const nid = r.orderId || r.rid || r.newId || r.id;
+  if (kind === "replace" && nid) m += " #" + String(nid).slice(-8);
+  if (r.block) {
+   const BT = {
+    applied: "⛔ أُوقف الكابتن عن استلام الطلبات",
+    pending: "⏳ سيُوقَف بعد أن يُكمل طلبه الحاليّ",
+    shadow: "👻 أيّام التجربة: سُجّل «كان سيُوقَف» بلا إيقاف",
+    protected: "🛡 حسابٌ محميّ — أُرسل اقتراحٌ للمدير",
+    capped: "📊 بلغ حدّ إيقافات اليوم — أُرسل اقتراحٌ للمدير",
+    already: "الكابتن موقوفٌ أصلاً",
+    off: "الإيقاف مُطفأ — أُغلق الدَّين فقط"
+   };
+   m = "✅ أُغلق الدَّين · " + (BT[r.block] || r.block);
+  }
+  toast(m);
+  if (_avAI[p] && _avAI[p].sent) db.ref("res_leader/drafts/" + p).remove().catch(() => {});
+  const sh = document.getElementById("avSheet");
+  if (sh && sh.classList.contains("open")) _navBack();
+ } else toast(r && (r.msg || r.err) || "تعذّر التنفيذ", "e");
+};
+
+const AV_NT_TAGS = Object.assign({}, NT_TAGS, {
+ ai: {
+  i: "💬",
+  t: "من الفريق"
+ }
+});
+
+let _avNtP = null, _avNtRef = null, _avNtData = {}, _avNtTag = "gen", _avNtFlt = "all", _avNtEdit = null, _avNtBusy = false;
+
+function avNtWatch(p) {
+ p = nP(p);
+ if (_avNtP === p) return;
+ if (_avNtRef) {
+  try {
+   _avNtRef.off();
+  } catch (_) {}
+ }
+ _avNtRef = null;
+ _avNtP = p;
+ _avNtData = {};
+ if (!p) return;
+ const r = db.ref("res_notes/" + p).limitToLast(80);
+ _avNtRef = r;
+ r.on("value", sn => {
+  if (_avNtP !== p) return;
+  _avNtData = sn.val() || {};
+  _avCtxSig = "";
+  try {
+   avRenderCtx();
+  } catch (_) {}
+  try {
+   avNtRenderSheet();
+  } catch (_) {}
+ }, err => {
+  console.warn("🐳 res_notes:", err && err.message);
+ });
+}
+
+function avNtStop() {
+ if (_avNtRef) {
+  try {
+   _avNtRef.off();
+  } catch (_) {}
+ }
+ _avNtRef = null;
+ _avNtP = null;
+ _avNtData = {};
+ _avNtEdit = null;
+ const sh = document.getElementById("avNtSheet");
+ if (sh) sh.classList.remove("open");
+}
+
+function _avNtList() {
+ return Object.keys(_avNtData || {}).map(k => Object.assign({
+  k: k
+ }, _avNtData[k] || {})).filter(n => n && n.text && AV_NT_TAGS[n.tag]).sort((a, b) => (b.pin ? 1 : 0) - (a.pin ? 1 : 0) || (Number(b.ts) || 0) - (Number(a.ts) || 0));
+}
+
+function _avNtMine(n) {
+ return n && String(n.uid || "") === _ntUid();
+}
+
+function _avNtItem(n, full) {
+ const tg = AV_NT_TAGS[n.tag] || AV_NT_TAGS.gen;
+ const acts = full && _avNtMine(n) && canDo("message") ? `<div class="nt-acts">\n      <button class="nt-ab" onclick="avNtPin('${ej(n.k)}')">${n.pin ? "📌 إلغاء التثبيت" : "📌 تثبيت"}</button>\n      <button class="nt-ab" onclick="avNtEditStart('${ej(n.k)}')">✏️ تعديل</button>\n      <button class="nt-ab del" onclick="avNtDel('${ej(n.k)}')">🗑 حذف</button></div>` : "";
+ return `<div class="nt-it t-${esc(n.tag)}${n.pin ? " pin" : ""}">\n    <div class="nt-h"><span class="nt-tag">${tg.i} ${tg.t}</span>${n.pin ? '<span class="nt-pinb">📌 مثبّتة</span>' : ""}\n      <span class="nt-by">${_avNtMine(n) ? "أنت" : esc(n.by || (n.tag === "ai" ? "الفريق" : "ليدر"))}</span>\n      <span class="nt-when" title="${esc(_ntWhen(n.ts))}">${esc(_ntAgo(n.ts))}${n.edited ? " · عُدّلت" : ""}</span></div>\n    <div class="nt-tx">${esc(n.text)}</div>${acts}</div>`;
+}
+
+function _avNtChip() {
+ const l = _avNtList();
+ if (!l.length) return '<button class="ctx-p nt-chip" onclick="avNtOpen()">📝 ملاحظات</button>';
+ const w = l.filter(n => n.tag === "warn").length;
+ return `<button class="ctx-p nt-chip${w ? " hot" : ""}" onclick="avNtOpen()">📝 ملاحظات <b>${l.length}</b>${w ? ` · ⚠️ <b>${w}</b>` : ""}</button>`;
+}
+
+function _avNtCard() {
+ const l = _avNtList();
+ return `<div class="nt-card">\n    <div class="nt-top"><div class="nt-ttl">📝 ملاحظات الليدرز عن المطعم ${l.length ? `<span class="nt-cnt">${l.length}</span>` : ""}</div>\n      <button class="nt-open" onclick="avNtOpen()">${l.length ? "فتح السجلّ" : "＋ أضف ملاحظة"}</button></div>\n    ${l.length ? `<div class="nt-mini">${l.slice(0, 2).map(n => _avNtItem(n, false)).join("")}${l.length > 2 ? `<div class="nt-empty" style="padding:0 2px">و${l.length - 2} أخرى في السجلّ…</div>` : ""}</div>` : '<div class="nt-empty">لا ملاحظات بعد. سجّل ما يفيد زملاءك عن هذا المطعم: تحذير، إشادة، مبالغ، متابعة…<br>لا يراها المطعم.</div>'}\n  </div>`;
+}
+
+function _avNtEnsure() {
+ let sh = document.getElementById("avNtSheet");
+ if (sh) return sh;
+ sh = document.createElement("div");
+ sh.id = "avNtSheet";
+ sh.innerHTML = '<div class="nt-box" onclick="event.stopPropagation()"><div class="nt-hd" id="avNtHd"></div><div class="nt-comp" id="avNtComp"></div><div class="nt-flt" id="avNtFlt"></div><div class="nt-list" id="avNtList"></div></div>';
+ sh.addEventListener("click", () => _navBack());
+ document.body.appendChild(sh);
+ return sh;
+}
+
+window.avNtOpen = function() {
+ if (!_avActive) return;
+ avNtWatch(_avActive);
+ const sh = _avNtEnsure();
+ _avNtEdit = null;
+ _avNtFlt = "all";
+ _avNtRenderComp();
+ avNtRenderSheet();
+ if (!sh.classList.contains("open")) {
+  sh.classList.add("open");
+  _navPush("avnotes");
+ }
+ setTimeout(() => {
+  const t = document.getElementById("avNtTa");
+  if (t && window.innerWidth >= 760) t.focus();
+ }, 120);
+};
+
+window.avNtClose = function() {
+ _navBack();
+};
+
+function _avNtRenderComp() {
+ const box = document.getElementById("avNtComp");
+ if (!box) return;
+ if (!canDo("message")) {
+  box.innerHTML = '<div class="nt-empty">لا تملك صلاحيّة كتابة الملاحظات — يمكنك القراءة فقط.</div>';
+  return;
+ }
+ const ed = _avNtEdit && _avNtData[_avNtEdit];
+ if (ed) _avNtTag = NT_TAGS[ed.tag] ? ed.tag : "gen";
+ box.className = "nt-comp" + (ed ? " edit" : "");
+ const comp = `<div class="nt-cl">${ed ? "✏️ تعديل ملاحظتك" : "＋ ملاحظة جديدة — لا يراها المطعم"}${ed ? '<button onclick="avNtEditCancel()">إلغاء التعديل</button>' : ""}</div>\n    <textarea class="nt-ta" id="avNtTa" maxlength="${NT_MAX}" placeholder="مثلاً: يطلب تعويضاً متكرّراً — راجع خطّ الزمن قبل أيّ مطالبة" oninput="avNtLen()"></textarea>\n    <div class="nt-tags" id="avNtTags"></div>\n    <div class="nt-row"><label class="nt-pin"><input type="checkbox" id="avNtPin" ${ed && ed.pin ? "checked" : ""}> 📌 تثبيت في الأعلى</label>\n      <span class="nt-len" id="avNtLen">0 / ${NT_MAX}</span>\n      <button class="nt-save" id="avNtSave" onclick="avNtSave()">${ed ? "حفظ التعديل" : "حفظ الملاحظة"}</button></div>`;
+ box.innerHTML = comp;
+ const ta = document.getElementById("avNtTa");
+ if (ed && ta) ta.value = String(ed.text || "");
+ _avNtRenderTags();
+ avNtLen();
+}
+
+function _avNtRenderTags() {
+ const t = document.getElementById("avNtTags");
+ if (!t) return;
+ t.innerHTML = Object.keys(NT_TAGS).map(k => `<button class="nt-tg t-${k}${k === _avNtTag ? " on" : ""}" onclick="avNtTagPick('${k}')">${NT_TAGS[k].i} ${NT_TAGS[k].t}</button>`).join("");
+}
+
+window.avNtTagPick = function(k) {
+ if (NT_TAGS[k]) {
+  _avNtTag = k;
+  _avNtRenderTags();
+ }
+};
+
+window.avNtLen = function() {
+ const ta = document.getElementById("avNtTa"), l = document.getElementById("avNtLen"), b = document.getElementById("avNtSave");
+ if (!ta || !l) return;
+ const n = ta.value.length;
+ l.textContent = n + " / " + NT_MAX;
+ l.classList.toggle("max", n >= NT_MAX);
+ if (b) b.disabled = !ta.value.trim() || _avNtBusy;
+};
+
+window.avNtRenderSheet = function() {
+ const sh = document.getElementById("avNtSheet");
+ if (!sh || !_avActive) return;
+ const p = _avActive, l = _avNtList(), cnt = {}, cat = AV_CATS[(_avChats[p] || {}).cat];
+ l.forEach(n => {
+  cnt[n.tag] = (cnt[n.tag] || 0) + 1;
+ });
+ const hd = document.getElementById("avNtHd");
+ const hh = `<div class="nt-hr"><div class="nt-av">${cat ? cat.i : "🍽"}</div>\n      <div class="nt-nm"><b>📝 سجلّ ${esc(_avName(p))}</b><small>0${esc(p)}</small></div>\n      <button class="nt-x" onclick="avNtClose()" aria-label="إغلاق">✕</button></div>\n    <div class="nt-stats">${l.length ? Object.keys(AV_NT_TAGS).filter(k => cnt[k]).map(k => `<span class="nt-st t-${k}">${AV_NT_TAGS[k].i} ${AV_NT_TAGS[k].t} <b>${cnt[k]}</b></span>`).join("") : '<span class="nt-st t-gen">لا ملاحظات بعد</span>'}</div>`;
+ if (hd) hd.innerHTML = hh;
+ const fl = document.getElementById("avNtFlt");
+ const fh = `<button class="nt-fb${_avNtFlt === "all" ? " on" : ""}" onclick="avNtFilter('all')">الكلّ (${l.length})</button>` + Object.keys(AV_NT_TAGS).filter(k => cnt[k]).map(k => `<button class="nt-fb${_avNtFlt === k ? " on" : ""}" onclick="avNtFilter('${k}')">${AV_NT_TAGS[k].i} ${AV_NT_TAGS[k].t} (${cnt[k]})</button>`).join("");
+ if (fl) fl.innerHTML = fh;
+ const shown = _avNtFlt === "all" ? l : l.filter(n => n.tag === _avNtFlt);
+ const li = document.getElementById("avNtList");
+ if (li) li.innerHTML = shown.length ? shown.map(n => _avNtItem(n, true)).join("") : '<div class="nt-empty" style="text-align:center;padding:26px 8px">لا ملاحظات' + (_avNtFlt === "all" ? " بعد — اكتب أوّل ملاحظة في الأعلى ✍️" : " من هذا النوع") + "</div>";
+};
+
+window.avNtFilter = function(k) {
+ _avNtFlt = k;
+ avNtRenderSheet();
+};
+
+window.avNtSave = async function() {
+ if (!_avActive || _avNtBusy) return;
+ if (!needPerm("message", "كتابة الملاحظات")) return;
+ const ta = document.getElementById("avNtTa");
+ const text = String(ta && ta.value || "").trim().slice(0, NT_MAX);
+ if (!text) return;
+ const pin = !!(document.getElementById("avNtPin") || {}).checked, p = nP(_avActive);
+ _avNtBusy = true;
+ avNtLen();
+ try {
+  if (_avNtEdit && _avNtData[_avNtEdit]) {
+   const o = _avNtData[_avNtEdit];
+   await db.ref("res_notes/" + p + "/" + _avNtEdit).set({
+    text: text,
+    tag: _avNtTag,
+    ts: Number(o.ts) || Date.now(),
+    uid: String(o.uid),
+    by: String(o.by || EMP_NAME || "ليدر").slice(0, 60),
+    pin: pin,
+    edited: Date.now()
+   });
+   toast("حُفظ التعديل");
+  } else {
+   const n = {
+    text: text,
+    tag: _avNtTag,
+    ts: Date.now(),
+    uid: _ntUid(),
+    by: String(EMP_NAME || "ليدر").slice(0, 60)
+   };
+   if (pin) n.pin = true;
+   await db.ref("res_notes/" + p).push(n);
+   toast("حُفظت الملاحظة");
+  }
+  _avNtEdit = null;
+  _avNtTag = "gen";
+  _avNtBusy = false;
+  _avNtRenderComp();
+ } catch (e) {
+  _avNtBusy = false;
+  avNtLen();
+  toast("تعذّر الحفظ — تحقّق من الاتصال أو الصلاحيّة", "e");
+ }
+};
+
+window.avNtEditStart = function(k) {
+ if (!_avNtData[k] || !_avNtMine(_avNtData[k])) return;
+ _avNtEdit = k;
+ _avNtRenderComp();
+ const b = document.querySelector("#avNtSheet .nt-box");
+ if (b) b.scrollTop = 0;
+ const t = document.getElementById("avNtTa");
+ if (t) t.focus();
+};
+
+window.avNtEditCancel = function() {
+ _avNtEdit = null;
+ _avNtTag = "gen";
+ _avNtRenderComp();
+};
+
+window.avNtPin = function(k) {
+ const o = _avNtData[k];
+ if (!o || !_avNtMine(o) || !_avActive) return;
+ db.ref("res_notes/" + nP(_avActive) + "/" + k + "/pin").set(!o.pin).catch(() => toast("تعذّر التثبيت", "e"));
+};
+
+window.avNtDel = function(k) {
+ const o = _avNtData[k];
+ if (!o || !_avNtMine(o) || !_avActive) return;
+ if (!confirm("حذف هذه الملاحظة نهائياً؟")) return;
+ db.ref("res_notes/" + nP(_avActive) + "/" + k).remove().then(() => toast("حُذفت")).catch(() => toast("تعذّر الحذف", "e"));
 };
 
 let _ordSeen = null;
