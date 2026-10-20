@@ -2601,7 +2601,7 @@ function renderCrew() {
    const stTxt = c.busy ? "🔴 مشغول" : c.online ? "🟢 متصل" : "⚫ غير متصل";
    const initial = c.name !== "غير محدد" ? c.name.charAt(0) : "🛵";
    const trackBtn = c.online ? `<button class="crew-b crew-b-track" onclick="trackDriver('${ej(c.phone)}','')" title="تتبع على الخريطة">📍</button>` : "";
-   html += `<div class="crew-card ${stCls}${c.leftEarlyMins !== undefined ? " left-early" : ""}">\n        <div class="crew-top">\n          <div class="crew-av">${drvAvatar(c.phone) || esc(initial)}</div>\n          <div class="crew-id">\n            <div class="crew-nm">${esc(c.name)}</div>\n            <div class="crew-ph">${esc(c.phone)}</div>\n          </div>\n          <span class="crew-st ${stCls}">${stTxt}</span>\n        </div>\n        <div class="crew-stats">\n          <div class="crew-stat"><div class="crew-sv g">${c.completed}</div><div class="crew-sl">منجز اليوم</div></div>\n          <div class="crew-stat"><div class="crew-sv r">${c.rejected}</div><div class="crew-sl">رفض</div></div>\n          <div class="crew-stat"><div class="crew-sv b">${c.avg || "—"}</div><div class="crew-sl">د/طلب</div></div>\n        </div>\n        <div class="crew-times">\n          <div class="crew-time"><div class="crew-time-l">🕐 فتح</div><div class="crew-time-v">${fmtClock(c.openTime)}</div></div>\n          <div class="crew-time"><div class="crew-time-l">👁 آخر ظهور</div><div class="crew-time-v">${fmtClock(c.lastSeen)}</div></div>\n        </div>\n        <div class="crew-dur">⏱️ ${c.realTime ? "عملٌ فعليّ" : "مدة العمل اليوم"}: ${fmtDur(c.workedMin)}${c.realTime ? ` · استراحة ${fmtDur(c.breakMin || 0)} · منذ الفتح ${fmtDur(c.sinceOpenMin || 0)}` : ""}</div>\n        ${""}${shiftChipHtml(c)}\n        <div class="crew-acts">\n          ${""}<button class="crew-b crew-b-call" onclick="waOpen('${ej(c.phone)}')">💬 واتساب</button>\n          ${""}${canDo("message") ? `<button class="crew-b crew-b-msg" onclick="msgCaptain('${ej(c.phone)}','${ej(c.name)}')">💬 رسالة</button>` : ""}\n          ${trackBtn}\n        </div>\n      </div>`;
+   html += `<div class="crew-card ${stCls}${c.leftEarlyMins !== undefined ? " left-early" : ""}">\n        <div class="crew-top">\n          <div class="crew-av">${drvAvatar(c.phone) || esc(initial)}</div>\n          <div class="crew-id">\n            <div class="crew-nm">${esc(c.name)}</div>\n            <div class="crew-ph">${esc(c.phone)}</div>\n          </div>\n          <span class="crew-st ${stCls}">${stTxt}</span>\n        </div>\n        <div class="crew-stats">\n          <div class="crew-stat"><div class="crew-sv g">${c.completed}</div><div class="crew-sl">منجز اليوم</div></div>\n          <div class="crew-stat"><div class="crew-sv r">${c.rejected}</div><div class="crew-sl">رفض</div></div>\n          <div class="crew-stat"><div class="crew-sv b">${c.avg || "—"}</div><div class="crew-sl">د/طلب</div></div>\n        </div>\n        <div class="crew-times">\n          <div class="crew-time"><div class="crew-time-l">🕐 فتح</div><div class="crew-time-v">${fmtClock(c.openTime)}</div></div>\n          <div class="crew-time"><div class="crew-time-l">👁 آخر ظهور</div><div class="crew-time-v">${fmtClock(c.lastSeen)}</div></div>\n        </div>\n        <div class="crew-dur">⏱️ ${c.realTime ? "عملٌ فعليّ" : "مدة العمل اليوم"}: ${fmtDur(c.workedMin)}${c.realTime ? ` · استراحة ${fmtDur(c.breakMin || 0)} · منذ الفتح ${fmtDur(c.sinceOpenMin || 0)}` : ""}</div>\n        ${""}${shiftChipHtml(c)}\n        ${""}${_ofCrewLine(c.phone)}\n        <div class="crew-acts">\n          ${""}<button class="crew-b crew-b-call" onclick="waOpen('${ej(c.phone)}')">💬 واتساب</button>\n          ${""}${canDo("message") ? `<button class="crew-b crew-b-msg" onclick="msgCaptain('${ej(c.phone)}','${ej(c.name)}')">💬 رسالة</button>` : ""}\n          ${""}${_ofCrewBtn(c.phone)}\n          ${trackBtn}\n        </div>\n      </div>`;
   });
  }
  if (_crewHtml !== html) {
@@ -3862,6 +3862,40 @@ function _ofDebt(p) {
  return Math.max(0, Number(((liveLed.drivers || {})[nP(p)] || {}).debt_ops || 0));
 }
 
+function _ofName(p) {
+ try {
+  const n = dN(p);
+  if (n && n !== "غير محدد") return n;
+ } catch (_) {}
+ return (drvLocs[nP(p)] || {}).name || "…" + String(p).slice(-4);
+}
+
+function _ofCrewLine(p) {
+ const v = _ofDebt(p);
+ if (!v) return "";
+ const hi = v >= 4e3;
+ return `<div class="crew-dur" style="background:${hi ? "#fef2f2" : "#fffbeb"};border-color:${hi ? "#fecaca" : "#fde68a"};color:${hi ? "#b91c1c" : "#92400e"};font-weight:900">💵 العمولة التشغيليّة: ${v.toLocaleString("en-US")} د.ع${hi ? " — قريبٌ من الإغلاق" : ""}</div>`;
+}
+
+function _ofCrewBtn(p) {
+ if (!canDo("opsfee") || !_ofDebt(p)) return "";
+ return `<button class="crew-b" style="background:#fef3c7;color:#92400e" onclick="ofPayQuick('${nP(p)}')" title="تسديد العمولة التشغيليّة كاملةً">💵 تسديد</button>`;
+}
+
+window.ofPayQuick = function(phone) {
+ if (!canDo("opsfee")) {
+  alert("قبول تسديد العمولة التشغيليّة غير ممنوحٍ لحسابك — يمنحه المدير من لوحة الإدارة.");
+  return;
+ }
+ const p = nP(phone), debt = _ofDebt(p), nm = _ofName(p);
+ if (!debt) {
+  alert("ما على " + nm + " عمولة تشغيليّة الآن.");
+  return;
+ }
+ if (!confirm("💵 استلام العمولة التشغيليّة كاملةً من " + nm + "؟\n\nالمبلغ: " + debt.toLocaleString("en-US") + " د.ع\n\n(لتسديدٍ جزئيّ استعمل زرّ «💵 تسديد عمولة»)")) return;
+ ofPaySend(p, debt, nm);
+};
+
 function _ofChip(p) {
  const v = _ofDebt(p);
  if (!v) return "";
@@ -3885,8 +3919,7 @@ window.ofPayOpen = function(phone) {
   return;
  }
  const debt = _ofDebt(p);
- const g = (gDrivers || []).find(x => nP(x && x[2]) === p);
- const nm = g && g[1] || (drvLocs[p] || {}).name || "…" + p.slice(-4);
+ const nm = _ofName(p);
  if (!debt) {
   alert("ما على " + nm + " عمولة تشغيليّة الآن.");
   return;
@@ -3917,6 +3950,10 @@ async function ofPaySend(p, amount, nm) {
    toast("✅ سُجّل تسديد " + Number(d.amount).toLocaleString("en-US") + " د.ع من " + nm + (d.after > 0 ? " — المتبقّي " + Number(d.after).toLocaleString("en-US") : " — صفر") + (d.lifted ? " · رُفع الإغلاق" : ""));
    try {
     renderCtx();
+   } catch (_) {}
+   try {
+    _crewHtml = "";
+    renderCrew();
    } catch (_) {}
   } else alert(d && d.msg || "تعذّر تسجيل التسديد.");
  } catch (e) {
