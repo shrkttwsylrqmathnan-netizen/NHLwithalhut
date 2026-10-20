@@ -2572,7 +2572,8 @@ function setupFB() {
    out[ch.key] = {
     debt: ch.child("debt").val() || 0,
     completed_orders: ch.child("completed_orders").val() || 0,
-    balance: ch.child("balance").val() || 0
+    balance: ch.child("balance").val() || 0,
+    debt_ops: ch.child("debt_ops").val() || 0
    };
    return false;
   });
