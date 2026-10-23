@@ -6,7 +6,7 @@
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://www.gstatic.com https://unpkg.com https://cdn.jsdelivr.net https://*.firebasedatabase.app https://*.firebaseio.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://unpkg.com https://cdn.jsdelivr.net; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: blob: https:; media-src 'self' data: blob: https://actions.google.com; connect-src 'self' https://*.firebasedatabase.app https://*.firebaseio.com wss://*.firebasedatabase.app wss://*.firebaseio.com https://script.google.com https://script.googleusercontent.com https://*.googleapis.com https://securetoken.googleapis.com https://*.cloudfunctions.net https://*.run.app https://nominatim.openstreetmap.org; object-src 'none'; base-uri 'none'; form-action 'self'; frame-ancestors 'none'">
 
     <script>
-const CURRENT_APP_VERSION = "43.17.Nahla-V34.65";
+const CURRENT_APP_VERSION = "43.24.Nahla-V34.86";
 
 const RES_VERSION_KEY = "hut_res_app_version";
 
@@ -157,7 +157,7 @@ window.nahlaOpen = window.nahlaOpen || function(what, id) {
   fl.href = "https://fonts.googleapis.com/css2?family=Noto+Sans+Arabic:wght@400;600;800&display=swap";
   document.head.appendChild(fl);
   var fs = document.createElement("style");
-  fs.textContent = "html[lang=ckb] body *:not(code):not(pre):not(i):not(svg){font-family:'Cairo','Noto Sans Arabic',sans-serif!important}" + "html[lang=ckb] .lg-brand-t{white-space:normal;line-height:1.35;letter-spacing:0}";
+  fs.textContent = "html[lang=ckb] body *:not(code):not(pre):not(i):not(svg){font-family:'IBM Plex Sans Arabic','Noto Sans Arabic',sans-serif!important}" + "html[lang=ckb] .lg-brand-t{white-space:normal;line-height:1.35;letter-spacing:0}";
   document.head.appendChild(fs);
  } catch (e) {}
  var D = {
@@ -272,6 +272,10 @@ window.nahlaOpen = window.nahlaOpen || function(what, id) {
   "بعد إرسال التسجيل لا يمكن تعديله من هنا — لتصحيح الاسم أو الموقع أو الأسعار تواصل مع الإدارة وستعدّله لك.": "دوای ناردنی تۆمار ناتوانرێت لێرە دەستکاری بکرێت — بۆ ڕاستکردنەوەی ناو یان شوێن یان نرخەکان پەیوەندی بە بەڕێوەبەرایەتییەوە بکە و بۆت ڕاست دەکەنەوە.",
   "شريك معتمد - الحوت": "هاوبەشی پەسەندکراو - الحوت",
   "نحلة": "نحلة",
+  "رسالة جديدة": "نامەی نوێ",
+  "وصلك ردٌّ من مستشارك — اضغط زرّ «مستشارك» لقراءته.": "وەڵامێکت لە ڕاوێژکارەکەتەوە بۆ هات — بۆ خوێندنەوەی کرتە لە دوگمەی «ڕاوێژکارەکەت» بکە.",
+  "اضغط المايكروفون وتكلّم، ثم أرسل": "کرتە لە مایکرۆفۆن بکە و قسە بکە، پاشان بینێرە",
+  "أو اختر موضوعاً من الأزرار في الأعلى": "یان بابەتێک لە دوگمەکانی سەرەوە هەڵبژێرە",
   "طلبات الشهر": "داواکارییەکانی مانگ",
   "العمولة (د.ع)": "کۆمیسیۆن (د.ع)",
   "نظام الدفع": "سیستەمی پارەدان",
@@ -284,7 +288,9 @@ window.nahlaOpen = window.nahlaOpen || function(what, id) {
   "إجمالي الفواتير المكتملة:": "کۆی پسوڵە تەواوبووەکان:",
   "يدوي": "دەستی",
   "سريع ⚡": "خێرا ⚡",
-  "مسح": "سڕینەوە",
+  "مسح": "سکان",
+  "سريع": "خێرا",
+  "صوتي": "دەنگی",
   "صوتي 🎙️": "دەنگی 🎙️",
   "لصق رسالة الزبون": "دانانی نامەی کڕیار",
   "الصق الرسالة هنا وسيقوم ذكاء الحوت الاصطناعي بتعبئة الحقول أوتوماتيكياً لاستخراج المنطقة وتفاصيل العنوان الدقيقة ✨.": "نامەکە لێرە دابنێ، زیرەکیی دەستکردی الحوت خانەکان خۆکارانە پڕ دەکاتەوە و ناوچە و وردەکاریی ناونیشان دەردەهێنێت ✨.",
@@ -935,7 +941,7 @@ window.nahlaOpen = window.nahlaOpen || function(what, id) {
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" async></script>
 
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.rtl.min.css" media="print" onload="this.media='all'">
-    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;700;800;900&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
     <script src="https://unpkg.com/lucide@0.279.0/dist/umd/lucide.min.js" async onload="try{window.lucide&&lucide.createIcons()}catch(e){}"></script>
     
     <style>
@@ -963,7 +969,7 @@ window.nahlaOpen = window.nahlaOpen || function(what, id) {
         body { 
             background-color: var(--bg-color);
             background-image: radial-gradient(circle at 50% 0%, #e2e8f0 0%, #f8fafc 80%);
-            font-family: 'Cairo', sans-serif; 
+            font-family: 'IBM Plex Sans Arabic', sans-serif; 
             color: var(--primary); 
             -webkit-tap-highlight-color: transparent;
             user-select: none;
@@ -997,7 +1003,7 @@ window.nahlaOpen = window.nahlaOpen || function(what, id) {
 
         .veh-opt   { position:relative; z-index:1; display:flex; align-items:center; justify-content:center;
                      gap:7px; min-height:44px; padding:0 10px; border:0; background:transparent;
-                     font-family:'Cairo',sans-serif; font-size:.9rem; font-weight:800; color:#64748b;
+                     font-family:'IBM Plex Sans Arabic',sans-serif; font-size:.9rem; font-weight:800; color:#64748b;
                      cursor:pointer; border-radius:10px; transition:color .18s ease; -webkit-tap-highlight-color:transparent; }
         .veh-opt svg { width:19px; height:19px; flex:none; }
         .veh-opt.is-on { color:var(--primary-blue-dark); }   
@@ -1612,7 +1618,7 @@ window.nahlaOpen = window.nahlaOpen || function(what, id) {
         .lg-brand-s { font-size: .82rem; font-weight: 800; color: var(--lg-muted); margin: 2px 0 0; }
         
         .lang-pill { margin-top: 10px; padding: 6px 16px; border-radius: 999px; border: 1.5px solid #cbd5e1; background: #fff; color: #0f172a;
-                     font-family: 'Cairo', sans-serif; font-weight: 800; font-size: .85rem; cursor: pointer; }
+                     font-family: 'IBM Plex Sans Arabic', sans-serif; font-weight: 800; font-size: .85rem; cursor: pointer; }
         .lang-pill:active { transform: scale(.96); }
         .lang-ico .lang-pill-l { font-weight: 900; font-size: .78rem; line-height: 1; }
         .lg-brand-v { display: inline-flex; align-items: center; gap: 6px; margin-top: 13px; padding: 6px 14px;
@@ -1668,7 +1674,7 @@ window.nahlaOpen = window.nahlaOpen || function(what, id) {
         #orderSection { padding-bottom: 76px; }   
         .adv-fab { position: fixed; left: 14px; bottom: calc(14px + env(safe-area-inset-bottom)); z-index: 2500;
                    display: inline-flex; align-items: center; gap: 8px; height: 54px; padding: 0 18px 0 14px;
-                   border: none; border-radius: 999px; cursor: pointer; color: #fff; font-family: 'Cairo', sans-serif;
+                   border: none; border-radius: 999px; cursor: pointer; color: #fff; font-family: 'IBM Plex Sans Arabic', sans-serif;
                    font-weight: 900; font-size: .95rem; letter-spacing: .2px;
                    background: linear-gradient(135deg, #0f172a 0%, #1e3a8a 55%, #2563eb 100%);
                    box-shadow: 0 10px 28px rgba(30, 58, 138, .35), 0 0 0 3px rgba(255, 255, 255, .75);
@@ -1677,7 +1683,7 @@ window.nahlaOpen = window.nahlaOpen || function(what, id) {
         
         .adv-askbar { position: fixed; top: calc(8px + env(safe-area-inset-top)); left: 10px; right: 10px; z-index: 2600; cursor: pointer;
                       display: flex; align-items: center; gap: 10px; padding: 12px 14px; border-radius: 16px; color: #fff;
-                      font-family: 'Cairo', sans-serif; background: linear-gradient(135deg, #b45309 0%, #ea580c 100%);
+                      font-family: 'IBM Plex Sans Arabic', sans-serif; background: linear-gradient(135deg, #b45309 0%, #ea580c 100%);
                       box-shadow: 0 12px 30px rgba(234, 88, 12, .45), 0 0 0 3px rgba(255, 255, 255, .85); animation: advAskPulse 1.6s ease-in-out infinite; }
         .adv-askbar[hidden] { display: none; }
         .adv-askbar .ic { font-size: 1.6rem; line-height: 1; }
@@ -1688,7 +1694,9 @@ window.nahlaOpen = window.nahlaOpen || function(what, id) {
         @keyframes advAskPulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.015); } }
         @media (prefers-reduced-motion: reduce) { .adv-askbar { animation: none; } }
         .adv-fab.adv-fab-hide { opacity: 0; pointer-events: none; }
-        .adv-fab-ic { font-size: 1.55rem; line-height: 1; }
+        .adv-fab-ic { font-size: 1.55rem; line-height: 1; display: flex; }
+        
+        .adv-fab-ic svg { width: 21px; height: 21px; color: #FFFFFF; }
         .adv-fab-badge { position: absolute; top: -6px; left: -4px; min-width: 23px; height: 23px; padding: 0 6px;
                          border-radius: 999px; background: #ef4444; color: #fff; font-size: .74rem; font-weight: 900;
                          display: flex; align-items: center; justify-content: center; box-shadow: 0 0 0 2px #fff; }
@@ -1703,7 +1711,7 @@ window.nahlaOpen = window.nahlaOpen || function(what, id) {
         
         #advisorView { --a-bg: #f3f5f9; --a-line: #e6eaf0; --a-ink: #0f172a; --a-mut: #64748b; --a-brand: #2563eb; --a-brand-d: #1e3a8a;
                        position: fixed; inset: 0; z-index: 2600; display: none; flex-direction: column;
-                       background: var(--a-bg); font-family: 'Cairo', sans-serif; color: var(--a-ink); }
+                       background: var(--a-bg); font-family: 'IBM Plex Sans Arabic', sans-serif; color: var(--a-ink); }
         #advisorView.open { display: flex; animation: advIn .2s ease; }
         .adv-head { flex-shrink: 0; background: #fff; border-bottom: 1px solid var(--a-line);
                     padding: 8px 12px; padding-top: max(8px, env(safe-area-inset-top)); }
@@ -1904,6 +1912,181 @@ window.nahlaOpen = window.nahlaOpen || function(what, id) {
             .adv-kpi .v { font-size: 1.12rem; } .adv-fab { padding: 0 14px 0 12px; }
         }
         @media (max-width: 340px) { .adv-live, .adv-av { display: none !important; } }
+
+        
+        :root {
+            --primary: #0F172A; --primary-blue: #2453D6; --primary-blue-dark: #0F172A;
+            --accent: #C2560C; --success: #12805C; --bg-color: #F4F6F9;
+            --ink: #0F172A; --ink-2: #334155; --muted: #64748B;
+            --line: #E3E8EF; --line-2: #CBD5E1;
+            --brand-soft: #EEF3FE; --brand-line: #CFDCFA;
+            --glass-bg: #FFFFFF; --glass-border: #E3E8EF; --glass-shadow: 0 1px 2px rgba(15, 23, 42, .04);
+            --r-card: 18px; --r-ctl: 12px;
+        }
+        body { background: var(--bg-color); background-image: none; color: var(--ink);
+               font-family: 'IBM Plex Sans Arabic', 'Noto Sans Arabic', sans-serif; -webkit-font-smoothing: antialiased; }
+        .fw-black { font-weight: 700 !important; }
+        .btn { font-weight: 600; }
+
+        
+        .global-header { background: #FFFFFF; border-bottom: 1px solid var(--line); backdrop-filter: none; -webkit-backdrop-filter: none;
+                         padding: 10px 14px; padding-top: max(10px, env(safe-area-inset-top)); gap: 10px; min-height: 64px; }
+        
+        .header-center { order: -1; flex: 0 0 auto; padding: 0; --primary-blue: #3b82f6; }
+        .header-right { flex: 1 1 auto; min-width: 0; justify-content: center;
+                        border-inline-start: 1px solid var(--line); padding-inline-start: 10px; }
+        .res-name-title { -webkit-line-clamp: 2; font-weight: 700; font-size: .95rem; line-height: 1.28; letter-spacing: 0; color: var(--ink); }
+        .partner-badge { font-weight: 500; font-size: .7rem; color: var(--muted); margin-top: 3px;
+                         white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; }
+        .partner-badge::before { content: ""; display: inline-block; width: 6px; height: 6px; border-radius: 50%;
+                                 background: var(--success); margin-inline-end: 6px; vertical-align: middle; }
+        .header-left { flex: 0 0 auto; gap: 2px; padding: 3px; background: #F1F5F9; border: 1px solid var(--line); border-radius: 14px; }
+        .icon-btn-logout { width: 40px; height: 40px; background: #FFFFFF; border: 1px solid var(--line); color: var(--ink-2); border-radius: var(--r-ctl); }
+        .header-left .icon-btn-logout { width: 34px; height: 36px; background: transparent; border: 0; border-radius: 11px; color: var(--ink-2); }
+        .header-left .icon-btn-logout:hover, .header-left .icon-btn-logout:active { transform: none; background: #FFFFFF; color: var(--ink);
+                                                                                   box-shadow: 0 1px 2px rgba(15, 23, 42, .08); }
+        .header-left .icon-btn-logout[onclick="logout()"]:hover { color: #C02626; }
+        .header-left .icon-btn-logout svg { width: 18px; height: 18px; }
+        .header-left .lang-pill-l { font-weight: 700; font-size: .8rem; }
+
+        
+        .glass-card { background: #FFFFFF; backdrop-filter: none; -webkit-backdrop-filter: none; border: 1px solid var(--line);
+                      border-radius: var(--r-card); box-shadow: var(--glass-shadow); padding: 18px; }
+        .header-stats-container { background: #FFFFFF; backdrop-filter: none; -webkit-backdrop-filter: none; border: 1px solid var(--line);
+                                  border-radius: 16px; box-shadow: none; padding: 12px 6px; }
+        .stat-label { font-weight: 500; font-size: .7rem; color: var(--muted); }
+        .stat-value { font-weight: 700; font-size: 1.15rem; color: var(--ink); font-variant-numeric: tabular-nums; }
+        .stat-divider { background: var(--line); }
+        #friendlyMessageBanner > div { background: var(--brand-soft) !important; border-color: var(--brand-line) !important; box-shadow: none !important; }
+        #friendlyText { color: var(--ink) !important; font-weight: 600 !important; }
+
+        
+        .form-label { font-weight: 600; color: var(--ink-2); font-size: .8rem; }
+        .custom-input { background: #FFFFFF; border: 1px solid var(--line-2); border-radius: var(--r-ctl); font-weight: 500; min-height: 48px;
+                        box-shadow: none; color: var(--ink); transition: border-color .15s ease, box-shadow .15s ease; }
+        .custom-input:focus { background: #FFFFFF; border-color: var(--primary-blue); box-shadow: 0 0 0 3px rgba(36, 83, 214, .14); }
+        .custom-input::placeholder { color: #94A3B8; font-weight: 400; }
+        .smart-dropdown-list { background: #FFFFFF; backdrop-filter: none; -webkit-backdrop-filter: none; border: 1px solid var(--line);
+                               border-radius: 14px; box-shadow: 0 12px 28px rgba(15, 23, 42, .12); }
+        .dropdown-item-area { font-weight: 500; border-radius: 10px; color: var(--ink); }
+        .area-price-tag { background: var(--brand-soft); color: var(--primary-blue); font-weight: 600; }
+
+        
+        .order-type-toggle, .commission-type-toggle { background: #EEF2F6; border-radius: 14px; padding: 4px; gap: 2px; }
+        .toggle-btn, .comm-type-btn { font-weight: 600; color: var(--muted); border-radius: 10px; font-size: .82rem; gap: 6px; min-height: 40px;
+                                      transition: background .15s ease, color .15s ease; }
+        .toggle-btn.active, .comm-type-btn.active { background: #FFFFFF; color: var(--ink); box-shadow: 0 1px 2px rgba(15, 23, 42, .08), 0 0 0 1px var(--line); }
+        .toggle-btn svg { width: 15px; height: 15px; flex: none; }
+        .list-tabs { background: transparent; padding: 0; gap: 8px; }
+        .list-tabs .toggle-btn { background: transparent; border: 1px solid var(--line); }
+        .list-tabs .toggle-btn.active { background: #FFFFFF; border-color: var(--line-2); box-shadow: 0 1px 2px rgba(15, 23, 42, .06); }
+
+        
+        .smart-paste-btn { background: var(--brand-soft); color: var(--primary-blue); border: 1px dashed var(--brand-line); font-weight: 600;
+                           border-radius: var(--r-ctl); min-height: 46px; }
+        .smart-paste-btn:active { transform: none; background: #E3EBFD; }
+        .magical-submit-btn { background: var(--primary-blue); border-radius: 14px; min-height: 52px; font-weight: 600; font-size: 1rem;
+                              box-shadow: none; transition: background .15s ease; }
+        .magical-submit-btn:hover { background: #1E46B8; }
+        .magical-submit-btn:active { transform: none; background: #1A3E9F; }
+        .camera-btn { background: #FFFFFF; border: 1.5px dashed var(--line-2); border-radius: 16px; font-weight: 600; color: var(--ink); }
+        .camera-btn:active { transform: none; background: #F8FAFC; }
+        .camera-btn i, .camera-btn svg { color: var(--primary-blue); }
+        .voice-btn { box-shadow: 0 6px 18px rgba(36, 83, 214, .22); }
+        .voice-btn .voice-label, .voice-hint { font-weight: 500; }
+        .voice-timer { font-weight: 700; }
+
+        
+        .live-order-card { background: #FFFFFF; border: 1px solid var(--line); border-radius: var(--r-card); box-shadow: 0 1px 2px rgba(15, 23, 42, .04); }
+        .oc-rail { background: #EEF2F6; }
+        .oc-rail-fill { background: var(--primary-blue); }
+        .oc-rail-fill::after { display: none; }
+        .oc-status { font-weight: 700; color: var(--ink); }
+        .oc-status.searching { color: #A15C07; }
+        .oc-actions { border-top: 1px solid var(--line); }
+        .oc-icon-btn { background: #FFFFFF; border: 1px solid var(--line); color: var(--ink-2); border-radius: var(--r-ctl); }
+        .oc-icon-btn.receipt { background: var(--brand-soft); border-color: var(--brand-line); color: var(--primary-blue); }
+        .oc-icon-btn.danger { background: #FFFFFF; border-color: #F5C2C2; color: #C02626; }
+        .oc-icon-btn:active { transform: none; background: #F1F5F9; }
+        .btn-ready { background: #FFF4E5; color: #A14B05; font-weight: 600; border: 1px solid #F8D9B0; border-radius: 10px; }
+        .ready-pill { background: #FEF6D8; color: #8A5A00; font-weight: 600; border-radius: 10px; }
+        .btn-cancel-grace { font-weight: 600; border-color: #F5C2C2; color: #C02626; }
+        .oc-driver { background: #F3FAF6; border-color: #CDEBDD; border-radius: 14px; }
+        .oc-driver.waiting { background: #F8FAFC; border-color: var(--line); }
+        .oc-av { box-shadow: none; border-color: #A7DCC3; }
+        .oc-dname, .order-id-text { font-weight: 700; color: var(--ink); }
+        .oc-drole, .order-time-text, .progress-label { font-weight: 500; color: var(--muted); }
+        .detail-item { font-weight: 500; color: var(--ink-2); }
+        .oc-call { background: #E5F5EC; color: var(--success); }
+        .progress-step.active .progress-dot { background: var(--success); }
+        .progress-step.current .progress-dot { background: var(--primary-blue); box-shadow: 0 0 0 4px rgba(36, 83, 214, .14); }
+        
+        .order-time-text svg { width: 12px; height: 12px; }
+        .detail-item svg { width: 15px; height: 15px; flex: none; }
+        .progress-dot svg { width: 10px; height: 10px; }
+        .btn-ready svg, .ready-pill svg { width: 15px; height: 15px; flex: none; }
+        .oc-icon-btn svg { width: 18px; height: 18px; }
+        .oc-call svg { width: 17px; height: 17px; }
+        .oc-av svg { width: 24px; height: 24px; }
+        .archive-item { background: #FFFFFF; border: 1px solid var(--line); border-radius: 16px; box-shadow: none; }
+        .archive-details-box { background: #F8FAFC; border: 1px solid var(--line); }
+        .success-toast { background: var(--ink); backdrop-filter: none; -webkit-backdrop-filter: none; border-radius: 16px; animation: fadeIn .25s ease; }
+
+        
+        #pasteModal, #posScanModal { background: rgba(15, 23, 42, .55); backdrop-filter: none; -webkit-backdrop-filter: none; }
+        .paste-modal-content { background: #FFFFFF; border-radius: 20px; border: 1px solid var(--line); box-shadow: 0 24px 48px rgba(15, 23, 42, .18); }
+        #loadingOverlay { background: rgba(255, 255, 255, .94); backdrop-filter: none; -webkit-backdrop-filter: none; }
+        #imageViewerModal { backdrop-filter: none !important; -webkit-backdrop-filter: none !important; }
+
+        
+        #advisorView { --a-bg: #F3F5F8; --a-line: #E3E8EF; --a-ink: #0F172A; --a-mut: #64748B; --a-brand: #2453D6; --a-brand-d: #1A3E9F; }
+        .adv-fab { background: var(--ink); box-shadow: 0 8px 20px rgba(15, 23, 42, .22); font-weight: 600; }
+        
+        .adv-fab.has-unread { background: #C62828; box-shadow: 0 8px 22px rgba(198, 40, 40, .35); }
+        .adv-fab-ic { position: relative; }
+        .adv-fab.has-unread .adv-fab-ic::after { content: ""; position: absolute; top: -3px; inset-inline-end: -4px; width: 10px; height: 10px;
+            border-radius: 50%; background: #FDE047; box-shadow: 0 0 0 2px #C62828; }
+        .adv-fab.has-unread .adv-fab-badge { background: #FFFFFF; color: #C62828; box-shadow: 0 0 0 2px #C62828; font-weight: 700; }
+        .adv-askbar { background: #B45309; }
+        .adv-head { padding: 10px 12px; padding-top: max(10px, env(safe-area-inset-top)); }
+        .adv-back { background: #F1F5F9; color: var(--a-ink); }
+        .adv-back:active { transform: none; background: #E2E8F0; }
+        .adv-back svg { width: 20px; height: 20px; }
+        .adv-av { background: var(--brand-soft); color: var(--a-brand); }
+        .adv-av svg { width: 20px; height: 20px; }
+        .adv-ttl b { font-weight: 700; }
+        .adv-ttl small { font-weight: 500; }
+        .adv-live { font-weight: 600; }
+        .adv-qk { gap: 8px; padding: 8px 12px 10px; }
+        .adv-q { height: 36px; padding: 0 12px; gap: 6px; background: #FFFFFF; border-color: var(--a-line); font-weight: 600; color: var(--a-ink); }
+        .adv-q svg { width: 16px; height: 16px; color: var(--a-brand); flex: none; }
+        .adv-q:active { transform: none; background: var(--brand-soft); border-color: var(--brand-line); }
+        .adv-msgs { padding: 14px 12px; gap: 10px; }
+        .adv-b { font-weight: 500; font-size: .93rem; padding: 10px 14px; box-shadow: 0 1px 1px rgba(15, 23, 42, .04); }
+        .adv-b.me { background: var(--a-brand); }
+        .adv-b.ld { border-color: var(--a-line); }
+        .adv-b .bn { font-weight: 600; font-size: .72rem; }
+        .adv-b .bt { font-weight: 500; opacity: .7; }
+        .adv-sys { font-weight: 500; background: #E9EDF2; color: var(--ink-2); }
+        .adv-day { font-weight: 600; }
+        .adv-welcome .wv { background: var(--brand-soft); color: var(--a-brand); }
+        .adv-welcome > b { font-weight: 700; }
+        .adv-welcome > span { font-weight: 500; }
+        .adv-welcome .wh { font-weight: 500; color: var(--a-mut); }
+        .adv-comp { gap: 8px; padding: 10px 10px calc(10px + env(safe-area-inset-bottom)); }
+        .adv-cbtn { width: 44px; height: 44px; background: #F1F5F9; color: var(--ink-2); }
+        .adv-cbtn svg { width: 21px; height: 21px; }
+        .adv-cbtn:active { background: #E2E8F0; }
+        .adv-cbtn.send { background: var(--a-brand); color: #FFFFFF; }
+        .adv-cbtn.mic { background: var(--a-brand); width: 48px; height: 48px; box-shadow: 0 6px 14px rgba(36, 83, 214, .25); }
+        .adv-cbtn.mic.rec { background: #DC2626; box-shadow: 0 0 0 6px rgba(220, 38, 38, .16); }
+        .adv-cbtn.mic.lock { background: var(--a-brand); }
+        #advText { font-weight: 500; background: #F5F7FA; border-color: var(--a-line); border-radius: 22px; }
+        #advText:focus { border-color: var(--a-brand); box-shadow: 0 0 0 3px rgba(36, 83, 214, .12); background: #FFFFFF; }
+        .adv-kpi.hero { background: #F5F8FF; border-color: var(--brand-line); }
+        .adv-btn { box-shadow: none; font-weight: 600; }
+        .adv-btn.gold { background: #D97706; box-shadow: none; }
+        .adv-ord .om b, .adv-why, .adv-step-h b, .adv-card h6, .adv-claims summary b { font-weight: 700; }
     </style>
 
 </head>
@@ -2195,17 +2378,18 @@ window.nahlaOpen = window.nahlaOpen || function(what, id) {
 
                 <div class="glass-card mb-4">
                     <div class="order-type-toggle">
+                        
                         <div class="toggle-btn active" id="tabManual" onclick="switchTab('manual')">
-                            يدوي
+                            <i data-lucide="pencil-line" size="15"></i><span>يدوي</span>
                         </div>
                         <div class="toggle-btn" id="tabQuick" onclick="switchTab('quick')">
-                            سريع ⚡
+                            <i data-lucide="zap" size="15"></i><span>سريع</span>
                         </div>
                         <div class="toggle-btn" id="tabPhoto" onclick="switchTab('photo')">
-                            مسح <i data-lucide="sparkles" size="14" style="color: var(--primary-blue);"></i>
+                            <i data-lucide="scan-line" size="15"></i><span>مسح</span>
                         </div>
                         <div class="toggle-btn" id="tabVoice" onclick="switchTab('voice')">
-                            صوتي 🎙️
+                            <i data-lucide="mic" size="15"></i><span>صوتي</span>
                         </div>
                     </div>
                     
@@ -2295,7 +2479,7 @@ window.nahlaOpen = window.nahlaOpen || function(what, id) {
                                     <span style="font-size:0.8rem; font-weight:800; color:#b91c1c;">
                                         سيُرسَل خلال <span id="voiceUndoCount">6</span> ثوانٍ
                                     </span>
-                                    <button type="button" onclick="undoVoiceOrder()" style="background:#ef4444; color:#fff; border:none; border-radius:12px; padding:8px 16px; font-weight:800; font-size:0.8rem; font-family:'Cairo'; cursor:pointer;">
+                                    <button type="button" onclick="undoVoiceOrder()" style="background:#ef4444; color:#fff; border:none; border-radius:12px; padding:8px 16px; font-weight:800; font-size:0.8rem; font-family:'IBM Plex Sans Arabic'; cursor:pointer;">
                                         ↩︎ تراجع
                                     </button>
                                 </div>
@@ -2339,11 +2523,11 @@ window.nahlaOpen = window.nahlaOpen || function(what, id) {
                 </div>
 
                 <div class="mb-2">
-                    <div class="order-type-toggle mb-3" style="background: transparent; border: none; padding: 0;">
-                        <div class="toggle-btn active py-2" id="tabLiveOrders" onclick="switchListTab('live')" style="background: rgba(255,255,255,0.8); border: 1px solid rgba(0,0,0,0.05);">
+                    <div class="order-type-toggle list-tabs mb-3">
+                        <div class="toggle-btn active py-2" id="tabLiveOrders" onclick="switchListTab('live')">
                             طلبات نشطة
                         </div>
-                        <div class="toggle-btn py-2" id="tabTodayArchive" onclick="switchListTab('archive')" style="background: transparent;">
+                        <div class="toggle-btn py-2" id="tabTodayArchive" onclick="switchListTab('archive')">
                             مكتملة اليوم
                         </div>
                     </div>
@@ -2390,15 +2574,15 @@ window.nahlaOpen = window.nahlaOpen || function(what, id) {
         <div class="tx"><b>فريق الدعم يسألكم — كابتن ينتظر</b><span id="advAskTxt"></span><small>اضغط هنا للردّ</small></div>
     </div>
     <button type="button" id="advFab" class="adv-fab" aria-label="مستشارك — الدعم وأرقام مطعمك">
-        <span class="adv-fab-ic" aria-hidden="true">🐳</span><span>مستشارك</span>
+        <span class="adv-fab-ic" aria-hidden="true"><i data-lucide="messages-square"></i></span><span class="adv-fab-t" id="advFabT">مستشارك</span>
         <span class="adv-fab-badge" id="advFabBadge" hidden>0</span>
     </button>
 
     <div id="advisorView" role="dialog" aria-modal="true" aria-labelledby="advTitle">
         <div class="adv-head">
             <div class="adv-head-row">
-                <button type="button" class="adv-back" data-adv="back" aria-label="رجوع">→</button>
-                <div class="adv-av" aria-hidden="true">🐳</div>
+                <button type="button" class="adv-back" data-adv="back" aria-label="رجوع"><i data-lucide="arrow-right"></i></button>
+                <div class="adv-av" aria-hidden="true"><i data-lucide="messages-square"></i></div>
                 <div class="adv-ttl"><b id="advTitle">مستشارك</b><small id="advSub"></small></div>
                 <span class="adv-live" id="advLive" hidden><i></i><span id="advLiveT"></span></span>
             </div>
@@ -2407,22 +2591,23 @@ window.nahlaOpen = window.nahlaOpen || function(what, id) {
             
             <section class="adv-scr adv-chat on" id="adv_chat">
                 <div class="adv-qk" role="toolbar" aria-label="مواضيع سريعة">
-                    <button type="button" class="adv-q" data-adv="tile" data-cat="order"><span aria-hidden="true">📦</span>شكوى طلب</button>
-                    <button type="button" class="adv-q" data-adv="tile" data-cat="damaged"><span aria-hidden="true">🍔</span>طلب تالف</button>
-                    <button type="button" class="adv-q" data-adv="tile" data-cat="captain"><span aria-hidden="true">🛵</span>كابتن</button>
-                    <button type="button" class="adv-q" data-adv="tile" data-cat="price"><span aria-hidden="true">💰</span>سعر منطقة</button>
-                    <button type="button" class="adv-q" data-adv="tile" data-cat="location"><span aria-hidden="true">📍</span>موقعي</button>
-                    <button type="button" class="adv-q" data-adv="tile" data-cat="market"><span aria-hidden="true">📊</span>أرقامي</button>
+                    
+                    <button type="button" class="adv-q" data-adv="tile" data-cat="order"><i data-lucide="package"></i>شكوى طلب</button>
+                    <button type="button" class="adv-q" data-adv="tile" data-cat="damaged"><i data-lucide="package-x"></i>طلب تالف</button>
+                    <button type="button" class="adv-q" data-adv="tile" data-cat="captain"><i data-lucide="bike"></i>كابتن</button>
+                    <button type="button" class="adv-q" data-adv="tile" data-cat="price"><i data-lucide="tag"></i>سعر منطقة</button>
+                    <button type="button" class="adv-q" data-adv="tile" data-cat="location"><i data-lucide="map-pin"></i>موقعي</button>
+                    <button type="button" class="adv-q" data-adv="tile" data-cat="market"><i data-lucide="bar-chart-3"></i>أرقامي</button>
                 </div>
                 <div class="adv-cstat" id="advCStat" hidden></div>
                 <div class="adv-msgs" id="advMsgs" aria-live="polite"></div>
                 <div id="advRateChat"></div>
                 <div class="adv-comp">
-                    <button type="button" class="adv-cbtn" data-adv="photo" aria-label="أرسل صورة">📷</button>
-                    <button type="button" class="adv-cbtn" id="advLocBtn" data-adv="gps" aria-label="أرسل موقعي الآن" hidden>📍</button>
+                    <button type="button" class="adv-cbtn" data-adv="photo" aria-label="أرسل صورة"><i data-lucide="camera"></i></button>
+                    <button type="button" class="adv-cbtn" id="advLocBtn" data-adv="gps" aria-label="أرسل موقعي الآن" hidden><i data-lucide="map-pin"></i></button>
                     <textarea id="advText" rows="1" maxlength="1000" dir="auto" placeholder="اكتب رسالتك…" aria-label="نصّ الرسالة"></textarea>
-                    <button type="button" class="adv-cbtn send" id="advSend" data-adv="send" aria-label="إرسال" hidden><span>➤</span></button>
-                    <button type="button" class="adv-cbtn mic" id="advMic" aria-label="اضغط وتكلّم لإرسال رسالة صوتيّة">🎤</button>
+                    <button type="button" class="adv-cbtn send" id="advSend" data-adv="send" aria-label="إرسال" hidden><span><i data-lucide="send-horizontal"></i></span></button>
+                    <button type="button" class="adv-cbtn mic" id="advMic" aria-label="اضغط وتكلّم لإرسال رسالة صوتيّة"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"></path><path d="M19 10v2a7 7 0 0 1-14 0v-2"></path><path d="M12 19v3"></path></svg></button>
                     <div class="adv-recbar" id="advRecBar"><button type="button" class="adv-rec-x" data-adv="rec-cancel" aria-label="إلغاء التسجيل">✕</button><span class="dot"></span><b id="advRecT">0:00</b><span id="advRecH">⬆️ اسحب لأعلى للإلغاء</span></div>
                 </div>
                 <input type="file" id="advFile" accept="image/*" hidden>
@@ -4218,18 +4403,12 @@ window.togglePassView = function(btn) {
 };
 
 window.switchListTab = function(tab) {
- document.getElementById("tabLiveOrders").style.background = "transparent";
- document.getElementById("tabLiveOrders").style.border = "1px solid transparent";
- document.getElementById("tabTodayArchive").style.background = "transparent";
- document.getElementById("tabTodayArchive").style.border = "1px solid transparent";
+ document.getElementById("tabLiveOrders").classList.toggle("active", tab === "live");
+ document.getElementById("tabTodayArchive").classList.toggle("active", tab !== "live");
  if (tab === "live") {
-  document.getElementById("tabLiveOrders").style.background = "rgba(255,255,255,0.8)";
-  document.getElementById("tabLiveOrders").style.border = "1px solid rgba(0,0,0,0.05)";
   document.getElementById("activeOrdersList").classList.remove("hidden-section");
   document.getElementById("todayArchiveList").classList.add("hidden-section");
  } else {
-  document.getElementById("tabTodayArchive").style.background = "rgba(255,255,255,0.8)";
-  document.getElementById("tabTodayArchive").style.border = "1px solid rgba(0,0,0,0.05)";
   document.getElementById("todayArchiveList").classList.remove("hidden-section");
   document.getElementById("activeOrdersList").classList.add("hidden-section");
  }
@@ -6240,13 +6419,15 @@ function advOnMeta(prevUnread) {
   badge.textContent = un > 9 ? "9+" : String(un);
  }
  if (fab) fab.classList.toggle("has-unread", un > 0 && !advOpen);
+ const ft = advEl("advFabT");
+ if (ft) ft.textContent = un > 0 && !advOpen ? "رسالة جديدة" : "مستشارك";
  if (advMetaSeen && un > prevUnread && !advOpen) {
   if (navigator.vibrate) {
    try {
     navigator.vibrate([ 60, 40, 60 ]);
    } catch (_) {}
   }
-  showToastMsg("🐳 وصلك ردٌّ من مستشارك — اضغط زرّ «مستشارك» لقراءته.", 7e3);
+  showToastMsg("وصلك ردٌّ من مستشارك — اضغط زرّ «مستشارك» لقراءته.", 7e3);
  }
  advMetaSeen = true;
  advAskSync();
@@ -7470,7 +7651,7 @@ function advRenderChat() {
  if (!ks.length) {
   if (advMsgsLoaded || !advMsgsOff) {
    const nm = String(currentResName || "").trim(), per = advPersona();
-   h = '<div class="adv-welcome"><div class="wv" aria-hidden="true">🐳</div>' + "<b>" + ((new Date).getHours() < 12 ? "صباح الخير" : "مساء الخير") + (nm ? "، " + escapeHtml(nm) : "") + " 👋</b>" + "<span>" + (per ? "معك <b>" + escapeHtml(advFirst(per)) + "</b> من فريق مستشارك" : "فريق مستشارك معك") + " — احكِ لنا بصوتك أو اكتب، ونردّ عليك هنا.</span>" + '<div class="wh">🎤 اضغط المايكروفون وتكلّم، ثم ➤ للإرسال</div>' + '<div class="wh">☝️ أو اختر موضوعاً من الأزرار في الأعلى</div></div>';
+   h = '<div class="adv-welcome"><div class="wv" aria-hidden="true"><svg viewBox="0 0 24 24" width="30" height="30" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 9a2 2 0 0 1-2 2H6l-4 4V4c0-1.1.9-2 2-2h8a2 2 0 0 1 2 2v5Z"></path><path d="M18 9h2a2 2 0 0 1 2 2v11l-4-4h-6a2 2 0 0 1-2-2v-1"></path></svg></div>' + "<b>" + ((new Date).getHours() < 12 ? "صباح الخير" : "مساء الخير") + (nm ? "، " + escapeHtml(nm) : "") + "</b>" + "<span>" + (per ? "معك <b>" + escapeHtml(advFirst(per)) + "</b> من فريق مستشارك" : "فريق مستشارك معك") + " — احكِ لنا بصوتك أو اكتب، ونردّ عليك هنا.</span>" + '<div class="wh">اضغط المايكروفون وتكلّم، ثم أرسل</div>' + '<div class="wh">أو اختر موضوعاً من الأزرار في الأعلى</div></div>';
   } else h = '<div class="adv-hint">⏳ …</div>';
  } else {
   if (Object.keys(advMsgs).length >= 50) h += '<div class="adv-day">تظهر آخر ٥٠ رسالة</div>';
@@ -7788,7 +7969,9 @@ function advRecUi(mode) {
  mic.classList.toggle("rec", (mode === "rec" || mode === "starting") && !lock);
  mic.classList.toggle("cancel", mode === "cancel");
  mic.classList.toggle("lock", lock);
- mic.innerHTML = lock ? '<span class="snd">➤</span>' : "🎤";
+ const ADV_SVG_MIC = '<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"></path><path d="M19 10v2a7 7 0 0 1-14 0v-2"></path><path d="M12 19v3"></path></svg>';
+ const ADV_SVG_SEND = '<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m3 3 3 9-3 9 19-9Z"></path><path d="M6 12h16"></path></svg>';
+ mic.innerHTML = lock ? '<span class="snd">' + ADV_SVG_SEND + "</span>" : ADV_SVG_MIC;
  mic.setAttribute("aria-label", lock ? "إرسال الرسالة الصوتيّة" : "اضغط وتكلّم لإرسال رسالة صوتيّة");
  if (mode === "starting") {
   if (t) t.textContent = "…";

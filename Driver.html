@@ -34,7 +34,7 @@
  } catch (_) {}
 })();
 
-const CURRENT_APP_VERSION = "34.66-Nahla";
+const CURRENT_APP_VERSION = "34.67-Nahla";
 
 window.APP_VERSION = CURRENT_APP_VERSION;
 
@@ -344,6 +344,16 @@ select.inp-clay{appearance:none;-webkit-appearance:none;cursor:pointer;
 .sup-dot{position:absolute;top:-3px;left:-3px;width:11px;height:11px;border-radius:50%;background:var(--bad);
   border:2px solid var(--clay);display:none;}
 .sup-dot.on{display:block;animation:blink 1.3s infinite;}
+.sup-fab{position:fixed;left:14px;bottom:calc(max(16px,env(safe-area-inset-bottom)) + 84px);z-index:9000;display:flex;align-items:center;gap:7px;
+  height:50px;padding:0 16px 0 14px;border-radius:999px;border:none;background:var(--royal);color:#fff;font-family:inherit;font-weight:800;font-size:.86rem;
+  box-shadow:0 8px 22px rgba(0,0,0,.25);cursor:pointer;animation:supPulse 1.6s infinite;}
+.sup-fab[hidden]{display:none;}
+.sup-fab .sup-dot{position:absolute;top:-2px;left:-2px;}
+@keyframes supPulse{0%,100%{transform:scale(1);}50%{transform:scale(1.06);}}
+.await-bar{position:fixed;left:12px;right:12px;top:calc(max(10px,env(safe-area-inset-top)) + 4px);z-index:9500;display:flex;flex-direction:column;align-items:center;gap:2px;
+  padding:10px 14px;border-radius:14px;border:none;background:#B42318;color:#fff;font-family:inherit;text-align:center;box-shadow:0 8px 22px rgba(180,35,24,.35);cursor:pointer;}
+.await-bar[hidden]{display:none;}
+.await-bar b{font-size:.92rem;} .await-bar span{font-size:.74rem;opacity:.92;}
 #toasts{position:fixed;top:max(16px,env(safe-area-inset-top));left:50%;transform:translateX(-50%);z-index:60000;
   display:flex;flex-direction:column;gap:9px;width:93%;max-width:390px;pointer-events:none;}
 .toast{display:flex;align-items:center;gap:12px;padding:13px 15px;border-radius:var(--r);background:#fff;
@@ -1074,6 +1084,9 @@ window.__SND = {
 </div>
 
 <div id="toasts"></div>
+
+<button type="button" id="supFab" class="sup-fab" onclick="openChat()" aria-label="محادثة الليدر" hidden><svg class="si si-s" viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg><span>الليدر</span><span class="sup-dot on" id="chatDot"></span></button>
+<button type="button" id="awaitBar" class="await-bar" onclick="openChat()" hidden><b>⚠️ الليدر ينتظر جوابك على سؤاله</b><span>اضغط هنا وجاوب — التجاهل يوقف حسابك</span></button>
 
 <script>
 const LEGAL_DOCS = {
@@ -7242,6 +7255,11 @@ window.openChat = async function() {
  } catch (e) {}
  document.querySelectorAll(".sup-dot,#chatDot").forEach(d => d.classList.remove("on"));
  try {
+  const fab = document.getElementById("supFab"), bar = document.getElementById("awaitBar");
+  if (fab) fab.hidden = true;
+  if (bar) bar.hidden = true;
+ } catch (_) {}
+ try {
   const s = await withTimeout(get(ref(db, cPath() + "/status")), NET_TIMEOUT_MS, "chat");
   const st = s.val();
   if (!st || st === "closed") {
@@ -7268,6 +7286,11 @@ window.openChat = async function() {
 window.closeChat = function() {
  document.getElementById("chat").classList.add("dn");
  chatOpen = false;
+ try {
+  const un = Number(chatMeta && chatMeta.unread_driver || 0), aw = chatMeta && chatMeta.await && chatMeta.await.at, fab = document.getElementById("supFab"), bar = document.getElementById("awaitBar");
+  if (fab) fab.hidden = !(un > 0 || aw);
+  if (bar) bar.hidden = !aw;
+ } catch (_) {}
 };
 
 let _chImg = null;
@@ -7423,6 +7446,11 @@ function startChat() {
   document.querySelectorAll(".sup-dot,#chatDot").forEach(dot => {
    if (!chatOpen && un > 0) dot.classList.add("on"); else dot.classList.remove("on");
   });
+  try {
+   const fab = document.getElementById("supFab"), bar = document.getElementById("awaitBar"), aw = d.await && d.await.at;
+   if (fab) fab.hidden = chatOpen || !(un > 0 || aw);
+   if (bar) bar.hidden = chatOpen || !aw;
+  } catch (_) {}
   if (!chatOpen && un > 0 && d.last_msg_at > chatSeen && d.last_from === "leader") {
    chatSeen = d.last_msg_at;
    play("ready");

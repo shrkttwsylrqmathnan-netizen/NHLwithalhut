@@ -544,6 +544,18 @@ button,input,select,textarea{font-family:'Cairo',sans-serif;}
 .cc-st.oth{background:#fef3c7;color:#b45309;}
 .cc-st.w{background:#dbeafe;color:#1e40af;}
 .cc-st.cl{background:#f1f5f9;color:#64748b;}
+
+.cc-conv.cc-esc{background:#fff5f4;border:2px solid #f04438;box-shadow:0 0 0 3px rgba(240,68,56,.12);}
+.cc-escl{display:inline-block;margin-top:4px;font-size:.66rem;font-weight:900;color:#fff;background:#d92d20;padding:3px 9px;border-radius:7px;}
+.cc-escs{font-size:.74rem;font-weight:800;color:#b42318;margin-top:3px;white-space:normal;line-height:1.5;}
+.cc-escb{background:#d92d20;color:#fff;font-weight:900;font-size:.8rem;border-radius:12px;padding:10px 12px;margin-bottom:10px;text-align:center;}
+.chat-fab.esc,.chat-fab.adv-fab.esc{background:#d92d20;box-shadow:0 8px 24px rgba(217,45,32,.45);animation:escPulse 1.4s infinite;}
+@keyframes escPulse{0%,100%{transform:scale(1);}50%{transform:scale(1.08);}}
+.ai-esc-bar{position:fixed;top:calc(env(safe-area-inset-top) + 8px);left:50%;transform:translateX(-50%);z-index:9990;max-width:calc(100vw - 32px);
+  background:#d92d20;color:#fff;border:0;border-radius:999px;padding:9px 16px;font-family:inherit;font-weight:900;font-size:.82rem;
+  box-shadow:0 8px 24px rgba(217,45,32,.4);cursor:pointer;display:none;white-space:normal;text-align:center;line-height:1.5;width:max-content;}
+.ai-esc-bar.on{display:block;}
+#chatCenter.open~.ai-esc-bar,#advCenter.open~.ai-esc-bar{display:none !important;}   
 .cc-empty{text-align:center;color:#9aa8bd;font-weight:700;font-size:.85rem;padding:52px 16px;line-height:1.9;}
 .cc-sla{display:inline-flex;align-items:center;gap:3px;font-size:.62rem;font-weight:900;
   padding:2px 7px;border-radius:6px;margin-inline-start:5px;}
@@ -1344,6 +1356,7 @@ body.adv-on #fbSt{bottom:calc(154px + env(safe-area-inset-bottom));}
   <div class="sheet" id="avSheetBox"></div>
 </div>
 
+<button type="button" class="ai-esc-bar" id="aiEscBar" onclick="aiEscOpen()"></button>   
 <div id="bcModal" onclick="if(event.target.id==='bcModal')bcClose()">
   <div class="bc-box">
     <div class="bc-h">📣 بثّ موجّه للكباتن</div>
@@ -3573,6 +3586,139 @@ function _ccWait(c) {
  return Math.max(0, Math.floor((Date.now() - Number(c.last_msg_at)) / 6e4));
 }
 
+const ESC_MAX_MS = 6 * 36e5, ESC_RING_MS = 18e4;
+
+function _ccAiEsc(c) {
+ if (!c || !c.ai_escalated_at || c.status !== "open") return 0;
+ const t = Date.parse(c.ai_escalated_at) || 0;
+ if (!t || Date.now() - t > ESC_MAX_MS) return 0;
+ if (c.last_from === "leader" && !c.last_ai && Number(c.last_msg_at || 0) > t) return 0;
+ return t;
+}
+
+function _avAiEsc(p) {
+ const d = typeof _avAI !== "undefined" && _avAI ? _avAI[p] : null, t = d && d.sent ? Number(d.at) || 0 : 0;
+ return t && Date.now() - t <= ESC_MAX_MS ? t : 0;
+}
+
+function _escAgo(t) {
+ const m = Math.max(0, Math.round((Date.now() - t) / 6e4));
+ return m < 1 ? "الآن" : m < 60 ? "منذ " + m + " د" : "منذ " + Math.floor(m / 60) + " س";
+}
+
+function _escCard(t, sum, who) {
+ return '<div class="cc-escl">🐋 ' + who + " — تحتاجك · " + _escAgo(t) + "</div>" + (sum ? '<div class="cc-escs">' + esc(String(sum).slice(0, 140)) + "</div>" : "");
+}
+
+function _escAlarm() {
+ try {
+  const a = _AC();
+  if (!a) return;
+  [ 0, .2, .4 ].forEach((d, i) => {
+   const o = a.createOscillator(), g = a.createGain();
+   o.connect(g);
+   g.connect(a.destination);
+   o.type = "square";
+   o.frequency.value = i === 1 ? 660 : 990;
+   g.gain.setValueAtTime(.08, a.currentTime + d);
+   g.gain.exponentialRampToValueAtTime(.001, a.currentTime + d + .17);
+   o.start(a.currentTime + d);
+   o.stop(a.currentTime + d + .19);
+  });
+ } catch (e) {}
+}
+
+function _aiEscList() {
+ const out = [];
+ Object.keys(_ccChats || {}).forEach(p => {
+  const c = _ccChats[p] || {}, t = _ccAiEsc(c);
+  if (t) out.push({
+   k: "d" + p + "_" + t,
+   t: t,
+   kind: "d",
+   p: p,
+   name: c.driver_name || "كابتن",
+   sum: c.ai_esc_sum || ""
+  });
+ });
+ if (typeof _avAI !== "undefined" && _avAI) Object.keys(_avAI).forEach(p => {
+  const t = _avAiEsc(p);
+  if (t) out.push({
+   k: "r" + p + "_" + t,
+   t: t,
+   kind: "r",
+   p: p,
+   name: _avName(p),
+   sum: (_avAI[p] || {}).summary || ""
+  });
+ });
+ return out.sort((a, b) => a.t - b.t);
+}
+
+let _escSeen = new Set, _escReady = {
+ d: false,
+ r: false
+}, _escAlarmAt = 0, _escTimer = null;
+
+function _aiEscUpdate(src) {
+ if (typeof canDo === "function" && !canDo("message")) return;
+ const L = _aiEscList(), nd = L.filter(x => x.kind === "d").length, nr = L.length - nd;
+ const fab = document.getElementById("chatFab"), afab = document.getElementById("advFab"), bar = document.getElementById("aiEscBar");
+ if (fab) fab.classList.toggle("esc", nd > 0);
+ if (afab) afab.classList.toggle("esc", nr > 0);
+ if (bar) {
+  if (L.length) {
+   const x = L[0];
+   bar.textContent = "🐋 " + (L.length === 1 ? "إحالة تنتظرك من رفيقك في العمل" : L.length + " إحالات من رفاقك في العمل تنتظركم · أقدمها") + " · " + x.name + " · " + _escAgo(x.t);
+   bar.classList.add("on");
+  } else bar.classList.remove("on");
+ }
+ const fresh = [];
+ L.forEach(x => {
+  if (_escSeen.has(x.k)) return;
+  _escSeen.add(x.k);
+  if (_escReady[x.kind]) fresh.push(x);
+ });
+ if (src && !_escReady[src]) _escReady[src] = true;
+ const now = Date.now();
+ if (fresh.length) {
+  const x = fresh[fresh.length - 1];
+  _escAlarm();
+  _escAlarmAt = now;
+  toast("🐋 إحالة من رفيقك في العمل — " + esc(x.name) + (x.sum ? ": " + esc(String(x.sum).slice(0, 60)) : ""), "e");
+  _ccNotify("🐋 إحالة تنتظرك — " + x.name, String(x.sum || "افتح المحادثة"), "hut-aiesc", () => {
+   try {
+    window.focus();
+    aiEscOpen();
+   } catch (_) {}
+  });
+ } else if (L.length && now - _escAlarmAt >= ESC_RING_MS && now - L[0].t >= ESC_RING_MS) {
+  _escAlarm();
+  _escAlarmAt = now;
+ }
+ if (!_escTimer) _escTimer = setInterval(() => _aiEscUpdate(), 3e4);
+}
+
+window.aiEscOpen = function() {
+ const x = _aiEscList()[0];
+ if (!x) return;
+ if (x.kind === "d") {
+  openChatCenter();
+  setTimeout(() => {
+   try {
+    openThread(x.p);
+   } catch (_) {}
+  }, 60);
+ } else {
+  avOpenCenter();
+  setTimeout(() => {
+   try {
+    avOpenThread(x.p);
+   } catch (_) {}
+  }, 60);
+ }
+};
+
 function _ccSlaChip(c) {
  const w = _ccWait(c);
  if (w === null) return "";
@@ -3606,6 +3752,7 @@ function startChatCenter() {
   }
   _ccPrevUnread = totalUnread;
   renderChatList();
+  _aiEscUpdate("d");
   if (_ccActive) {
    renderThread();
    renderCtx();
@@ -3762,6 +3909,9 @@ function renderChatList() {
   if (n) n.textContent = cnt[k];
  });
  const arr = all.filter(c => _ccPassFilter(c) && _ccMatch(c)).sort((a, b) => {
+  const ea = _ccAiEsc(a), eb = _ccAiEsc(b);
+  if (!!ea !== !!eb) return ea ? -1 : 1;
+  if (ea && eb && ea !== eb) return ea - eb;
   if (_ccSort === "wait") {
    const wa = _ccWait(a), wb = _ccWait(b);
    if (wa !== null && wb === null) return -1;
@@ -3774,11 +3924,14 @@ function renderChatList() {
  if (!arr.length) {
   h = _ccSearch ? `<div class="cc-empty">لا نتيجة لـ «${esc(_ccSearch)}»<br>جرّب اسماً أو رقماً آخر</div>` : _ccFilter !== "all" ? '<div class="cc-empty">لا محادثات في هذا التصنيف</div>' : '<div class="cc-empty">لا محادثات بعد.<br>حين يراسلك كابتن ستظهر هنا فوراً 💬</div>';
  } else {
+  const nEsc = arr.filter(c => _ccAiEsc(c)).length;
+  if (nEsc) h += `<div class="cc-escb">🐋 ${nEsc === 1 ? "محادثة أحالها رفيقك في العمل تنتظرك" : nEsc + " محادثات أحالها رفاقك في العمل تنتظركم"} — افتحوها أوّلاً</div>`;
   arr.forEach(c => {
    const ub = Number(c.unread_leader || 0);
    const t = c.last_msg_at ? fmtHM(c.last_msg_at) : "";
    const on = _ccIsOnline(c.phone);
-   h += `<div class="cc-conv" onclick="openThread('${ej(c.phone)}')">\n        <div class="cc-av" style="${on ? "box-shadow:0 0 0 2.5px #86efac" : ""}">${drvAvatar(c.phone) || "🛵"}</div>\n        <div style="min-width:0">\n          <div class="cc-nm">${esc(c.driver_name || "كابتن")}</div>\n          <div class="cc-lm">${_ccLastWho(c)}${esc(c.last_msg || "...")}</div>\n          ${_ccStChip(c)}${_ccSlaChip(c)}\n        </div>\n        <div class="cc-meta"><div class="cc-tm">${t}</div>${ub > 0 ? `<div class="cc-ub">${ub}</div>` : ""}</div>\n      </div>`;
+   const et = _ccAiEsc(c);
+   h += `<div class="cc-conv${et ? " cc-esc" : ""}" onclick="openThread('${ej(c.phone)}')">\n        <div class="cc-av" style="${on ? "box-shadow:0 0 0 2.5px #86efac" : ""}">${drvAvatar(c.phone) || "🛵"}</div>\n        <div style="min-width:0">\n          <div class="cc-nm">${esc(c.driver_name || "كابتن")}</div>\n          <div class="cc-lm">${_ccLastWho(c)}${esc(c.last_msg || "...")}</div>\n          ${_ccStChip(c)}${_ccSlaChip(c)}\n          ${et ? _escCard(et, c.ai_esc_sum, "أحالها رفيقك في العمل") : ""}\n        </div>\n        <div class="cc-meta"><div class="cc-tm">${t}</div>${ub > 0 ? `<div class="cc-ub">${ub}</div>` : ""}</div>\n      </div>`;
   });
  }
  if (h === _ccListSig) return;
@@ -4002,10 +4155,10 @@ function renderCtx() {
    const price = Number(o[O.PRICE] || 0).toLocaleString("en-US");
    const mins = o[O.CREATED] ? Math.floor((Date.now() - new Date(o[O.CREATED]).getTime()) / 6e4) : null;
    const dblC = o[O.DOUBLE] === true ? `<span class="stb" style="background:var(--violet);color:#fff;font-size:.55rem">مزدوج</span>` : "";
-   h += `<div class="ctx-ord ${meta.cls}">\n        <div class="co-top">\n          <span class="co-id">#${esc(oid)} ${dblC}</span>\n          <span class="stb ${meta.chip}">${meta.txt}</span>\n          <span class="co-tm">⏰ ${esc(fmtHM(o[O.CREATED]))}${mins !== null && mins > 0 ? ` · ${mins} د` : ""}</span>\n        </div>\n        <div class="co-mid">\n          <span class="co-res">${rawOrders[o[O.ID]] && rawOrders[o[O.ID]].vehicle === "car" ? '<b style="color:#0ea5e9">🚗 سيارة · </b>' : ""}🍽 ${esc(o[O.RES] || "—")}</span>\n          <span class="co-pr">${price} د.ع</span>\n        </div>\n        ${o[O.AREA] && o[O.AREA] !== "غير محدد" ? `<div class="co-ar">📍 ${esc(o[O.AREA])}</div>` : ""}\n        <div class="co-acts">\n          <button class="co-b cust" ${cust ? "" : "disabled"} onclick="event.stopPropagation();ccDial('${ej(cust)}')">📞 الزبون</button>\n          <button class="co-b res"  ${resPh ? "" : "disabled"} onclick="event.stopPropagation();ccDial('${ej(resPh)}')">🍽 المطعم</button>\n          ${""}\n          ${canDo("withdraw") ? `<button class="co-b wd"   onclick="event.stopPropagation();ccWithdraw('${ej(oid)}','${ej(p)}')">↩ سحب</button>` : ""}\n          ${canDo("complete") ? `<button class="co-b fin"  onclick="event.stopPropagation();ccFinish('${ej(oid)}')">✔ إنهاء</button>` : ""}\n        </div>\n        ${resPh && canDo("message") ? `<button class="co-b adv" onclick="event.stopPropagation();avOpenForRes('${ej(resPh)}','${ej(oid)}')">🐳 محادثة المطعم</button>` : ""}\n      </div>`;
+   h += `<div class="ctx-ord ${meta.cls}">\n        <div class="co-top">\n          <span class="co-id">#${esc(oid)} ${dblC}</span>\n          <span class="stb ${meta.chip}">${meta.txt}</span>\n          <span class="co-tm">⏰ ${esc(fmtHM(o[O.CREATED]))}${mins !== null && mins > 0 ? ` · ${mins} د` : ""}</span>\n        </div>\n        <div class="co-mid">\n          <span class="co-res">${rawOrders[o[O.ID]] && rawOrders[o[O.ID]].vehicle === "car" ? '<b style="color:#0ea5e9">🚗 سيارة · </b>' : ""}🍽 ${esc(o[O.RES] || "—")}</span>\n          <span class="co-pr">${price} د.ع</span>\n        </div>\n        ${o[O.AREA] && o[O.AREA] !== "غير محدد" ? `<div class="co-ar">📍 ${esc(o[O.AREA])}</div>` : ""}\n        <div class="co-acts">\n          <button class="co-b cust" ${cust ? "" : "disabled"} onclick="event.stopPropagation();ccDial('${ej(cust)}')">💬 الزبون</button>\n          <button class="co-b res"  ${resPh ? "" : "disabled"} onclick="event.stopPropagation();ccDial('${ej(resPh)}')">💬 المطعم</button>\n          ${""}\n          ${canDo("withdraw") ? `<button class="co-b wd"   onclick="event.stopPropagation();ccWithdraw('${ej(oid)}','${ej(p)}')">↩ سحب</button>` : ""}\n          ${canDo("complete") ? `<button class="co-b fin"  onclick="event.stopPropagation();ccFinish('${ej(oid)}')">✔ إنهاء</button>` : ""}\n        </div>\n        ${resPh && canDo("message") ? `<button class="co-b adv" onclick="event.stopPropagation();avOpenForRes('${ej(resPh)}','${ej(oid)}')">🐳 محادثة المطعم</button>` : ""}\n      </div>`;
   });
  }
- h += `<div class="ctx-more">\n    <div class="ctx-hd">موقعه الآن</div>\n    <div id="ctxMapWrap">\n      <button class="ctx-a" style="width:100%" onclick="ccShowMap('${ej(p)}')">🗺️ عرض موقعه على الخريطة</button>\n    </div>\n    <div class="ctx-hd">إجراءات</div>\n    <div class="ctx-acts">\n      <button class="ctx-a" onclick="ccCall('${ej(p)}')">📞 اتصال</button>\n      <button class="ctx-a" onclick="ccWhats('${ej(p)}')">💬 واتساب</button>\n      <button class="ctx-a" onclick="ccLocate('${ej(p)}')">📍 موقعه</button>\n      <button class="ctx-a" onclick="ccPush('${ej(p)}','${ej(c.driver_name || "كابتن")}')">🔔 إشعار</button>\n    </div>\n    ${_ntCard(c)}\n  </div>`;
+ h += `<div class="ctx-more">\n    <div class="ctx-hd">موقعه الآن</div>\n    <div id="ctxMapWrap">\n      <button class="ctx-a" style="width:100%" onclick="ccShowMap('${ej(p)}')">🗺️ عرض موقعه على الخريطة</button>\n    </div>\n    <div class="ctx-hd">إجراءات</div>\n    <div class="ctx-acts">\n      <button class="ctx-a" onclick="ccWhats('${ej(p)}')">💬 واتساب</button>\n      <button class="ctx-a" onclick="ccLocate('${ej(p)}')">📍 موقعه</button>\n      <button class="ctx-a" onclick="ccPush('${ej(p)}','${ej(c.driver_name || "كابتن")}')">🔔 إشعار</button>\n    </div>\n    ${_ntCard(c)}\n  </div>`;
  if (h === _ccCtxSig) return;
  _ccCtxSig = h;
  const isMobile = el.id === "ctCtx";
@@ -4031,7 +4184,7 @@ function _ccResPhone(oid) {
 
 window.ccDial = function(p) {
  if (!p) return toast("لا يوجد رقم محفوظ لهذا الطرف", "e");
- location.href = "tel:" + (String(p).startsWith("0") ? p : "0" + p);
+ waOpen(p);
 };
 
 window.ccFinish = function(oid) {
@@ -4160,7 +4313,7 @@ function _ccDrawMap(phone, orders) {
 }
 
 window.ccCall = function(p) {
- location.href = "tel:" + (String(p).startsWith("0") ? p : "0" + p);
+ waOpen(p);
 };
 
 window.ccWhats = function(p) {
@@ -4356,7 +4509,7 @@ function _ntChip() {
 
 function _ntCard(c) {
  const l = _ntList(), old = _ntOld(c), ai = old.find(x => /^(🐋|🆘)/.test(x));
- return `<div class="nt-card">\n    <div class="nt-top"><div class="nt-ttl">📝 ملاحظات الليدرز عن الكابتن ${l.length ? `<span class="nt-cnt">${l.length}</span>` : ""}</div>\n      <button class="nt-open" onclick="ntOpen()">${l.length ? "فتح السجلّ" : "＋ أضف ملاحظة"}</button></div>\n    ${l.length ? `<div class="nt-mini">${l.slice(0, 2).map(n => _ntItem(n, false)).join("")}${l.length > 2 ? `<div class="nt-empty" style="padding:0 2px">و${l.length - 2} أخرى في السجلّ…</div>` : ""}</div>` : '<div class="nt-empty">لا ملاحظات بعد. سجّل ما يفيد زملاءك: تحذير، إشادة، مبالغ، التزام…<br>لا يراها الكابتن.</div>'}\n    ${ai ? `<div class="nt-ai"><b>🐋 آخر ما أحاله الليدر الذكيّ:</b> ${esc(ai.replace(/^(🆘 إسعاف · )?🐋 /, "").slice(0, 220))}</div>` : ""}\n  </div>`;
+ return `<div class="nt-card">\n    <div class="nt-top"><div class="nt-ttl">📝 ملاحظات الليدرز عن الكابتن ${l.length ? `<span class="nt-cnt">${l.length}</span>` : ""}</div>\n      <button class="nt-open" onclick="ntOpen()">${l.length ? "فتح السجلّ" : "＋ أضف ملاحظة"}</button></div>\n    ${l.length ? `<div class="nt-mini">${l.slice(0, 2).map(n => _ntItem(n, false)).join("")}${l.length > 2 ? `<div class="nt-empty" style="padding:0 2px">و${l.length - 2} أخرى في السجلّ…</div>` : ""}</div>` : '<div class="nt-empty">لا ملاحظات بعد. سجّل ما يفيد زملاءك: تحذير، إشادة، مبالغ، التزام…<br>لا يراها الكابتن.</div>'}\n    ${ai ? `<div class="nt-ai"><b>🐋 آخر ما أحاله رفيقك في العمل:</b> ${esc(ai.replace(/^(🆘 إسعاف · )?🐋 /, "").slice(0, 220))}</div>` : ""}\n  </div>`;
 }
 
 function _ntEnsure() {
@@ -4874,7 +5027,7 @@ function _ccSetComposer(enabled, hint) {
 window.ccTakeOver = function() {
  if (!_ccActive || !needPerm("message", "التواصل مع الكباتن")) return;
  const c = _ccChats[_ccActive] || {};
- if (!confirm(`المحادثة الآن مع ${c.claimed_by === "ai_leader" ? "🐋 الموظّف الآليّ " : ""}${c.claimed_by_name || "ليدر آخر"}.\n\nالاستحواذ ينقلها إليك ويُسجَّل باسمك${c.claimed_by === "ai_leader" ? " — ويصمت الموظّف فيها" : ""}. متأكد؟`)) return;
+ if (!confirm(`المحادثة الآن مع ${c.claimed_by === "ai_leader" ? "🐋 " : ""}${c.claimed_by_name || "ليدر آخر"}.\n\nالاستحواذ ينقلها إليك ويُسجَّل باسمك${c.claimed_by === "ai_leader" ? " — ويصمت الموظّف فيها" : ""}. متأكد؟`)) return;
  db.ref(`driver_chats/${_ccActive}`).update({
   status: "claimed",
   claimed_by: EMP_PHONE,
@@ -5265,6 +5418,7 @@ function startAdvisorCenter() {
   _avAI = snap.val() || {};
   _avListSig = "";
   avRenderList();
+  _aiEscUpdate("r");
   if (_avActive) {
    _avDraftSig = "";
    avRenderDraft();
@@ -5455,20 +5609,26 @@ function avRenderList() {
   const n = document.getElementById(id);
   if (n) n.textContent = cnt[k];
  });
- const arr = all.filter(c => _avPass(c, _avFilter) && _avMatch(c)).sort((a, b) => (Number(b.last_msg_at) || 0) - (Number(a.last_msg_at) || 0));
+ const arr = all.filter(c => _avPass(c, _avFilter) && _avMatch(c)).sort((a, b) => {
+  const ea = _avAiEsc(a.p), eb = _avAiEsc(b.p);
+  if (!!ea !== !!eb) return ea ? -1 : 1;
+  return (Number(b.last_msg_at) || 0) - (Number(a.last_msg_at) || 0);
+ });
  let h = "";
  if (!arr.length) {
   h = _avSearch ? `<div class="cc-empty">لا نتيجة لـ «${esc(_avSearch)}»<br>جرّب اسماً أو رقماً آخر</div>` : _avFilter !== "all" ? '<div class="cc-empty">لا محادثات في هذا التصنيف</div>' : '<div class="cc-empty">لا محادثات بعد.<br>حين يراسل مطعمٌ «مستشارك» تظهر هنا فوراً 🐳</div>';
  } else {
+  const nEscR = arr.filter(c => _avAiEsc(c.p)).length;
+  if (nEscR) h += `<div class="cc-escb">🐋 ${nEscR === 1 ? "خطوة أحالها رفيقك في العمل تنتظر قرارك" : nEscR + " خطوات أحالها رفاقك في العمل تنتظر قراركم"} — افتحوها أوّلاً</div>`;
   arr.forEach(c => {
-   const ub = Number(c.unread_leader || 0), cat = AV_CATS[c.cat] || AV_CATS.other, dr = !!_avAI[c.p];
+   const ub = Number(c.unread_leader || 0), cat = AV_CATS[c.cat] || AV_CATS.other, dr = !!_avAI[c.p], et = _avAiEsc(c.p);
    const kind = c.last_from === "res" ? {
     voice: "🎙️ ",
     image: "📷 ",
     loc: "📍 "
    }[c.last_kind] || "" : "";
    const rt = c.last_rating === "up" ? '<span class="av-rt" title="تقييم المطعم">⭐ 👍</span>' : c.last_rating === "down" ? '<span class="av-rt" title="تقييم المطعم">⭐ 👎</span>' : "";
-   h += `<div class="cc-conv" onclick="avOpenThread('${ej(c.p)}')">\n        <div class="cc-av av-av" title="${esc(cat.t)}">${cat.i}${dr ? '<i class="av-dot" title="اقتراح ردّ جاهز">💬</i>' : ""}</div>\n        <div style="min-width:0">\n          <div class="cc-nm">${esc(_avName(c.p))}${rt}</div>\n          <div class="cc-lm">${_avLastWho(c)}${kind}${esc(c.last_msg || "...")}</div>\n          ${_avStChip(c)}${dr ? '<span class="cc-st av-dr">💬 اقتراح</span>' : ""}\n        </div>\n        <div class="cc-meta"><div class="cc-tm">${c.last_msg_at ? fmtHM(Number(c.last_msg_at)) : ""}</div>${ub > 0 ? `<div class="cc-ub">${ub}</div>` : ""}</div>\n      </div>`;
+   h += `<div class="cc-conv${et ? " cc-esc" : ""}" onclick="avOpenThread('${ej(c.p)}')">\n        <div class="cc-av av-av" title="${esc(cat.t)}">${cat.i}${dr ? '<i class="av-dot" title="اقتراح ردّ جاهز">💬</i>' : ""}</div>\n        <div style="min-width:0">\n          <div class="cc-nm">${esc(_avName(c.p))}${rt}</div>\n          <div class="cc-lm">${_avLastWho(c)}${kind}${esc(c.last_msg || "...")}</div>\n          ${_avStChip(c)}${dr && !et ? '<span class="cc-st av-dr">💬 اقتراح</span>' : ""}\n          ${et ? _escCard(et, (_avAI[c.p] || {}).summary, "أحالها رفيقك في العمل") : ""}\n        </div>\n        <div class="cc-meta"><div class="cc-tm">${c.last_msg_at ? fmtHM(Number(c.last_msg_at)) : ""}</div>${ub > 0 ? `<div class="cc-ub">${ub}</div>` : ""}</div>\n      </div>`;
   });
  }
  if (h === _avListSig) return;
@@ -6369,7 +6529,7 @@ function _avFactsHtml(p, oid) {
  const cmp = num(pick(dv.complaints_30d, dv.complaints, f.complaints_30d, f.complaints));
  const nts = num(pick(dv.notes_30d, dv.notes, f.notes_30d));
  let drv = "";
- if (dPh || dNm) drv = `<div class="ctx-row" style="margin:8px 0 0"><span class="ctx-p">🛵 <b>${esc(dNm || "كابتن")}</b></span>${dPh ? `<button class="ctx-p nt-chip" onclick="ccDial('${ej(dPh)}')">📞 0${esc(dPh)}</button>` : ""}${cmp != null ? `<span class="ctx-p ${cmp > 0 ? "warn" : ""}">🗂 شكاوى ٣٠ يوماً <b>${cmp}</b></span>` : ""}${nts != null ? `<span class="ctx-p">📝 ملاحظات <b>${nts}</b></span>` : ""}</div>`;
+ if (dPh || dNm) drv = `<div class="ctx-row" style="margin:8px 0 0"><span class="ctx-p">🛵 <b>${esc(dNm || "كابتن")}</b></span>${dPh ? `<button class="ctx-p nt-chip" onclick="ccDial('${ej(dPh)}')">💬 0${esc(dPh)}</button>` : ""}${cmp != null ? `<span class="ctx-p ${cmp > 0 ? "warn" : ""}">🗂 شكاوى ٣٠ يوماً <b>${cmp}</b></span>` : ""}${nts != null ? `<span class="ctx-p">📝 ملاحظات <b>${nts}</b></span>` : ""}</div>`;
  const lines = Array.isArray(f.lines) ? f.lines.slice(0, 12).map(x => `<div class="nt-empty" style="padding:2px">• ${esc(String(x).slice(0, 200))}</div>`).join("") : "";
  const any = rows || chips || drv || lines;
  return `<div class="av-facts"><div class="nt-top"><div class="nt-ttl">📋 حقائق الطلب #${esc(String(oid).slice(-8))}</div><button class="nt-ab" onclick="avFacts()" title="تحديث">↻</button></div>\n    ${rows ? `<div class="tl-stages" style="margin-top:8px">${rows}</div>` : ""}\n    ${chips ? `<div class="ctx-row" style="margin:6px 0 0">${chips}</div>` : ""}${drv}${lines}\n    ${any ? "" : `<div class="nt-empty">لم أفهم شكل الردّ — الخام:</div><pre>${esc(JSON.stringify(f).slice(0, 1500))}</pre>`}\n  </div>`;
@@ -6709,7 +6869,7 @@ function avRenderCtx() {
   } catch (_) {}
  }
  const T = o ? _avTimes(p, o) : null, sit = o ? _avSit(o, T) : null;
- let h = `<div class="sb-res"><div class="sb-rn">🍽 <b>${esc(_avName(p))}</b><small>${cat ? cat.i + " " + esc(cat.t) + (why ? " · " + esc(why) : "") : "0" + esc(p)}</small></div>\n    <div class="sb-rb"><button onclick="ccCall('${ej(p)}')" title="اتصال">📞</button><button onclick="ccWhats('${ej(p)}')" title="واتساب">💬</button></div></div>`;
+ let h = `<div class="sb-res"><div class="sb-rn">🍽 <b>${esc(_avName(p))}</b><small>${cat ? cat.i + " " + esc(cat.t) + (why ? " · " + esc(why) : "") : "0" + esc(p)}</small></div>\n    <div class="sb-rb"><button onclick="ccWhats('${ej(p)}')" title="واتساب">💬</button></div></div>`;
  if (ords.length) {
   h += `<div class="sb-hd">طلبات المطعم الآن <span>${ords.length}</span></div><div class="sb-ords">` + ords.slice(0, 8).map(x => {
    const s = _avSit(x, _avTimes(p, x)), dr = _avHasDrv(x) ? String(dN(x.driverPhone)).split(/\s+/)[0] : "—";
@@ -6723,7 +6883,7 @@ function avRenderCtx() {
    return `<div class="sb-st ${st}"><i></i><b>${lb}</b><small>${isFinite(t) && t > 0 ? esc(_tlHM(t)) : ""}</small></div>`;
   }).join("");
   const pr = Number(o.price), hasD = _avHasDrv(o), km = sit.km != null ? sit.km : _avDrvKm(o);
-  h += `<div class="sb-ord t-${sit.tone}">\n      <div class="sb-ot">📍 <b>${esc(_avAreaTxt(o) || "طلب")}</b>${isFinite(pr) && pr > 0 ? ` · 💵 ${_avN(pr)}` : ""}<button class="sb-tl" onclick="openTimeline('${ej(o._id)}')" title="المسار الكامل">📜</button></div>\n      <div class="sb-steps">${steps}</div>\n      <div class="sb-sit">${esc(sit.t)}</div>\n      ${hasD ? `<div class="sb-drv">🛵 <b>${esc(dN(o.driverPhone))}</b><button onclick="ccDial('${ej(nP(o.driverPhone))}')">📞 اتصل بالكابتن</button></div>` : ""}\n    </div>`;
+  h += `<div class="sb-ord t-${sit.tone}">\n      <div class="sb-ot">📍 <b>${esc(_avAreaTxt(o) || "طلب")}</b>${isFinite(pr) && pr > 0 ? ` · 💵 ${_avN(pr)}` : ""}<button class="sb-tl" onclick="openTimeline('${ej(o._id)}')" title="المسار الكامل">📜</button></div>\n      <div class="sb-steps">${steps}</div>\n      <div class="sb-sit">${esc(sit.t)}</div>\n      ${hasD ? `<div class="sb-drv">🛵 <b>${esc(dN(o.driverPhone))}</b><button onclick="ccDial('${ej(nP(o.driverPhone))}')">💬 واتساب الكابتن</button></div>` : ""}\n    </div>`;
  } else h += `<div class="sb-empty">${ords.length ? "اختر طلباً من فوق لترى قصّته" : "لا طلبات لهذا المطعم الآن — المحادثة عامّة"}</div>`;
  _avCashLoad(p);
  if (canDo("message")) h += _avOpenDebts(p).slice(0, 3).map(x => {
