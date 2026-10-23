@@ -34,7 +34,7 @@
  } catch (_) {}
 })();
 
-const CURRENT_APP_VERSION = "34.65-Nahla";
+const CURRENT_APP_VERSION = "34.66-Nahla";
 
 window.APP_VERSION = CURRENT_APP_VERSION;
 
@@ -1751,6 +1751,8 @@ function vpnActive() {
 const MIN_DIST_M = 500, FALLBACK_MINS = 15, MIN_PICKUP_SECS = 120, RETRIES = 3;
 
 const AT_RES_BLOCK_M = 150, AT_RES_BLOCK_MINS = 10;
+
+const FINISH_MIN_M = 300, FINISH_MIN_MINS = 15;
 
 let DAILY_GOAL = Math.min(40, Math.max(5, parseInt(localStorage.getItem("nahla_goal")) || 15));
 
@@ -6247,6 +6249,7 @@ function listenOrders() {
      payType: f.payType || "المطعم يدفع",
      acceptedTime: srvMs,
      pickupTime: st2 === "picked_up" ? Math.min(srvMs, Date.now() - MIN_PICKUP_SECS * 1e3) : null,
+     pickupApprox: st2 === "picked_up",
      is_sovereign: f.is_sovereign || false,
      readyForPickup: f.ready_for_pickup === true
     });
@@ -6957,6 +6960,7 @@ window.orderAction = function(id, act, btn) {
    if (done) {
     o.state = "picked_up";
     o.pickupTime = Date.now();
+    o.pickupApprox = false;
     localStorage.setItem("nahla_orders", JSON.stringify(active));
     renderOrders();
    } else {
@@ -6988,13 +6992,62 @@ window.orderAction = function(id, act, btn) {
   const slack = acc > 0 && acc < 400 ? Math.min(acc, 250) : 120;
   const timeOk = mins >= FALLBACK_MINS, pickOk = secs >= MIN_PICKUP_SECS;
   const suspicious = !timeOk;
-  if (!pickOk) {
+  let finishAskServer = false;
+  if (o.resLat && o.resLng) {
+   if (dm === null || !locFresh()) {
+    btn.innerHTML = orig;
+    btn.disabled = false;
+    try {
+     navigator.geolocation?.getCurrentPosition(pp => {
+      markFix(pp.coords.latitude, pp.coords.longitude, pp.coords.accuracy);
+     }, () => {}, {
+      enableHighAccuracy: true,
+      timeout: 8e3,
+      maximumAge: 0
+     });
+    } catch (e) {}
+    toast("📍 موقعك غير محدَّث — شغّل الموقع (GPS) وانتظر ثوانٍ، ثم أعد المحاولة.", "bad");
+    try {
+     track("finish_blocked_loc", {
+      m: mins
+     });
+    } catch (_) {}
+    return;
+   }
+   if (dm < FINISH_MIN_M) {
+    btn.innerHTML = orig;
+    btn.disabled = false;
+    toast("🏪 أنت ما زلت قريباً من المطعم.<br>سلّم الطلب للزبون أولاً، ثم أكّد التسليم.<br><small>الزبون قريب جداً من المطعم؟ راسل الليدر.</small>", "bad");
+    try {
+     track("finish_blocked_near", {
+      d: Math.round(dm),
+      m: mins
+     });
+    } catch (_) {}
+    return;
+   }
+  }
+  if (secs < FINISH_MIN_MINS * 60) {
+   if (!o.pickupApprox) {
+    btn.innerHTML = orig;
+    btn.disabled = false;
+    toast("⏳ لا يمكن تأكيد التسليم الآن — لم يمرّ وقتٌ كافٍ على استلام الطلب.<br>أكمل التوصيل، وإن سلّمته فعلاً راسل الليدر.", "bad");
+    try {
+     track("finish_blocked_time", {
+      m: mins
+     });
+    } catch (_) {}
+    return;
+   }
+   finishAskServer = true;
+  }
+  if (!pickOk && !finishAskServer) {
    btn.innerHTML = orig;
    btn.disabled = false;
    toast("⏳ لم تمرّ دقيقتان على الاستلام.<br>أعد المحاولة بعد قليل.", "bad");
    return;
   }
-  if (dm !== null && locFresh() && dm < AT_RES_BLOCK_M && secs < AT_RES_BLOCK_MINS * 60) {
+  if (false && dm !== null && locFresh() && dm < AT_RES_BLOCK_M && secs < AT_RES_BLOCK_MINS * 60) {
    btn.innerHTML = orig;
    btn.disabled = false;
    toast("🏪 أنت ما زلت عند المطعم.<br>سلّم الطلب للزبون أولاً، ثم أكّد التسليم.<br><small>الزبون قريب جداً من المطعم؟ راسل الليدر.</small>", "bad");
@@ -7016,7 +7069,8 @@ window.orderAction = function(id, act, btn) {
    uA[`active_orders/${id}/completed_at`] = now;
    uA[`active_orders/${id}/last_update`] = now;
    const uB = {};
-   let ok = await guaranteedWrite(uA, `active_orders/${id}/status`, "completed");
+   let ok = finishAskServer ? false : await guaranteedWrite(uA, `active_orders/${id}/status`, "completed");
+   let finishRefused = false;
    if (!ok) {
     try {
      let dd = null;
@@ -7032,7 +7086,10 @@ window.orderAction = function(id, act, btn) {
      }
      if (dd && dd.success) {
       ok = true;
-      toast("✅ سُجّل التسليم عبر الخادم البديل.", "ok");
+      if (!finishAskServer) toast("✅ سُجّل التسليم عبر الخادم البديل.", "ok");
+     } else if (dd && dd.guard) {
+      finishRefused = true;
+      toast(dd.msg, "bad");
      } else if (dd && dd.msg) {
       toast("⚠️ " + dd.msg, "bad");
      }
@@ -7041,6 +7098,17 @@ window.orderAction = function(id, act, btn) {
       reason: String(e && e.message || e).slice(0, 60)
      });
     }
+   }
+   if (!ok && finishRefused) {
+    btn.innerHTML = orig;
+    btn.disabled = false;
+    return;
+   }
+   if (!ok && finishAskServer) {
+    btn.innerHTML = orig;
+    btn.disabled = false;
+    toast("⚠️ تعذّر الوصول إلى الخادم للتحقّق من التسليم — أعد المحاولة بعد قليل.", "bad");
+    return;
    }
    if (!ok) {
     btn.innerHTML = orig;
