@@ -310,6 +310,18 @@ button,input,select,textarea{font-family:'Cairo',sans-serif;}
 .fp.fr.on{background:linear-gradient(135deg,var(--rose),#dc2626);}
 .fp.fa{color:var(--amber);}
 .fp.fa.on{background:linear-gradient(135deg,var(--amber),#d97706);}
+
+.fp.fu{color:#0B5D4B;}.fp.fu.on{background:#0B5D4B;color:#fff;}
+.oc.oc-itt{border:2px solid #0B5D4B;}
+.itt-band{display:flex;align-items:center;justify-content:space-between;gap:8px;margin:-13px -13px 10px;padding:7px 12px;background:#0B5D4B;color:#fff;font-size:.74rem;font-weight:800;border-radius:var(--r5) var(--r5) 0 0;}
+.itt-band .z{background:#F2B33D;color:#3A2A00;border-radius:999px;padding:1px 9px;font-size:.64rem;font-weight:900;}
+.itt-box{margin-top:9px;border-radius:12px;background:#E3F1EC;color:#0B3F33;padding:8px 10px;font-size:.74rem;font-weight:700;line-height:1.7;}
+.itt-box .itt-cd{display:inline-block;border-radius:999px;padding:1px 9px;background:#fff;color:#0B5D4B;font-weight:900;margin-inline-start:4px;}
+.itt-box .itt-cd.late{background:#B42318;color:#fff;}
+.itt-box .itt-it{color:#4F635C;font-weight:600;font-size:.7rem;}
+.itt-box .itt-ref{margin-top:5px;border-radius:9px;background:#FDECEA;color:#B42318;padding:4px 8px;font-weight:800;}
+.itt-acts{display:flex;gap:6px;flex-wrap:wrap;margin-top:6px;}
+.itt-acts button{height:28px;border-radius:9px;border:1px solid #BFDCD1;background:#fff;color:#0B5D4B;font-weight:800;font-size:.68rem;padding:0 10px;cursor:pointer;font-family:inherit;}
 .fp.fo{color:var(--fire);}
 .fp.fo.on{background:linear-gradient(135deg,var(--fire),var(--fire-d));}
 .fp.fg{color:var(--jade);}
@@ -1192,6 +1204,7 @@ button,input,select,textarea{font-family:'Cairo',sans-serif;}
             <button class="fp fg" onclick="doFilt('active',this)">قيد التوصيل <span class="fc" id="cAc">0</span></button>
             <button class="fp fo" onclick="doFilt('dlyr',this)">🕐 متأخر بالمطعم <span class="fc" id="cDR">0</span></button>
             <button class="fp fa" onclick="doFilt('dlyd',this)">🛵 متأخر بالطريق <span class="fc" id="cDD">0</span></button>
+            <button class="fp fu" onclick="doFilt('itt',this)">🏪 الاتحاد <span class="fc" id="cIt">0</span></button>
           </div>
           <div id="radM" class="og"></div>
         </div>
@@ -1204,6 +1217,7 @@ button,input,select,textarea{font-family:'Cairo',sans-serif;}
           <button class="fp fg" onclick="doFilt('active',this)">قيد التوصيل <span class="fc" id="cAcD">0</span></button>
           <button class="fp fo" onclick="doFilt('dlyr',this)">🕐 متأخر بالمطعم <span class="fc" id="cDRD">0</span></button>
           <button class="fp fa" onclick="doFilt('dlyd',this)">🛵 متأخر بالطريق <span class="fc" id="cDDD">0</span></button>
+          <button class="fp fu" onclick="doFilt('itt',this)">🏪 الاتحاد <span class="fc" id="cItD">0</span></button>
         </div>
         <div id="radD" class="og"></div>
       </div>
@@ -1501,7 +1515,8 @@ const O = {
  COMM: 13,
  PAY: 14,
  DOUBLE: 15,
- RESPH: 16
+ RESPH: 16,
+ ITT: 17
 };
 
 const R = {
@@ -2458,7 +2473,9 @@ function setupFB() {
   if (obj) {
    Object.values(obj).forEach(o => {
     if (!o.restaurant?.trim()) return;
-    let a = [ o.id || "", o.restaurant || "", o.area || "غير محدد", o.details || "طلب توصيل", o.price || 0, o.status || "pending", o.driverPhone || "", o.last_update || o.timestamp || "", o.photoUrl || "", o.is_sovereign || false, o.last_update || "", o.last_offered_to || "", o.ready_for_pickup || false, o.comm ?? null, o.payType || "", o.is_double || false, o.resPhone || "" ];
+    let a = [ o.id || "", o.restaurant || "", o.area || "غير محدد", o.details || "طلب توصيل", o.price || 0, o.status || "pending", o.driverPhone || "", o.last_update || o.timestamp || "", o.photoUrl || "", o.is_sovereign || false, o.last_update || "", o.last_offered_to || "", o.ready_for_pickup || false, o.comm ?? null, o.payType || "", o.is_double || false, o.resPhone || "", o.src === "ittihad" ? Object.assign({}, o.itt || {}, {
+     cust: o.cust_phone || ""
+    }) : null ];
     const st = String(o.status || "").toLowerCase().trim();
     const DONE = [ "completed", "مكتمل", "settled", "delivered", "done", "تم التسليم", "تم", "finished", "complete" ];
     const isDone = DONE.includes(st) || DONE.includes(o.status) || st === "deleted" || o.status === "deleted";
@@ -2487,9 +2504,11 @@ function setupFB() {
   liveOrd = active;
   archOrd = arch;
   if (_map) _paintMapDeb();
-  const np = active.filter(o => !o[O.DRV] || [ "pending_driver", "system_routing", "manual_pending" ].includes(o[O.DRV])).length;
+  const itW = o => o[O.STATUS] === "res_pending" || o[O.STATUS] === "res_accepted";
+  const np = active.filter(o => !itW(o) && (!o[O.DRV] || [ "pending_driver", "system_routing", "manual_pending" ].includes(o[O.DRV]))).length;
   if (np > pendCnt) document.getElementById("snd").play().catch(() => {});
   const hasE = active.some(o => {
+   if (itW(o)) return false;
    const hd = o[O.DRV] && ![ "pending_driver", "system_routing", "manual_pending" ].includes(o[O.DRV]);
    return !hd && o[O.TIME] && (now - new Date(o[O.TIME]).getTime()) / 6e4 >= 3;
   });
@@ -6431,10 +6450,31 @@ window.doFilt = function(f, btn) {
  renderRadar();
 };
 
+function ittBoxIn(itt, st, resPh) {
+ const n0 = Date.now(), items = Array.isArray(itt.items) ? itt.items : [], N = v => (Number(v) || 0).toLocaleString("en-US");
+ const its = items.slice(0, 3).map(x => (Number(x.q) || 1) + "× " + esc(x.n || "")).join("، ") + (items.length > 3 ? " …" : "");
+ let stage = "";
+ if (st === "res_pending") {
+  const left = Math.max(0, Math.ceil(((Number(itt.cancel_at) || n0) - n0) / 6e4));
+  const late = n0 >= (Number(itt.warn_at) || Infinity);
+  stage = `ينتظر قرار المطعم <span class="itt-cd ${late ? "late" : ""}">${left > 0 ? "باقي " + left + " د" : "يُلغى الآن"}</span>${late ? " — اتّصلوا بالمطعم" : ""}`;
+ } else if (st === "res_accepted") {
+  const rel = Number(itt.rel_at) || 0;
+  stage = `جاهز خلال ~${Number(itt.prep) || 0} د · الكابتن ${rel > n0 ? "يُطلب بعد ~" + Math.ceil((rel - n0) / 6e4) + " د" : "يُطلب الآن"}`;
+ } else if (itt.prep) stage = `وقت التحضير ${Number(itt.prep)} د`;
+ const rp = nP(resPh || "");
+ return `<div>الزبون يدفع <b>${N(itt.total)}</b> د.ع · طلب ${N(itt.sub)} + توصيل ${N(itt.fee)}${itt.km ? " (" + itt.km + " كم)" : ""}</div>${its ? `<div class="itt-it">${its}</div>` : ""}${stage ? `<div>${stage}</div>` : ""}${itt.refused ? `<div class="itt-ref">📵 الكابتن أبلغ: الزبون رفض الاستلام — ${itt.refused.near ? "موقعه عند باب الزبون ✓" : "موقعه لا يؤكّد"} · قرّروا إرجاع الطلب للمطعم</div>` : ""}\n    <div class="itt-acts">${rp && st === "res_pending" ? `<button onclick="window.open('tel:0${ej(rp)}')">📞 اتّصل بالمطعم</button>` : ""}${itt.cust ? `<button onclick="window.open('tel:${ej(itt.cust)}')">📞 الزبون</button>` : ""}</div>`;
+}
+
 function renderRadar() {
  const now = Date.now();
  let list = [ ...liveOrd ];
- if (rfilt === "pending") list = list.filter(o => !o[O.DRV] || [ "pending_driver", "system_routing", "manual_pending" ].includes(o[O.DRV]));
+ const ittW = o => o[O.STATUS] === "res_pending" || o[O.STATUS] === "res_accepted";
+ if (rfilt === "pending") list = list.filter(o => !ittW(o) && (!o[O.DRV] || [ "pending_driver", "system_routing", "manual_pending" ].includes(o[O.DRV])));
+ if (rfilt === "itt") {
+  list = list.filter(o => o[O.ITT]);
+  list.sort((a, b) => ittW(b) - ittW(a));
+ }
  if (rfilt === "active") list = list.filter(o => o[O.DRV] && ![ "pending_driver", "system_routing", "manual_pending" ].includes(o[O.DRV]));
  if (rfilt === "dlyr") list = list.filter(o => o[O.STATUS] === "arrived_at_res" && o[O.TIME] && (now - new Date(o[O.TIME]).getTime()) / 6e4 > 10);
  if (rfilt === "dlyd") list = list.filter(o => [ "picked_up", "في الطريق", "heading" ].includes(o[O.STATUS]) && o[O.TIME] && (now - new Date(o[O.TIME]).getTime()) / 6e4 > 20);
@@ -6460,6 +6500,7 @@ function renderRadar() {
   const newIds = new Set;
   list.forEach(o => {
    const [oId, rN, oA, , oP, st, dp, oT, pU, isSov, , lastOff, isReady, , , isDoubleDB] = o;
+   const itt = o[O.ITT];
    const hD = dp && ![ "pending_driver", "system_routing", "manual_pending" ].includes(dp);
    const dn = hD ? dN(dp) : "جاري البحث...";
    const dMins = oT ? Math.floor((now - new Date(oT).getTime()) / 6e4) : 0;
@@ -6473,6 +6514,14 @@ function renderRadar() {
     clsCls = "os";
     sbCls = "stb-v";
     sbTxt = "👑 سيادي";
+   } else if (st === "res_pending") {
+    clsCls = "or";
+    sbCls = "stb-w";
+    sbTxt = "🏪 اتحاد — ينتظر قبول المطعم";
+   } else if (st === "res_accepted") {
+    clsCls = "oh";
+    sbCls = "stb-b";
+    sbTxt = "🏪 اتحاد — قبله المطعم ويُجهَّز";
    } else if (!hD || st === "pending_driver" || st === "manual_pending") {
     if (hD && (st === "manual_pending" || st === "pending_driver")) {
      clsCls = "or";
@@ -6499,14 +6548,18 @@ function renderRadar() {
    const jOId = ej(oId), jDP = ej(dp), jRN = ej(rN), jPU = ej(pU || "");
    const cardId = `oc-${esc(oId)}-${cId.slice(0, 3)}`;
    newIds.add(cardId);
-   const hash = `${st}|${dp}|${dMins}|${isSov}|${isReady}|${Boolean(pU)}|${isDbl}`;
+   const hash = `${st}|${dp}|${dMins}|${isSov}|${isReady}|${Boolean(pU)}|${isDbl}|${itt ? (itt.refused ? 1 : 0) + ":" + (itt.rel_at || 0) : ""}`;
    const dblB = isDbl ? `<span class="stb" style="background:var(--violet);color:#fff;font-size:.6rem">مزدوج</span>` : "";
    const sovB = isSov ? `<span class="stb stb-v" style="font-size:.6rem">👑</span>` : "";
    const ex = document.getElementById(cardId);
    if (ex) {
     if ((ex._h || "") !== hash) {
-     ex.className = `oc ${clsCls} flash`;
+     ex.className = `oc ${clsCls}${itt ? " oc-itt" : ""} flash`;
      ex._h = hash;
+     if (itt) {
+      const ib = ex.querySelector(".itt-box");
+      if (ib) ib.innerHTML = ittBoxIn(itt, st, o[O.RESPH]);
+     }
      const idEl = ex.querySelector(".oc-id");
      if (idEl) idEl.innerHTML = `#${esc(oId)} ${dblB}${sovB}`;
      const sb = ex.querySelector(".oc-sb");
@@ -6531,10 +6584,10 @@ function renderRadar() {
     }
     return;
    }
-   const delH = dMins > 3 && !hD ? `<div class="dl-pill">⚠️ ${dMins} دق</div>` : "";
+   const delH = dMins > 3 && !hD && !ittW(o) ? `<div class="dl-pill">⚠️ ${dMins} دق</div>` : "";
    const rejH = !hD && lastOff ? `<div class="rj-tag">✖ رفضه: ${esc(dN(lastOff))}</div>` : "";
    const rdH = isReady ? `<span class="rdy-badge">✔ جاهز</span>` : "";
-   const html = `<div id="${cardId}" class="oc ${clsCls} flash">${delH}\n        <div class="oc-head" style="${delH ? "margin-top:24px" : ""}">\n          <div><div class="oc-id">#${esc(oId)} ${dblB}${sovB}</div><div class="oc-tm">⏰ ${tF}</div></div>\n        </div>\n        <div class="oc-acts oc-acts-row">${bBtns(hD, jOId, jDP, jRN, jPU, isReady, sbCls, sbTxt)}</div>\n        <div class="oc-body">\n          <div class="oc-row"><div class="oc-res">🍽 ${esc(rN)}</div><div class="oc-pr">${oP || 0} د.ع</div></div>\n          <div class="oc-dr">\n            <div class="oc-dn"><span>🛵 ${esc(dn)}</span></div>\n            <div class="oc-dc">${bDC(hD, jOId, jDP, isSov, st)}</div>\n          </div>\n          ${oA && oA !== "غير محدد" ? `<div class="oc-ar">📍 ${esc(oA)}${rejH}</div>` : ""}\n          ${rdH}\n        </div>\n      </div>`;
+   const html = `<div id="${cardId}" class="oc ${clsCls}${itt ? " oc-itt" : ""} flash">${itt ? `<div class="itt-band"><span>🏪 اتحاد المتاجر</span><span class="z">عمولة صفر</span></div>` : ""}${delH}\n        <div class="oc-head" style="${delH ? "margin-top:24px" : ""}">\n          <div><div class="oc-id">#${esc(oId)} ${dblB}${sovB}</div><div class="oc-tm">⏰ ${tF}</div></div>\n        </div>\n        <div class="oc-acts oc-acts-row">${bBtns(hD, jOId, jDP, jRN, jPU, isReady, sbCls, sbTxt)}</div>\n        <div class="oc-body">\n          <div class="oc-row"><div class="oc-res">🍽 ${esc(rN)}</div><div class="oc-pr">${oP || 0} د.ع</div></div>\n          <div class="oc-dr">\n            <div class="oc-dn"><span>🛵 ${esc(dn)}</span></div>\n            <div class="oc-dc">${bDC(hD, jOId, jDP, isSov, st)}</div>\n          </div>\n          ${oA && oA !== "غير محدد" ? `<div class="oc-ar">📍 ${esc(oA)}${rejH}</div>` : ""}\n          ${rdH}\n          ${itt ? `<div class="itt-box">${ittBoxIn(itt, st, o[O.RESPH])}</div>` : ""}\n        </div>\n      </div>`;
    c.insertAdjacentHTML("beforeend", html);
    const newEl = document.getElementById(cardId);
    if (newEl) newEl._h = hash;
@@ -6644,7 +6697,7 @@ function bDC(hD, jOId, jDP, isSov, st) {
  let h = "";
  if (hD) h += `<button class="cb-sm" onclick="window.open('tel:${jDP}')">📞</button>`;
  if (hD && !isSov) h += `<button class="ob b-del" style="width:auto;padding:0 8px;font-size:.68rem;font-weight:800;height:28px" onclick="wdOrder('${jOId}','${jDP}',this)">↩ سحب</button>`;
- h += `<select class="asel" onchange="asgnDrv('${jOId}',this.value,this)">${drvSelOpts}</select>`;
+ if (st !== "res_pending" && st !== "res_accepted") h += `<select class="asel" onchange="asgnDrv('${jOId}',this.value,this)">${drvSelOpts}</select>`;
  return h;
 }
 
@@ -6655,12 +6708,14 @@ function updRadarCnts() {
   pending: 0,
   active: 0,
   dlyr: 0,
-  dlyd: 0
+  dlyd: 0,
+  itt: 0
  };
  liveOrd.forEach(o => {
   const dp = o[O.DRV], st = o[O.STATUS], t = o[O.TIME];
   const hD = dp && ![ "pending_driver", "system_routing", "manual_pending" ].includes(dp);
-  if (!hD) c.pending++; else c.active++;
+  if (o[O.ITT]) c.itt++;
+  if (st === "res_pending" || st === "res_accepted") {} else if (!hD) c.pending++; else c.active++;
   if (st === "arrived_at_res" && t && (now - new Date(t).getTime()) / 6e4 > 10) c.dlyr++;
   if ([ "picked_up", "في الطريق", "heading" ].includes(st) && t && (now - new Date(t).getTime()) / 6e4 > 20) c.dlyd++;
  });
@@ -6669,7 +6724,8 @@ function updRadarCnts() {
   pending: [ "cP", "cPD" ],
   active: [ "cAc", "cAcD" ],
   dlyr: [ "cDR", "cDRD" ],
-  dlyd: [ "cDD", "cDDD" ]
+  dlyd: [ "cDD", "cDDD" ],
+  itt: [ "cIt", "cItD" ]
  };
  Object.keys(m).forEach(k => m[k].forEach(id => {
   const el = document.getElementById(id);

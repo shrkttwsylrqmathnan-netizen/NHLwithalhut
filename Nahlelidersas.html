@@ -297,6 +297,20 @@ button,input,select,textarea{font-family:'Cairo',sans-serif;}
 .fp.fa{color:var(--amber-d);}.fp.fa.on{background:var(--amber);border-color:var(--amber);}
 .fp.fv{color:var(--violet);}.fp.fv.on{background:var(--violet);border-color:var(--violet);}
 
+.fp.fu{color:#0B5D4B;}.fp.fu.on{background:#0B5D4B;border-color:#0B5D4B;}
+.oc.oc-itt{border:2px solid #0B5D4B;background:#FFFFFF;padding-top:0;}
+.oc.oc-itt::after{display:none;}
+.itt-band{display:flex;align-items:center;justify-content:space-between;gap:8px;margin:0 -15px 12px;padding:8px 14px;background:#0B5D4B;color:#FFFFFF;font-size:.78rem;font-weight:800;}
+.itt-band .z{background:#F2B33D;color:#3A2A00;border-radius:999px;padding:1px 9px;font-size:.66rem;font-weight:900;}
+.itt-box{margin-top:10px;border-radius:12px;background:#E3F1EC;color:#0B3F33;padding:9px 11px;font-size:.76rem;font-weight:700;line-height:1.7;}
+.itt-box .itt-cd{display:inline-block;border-radius:999px;padding:1px 9px;background:#FFFFFF;color:#0B5D4B;font-weight:900;margin-inline-start:4px;}
+.itt-box .itt-cd.late{background:#B42318;color:#FFFFFF;}
+.itt-box .itt-it{color:#4F635C;font-weight:600;font-size:.72rem;}
+.itt-box .itt-ref{margin-top:6px;border-radius:9px;background:#FDECEA;color:#B42318;padding:5px 9px;font-weight:800;}   
+.itt-acts{display:flex;gap:6px;flex-wrap:wrap;margin-top:7px;}
+.itt-acts button{height:30px;border-radius:9px;border:1px solid #BFDCD1;background:#FFFFFF;color:#0B5D4B;font-weight:800;font-size:.7rem;padding:0 10px;cursor:pointer;font-family:inherit;}
+.stb-u{background:#0B5D4B;color:#FFFFFF;}
+
 .og{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:12px;}
 .oc{background:var(--surface);border-radius:14px;padding:15px;border:1px solid var(--line);
   position:relative;overflow:hidden;}
@@ -1235,6 +1249,7 @@ body.adv-on #fbSt{bottom:calc(154px + env(safe-area-inset-bottom));}
       <button class="fp on" onclick="doFilt('all',this)">الكل <span class="fc" id="cA">0</span></button>
       <button class="fp fr" onclick="doFilt('pending',this)">بانتظار كابتن <span class="fc" id="cP">0</span></button>
       <button class="fp fg" onclick="doFilt('active',this)">قيد التوصيل <span class="fc" id="cAc">0</span></button>
+      <button class="fp fu" onclick="doFilt('itt',this)">🏪 الاتحاد <span class="fc" id="cIt">0</span></button>
       <button class="fp fv" onclick="doFilt('sov',this)">👑 سيادي <span class="fc" id="cSv">0</span></button>
       <button class="fp fo" onclick="doFilt('dlyr',this)">🕐 متأخر بالمطعم <span class="fc" id="cDR">0</span></button>
       <button class="fp fa" onclick="doFilt('dlyd',this)">🛵 متأخر بالطريق <span class="fc" id="cDD">0</span></button>
@@ -1407,8 +1422,11 @@ const O = {
  COMM: 13,
  PAY: 14,
  DOUBLE: 15,
- CREATED: 16
+ CREATED: 16,
+ ITT: 17
 };
+
+const ittWait = o => o[O.STATUS] === "res_pending" || o[O.STATUS] === "res_accepted";
 
 const D = {
  ID: 0,
@@ -2265,7 +2283,9 @@ function attachDataListeners() {
    const DONE = [ "completed", "مكتمل", "settled", "delivered", "done", "تم التسليم", "تم", "finished", "complete" ];
    if (DONE.includes(st) || st === "deleted") return;
    raw[o.id || ""] = o;
-   active.push([ o.id || "", o.restaurant || "", o.area || "غير محدد", o.details || "طلب توصيل", o.price || 0, o.status || "pending", o.driverPhone || "", o.last_update || o.timestamp || "", o.photoUrl || "", o.is_sovereign || false, o.last_update || "", o.last_offered_to || "", o.ready_for_pickup || false, o.comm ?? null, o.payType || "", o.is_double || false, o.timestamp || o.last_update || "" ]);
+   active.push([ o.id || "", o.restaurant || "", o.area || "غير محدد", o.details || "طلب توصيل", o.price || 0, o.status || "pending", o.driverPhone || "", o.last_update || o.timestamp || "", o.photoUrl || "", o.is_sovereign || false, o.last_update || "", o.last_offered_to || "", o.ready_for_pickup || false, o.comm ?? null, o.payType || "", o.is_double || false, o.timestamp || o.last_update || "", o.src === "ittihad" ? Object.assign({}, o.itt || {}, {
+    cust: o.cust_phone || ""
+   }) : null ]);
   });
   rawOrders = raw;
   _ordIdx = null;
@@ -2275,7 +2295,7 @@ function attachDataListeners() {
   } catch (_) {}
   active.sort((a, b) => new Date(b[O.CREATED]) - new Date(a[O.CREATED]));
   liveOrd = active;
-  const np = active.filter(o => !o[O.DRV] || [ "pending_driver", "system_routing", "manual_pending" ].includes(o[O.DRV])).length;
+  const np = active.filter(o => o[O.STATUS] !== "res_pending" && o[O.STATUS] !== "res_accepted" && (!o[O.DRV] || [ "pending_driver", "system_routing", "manual_pending" ].includes(o[O.DRV]))).length;
   pendCnt = np;
   document.getElementById("vOrd").textContent = active.length;
   document.getElementById("vPend").textContent = np;
@@ -2749,6 +2769,8 @@ function minsBetween(a, b) {
 
 function statusLabel(st) {
  const m = {
+  res_pending: "🏪 اتحاد المتاجر — ينتظر قبول المطعم",
+  res_accepted: "🏪 اتحاد المتاجر — قبله المطعم ويُجهَّز",
   pending_driver: "بانتظار كابتن (الرادار يبحث)",
   manual_pending: "تعيين يدوي — جاري الرنين",
   accepted: "قَبِل الكابتن الطلب",
@@ -2773,7 +2795,7 @@ function _tlFallback(oId) {
  let flags = "";
  if (o.status === "arrived_at_res" && sinceUpdate > 10) flags += `<div class="tl-flag crit">🟠 الكابتن داخل المطعم منذ ${sinceUpdate} دقيقة — تأخير محتمل من المطعم في تجهيز الطلب.</div>`;
  if ([ "picked_up", "في الطريق", "heading" ].includes(o.status) && sinceUpdate > 20) flags += `<div class="tl-flag">🛵 الطلب في الطريق منذ ${sinceUpdate} دقيقة دون تحديث.</div>`;
- if (!hD && ageMin > 5) flags += `<div class="tl-flag crit">🔴 الطلب بلا كابتن منذ ${ageMin} دقيقة — يتطلب تدخّلاً.</div>`;
+ if (!hD && ageMin > 5 && o.status !== "res_pending" && o.status !== "res_accepted") flags += `<div class="tl-flag crit">🔴 الطلب بلا كابتن منذ ${ageMin} دقيقة — يتطلب تدخّلاً.</div>`;
  const meta = `<div class="tl-meta">\n    <div class="tl-meta-c"><div class="tl-meta-v">${ageMin}</div><div class="tl-meta-l">دقيقة منذ الإنشاء</div></div>\n    <div class="tl-meta-c"><div class="tl-meta-v">${sinceUpdate}</div><div class="tl-meta-l">دقيقة منذ آخر تحديث</div></div>\n    <div class="tl-meta-c"><div class="tl-meta-v" style="font-size:.95rem;color:#048a48">${Number(o.price) || 0}</div><div class="tl-meta-l">قيمة الطلب (د.ع)</div></div>\n  </div>`;
  const ev = [];
  ev.push({
@@ -2958,12 +2980,14 @@ function updCnts() {
   active: 0,
   sov: 0,
   dlyr: 0,
-  dlyd: 0
+  dlyd: 0,
+  itt: 0
  };
  liveOrd.forEach(o => {
   const dp = o[O.DRV], st = o[O.STATUS], t = o[O.TIME];
   const hD = dp && ![ "pending_driver", "system_routing", "manual_pending" ].includes(dp);
-  if (!hD) c.pending++; else c.active++;
+  if (o[O.ITT]) c.itt++;
+  if (ittWait(o)) {} else if (!hD) c.pending++; else c.active++;
   if (o[O.SOV] === true) c.sov++;
   if (st === "arrived_at_res" && t && (now - new Date(t).getTime()) / 6e4 > 10) c.dlyr++;
   if ([ "picked_up", "في الطريق", "heading" ].includes(st) && t && (now - new Date(t).getTime()) / 6e4 > 20) c.dlyd++;
@@ -2974,7 +2998,8 @@ function updCnts() {
   active: "cAc",
   sov: "cSv",
   dlyr: "cDR",
-  dlyd: "cDD"
+  dlyd: "cDD",
+  itt: "cIt"
  };
  Object.keys(m).forEach(k => {
   const el = document.getElementById(m[k]);
@@ -3070,7 +3095,11 @@ function orderStatusMeta(st, hasDriver, isSov) {
 function renderRadar() {
  const now = Date.now();
  let list = [ ...liveOrd ];
- if (rfilt === "pending") list = list.filter(o => !o[O.DRV] || [ "pending_driver", "system_routing", "manual_pending" ].includes(o[O.DRV]));
+ if (rfilt === "pending") list = list.filter(o => !ittWait(o) && (!o[O.DRV] || [ "pending_driver", "system_routing", "manual_pending" ].includes(o[O.DRV])));
+ if (rfilt === "itt") {
+  list = list.filter(o => o[O.ITT]);
+  list.sort((a, b) => ittWait(b) - ittWait(a));
+ }
  if (rfilt === "active") list = list.filter(o => o[O.DRV] && ![ "pending_driver", "system_routing", "manual_pending" ].includes(o[O.DRV]));
  if (rfilt === "sov") list = list.filter(o => o[O.SOV] === true);
  if (rfilt === "dlyr") list = list.filter(o => o[O.STATUS] === "arrived_at_res" && o[O.TIME] && (now - new Date(o[O.TIME]).getTime()) / 6e4 > 10);
@@ -3093,10 +3122,19 @@ function renderRadar() {
   const dMins = oCr ? Math.floor((now - new Date(oCr).getTime()) / 6e4) : 0;
   const tF = fmtHM(oCr);
   const isDbl = isDoubleDB === true;
-  const _m = orderStatusMeta(st, hD, isSov);
+  const itt = o[O.ITT];
+  const _m = itt && st === "res_pending" ? {
+   cls: "",
+   chip: "stb-u",
+   txt: "🏪 ينتظر قبول المطعم"
+  } : itt && st === "res_accepted" ? {
+   cls: "",
+   chip: "stb-u",
+   txt: "🏪 قبله المطعم — يُجهَّز"
+  } : orderStatusMeta(st, hD, isSov);
   const clsCls = _m.cls, sbCls = _m.chip, sbTxt = _m.txt;
   const jOId = ej(oId), jDP = ej(dp), jPU = ej(pU || ""), jRN = ej(rN);
-  const delH = dMins > 3 && !hD ? `<div class="dl-pill">⚠️ ${dMins} دق</div>` : "";
+  const delH = dMins > 3 && !hD && !(itt && ittWait(o)) ? `<div class="dl-pill">⚠️ ${dMins} دق</div>` : "";
   const rejH = !hD && lastOff ? `<div class="rj-tag">✖ رفضه: ${esc(dN(lastOff))}</div>` : "";
   const dblB = isDbl ? `<span class="stb" style="background:var(--violet);color:#fff;font-size:.6rem">مزدوج</span>` : "";
   const sovB = isSov ? `<span class="stb stb-v" style="font-size:.6rem">👑</span>` : "";
@@ -3105,13 +3143,33 @@ function renderRadar() {
   const wdBtn = hD && canDo("withdraw") ? `<button class="ob b-del" style="width:auto;padding:0 8px;font-size:.68rem;font-weight:800;height:32px" onclick="wdOrder('${jOId}','${jDP}',this)">${isSov ? "👑↩ سحب سيادي" : "↩ سحب"}</button>` : "";
   const okBtn = canDo("complete") ? `<button class="ob b-ok" onclick="forceComplete('${jOId}',this)" title="إكمال">✓</button>` : "";
   const delBtn = canDo("delete") ? `<button class="ob b-del" onclick="delOrder('${jOId}',this)" title="إلغاء">✕</button>` : "";
-  const asgBtn = canDo("assign") ? `<button class="asel" style="cursor:pointer;display:flex;align-items:center;justify-content:center;gap:5px" onclick="openAssign('${jOId}')">👑 تعيين كابتن</button>` : "";
+  const asgBtn = canDo("assign") && !(itt && ittWait(o)) ? `<button class="asel" style="cursor:pointer;display:flex;align-items:center;justify-content:center;gap:5px" onclick="openAssign('${jOId}')">👑 تعيين كابتن</button>` : "";
   let advBtn = "";
   try {
    const rp = _ccResPhone(oId);
    if (rp && canDo("message")) advBtn = `<button class="ob b-adv" onclick="avOpenForRes('${ej(rp)}','${jOId}')" title="محادثة المطعم في مستشارك">🐳</button>`;
   } catch (_) {}
-  html += `<div class="oc ${clsCls}">${delH}\n      <div class="oc-head" style="${delH ? "margin-top:24px" : ""}">\n        <div><div class="oc-id">#${esc(oId)} ${dblB}${sovB}</div><div class="oc-tm">⏰ ${tF}${!delH && dMins > 0 ? ` · ${dMins} د` : ""}</div></div>\n      </div>\n      <div class="oc-acts">\n        <div style="display:flex;align-items:center;gap:4px;flex-wrap:wrap">\n          <span class="stb ${sbCls}">${sbTxt}</span>\n          ${isReady ? '<span class="stb stb-g" style="font-size:.58rem">✔ جاهز</span>' : ""}\n        </div>\n        <div style="display:flex;align-items:center;gap:4px">\n          ${trackBtn}\n          <button class="ob b-tl" onclick="openTimeline('${jOId}')" title="مسار الطلب الزمني">📜</button>\n          ${advBtn}\n          ${jPU ? `<button class="ob b-img" onclick="opImg('${jPU}')" title="صورة">🖼</button>` : ""}\n          ${okBtn}\n          ${delBtn}\n        </div>\n      </div>\n      <div class="oc-body">\n        <div class="oc-row"><div class="oc-res">🍽 ${esc(rN)}</div><div class="oc-pr">${Number(oP) || 0} د.ع</div></div>\n\n        <div class="oc-dr">\n          <div class="oc-dn"><div class="ocd-av">${hD && drvAvatar(dp) || "🛵"}</div><span>${esc(dn)}</span></div>\n          <div class="oc-dc">\n            ${""}${hD ? `<button class="cb-sm" onclick="waOpen('${jDP}')" title="واتساب">💬</button>` : ""}\n            ${msgBtn}\n            ${wdBtn}\n            ${asgBtn}\n          </div>\n        </div>\n\n        ${oA && oA !== "غير محدد" ? `<div class="oc-ar">📍 ${esc(oA)}${rejH}</div>` : ""}\n      </div>\n    </div>`;
+  let ittHead = "", ittBox = "";
+  if (itt) {
+   const n0 = Date.now(), items = Array.isArray(itt.items) ? itt.items : [];
+   const its = items.slice(0, 3).map(x => (Number(x.q) || 1) + "× " + esc(x.n || "")).join("، ") + (items.length > 3 ? " …" : "");
+   let stage = "";
+   if (st === "res_pending") {
+    const left = Math.max(0, Math.ceil(((Number(itt.cancel_at) || n0) - n0) / 6e4));
+    const late = n0 >= (Number(itt.warn_at) || Infinity);
+    stage = `ينتظر قرار المطعم <span class="itt-cd ${late ? "late" : ""}">${left > 0 ? "باقي " + left + " د" : "يُلغى الآن"}</span>${late ? " — اتّصلوا بالمطعم" : ""}`;
+   } else if (st === "res_accepted") {
+    const rel = Number(itt.rel_at) || 0;
+    stage = `جاهز خلال ~${Number(itt.prep) || 0} د · الكابتن ${rel > n0 ? "يُطلب بعد ~" + Math.ceil((rel - n0) / 6e4) + " د" : "يُطلب الآن"}`;
+   } else if (itt.prep) stage = `وقت التحضير ${Number(itt.prep)} د`;
+   let rp = "";
+   try {
+    rp = _ccResPhone(oId);
+   } catch (_) {}
+   ittHead = `<div class="itt-band"><span>🏪 اتحاد المتاجر</span><span class="z">عمولة صفر</span></div>`;
+   ittBox = `<div class="itt-box"><div>الزبون يدفع <b>${(Number(itt.total) || 0).toLocaleString("en-US")}</b> د.ع · طلب ${(Number(itt.sub) || 0).toLocaleString("en-US")} + توصيل ${(Number(itt.fee) || 0).toLocaleString("en-US")}${itt.km ? " (" + itt.km + " كم)" : ""}</div>${its ? `<div class="itt-it">${its}</div>` : ""}${stage ? `<div>${stage}</div>` : ""}${itt.refused ? `<div class="itt-ref">📵 الكابتن أبلغ: الزبون رفض الاستلام — ${itt.refused.near ? "موقعه عند باب الزبون ✓" : "موقعه لا يؤكّد"} · قرّروا إرجاع الطلب للمطعم</div>` : ""}\n        <div class="itt-acts">${rp && st === "res_pending" ? `<button onclick="waOpen('0${ej(rp)}')">💬 واتساب المطعم</button>` : ""}${itt.cust ? `<button onclick="waOpen('${ej(itt.cust)}')">💬 واتساب الزبون</button>` : ""}</div></div>`;
+  }
+  html += `<div class="oc ${clsCls}${itt ? " oc-itt" : ""}">${ittHead}${delH}\n      <div class="oc-head" style="${delH ? "margin-top:24px" : ""}">\n        <div><div class="oc-id">#${esc(oId)} ${dblB}${sovB}</div><div class="oc-tm">⏰ ${tF}${!delH && dMins > 0 ? ` · ${dMins} د` : ""}</div></div>\n      </div>\n      <div class="oc-acts">\n        <div style="display:flex;align-items:center;gap:4px;flex-wrap:wrap">\n          <span class="stb ${sbCls}">${sbTxt}</span>\n          ${isReady ? '<span class="stb stb-g" style="font-size:.58rem">✔ جاهز</span>' : ""}\n        </div>\n        <div style="display:flex;align-items:center;gap:4px">\n          ${trackBtn}\n          <button class="ob b-tl" onclick="openTimeline('${jOId}')" title="مسار الطلب الزمني">📜</button>\n          ${advBtn}\n          ${jPU ? `<button class="ob b-img" onclick="opImg('${jPU}')" title="صورة">🖼</button>` : ""}\n          ${okBtn}\n          ${delBtn}\n        </div>\n      </div>\n      <div class="oc-body">\n        <div class="oc-row"><div class="oc-res">🍽 ${esc(rN)}</div><div class="oc-pr">${Number(oP) || 0} د.ع</div></div>\n\n        <div class="oc-dr">\n          <div class="oc-dn"><div class="ocd-av">${hD && drvAvatar(dp) || "🛵"}</div><span>${esc(dn)}</span></div>\n          <div class="oc-dc">\n            ${""}${hD ? `<button class="cb-sm" onclick="waOpen('${jDP}')" title="واتساب">💬</button>` : ""}\n            ${msgBtn}\n            ${wdBtn}\n            ${asgBtn}\n          </div>\n        </div>\n\n        ${oA && oA !== "غير محدد" ? `<div class="oc-ar">📍 ${esc(oA)}${rejH}</div>` : ""}\n        ${ittBox}\n      </div>\n    </div>`;
  });
  if (_total > _page.length) {
   html += `<div style="text-align:center;padding:14px 10px">\n      <button class="cc-f" style="padding:9px 20px;font-size:.8rem" onclick="_radarShown+=RADAR_PAGE*2;radarHtml='';renderRadar()">\n        ⬇ عرض المزيد — ${_total - _page.length} طلباً متبقياً</button></div>`;

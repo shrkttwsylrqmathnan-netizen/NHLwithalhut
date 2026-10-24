@@ -34,7 +34,7 @@
  } catch (_) {}
 })();
 
-const CURRENT_APP_VERSION = "34.67-Nahla";
+const CURRENT_APP_VERSION = "34.68-Nahla";
 
 window.APP_VERSION = CURRENT_APP_VERSION;
 
@@ -324,6 +324,8 @@ select.inp-clay{appearance:none;-webkit-appearance:none;cursor:pointer;
 .rp-t{font-size:.66rem;font-weight:800;color:var(--muted);margin-bottom:3px;}
 .rp-n{font-size:1.02rem;font-weight:800;color:var(--ink);line-height:1.35;}
 .acts{display:flex;gap:8px;flex-wrap:wrap;margin-top:11px;}
+.refz{display:block;width:100%;margin-top:9px;height:40px;border-radius:12px;border:1px solid #F1C9C4;background:#FFF6F5;color:#B42318;font-weight:800;font-size:.8rem;font-family:inherit;cursor:pointer;}   
+.refz:disabled{opacity:.6;}
 .act{flex:1;min-width:84px;padding:10px 8px;border-radius:10px;cursor:pointer;font-family:'Cairo',sans-serif;
   font-size:.78rem;font-weight:800;display:flex;align-items:center;justify-content:center;gap:5px;
   background:#fff;border:1px solid var(--line);transition:border-color .16s var(--ease);}
@@ -6102,7 +6104,8 @@ function _offerScan(fb, myId, pump) {
   resArea: f.resArea || null,
   comm: f.comm || 0,
   payType: f.payType || "المطعم يدفع",
-  is_sovereign: f.is_sovereign || false
+  is_sovereign: f.is_sovereign || false,
+  itt: f.src === "ittihad"
  };
  curOrder.okey = _offerKey(f);
  const _stamp = f.last_update ? new Date(f.last_update).getTime() : 0;
@@ -6264,7 +6267,8 @@ function listenOrders() {
      pickupTime: st2 === "picked_up" ? Math.min(srvMs, Date.now() - MIN_PICKUP_SECS * 1e3) : null,
      pickupApprox: st2 === "picked_up",
      is_sovereign: f.is_sovereign || false,
-     readyForPickup: f.ready_for_pickup === true
+     readyForPickup: f.ready_for_pickup === true,
+     itt: f.src === "ittihad"
     });
     if (f.ready_for_pickup === true) readySet.add(oid);
     restored++;
@@ -6561,7 +6565,8 @@ function finalizeAccept() {
   payType: curOrder.payType || "المطعم يدفع",
   acceptedTime: Date.now(),
   is_sovereign: curOrder.is_sovereign || false,
-  readyForPickup: false
+  readyForPickup: false,
+  itt: !!curOrder.itt
  };
  active.push(o);
  localStorage.setItem("nahla_orders", JSON.stringify(active));
@@ -6878,12 +6883,15 @@ function renderOrders() {
   const cm = det.match(/(07[0-9]{8,9})/);
   const cp = cm ? String(cm[0]) : null;
   const mp = o.resLat ? `https://www.google.com/maps/dir/?api=1&destination=${o.resLat},${o.resLng}` : "";
+  const cpin = det.match(/maps\.google\.com\/\?q=(-?\d{1,3}\.\d+),(-?\d{1,3}\.\d+)/);
+  const cmp = cpin ? `https://www.google.com/maps/dir/?api=1&destination=${cpin[1]},${cpin[2]}` : "";
+  const isItt = o.itt || /^🛒 طلب «اتحاد المتاجر»/.test(det);
   const tags = dbl ? `<span class="pill p-warn">🔥 مزدوج (${idx + 1}/${active.length})</span>` : "";
   const ready = o.readyForPickup ? `<div class="ready">${ICO.bell}<span class="ready-t">🍽️ الطلبية جاهزة — توجّه للاستلام!</span></div>` : "";
   const photo = o.photoUrl && /^https:\/\//.test(String(o.photoUrl)) ? `<button class="act a-img" data-receipt="${esc(o.photoUrl)}" onclick="openReceipt(this.dataset.receipt)">${ICO.img} الوصل</button>` : "";
   if (!o.resArea) enrichOrder(o);
   const pick = o.resArea ? ` (${esc(o.resArea)})` : "";
-  html += `<div class="ord" id="o-${sid(o.id)}">\n      <div class="ord-strip ${strip}"></div>\n      <div class="ord-b">\n        <div class="ord-hd">\n          <div><div class="ord-no">#${sid(o.id)}</div><div class="ord-tags">${tags}</div>\n            <div id="t-${sid(o.id)}" class="ord-tm tm-ok">${ICO.clk} --:--</div></div>\n          <div class="ord-pr"><div class="ord-pv">${num(o.price).toLocaleString("ar-EG")}<small> د.ع</small></div>\n            <button class="sup" onclick="openChat()" style="margin-top:9px;">${ICO.sup} ليدر<span class="sup-dot" id="d-${sid(o.id)}"></span></button></div>\n        </div>\n        <div class="steps">\n          <div class="step ${step >= 1 ? step === 1 ? "now" : "done" : ""}"><div class="step-d">${step > 1 ? "✓" : "1"}</div><span class="step-l">قبلت</span></div>\n          <div class="step ${step >= 2 ? step === 2 ? "now" : "done" : ""}"><div class="step-d">${step > 2 ? "✓" : "2"}</div><span class="step-l">بالمطعم</span></div>\n          <div class="step ${step >= 3 ? step === 3 ? "now" : "done" : ""}"><div class="step-d">${step > 3 ? "✓" : "3"}</div><span class="step-l">استلمت</span></div>\n          <div class="step ${step >= 4 ? "now" : ""}"><div class="step-d">🏁</div><span class="step-l">سلّمت</span></div>\n        </div>\n        ${ready}\n        <div class="route">\n          <div class="rp up"><div class="rp-t">📍 الاستلام من${pick}</div><div class="rp-n">${esc(o.resName)}</div>\n            <div class="acts">\n              ${rpn ? `<button class="act a-call" onclick="openLink('tel:${rpn}')">${ICO.call} اتصال</button>` : ""}\n              ${rwa ? `<button class="act a-wa" onclick="openLink('https://wa.me/${rwa}')">${ICO.wa} واتساب</button>` : ""}\n              ${mp ? `<button class="act a-map" onclick="openLink('${mp}')">${ICO.map} خريطة</button>` : ""}\n            </div></div>\n          <div class="rp dn2"><div class="rp-t">🏠 التسليم إلى (${esc(o.area)})</div><div class="rp-n">${esc(det)}</div>\n            <div class="acts">\n              ${cp ? `<button class="act a-call" onclick="openLink('tel:${cp}')">${ICO.call} اتصال</button>` : ""}\n              ${cp ? `<button class="act a-wa" onclick="smartWa('${jss(cp)}','${jss(o.resName)}','${jss(o.area)}','${sid(o.id)}','${num(o.price)}')">${ICO.wa} رسالة الزبون</button>` : ""}\n              ${photo}\n            </div></div>\n        </div>\n        <button class="cta ${bCls}" ${dis} onclick="orderAction('${sid(o.id)}','${sid(act)}',this)">${bTxt}</button>\n      </div></div>`;
+  html += `<div class="ord" id="o-${sid(o.id)}">\n      <div class="ord-strip ${strip}"></div>\n      <div class="ord-b">\n        <div class="ord-hd">\n          <div><div class="ord-no">#${sid(o.id)}</div><div class="ord-tags">${tags}</div>\n            <div id="t-${sid(o.id)}" class="ord-tm tm-ok">${ICO.clk} --:--</div></div>\n          <div class="ord-pr"><div class="ord-pv">${num(o.price).toLocaleString("ar-EG")}<small> د.ع</small></div>\n            <button class="sup" onclick="openChat()" style="margin-top:9px;">${ICO.sup} ليدر<span class="sup-dot" id="d-${sid(o.id)}"></span></button></div>\n        </div>\n        <div class="steps">\n          <div class="step ${step >= 1 ? step === 1 ? "now" : "done" : ""}"><div class="step-d">${step > 1 ? "✓" : "1"}</div><span class="step-l">قبلت</span></div>\n          <div class="step ${step >= 2 ? step === 2 ? "now" : "done" : ""}"><div class="step-d">${step > 2 ? "✓" : "2"}</div><span class="step-l">بالمطعم</span></div>\n          <div class="step ${step >= 3 ? step === 3 ? "now" : "done" : ""}"><div class="step-d">${step > 3 ? "✓" : "3"}</div><span class="step-l">استلمت</span></div>\n          <div class="step ${step >= 4 ? "now" : ""}"><div class="step-d">🏁</div><span class="step-l">سلّمت</span></div>\n        </div>\n        ${ready}\n        <div class="route">\n          <div class="rp up"><div class="rp-t">📍 الاستلام من${pick}</div><div class="rp-n">${esc(o.resName)}</div>\n            <div class="acts">\n              ${rpn ? `<button class="act a-call" onclick="openLink('tel:${rpn}')">${ICO.call} اتصال</button>` : ""}\n              ${rwa ? `<button class="act a-wa" onclick="openLink('https://wa.me/${rwa}')">${ICO.wa} واتساب</button>` : ""}\n              ${mp ? `<button class="act a-map" onclick="openLink('${mp}')">${ICO.map} خريطة</button>` : ""}\n            </div></div>\n          <div class="rp dn2"><div class="rp-t">🏠 التسليم إلى (${esc(o.area)})</div><div class="rp-n">${esc(det)}</div>\n            <div class="acts">\n              ${cp ? `<button class="act a-call" onclick="openLink('tel:${cp}')">${ICO.call} اتصال</button>` : ""}\n              ${cp ? `<button class="act a-wa" onclick="smartWa('${jss(cp)}','${jss(o.resName)}','${jss(o.area)}','${sid(o.id)}','${num(o.price)}')">${ICO.wa} رسالة الزبون</button>` : ""}\n              ${cmp ? `<button class="act a-map" onclick="openLink('${cmp}')">${ICO.map} موقع الزبون</button>` : ""}\n              ${photo}\n            </div></div>\n        </div>\n        <button class="cta ${bCls}" ${dis} onclick="orderAction('${sid(o.id)}','${sid(act)}',this)">${bTxt}</button>\n        ${isItt && o.state === "picked_up" ? `<button class="refz" onclick="ittRefused('${sid(o.id)}',this)">📵 الزبون رفض الاستلام</button>` : ""}\n      </div></div>`;
  });
  if (lastHtml !== html) {
   box.innerHTML = html;
@@ -6907,6 +6915,29 @@ function timers() {
 }
 
 setInterval(timers, 1e3);
+
+window.ittRefused = async function(id, btn) {
+ if (!confirm("اتّصلت بالزبون ووقفت عند بابه وما استلم الطلب؟\nيُسجَّل البلاغ بموقعك الحاليّ، والطلب يبقى باسمك حتى يكلّمك الليدر عن إرجاعه للمطعم.")) return;
+ const orig = btn.innerHTML;
+ btn.disabled = true;
+ btn.textContent = "يُرسل…";
+ try {
+  const d = await drvAction("ITT_REFUSED", id, "", 12e3);
+  if (d && d.success) {
+   btn.textContent = "✓ وصل البلاغ للإدارة";
+   toast(d.near || d.already ? "✅ وصل البلاغ — الليدر يكلّمك عن إرجاع الطلب للمطعم." : "✅ وصل البلاغ. موقعك لا يظهر عند باب الزبون — قف عند الدبّوس واتّصل بالليدر.", "ok");
+   try {
+    openChat();
+   } catch (_) {}
+   return;
+  }
+  toast("⚠️ " + (d && d.msg || "تعذّر الإرسال — أعد المحاولة."), "bad");
+ } catch (e) {
+  toast("⚠️ تعذّر الإرسال — تأكّد من الشبكة وأعد المحاولة.", "bad");
+ }
+ btn.disabled = false;
+ btn.innerHTML = orig;
+};
 
 window.orderAction = function(id, act, btn) {
  const o = active.find(x => String(x.id) === String(id));
