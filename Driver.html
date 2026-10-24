@@ -34,7 +34,7 @@
  } catch (_) {}
 })();
 
-const CURRENT_APP_VERSION = "34.68-Nahla";
+const CURRENT_APP_VERSION = "34.69-Nahla";
 
 window.APP_VERSION = CURRENT_APP_VERSION;
 
@@ -1766,6 +1766,8 @@ function vpnActive() {
 const MIN_DIST_M = 500, FALLBACK_MINS = 15, MIN_PICKUP_SECS = 120, RETRIES = 3;
 
 const AT_RES_BLOCK_M = 150, AT_RES_BLOCK_MINS = 10;
+
+const FINISH_GUARD_ON = false;
 
 const FINISH_MIN_M = 300, FINISH_MIN_MINS = 15;
 
@@ -7037,7 +7039,7 @@ window.orderAction = function(id, act, btn) {
   const timeOk = mins >= FALLBACK_MINS, pickOk = secs >= MIN_PICKUP_SECS;
   const suspicious = !timeOk;
   let finishAskServer = false;
-  if (o.resLat && o.resLng) {
+  if (FINISH_GUARD_ON && o.resLat && o.resLng) {
    if (dm === null || !locFresh()) {
     btn.innerHTML = orig;
     btn.disabled = false;
@@ -7071,7 +7073,7 @@ window.orderAction = function(id, act, btn) {
     return;
    }
   }
-  if (secs < FINISH_MIN_MINS * 60) {
+  if (FINISH_GUARD_ON && secs < FINISH_MIN_MINS * 60) {
    if (!o.pickupApprox) {
     btn.innerHTML = orig;
     btn.disabled = false;
@@ -7091,7 +7093,7 @@ window.orderAction = function(id, act, btn) {
    toast("⏳ لم تمرّ دقيقتان على الاستلام.<br>أعد المحاولة بعد قليل.", "bad");
    return;
   }
-  if (false && dm !== null && locFresh() && dm < AT_RES_BLOCK_M && secs < AT_RES_BLOCK_MINS * 60) {
+  if (!FINISH_GUARD_ON && dm !== null && locFresh() && dm < AT_RES_BLOCK_M && secs < AT_RES_BLOCK_MINS * 60) {
    btn.innerHTML = orig;
    btn.disabled = false;
    toast("🏪 أنت ما زلت عند المطعم.<br>سلّم الطلب للزبون أولاً، ثم أكّد التسليم.<br><small>الزبون قريب جداً من المطعم؟ راسل الليدر.</small>", "bad");
