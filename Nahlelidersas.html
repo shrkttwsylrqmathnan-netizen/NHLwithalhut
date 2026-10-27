@@ -7500,6 +7500,7 @@ function _alertNewOrders(active) {
    return o ? `${o[O.RES] || "مطعم"} · ${o[O.AREA] || ""}` : "";
   }() : "";
   _newOrderBeep(fresh.length, one || `${fresh.length} طلبات بانتظار التوزيع`);
+  toast(fresh.length === 1 ? `🆕 طلب جديد${one ? " — " + one : ""}` : `🆕 ${fresh.length} طلبات جديدة`);
  } catch (e) {
   console.warn("alertNewOrders:", e && e.message);
  }
