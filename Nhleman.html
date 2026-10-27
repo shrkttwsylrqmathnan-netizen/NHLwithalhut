@@ -1392,6 +1392,8 @@ button,input,select,textarea{font-family:'Cairo',sans-serif;}
         <button class="fp" onclick="insSetF('notice',this)">أبلغوا بالترك</button>
         <button class="fp" onclick="insSetF('all',this)">الكل</button>
       </div>
+      
+      <div id="insLeadBox" style="margin-bottom:12px"></div>
       <div class="eg" id="insList"></div>
     </div>
 
@@ -1619,7 +1621,7 @@ let staffSessions = {}, staffLog = [], staffRoster = [], _stInit = false, stEdit
 
 let staffPerms = {};
 
-const ST_PERMS = [ [ "assign", "👑 التعيين السياديّ" ], [ "withdraw", "↩️ سحب الطلبات" ], [ "delete", "🗑 حذف الطلبات" ], [ "message", "💬 التواصل مع الكباتن" ], [ "complete", "✅ الإتمام القسريّ" ], [ "opsfee", "💵 قبول تسديد العمولة التشغيليّة" ] ];
+const ST_PERMS = [ [ "assign", "👑 التعيين السياديّ" ], [ "withdraw", "↩️ سحب الطلبات" ], [ "delete", "🗑 حذف الطلبات" ], [ "message", "💬 التواصل مع الكباتن" ], [ "complete", "✅ الإتمام القسريّ" ], [ "opsfee", "💵 قبول تسديد العمولة التشغيليّة" ], [ "ins", "🛡 التأمينات (المعدّات + استلام المال)" ] ];
 
 function stPermsEff(e) {
  const rec = staffPerms[nP(e.phone)];
@@ -1634,7 +1636,7 @@ function stPermsEff(e) {
  const raw = Array.isArray(e.perms) ? e.perms.map(x => String(x).toLowerCase()) : [];
  const all = raw.indexOf("*") > -1;
  const o = {};
- ST_PERMS.forEach(([k]) => o[k] = all || raw.indexOf(k) > -1);
+ ST_PERMS.forEach(([k]) => o[k] = k === "ins" ? raw.indexOf("ins") > -1 : all || raw.indexOf(k) > -1);
  return {
   o: o,
   legacy: true
@@ -5064,6 +5066,8 @@ window.pbFlag = async function(k) {
  }
 };
 
+let insLead = {}, insItemsA = {};
+
 const INS_DAYS_AR = [ "السبت", "الأحد", "الاثنين", "الثلاثاء", "الأربعاء", "الخميس" ];
 
 let insCfg = null, insAccs = {}, insNotices = {}, insLocs = {}, insF = "due", insBound = false;
@@ -5177,6 +5181,14 @@ window.insStart = function() {
   insNotices = s.val() || {};
   insRender();
  });
+ listen(() => db.ref("insurance/leader_cash"), s => {
+  insLead = s.val() || {};
+  insLeadRender();
+ });
+ listen(() => db.ref("insurance/items"), s => {
+  insItemsA = s.val() || {};
+  insRender();
+ });
  db.ref("drivers_locations").once("value").then(s => {
   insLocs = s.val() || {};
   insRender();
@@ -5246,7 +5258,7 @@ function insRender() {
   const st = ST[s.state] || [ s.state, "ep" ], pct = s.target ? Math.min(100, Math.round((s.paid || 0) * 100 / s.target)) : 0;
   const refundDue = a.left_at ? new Date(Date.parse(a.left_at) + (Number(cfg.refund_days) || 30) * 864e5).toISOString().slice(0, 10) : null;
   const days = INS_DAYS_AR.map((d, i) => `<option value="${i}" ${i === s.day ? "selected" : ""}>${d}</option>`).join("");
-  return `<div class="ec ${st[1]}">\n      <div class="ec-top"><div><div class="ec-n">${esc(name || "كابتن")}</div><div class="ec-ph">0${esc(p)}</div></div><div style="font-size:.72rem;font-weight:900">${st[0]}</div></div>\n      <div style="height:8px;background:var(--base2);border-radius:9px;overflow:hidden;margin-bottom:6px"><div style="height:100%;width:${pct}%;background:var(--jade)"></div></div>\n      <div style="font-size:.74rem;font-weight:800;margin-bottom:6px">${insFmt(s.paid)} / ${insFmt(s.target)} د.ع ${s.owed ? `· <span style="color:var(--rose)">المطلوب ${insFmt(s.owed)}</span>` : ""}</div>\n      <div style="display:flex;gap:6px;align-items:center;margin-bottom:8px;font-size:.72rem;font-weight:800">يومه: <select onchange="insSetDay('${p}',this.value)" style="font:inherit;padding:3px 6px;border-radius:7px;border:1px solid var(--line2)">${days}</select></div>\n      ${notice ? `<div style="font-size:.72rem;font-weight:800;color:var(--amber);margin-bottom:6px">📝 أبلغ بالترك: ${esc(String(notice).slice(0, 10))}</div>` : ""}\n      ${a.left_at ? `<div style="font-size:.72rem;font-weight:800;margin-bottom:6px">🚪 ترك: ${esc(String(a.left_at).slice(0, 10))} · الإعادة مستحقّة: <b>${esc(refundDue)}</b>${a.refunded_at ? ` · ✅ أُعيدت ${esc(String(a.refunded_at).slice(0, 10))}` : ""}</div>` : ""}\n      <div style="display:flex;gap:6px;flex-wrap:wrap">\n        ${!a.left_at && s.state !== "complete" && s.state !== "exempt" ? `<button class="abt" style="background:var(--jade)" onclick="insPay('${p}')">✅ استلام ${insFmt(s.weekly || 1e4)}</button>` : ""}\n        ${(notice || a.left_at) && !a.refunded_at ? `<button class="abt" style="background:var(--amber);color:#fff" title="الكابتن تراجع: يُلغى إبلاغه فيعمل كالمعتاد" onclick="insCancelNotice('${p}')">↩️ تراجع عن الترك</button>` : ""}\n        <button class="abt" style="background:var(--base2);color:var(--ink);box-shadow:none;border:1px solid var(--line2)" onclick="insHist('${p}')">📋 السجلّ</button>\n        <button class="abt" style="background:var(--base2);color:var(--ink);box-shadow:none;border:1px solid var(--line2)" onclick="insMore('${p}')">⋯</button>\n      </div></div>`;
+  return `<div class="ec ${st[1]}">\n      <div class="ec-top"><div><div class="ec-n">${esc(name || "كابتن")}</div><div class="ec-ph">0${esc(p)}</div></div><div style="font-size:.72rem;font-weight:900">${st[0]}</div></div>\n      <div style="height:8px;background:var(--base2);border-radius:9px;overflow:hidden;margin-bottom:6px"><div style="height:100%;width:${pct}%;background:var(--jade)"></div></div>\n      <div style="font-size:.74rem;font-weight:800;margin-bottom:6px">${insFmt(s.paid)} / ${insFmt(s.target)} د.ع ${s.owed ? `· <span style="color:var(--rose)">المطلوب ${insFmt(s.owed)}</span>` : ""}</div>\n      <div style="display:flex;gap:6px;align-items:center;margin-bottom:8px;font-size:.72rem;font-weight:800">يومه: <select onchange="insSetDay('${p}',this.value)" style="font:inherit;padding:3px 6px;border-radius:7px;border:1px solid var(--line2)">${days}</select></div>\n      ${insItemsLine(p)}\n      ${notice ? `<div style="font-size:.72rem;font-weight:800;color:var(--amber);margin-bottom:6px">📝 أبلغ بالترك: ${esc(String(notice).slice(0, 10))}</div>` : ""}\n      ${a.left_at ? `<div style="font-size:.72rem;font-weight:800;margin-bottom:6px">🚪 ترك: ${esc(String(a.left_at).slice(0, 10))} · الإعادة مستحقّة: <b>${esc(refundDue)}</b>${a.refunded_at ? ` · ✅ أُعيدت ${esc(String(a.refunded_at).slice(0, 10))}` : ""}</div>` : ""}\n      <div style="display:flex;gap:6px;flex-wrap:wrap">\n        ${!a.left_at && s.state !== "complete" && s.state !== "exempt" ? `<button class="abt" style="background:var(--jade)" onclick="insPay('${p}')">✅ استلام ${insFmt(s.weekly || 1e4)}</button>` : ""}\n        ${(notice || a.left_at) && !a.refunded_at ? `<button class="abt" style="background:var(--amber);color:#fff" title="الكابتن تراجع: يُلغى إبلاغه فيعمل كالمعتاد" onclick="insCancelNotice('${p}')">↩️ تراجع عن الترك</button>` : ""}\n        <button class="abt" style="background:var(--base2);color:var(--ink);box-shadow:none;border:1px solid var(--line2)" onclick="insHist('${p}')">📋 السجلّ</button>\n        <button class="abt" style="background:var(--base2);color:var(--ink);box-shadow:none;border:1px solid var(--line2)" onclick="insMore('${p}')">⋯</button>\n      </div></div>`;
  }).join("") : `<div class="empty-s" style="grid-column:1/-1">لا كباتن في هذا التصنيف.</div>`;
 }
 
@@ -5320,6 +5332,66 @@ window.insPay = async function(p) {
  }
 };
 
+const INS_IT_A = [ [ "u", "👕", "زيّ الشركة" ], [ "c", "📱", "كفر هاتف مطريّ" ], [ "r", "🧥", "زيّ مطريّ" ] ];
+
+function insItemsLine(p) {
+ const it = (insItemsA || {})[p];
+ if (!it) return "";
+ const got = INS_IT_A.filter(([k]) => it[k]);
+ if (!got.length) return "";
+ return `<div style="font-size:.72rem;font-weight:800;margin-bottom:6px">🧰 المعدّات: ${got.map(([k, e, l]) => e + " " + esc(l)).join(" · ")}</div>`;
+}
+
+function insLeadName(lp, open) {
+ const e = typeof staffRoster !== "undefined" && Array.isArray(staffRoster) ? staffRoster.find(x => nP(x.phone) === nP(lp)) : null;
+ return e && e.name || (Object.values(open || {})[0] || {}).leader_name || "0" + lp;
+}
+
+function insLeadRender() {
+ const el = document.getElementById("insLeadBox");
+ if (!el) return;
+ const rows = Object.entries(insLead || {}).map(([lp, v]) => {
+  const open = v && v.open || {}, ks = Object.keys(open);
+  return {
+   lp: lp,
+   open: open,
+   ks: ks,
+   tot: ks.reduce((a, k) => a + (Number(open[k].amount) || 0), 0)
+  };
+ }).filter(r => r.ks.length).sort((a, b) => b.tot - a.tot);
+ const all = rows.reduce((a, r) => a + r.tot, 0);
+ const tm = t => new Date(Number(t) + 3 * 36e5).toISOString().slice(5, 16).replace("T", " ");
+ el.innerHTML = `<div class="arch-alert" style="margin-bottom:8px"><span>💵 <b>ذمم الليدرز</b> — ما استلموه من تأمينات الكباتن ولم يسلّموه للإدارة بعد: <b>${insFmt(all)}</b> د.ع${rows.length ? "" : " · لا ذمم الآن ✅"}</span></div>` + (rows.length ? `<div class="eg" style="margin-bottom:6px">${rows.map(r => {
+  const nm = insLeadName(r.lp, r.open), its = r.ks.map(k => r.open[k]).sort((a, b) => Number(b.at || 0) - Number(a.at || 0));
+  return `<div class="ec ei"><div class="ec-top"><div><div class="ec-n">${esc(nm)}</div><div class="ec-ph">0${esc(r.lp)}</div></div><div style="font-size:.82rem;font-weight:900;color:var(--rose)">${insFmt(r.tot)} د.ع</div></div>\n        <div style="font-size:.72rem;font-weight:700;line-height:1.9;margin-bottom:8px">${its.slice(0, 8).map(x => `• ${esc(x.captain_name || "0" + x.captain)} — ${insFmt(x.amount)} د.ع · ${esc(tm(x.at))}`).join("<br>")}${its.length > 8 ? `<br>… و${its.length - 8} غيرها` : ""}</div>\n        <button class="abt" style="background:var(--jade)" onclick="insLeadSettle('${nP(r.lp)}')">✅ استلمت ${insFmt(r.tot)} — صفّر الذمّة</button></div>`;
+ }).join("")}</div>` : "");
+}
+
+window.insLeadSettle = async function(lp) {
+ const v = (insLead || {})[lp] || {}, open = v.open || {}, ks = Object.keys(open);
+ if (!ks.length) return;
+ const tot = ks.reduce((a, k) => a + (Number(open[k].amount) || 0), 0), nm = insLeadName(lp, open);
+ if (!confirm("استلمت من " + nm + " مبلغ " + insFmt(tot) + " د.ع (تأمينات " + ks.length + " دفعة)؟\nتُصفَّر ذمّته، ويبقى السجلّ.")) return;
+ const sid = db.ref().push().key, u = {};
+ ks.forEach(k => {
+  u["insurance/leader_cash/" + lp + "/open/" + k] = null;
+ });
+ u["insurance/leader_cash/" + lp + "/settled/" + sid] = {
+  at: firebase.database.ServerValue.TIMESTAMP,
+  total: tot,
+  n: ks.length,
+  by: "admin",
+  keys: ks.reduce((o, k) => (o[k] = Number(open[k].amount) || 0, o), {})
+ };
+ try {
+  await db.ref().update(u);
+  logAudit("insLeadSettle", nm + ": " + tot);
+  toast("✅ صُفّرت ذمّة " + esc(nm) + " — " + insFmt(tot) + " د.ع");
+ } catch (e) {
+  toast("تعذّر: " + esc(e.message || e), "e");
+ }
+};
+
 window.insSetDay = async function(p, d) {
  try {
   await db.ref("insurance/accounts/" + p).update({
@@ -5333,7 +5405,7 @@ window.insSetDay = async function(p, d) {
 
 window.insHist = function(p) {
  const a = insAccs[p] || {}, pays = Object.entries(a.payments || {}).sort((x, y) => Number(y[1].at || 0) - Number(x[1].at || 0));
- const txt = pays.length ? pays.map(([k, v], i) => i + 1 + ") " + insFmt(v.amount) + " د.ع — " + new Date(Number(v.at) + 3 * 36e5).toISOString().slice(0, 16).replace("T", " ")).join("\n") : "لا دفعات.";
+ const txt = pays.length ? pays.map(([k, v], i) => i + 1 + ") " + insFmt(v.amount) + " د.ع — " + new Date(Number(v.at) + 3 * 36e5).toISOString().slice(0, 16).replace("T", " ") + (v.by === "leader" ? " · عبر الليدر " + (v.leader_name || "0" + v.leader) : "")).join("\n") : "لا دفعات.";
  const del = prompt("سجلّ دفعات " + (insName(p) || "0" + p) + ":\n" + txt + "\n\nلحذف دفعة سُجّلت بالخطأ اكتب رقمها، أو اضغط إلغاء:", "");
  if (!del) return;
  const i = Number(del) - 1;
@@ -7701,6 +7773,7 @@ window.svStaff = async function() {
      delete: false,
      complete: false,
      message: false,
+     ins: false,
      opsfee: false,
      updated_at: (new Date).toISOString(),
      updated_by: "admin"

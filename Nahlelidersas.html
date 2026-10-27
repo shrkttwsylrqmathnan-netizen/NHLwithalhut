@@ -169,6 +169,14 @@ button,input,select,textarea{font-family:'Cairo',sans-serif;}
   display:flex;flex-direction:column;align-items:center;gap:2px;}
 .crew-time-l{color:var(--ink4);font-size:.56rem;}
 .crew-time-v{color:var(--ink);font-variant-numeric:tabular-nums;}
+
+.crew-ins{display:flex;gap:6px;align-items:center;margin:8px 0}
+.crew-ins-b{position:relative;width:44px;height:36px;border-radius:10px;border:1px solid #e2e8f0;background:#f8fafc;font-size:1.05rem;line-height:1;filter:grayscale(1);opacity:.5;cursor:pointer;padding:0}
+.crew-ins-b.on{filter:none;opacity:1;background:#ecfdf5;border-color:#a7f3d0}
+.crew-ins-b small{position:absolute;bottom:1px;inset-inline-end:4px;font-size:.58rem;color:#059669;font-weight:900}
+.crew-ins-b:disabled{cursor:default}
+.crew-ins-pay{margin-inline-start:auto;height:36px;padding:0 10px;border-radius:10px;border:1px solid #fde68a;background:#fffbeb;color:#92400e;font:inherit;font-weight:900;font-size:.76rem;cursor:pointer;white-space:nowrap}
+.crew-ins-hdr{font:inherit;font-size:.7rem;font-weight:900;padding:3px 8px;border-radius:8px;border:1px solid #fde68a;background:#fffbeb;color:#92400e;cursor:pointer;margin-inline-end:6px}
 .crew-dur{background:var(--blue-l);border:1px solid #d8e5fb;border-radius:8px;padding:6px 8px;
   text-align:center;font-size:.68rem;font-weight:900;color:var(--blue-d);margin-bottom:10px;}
 
@@ -1207,7 +1215,7 @@ body.adv-on #fbSt{bottom:calc(154px + env(safe-area-inset-bottom));}
     <div class="crew reveal" id="crewBox" style="animation-delay:.08s">
       <div class="crew-head">
         <div class="crew-ttl">👥 كباتن اليوم
-          <span class="crew-count" id="crewCount">0 متصل</span>
+          <button class="crew-ins-hdr" id="insPayBtn" onclick="event.stopPropagation();insPayOpen()" style="display:none" title="استلام تأمينٍ ماليّ من أيّ كابتن برقمه">💵 استلام تأمين</button><span class="crew-count" id="crewCount">0 متصل</span>
         </div>
         <button class="crew-toggle" id="crewToggle" onclick="toggleCrew()">▲ إخفاء</button>
       </div>
@@ -1453,6 +1461,7 @@ let STOKEN = "", EMP_NAME = "", EMP_PHONE = "";
 let EMP_PERMS = null, EMP_PERMS_ALL = true, _permsLoaded = false;
 
 function canDo(p) {
+ if (p === "ins") return Array.isArray(EMP_PERMS) && EMP_PERMS.indexOf("ins") > -1;
  if (EMP_PERMS_ALL) return true;
  if (!Array.isArray(EMP_PERMS)) return true;
  return EMP_PERMS.indexOf(p) > -1;
@@ -1926,6 +1935,7 @@ function applyPermsToUi() {
  const cf = document.getElementById("chatFab");
  if (cf && _ccStarted) cf.style.display = msg ? "flex" : "none"; else if (cf && !msg) cf.style.display = "none";
  _tog("bcOpenBtn", msg);
+ _tog("insPayBtn", canDo("ins"));
  _tog("ofPayBtn", canDo("opsfee"));
  _tog("ctBar", msg);
  _tog("ctQr", msg);
@@ -2258,7 +2268,7 @@ function attachDataListeners() {
  if (EMP_PHONE) listen("staff_perms/" + EMP_PHONE, snap => {
   const v = snap.val();
   if (v && typeof v === "object") {
-   EMP_PERMS = [ "assign", "withdraw", "delete", "complete", "message", "opsfee" ].filter(k => v[k] === true);
+   EMP_PERMS = [ "assign", "withdraw", "delete", "complete", "message", "opsfee", "ins" ].filter(k => v[k] === true);
    EMP_PERMS_ALL = false;
    _permsLoaded = true;
    applyPermsToUi();
@@ -2266,6 +2276,13 @@ function attachDataListeners() {
    _permsLoaded = false;
    loadStaffPerms();
   }
+ });
+ listen("insurance/items", snap => {
+  insItems = snap.val() || {};
+  _crewHtml = "";
+  try {
+   renderCrew();
+  } catch (_) {}
  });
  startChatCenter();
  try {
@@ -2634,7 +2651,7 @@ function renderCrew() {
    const stTxt = c.busy ? "🔴 مشغول" : c.online ? "🟢 متصل" : "⚫ غير متصل";
    const initial = c.name !== "غير محدد" ? c.name.charAt(0) : "🛵";
    const trackBtn = c.online ? `<button class="crew-b crew-b-track" onclick="trackDriver('${ej(c.phone)}','')" title="تتبع على الخريطة">📍</button>` : "";
-   html += `<div class="crew-card ${stCls}${c.leftEarlyMins !== undefined ? " left-early" : ""}">\n        <div class="crew-top">\n          <div class="crew-av">${drvAvatar(c.phone) || esc(initial)}</div>\n          <div class="crew-id">\n            <div class="crew-nm">${esc(c.name)}</div>\n            <div class="crew-ph">${esc(c.phone)}</div>\n          </div>\n          <span class="crew-st ${stCls}">${stTxt}</span>\n        </div>\n        <div class="crew-stats">\n          <div class="crew-stat"><div class="crew-sv g">${c.completed}</div><div class="crew-sl">منجز اليوم</div></div>\n          <div class="crew-stat"><div class="crew-sv r">${c.rejected}</div><div class="crew-sl">رفض</div></div>\n          <div class="crew-stat"><div class="crew-sv b">${c.avg || "—"}</div><div class="crew-sl">د/طلب</div></div>\n        </div>\n        <div class="crew-times">\n          <div class="crew-time"><div class="crew-time-l">🕐 فتح</div><div class="crew-time-v">${fmtClock(c.openTime)}</div></div>\n          <div class="crew-time"><div class="crew-time-l">👁 آخر ظهور</div><div class="crew-time-v">${fmtClock(c.lastSeen)}</div></div>\n        </div>\n        <div class="crew-dur">⏱️ ${c.realTime ? "عملٌ فعليّ" : "مدة العمل اليوم"}: ${fmtDur(c.workedMin)}${c.realTime ? ` · استراحة ${fmtDur(c.breakMin || 0)} · منذ الفتح ${fmtDur(c.sinceOpenMin || 0)}` : ""}</div>\n        ${""}${shiftChipHtml(c)}\n        ${""}${_ofCrewLine(c.phone)}\n        <div class="crew-acts">\n          ${""}<button class="crew-b crew-b-call" onclick="waOpen('${ej(c.phone)}')">💬 واتساب</button>\n          ${""}${canDo("message") ? `<button class="crew-b crew-b-msg" onclick="msgCaptain('${ej(c.phone)}','${ej(c.name)}')">💬 رسالة</button>` : ""}\n          ${""}${_ofCrewBtn(c.phone)}\n          ${trackBtn}\n        </div>\n      </div>`;
+   html += `<div class="crew-card ${stCls}${c.leftEarlyMins !== undefined ? " left-early" : ""}">\n        <div class="crew-top">\n          <div class="crew-av">${drvAvatar(c.phone) || esc(initial)}</div>\n          <div class="crew-id">\n            <div class="crew-nm">${esc(c.name)}</div>\n            <div class="crew-ph">${esc(c.phone)}</div>\n          </div>\n          <span class="crew-st ${stCls}">${stTxt}</span>\n        </div>\n        <div class="crew-stats">\n          <div class="crew-stat"><div class="crew-sv g">${c.completed}</div><div class="crew-sl">منجز اليوم</div></div>\n          <div class="crew-stat"><div class="crew-sv r">${c.rejected}</div><div class="crew-sl">رفض</div></div>\n          <div class="crew-stat"><div class="crew-sv b">${c.avg || "—"}</div><div class="crew-sl">د/طلب</div></div>\n        </div>\n        <div class="crew-times">\n          <div class="crew-time"><div class="crew-time-l">🕐 فتح</div><div class="crew-time-v">${fmtClock(c.openTime)}</div></div>\n          <div class="crew-time"><div class="crew-time-l">👁 آخر ظهور</div><div class="crew-time-v">${fmtClock(c.lastSeen)}</div></div>\n        </div>\n        <div class="crew-dur">⏱️ ${c.realTime ? "عملٌ فعليّ" : "مدة العمل اليوم"}: ${fmtDur(c.workedMin)}${c.realTime ? ` · استراحة ${fmtDur(c.breakMin || 0)} · منذ الفتح ${fmtDur(c.sinceOpenMin || 0)}` : ""}</div>\n        ${""}${shiftChipHtml(c)}\n        ${""}${_ofCrewLine(c.phone)}\n        ${insCrewRow(c.phone)}\n        <div class="crew-acts">\n          ${""}<button class="crew-b crew-b-call" onclick="waOpen('${ej(c.phone)}')">💬 واتساب</button>\n          ${""}${canDo("message") ? `<button class="crew-b crew-b-msg" onclick="msgCaptain('${ej(c.phone)}','${ej(c.name)}')">💬 رسالة</button>` : ""}\n          ${""}${_ofCrewBtn(c.phone)}\n          ${trackBtn}\n        </div>\n      </div>`;
   });
  }
  if (_crewHtml !== html) {
@@ -2642,6 +2659,117 @@ function renderCrew() {
   _crewHtml = html;
  }
 }
+
+let insItems = {};
+
+const INS_IT = [ [ "u", "👕", "زيّ الشركة" ], [ "c", "📱", "كفر هاتف مطريّ" ], [ "r", "🧥", "زيّ مطريّ" ] ];
+
+const _insNoPerm = "التأمينات غير ممنوحةٍ لحسابك — يمنحها المدير من كارتك في لوحة الإدارة.";
+
+function _insName(p) {
+ try {
+  const n = dN(p);
+  if (n && n !== "غير محدد") return n;
+ } catch (_) {}
+ return (drvLocs[nP(p)] || {}).name || "0" + nP(p);
+}
+
+function insCrewRow(p) {
+ const q = nP(p), it = insItems[q] || {}, can = canDo("ins");
+ return `<div class="crew-ins">${INS_IT.map(([k, e, l]) => {
+  const on = !!it[k];
+  return `<button class="crew-ins-b${on ? " on" : ""}" ${can ? `onclick="insItemTog('${q}','${k}')"` : "disabled"} title="${l}${on ? " — مُسلَّم" : " — لم يُسلَّم"}">${e}${on ? "<small>✓</small>" : ""}</button>`;
+ }).join("")}${can ? `<button class="crew-ins-pay" onclick="insPayOpen('${q}')" title="استلام تأمينٍ ماليّ من الكابتن">💵 تأمين</button>` : ""}</div>`;
+}
+
+window.insItemTog = async function(p, k) {
+ if (!canDo("ins")) {
+  alert(_insNoPerm);
+  return;
+ }
+ const it = insItems[p] || {}, on = !!it[k], lbl = (INS_IT.find(x => x[0] === k) || [ k, "", k ])[2], nm = _insName(p);
+ if (!confirm((on ? "استرجاع «" + lbl + "» من " : "تسليم «" + lbl + "» إلى ") + nm + "؟")) return;
+ try {
+  const d = await staffAction({
+   action: "STAFF_INS_ITEM",
+   driverPhone: p,
+   item: k,
+   given: !on
+  });
+  if (d && d.success) toast((d.given ? "✅ سُلِّم «" : "↩️ استُرجع «") + lbl + "» — " + nm); else alert(d && d.msg || "تعذّر الحفظ.");
+ } catch (e) {
+  alert("تعذّر الاتصال — أعد المحاولة.");
+ }
+};
+
+window.insPayOpen = async function(phone) {
+ if (!canDo("ins")) {
+  alert(_insNoPerm);
+  return;
+ }
+ let p = nP(phone || "");
+ if (!p) {
+  const q = prompt("💵 استلام تأمين — رقم هاتف الكابتن (07…):", "");
+  if (q === null) return;
+  p = nP(q);
+ }
+ if (!/^7\d{9}$/.test(p)) {
+  alert("رقمٌ غير صالح.");
+  return;
+ }
+ const nm = _insName(p), fmt = n => Number(n || 0).toLocaleString("en-US");
+ let info;
+ try {
+  info = await staffAction({
+   action: "STAFF_INS_INFO",
+   driverPhone: p
+  });
+ } catch (e) {
+  alert("تعذّر الاتصال — أعد المحاولة.");
+  return;
+ }
+ if (!info || !info.success) {
+  alert(info && info.msg || "تعذّر جلب حساب التأمين.");
+  return;
+ }
+ const room = Math.max(0, (info.target || 0) - (info.paid || 0));
+ if (info.left || info.exempt || room <= 0) {
+  alert(nm + ": " + (info.left ? "ترك العمل — تأمينه عند الإدارة." : info.exempt ? "مُعفى من التأمين." : "اكتمل تأمينه (" + fmt(info.paid) + " د.ع)."));
+  return;
+ }
+ const def = Math.min(room, info.owed > 0 ? info.owed : info.weekly || 1e4);
+ const raw = prompt("💵 استلام تأمين — " + nm + "\nالمدفوع: " + fmt(info.paid) + " من " + fmt(info.target) + " د.ع" + (info.owed > 0 ? "\nالمتأخّر عليه: " + fmt(info.owed) + " د.ع" : "") + "\n\nالمبلغ المستلَم (د.ع):", String(def));
+ if (raw === null) return;
+ const amount = Math.round(Number(String(raw).replace(/[^\d]/g, "")));
+ if (!(amount >= 1e3)) {
+  alert("اكتب مبلغاً صحيحاً (ألف دينار فأكثر).");
+  return;
+ }
+ if (amount > room) {
+  alert("المبلغ أكبر من المتبقّي (" + fmt(room) + " د.ع).");
+  return;
+ }
+ if (!confirm("تأكيد استلام " + fmt(amount) + " د.ع من " + nm + "؟\n\nيُحسب للكابتن الآن (ويُرفع منعه إن كان موقوفاً بسبب التأمين)، ويصير المبلغ ذمّةً عليك حتى تسلّمه للإدارة.")) return;
+ const cid = "insp_" + nP(EMP_PHONE || "") + "_" + Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
+ for (let i = 0; i < 2; i++) {
+  try {
+   const d = await staffAction({
+    action: "STAFF_INS_PAY",
+    driverPhone: p,
+    amount: amount,
+    cid: cid
+   });
+   if (d && d.success) {
+    toast("✅ سُجّل استلام " + fmt(d.amount || amount) + " د.ع من " + nm + " — ذمّةٌ عليك للإدارة");
+    return;
+   }
+   alert(d && d.msg || "تعذّر التسجيل.");
+   return;
+  } catch (e) {
+   if (i === 1) alert("تعذّر الاتصال — أعد المحاولة (لن يتكرّر المبلغ).");
+  }
+ }
+};
 
 window.toggleCrew = function() {
  _crewCollapsed = !_crewCollapsed;
