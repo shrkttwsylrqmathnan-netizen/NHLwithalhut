@@ -1054,6 +1054,15 @@ body.adv-on #fbSt{bottom:calc(154px + env(safe-area-inset-bottom));}
 .av-av{position:relative;background:linear-gradient(145deg,#ecfeff,#cffafe);}
 .av-dot{position:absolute;bottom:-4px;left:-4px;font-size:.8rem;font-style:normal;background:#fff;border-radius:99px;
   width:21px;height:21px;display:flex;align-items:center;justify-content:center;box-shadow:0 1px 4px rgba(15,30,61,.2);}
+
+.av-rude{display:inline-block;margin-inline-start:6px;font-size:.6rem;font-weight:900;padding:1px 7px;border-radius:6px;background:#fee2e2;color:#b91c1c;vertical-align:middle;}
+.av-rude-bar{margin:6px 0;padding:8px 10px;border-radius:10px;background:#fef2f2;border:1px solid #fecaca;color:#7f1d1d;font-size:.72rem;font-weight:700;line-height:1.7;}
+.av-rude-bar b{color:#b91c1c;}
+.av-rude-who{display:block;font-size:.66rem;color:#991b1b;opacity:.85;}
+.av-rude-bar button,.av-rude-off button{border:0;border-radius:8px;padding:4px 11px;font-size:.68rem;font-weight:900;cursor:pointer;font-family:inherit;}
+.av-rude-bar button{background:#b91c1c;color:#fff;margin-top:4px;}
+.av-rude-off{text-align:end;margin:4px 0;}
+.av-rude-off button{background:transparent;color:#94a3b8;border:1px dashed #cbd5e1;}
 .cc-st.av-dr{background:#ccfbf1;color:#0f766e;margin-inline-start:4px;}
 .av-rt{font-size:.66rem;font-weight:900;margin-inline-start:5px;}
 .av-sys{display:flex;justify-content:center;margin:8px 0 10px;}
@@ -5526,7 +5535,7 @@ const AV_MEDIA_RX = /^https:\/\/firebasestorage\.googleapis\.com\/v0\/b\/nahla-d
 
 const AV_PAGE = 50;
 
-let _avChats = {}, _avAI = {}, _avActive = null, _avOidSel = "", _avPrevUnread = 0, _avStarted = false, _avHealAt = 0;
+let _avChats = {}, _avAI = {}, _avRude = {}, _avActive = null, _avOidSel = "", _avPrevUnread = 0, _avStarted = false, _avHealAt = 0;
 
 let _avFilter = "inbox", _avSearch = "", _avListSig = "", _avCtxSig = "", _avDraftSig = "", _avClaimSig = "";
 
@@ -5610,6 +5619,15 @@ function startAdvisorCenter() {
    avRenderDraft();
    _avCtxSig = "";
    avRenderCtx();
+  }
+ });
+ _avListen("res_leader/rude", snap => {
+  _avRude = snap.val() || {};
+  _avListSig = "";
+  avRenderList();
+  if (_avActive) {
+   _avClaimSig = "";
+   avRenderClaim();
   }
  });
 }
@@ -5814,7 +5832,7 @@ function avRenderList() {
     loc: "📍 "
    }[c.last_kind] || "" : "";
    const rt = c.last_rating === "up" ? '<span class="av-rt" title="تقييم المطعم">⭐ 👍</span>' : c.last_rating === "down" ? '<span class="av-rt" title="تقييم المطعم">⭐ 👎</span>' : "";
-   h += `<div class="cc-conv${et ? " cc-esc" : ""}" onclick="avOpenThread('${ej(c.p)}')">\n        <div class="cc-av av-av" title="${esc(cat.t)}">${cat.i}${dr ? '<i class="av-dot" title="اقتراح ردّ جاهز">💬</i>' : ""}</div>\n        <div style="min-width:0">\n          <div class="cc-nm">${esc(_avName(c.p))}${rt}</div>\n          <div class="cc-lm">${_avLastWho(c)}${kind}${esc(c.last_msg || "...")}</div>\n          ${_avStChip(c)}${dr && !et ? '<span class="cc-st av-dr">💬 اقتراح</span>' : ""}\n          ${et ? _escCard(et, (_avAI[c.p] || {}).summary, "أحالها رفيقك في العمل") : ""}\n        </div>\n        <div class="cc-meta"><div class="cc-tm">${c.last_msg_at ? fmtHM(Number(c.last_msg_at)) : ""}</div>${ub > 0 ? `<div class="cc-ub">${ub}</div>` : ""}</div>\n      </div>`;
+   h += `<div class="cc-conv${et ? " cc-esc" : ""}" onclick="avOpenThread('${ej(c.p)}')">\n        <div class="cc-av av-av" title="${esc(cat.t)}">${cat.i}${dr ? '<i class="av-dot" title="اقتراح ردّ جاهز">💬</i>' : ""}</div>\n        <div style="min-width:0">\n          <div class="cc-nm">${esc(_avName(c.p))}${rt}${_avRudeTag(c.p)}</div>\n          <div class="cc-lm">${_avLastWho(c)}${kind}${esc(c.last_msg || "...")}</div>\n          ${_avStChip(c)}${dr && !et ? '<span class="cc-st av-dr">💬 اقتراح</span>' : ""}\n          ${et ? _escCard(et, (_avAI[c.p] || {}).summary, "أحالها رفيقك في العمل") : ""}\n        </div>\n        <div class="cc-meta"><div class="cc-tm">${c.last_msg_at ? fmtHM(Number(c.last_msg_at)) : ""}</div>${ub > 0 ? `<div class="cc-ub">${ub}</div>` : ""}</div>\n      </div>`;
   });
  }
  if (h === _avListSig) return;
@@ -6250,6 +6268,7 @@ function avRenderClaim() {
   en = false;
   hint = "مراقبة فقط — لا تملك صلاحيّة المراسلة";
  }
+ h += _avRudeBar();
  if (h !== _avClaimSig) {
   _avClaimSig = h;
   zone.innerHTML = h;
@@ -6284,6 +6303,65 @@ window.avCloseConv = function() {
   toast("أُغلقت المحادثة");
   avBackToList();
  }).catch(() => toast("تعذّر الإغلاق", "e"));
+};
+
+const AV_RUDE_DAYS = 7;
+
+function _avRudeOf(p) {
+ const x = _avRude[p];
+ return x && Number(x.until) > Date.now() ? x : null;
+}
+
+function _avRudeTag(p) {
+ return _avRudeOf(p) ? '<span class="av-rude" title="مطعم ذو أسلوب سيّئ">🚫 أسلوب سيّئ</span>' : "";
+}
+
+function _avRudeDate(ms) {
+ const d = new Date(Number(ms) + 3 * 36e5);
+ return [ "الأحد", "الاثنين", "الثلاثاء", "الأربعاء", "الخميس", "الجمعة", "السبت" ][d.getUTCDay()] + " " + d.getUTCDate() + "-" + (d.getUTCMonth() + 1);
+}
+
+function _avRudeBar() {
+ const p = _avActive;
+ if (!p) return "";
+ const x = _avRudeOf(p), can = canDo("message");
+ if (!x) return can ? '<div class="av-rude-off"><button onclick="avRudeToggle()">🚫 أسلوب سيّئ؟ ضع العلامة</button></div>' : "";
+ const who = x.src === "ai" ? "رفيقك في العمل" : x.by_name || (x.src === "admin" ? "الإدارة" : "ليدر");
+ return `<div class="av-rude-bar"><b>🚫 مطعم ذو أسلوب سيّئ</b> حتى ${_avRudeDate(x.until)} — رفاقك في العمل لا يردّون عليه، والردّ لكم عند الحاجة.\n    <span class="av-rude-who">وضعها ${esc(who)}${x.text ? " بسبب: «" + esc(String(x.text).slice(0, 120)) + "»" : ""}</span>\n    ${can ? '<button onclick="avRudeToggle()">رفع العلامة</button>' : ""}</div>`;
+}
+
+window.avRudeToggle = async function() {
+ if (!_avActive || !needPerm("message", "علامة الأسلوب السيّئ")) return;
+ const p = nP(_avActive), x = _avRudeOf(p), nm = _avName(p), now = Date.now(), me = String(EMP_NAME || "ليدر").slice(0, 60);
+ const note = {
+  text: "",
+  tag: "warn",
+  ts: now,
+  uid: _ntUid(),
+  by: me
+ }, u = {};
+ if (x) {
+  if (!confirm(`رفع علامة «مطعم ذو أسلوب سيّئ» عن ${nm}؟\n\nيعود رفاقك في العمل للردّ عليه.`)) return;
+  u["res_leader/rude/" + p] = null;
+  note.text = "✅ رفع علامة «مطعم ذو أسلوب سيّئ»";
+ } else {
+  if (!confirm(`وضع علامة «مطعم ذو أسلوب سيّئ» على ${nm} لمدّة ${AV_RUDE_DAYS} أيّام؟\n\nلن يردّ عليه رفاقك في العمل، ورسائله تبقى تصلكم.`)) return;
+  u["res_leader/rude/" + p] = {
+   at: now,
+   until: now + AV_RUDE_DAYS * 864e5,
+   src: "staff",
+   by: String(_ntUid()).slice(0, 40),
+   by_name: me
+  };
+  note.text = "🚫 وضع علامة «مطعم ذو أسلوب سيّئ» " + AV_RUDE_DAYS + " أيّام";
+ }
+ u["res_notes/" + p + "/" + db.ref("res_notes/" + p).push().key] = note;
+ try {
+  await db.ref().update(u);
+  toast(x ? "رُفعت العلامة ✅" : "وُضعت العلامة 🚫");
+ } catch (e) {
+  toast("تعذّر الحفظ — " + (e && e.message || ""), "e");
+ }
 };
 
 function _avArgsTxt(a) {

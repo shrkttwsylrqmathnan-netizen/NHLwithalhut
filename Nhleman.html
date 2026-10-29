@@ -1301,6 +1301,9 @@ button,input,select,textarea{font-family:'Cairo',sans-serif;}
       </div>
       <div class="rt"><div class="rt-dot"></div> 🧾 المطالبات المعلّقة</div>
       <div id="advClaims" style="margin-bottom:20px"></div>
+      
+      <div class="rt"><div class="rt-dot" style="background:var(--rose)"></div> 🚫 مطاعم ذات أسلوب سيّئ</div>
+      <div id="advRude" style="margin-bottom:20px"></div>
       <div class="rt"><div class="rt-dot" style="background:var(--jade)"></div> 💵 المعتمد شهرياً لكلّ مطعم</div>
       <div id="advMonth" style="margin-bottom:20px"></div>
       <div class="rt"><div class="rt-dot" style="background:var(--sky)"></div> 💰📍 طلبات التسعيرة والموقع</div>
@@ -5662,12 +5665,12 @@ window.advLoad = async function(force) {
  advSt("⏳ جارٍ التحميل…");
  const btn = document.getElementById("advRefBtn");
  if (btn) btn.disabled = true;
- const run = () => Promise.allSettled([ advGetClaims(), db.ref("res_requests").once("value").then(s => s.val() || {}), db.ref("res_leader/audit").orderByKey().limitToLast(10).once("value").then(s => s.val() || {}), db.ref("system_settings/flags/res_leader_mode").once("value").then(s => s.val()), db.ref("system_settings/res_leader").once("value").then(s => s.val() || {}) ]);
+ const run = () => Promise.allSettled([ advGetClaims(), db.ref("res_requests").once("value").then(s => s.val() || {}), db.ref("res_leader/audit").orderByKey().limitToLast(10).once("value").then(s => s.val() || {}), db.ref("system_settings/flags/res_leader_mode").once("value").then(s => s.val()), db.ref("system_settings/res_leader").once("value").then(s => s.val() || {}), db.ref("res_leader/rude").once("value").then(s => s.val() || {}) ]);
  try {
   let r = await run();
   const r3 = r[3].status === "rejected" ? r[3].reason : null;
   if (r3 && /permission/i.test(String(r3.code || "") + String(r3.message || "")) && await healAdminAuth()) r = await run();
-  const names = [ "المطالبات", "طلبات التغيير", "جودة الردود", "وضع الفريق", "إعدادات الفريق" ];
+  const names = [ "المطالبات", "طلبات التغيير", "جودة الردود", "وضع الفريق", "إعدادات الفريق", "المطاعم المعلَّمة" ];
   advErr = [];
   r.forEach((x, i) => {
    if (x.status === "rejected") {
@@ -5680,6 +5683,7 @@ window.advLoad = async function(force) {
   if (r[2].status === "fulfilled") advAudit = r[2].value || {};
   if (r[3].status === "fulfilled") advMode = r[3].value;
   if (r[4].status === "fulfilled") advCfg = r[4].value || {};
+  if (r[5] && r[5].status === "fulfilled") advRude = r[5].value || {};
   advAt = Date.now();
  } catch (e) {
   advErr = [ advErrTxt(e) ];
@@ -5742,6 +5746,37 @@ window.advSetMon = function(m) {
  advRenderMonth();
 };
 
+let advRude = {};
+
+function advRudeRender() {
+ const box = document.getElementById("advRude");
+ if (!box) return;
+ const now = Date.now(), rows = Object.keys(advRude || {}).map(p => Object.assign({
+  p: p
+ }, advRude[p] || {})).filter(x => Number(x.until) > now).sort((a, b) => Number(b.at) - Number(a.at));
+ if (!rows.length) {
+  box.innerHTML = '<div class="adv-empty">✅ لا مطعم معلَّماً الآن.</div>';
+  return;
+ }
+ const who = x => x.src === "ai" ? "«مستشارك» (إساءة صريحة)" : x.src === "admin" ? "الإدارة" : "الليدر " + (x.by_name || "");
+ const dt = ms => new Date(Number(ms) + 3 * 36e5).toISOString().slice(5, 16).replace("T", " ");
+ box.innerHTML = rows.map(x => `<div class="adv-grp">🚫 ${esc(advResName(x.p))} <span class="adv-tag">حتى ${dt(x.until)}</span><span class="adv-tag">${esc(who(x))}</span>` + `<button class="adv-b lt" style="min-height:30px;padding:4px 12px" onclick="advRudeLift('${esc(x.p)}')">رفع العلامة</button></div>` + (x.text ? `<div style="font-size:.74rem;color:var(--ink3);margin:-4px 8px 10px">«${esc(String(x.text).slice(0, 200))}»</div>` : "")).join("");
+}
+
+window.advRudeLift = async function(p) {
+ p = String(nP(p));
+ if (!/^7\d{9}$/.test(p)) return;
+ if (!confirm("رفع علامة «مطعم ذو أسلوب سيّئ» عن " + advResName(p) + "؟\nيعود «مستشارك» للردّ عليه.")) return;
+ try {
+  await db.ref("res_leader/rude/" + p).remove();
+  delete advRude[p];
+  advRudeRender();
+  toast("رُفعت العلامة ✅");
+ } catch (e) {
+  toast("تعذّر الرفع — " + advErrTxt(e), "e");
+ }
+};
+
 function advRender() {
  const {c: c, pr: pr, lo: lo} = advBadge();
  [ [ "advKCl", c ], [ "advKPr", pr ], [ "advKLo", lo ] ].forEach(([id, v]) => {
@@ -5757,6 +5792,7 @@ function advRender() {
  advRenderMonth();
  advRenderReqs();
  advRenderMeter();
+ advRudeRender();
 }
 
 function advRenderClaims() {
