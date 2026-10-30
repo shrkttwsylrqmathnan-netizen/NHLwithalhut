@@ -3213,6 +3213,8 @@ window.nahlaOpen = window.nahlaOpen || function(what, id) {
                         #supplyBox .sup-new{border:1px solid rgba(0,0,0,.08);border-radius:14px;padding:12px;margin-top:10px;background:rgba(0,0,0,.015)}
                         #supplyBox .sup-mini-act{display:flex;gap:8px;margin-top:8px}
                         #supplyBox .sup-mini-act button{flex:1;border-radius:10px;padding:8px;border:1px solid rgba(0,0,0,.12);background:#fff;font:inherit;font-size:.8rem}
+                        #supplyBox .sup-gbtn{width:100%;margin-top:8px;padding:11px 12px;border-radius:12px;border:1.5px solid var(--accent,#0B5D4B);background:#fff;color:var(--accent,#0B5D4B);font:inherit;font-weight:700;font-size:.9rem;cursor:pointer}
+                        #supplyBox .sup-hint{font-size:.75rem;opacity:.8;margin:4px 0 8px;line-height:1.5}
                     </style>
                     <div id="supplyBox" class="hidden-section">
                         <div class="sup-l" style="margin-top:4px">من أين يجلبها الكابتن؟</div>
@@ -3220,8 +3222,11 @@ window.nahlaOpen = window.nahlaOpen || function(what, id) {
                         <div class="sup-new hidden-section" id="supNew">
                             <div class="sup-row"><input id="supName" maxlength="60" placeholder="اسم المحلّ (مثلاً: مخبز الأمل)"><input id="supPh" inputmode="tel" maxlength="16" placeholder="هاتف المحلّ (اختياريّ)"></div>
                             <select id="supArea"></select>
-                            <div style="font-size:.75rem;opacity:.7;margin:8px 0 6px">حرّك الخريطة حتى يقع الدبّوس على المحلّ (أو ابحث باسمه):</div>
-                            <div style="display:flex;gap:6px;margin-bottom:6px"><input id="supSearch" placeholder="ابحث عن المكان…"><button type="button" class="sup-chip" style="white-space:nowrap" onclick="supSearchMap()">بحث</button></div>
+                            
+                            <button type="button" class="sup-gbtn" onclick="supGoogle()">🔎 ابحث عن المحلّ في خرائط جوجل</button>
+                            <div style="display:flex;gap:6px;margin-top:8px"><input id="supSearch" placeholder="الصق هنا رابط المحلّ من جوجل" oninput="supLinkInput()"><button type="button" class="sup-chip" style="white-space:nowrap" onclick="supSearchMap()">ضع الدبّوس</button></div>
+                            <div class="sup-hint" id="supLinkMsg">في خرائط جوجل: افتح المحلّ ← «مشاركة» ← «نسخ الرابط»، ثمّ ارجع والصقه هنا فيقع الدبّوس عليه.</div>
+                            <div style="font-size:.75rem;opacity:.7;margin:0 0 6px">أو حرّك الخريطة بيدك حتى يقع الدبّوس على المحلّ:</div>
                             <div class="position-relative">
                                 <div id="supMap" style="height:190px;border-radius:12px;border:1px solid rgba(0,0,0,.08)"></div>
                                 <img src="https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png" alt="" style="position:absolute;top:50%;left:50%;transform:translate(-50%,-100%);z-index:1000;pointer-events:none;width:25px;height:35px">
@@ -6884,6 +6889,7 @@ window.supNewPlace = function() {
   const e = document.getElementById(i);
   if (e) e.value = "";
  });
+ supMsg(SUP_HINT);
  supMapInit(regLat, regLng);
  setTimeout(() => document.getElementById("supName").focus(), 50);
 };
@@ -6924,17 +6930,118 @@ function supMapInit(lat, lng, tries) {
  setTimeout(() => _supMap && _supMap.invalidateSize(), 120);
 }
 
-window.supSearchMap = function() {
- const q = document.getElementById("supSearch").value.trim();
- if (!q || !_supMap) return;
- const m = q.match(/(-?\d{1,2}\.\d{3,})[,\s]+(-?\d{1,3}\.\d{3,})/);
- if (m) {
-  _supMap.flyTo([ parseFloat(m[1]), parseFloat(m[2]) ], 17);
+const SUP_HINT = "في خرائط جوجل: افتح المحلّ ← «مشاركة» ← «نسخ الرابط»، ثمّ ارجع والصقه هنا فيقع الدبّوس عليه.";
+
+const supDigits = s => String(s || "").replace(/[٠-٩]/g, d => "٠١٢٣٤٥٦٧٨٩".indexOf(d)).replace(/[۰-۹]/g, d => "۰۱۲۳۴۵۶۷۸۹".indexOf(d)).replace(/٫/g, ".").replace(/،/g, ",");
+
+function supParseLink(raw) {
+ const s = supDigits(raw).trim();
+ if (!s) return null;
+ const N = "(-?\\d{1,3}\\.\\d{3,})";
+ const pats = [ new RegExp("^\\(?\\s*" + N + "\\s*[, ]\\s*" + N + "\\s*\\)?$"), new RegExp("!3d" + N + "!4d" + N), new RegExp("[?&](?:q|query|ll|sll|center|destination|daddr)=(?:loc:)?" + N + "(?:,|%2C)[\\s+]*" + N), new RegExp("/(?:search|place|dir)/" + N + "(?:,|%2C)[\\s+]*" + N), new RegExp("/@" + N + "," + N) ];
+ for (const re of pats) {
+  const m = s.match(re);
+  if (m) return {
+   lat: parseFloat(m[1]),
+   lng: parseFloat(m[2])
+  };
+ }
+ return null;
+}
+
+const supInKirkuk = p => !!p && p.lat > 34.6 && p.lat < 36.1 && p.lng > 43.2 && p.lng < 45;
+
+function supLinkName(u) {
+ try {
+  const m = String(u).match(/\/maps\/place\/([^\/@?]+)/);
+  return m ? decodeURIComponent(m[1].replace(/\+/g, " ")).replace(/\s+/g, " ").trim().slice(0, 60) : "";
+ } catch (e) {
+  return "";
+ }
+}
+
+function supMsg(t, bad) {
+ const el = document.getElementById("supLinkMsg");
+ if (el) {
+  el.textContent = t;
+  el.style.color = bad ? "#B42318" : "";
+ }
+}
+
+function supApplyPoint(p, name) {
+ if (!supInKirkuk(p)) {
+  supMsg("هذا المكان خارج كركوك — تأكّد أنّك نسخت رابط المحلّ الصحيح.", true);
   return;
  }
- fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(q + ", كركوك, العراق")}&limit=1`).then(r => r.json()).then(d => {
-  if (d && d.length) _supMap.flyTo([ parseFloat(d[0].lat), parseFloat(d[0].lon) ], 17); else alert("لم يُعثر على المكان — حرّك الخريطة بيدك.");
- }).catch(() => alert("تعذّر البحث — حرّك الخريطة بيدك."));
+ const nm = document.getElementById("supName");
+ if (name && nm && !nm.value.trim()) nm.value = String(name).slice(0, 60);
+ _supPick = {
+  lat: p.lat,
+  lng: p.lng
+ };
+ if (_supMap) _supMap.setView([ p.lat, p.lng ], 18);
+ supMsg("✅ وُضع الدبّوس على المحلّ من خرائط جوجل — تأكّد منه ثمّ اضغط «احفظ المكان».");
+}
+
+window.supGoogle = function() {
+ const t = (document.getElementById("supName").value || "").trim();
+ const url = "https://www.google.com/maps/search/?api=1&query=" + encodeURIComponent((t ? t + " " : "") + "كركوك");
+ try {
+  window.open(url, "_blank");
+ } catch (e) {
+  location.href = url;
+ }
+ supMsg(SUP_HINT);
+};
+
+let _supLinkT = null, _supLinkSeq = 0;
+
+window.supLinkInput = function() {
+ clearTimeout(_supLinkT);
+ _supLinkT = setTimeout(supResolveLink, 350);
+};
+
+async function supResolveLink() {
+ const v = (document.getElementById("supSearch").value || "").trim();
+ if (!v) return;
+ const p = supParseLink(v);
+ if (p) return supApplyPoint(p, supLinkName(v));
+ const m = v.match(/https:\/\/[^\s]+/);
+ if (!m) return;
+ const url = m[0];
+ const shared = v.slice(0, v.indexOf(url)).split("\n").map(x => x.trim()).filter(Boolean)[0] || "";
+ const p2 = supParseLink(url);
+ if (p2) return supApplyPoint(p2, supLinkName(url) || shared);
+ if (!/^https:\/\/((maps\.app\.)?goo\.gl|g\.co|(www\.|maps\.)?google\.[a-z.]+)\//i.test(url)) {
+  supMsg("هذا ليس رابطاً من خرائط جوجل.", true);
+  return;
+ }
+ const seq = ++_supLinkSeq;
+ supMsg("⏳ جارٍ قراءة الرابط…");
+ try {
+  const r = await Promise.race([ httpsCallable(fns, "resolveMapLink")({
+   url: url
+  }), new Promise((_, rej) => setTimeout(() => rej(new Error("timeout")), 2e4)) ]);
+  if (seq !== _supLinkSeq) return;
+  const d = r && r.data || {};
+  if (d.success) supApplyPoint({
+   lat: Number(d.lat),
+   lng: Number(d.lng)
+  }, d.name || shared); else supMsg(d.msg || "لم أجد موقعاً في هذا الرابط.", true);
+ } catch (e) {
+  if (seq === _supLinkSeq) supMsg("تعذّر قراءة الرابط — تحقّق من الإنترنت، أو حرّك الخريطة بيدك.", true);
+ }
+}
+
+window.supSearchMap = function() {
+ const v = (document.getElementById("supSearch").value || "").trim();
+ if (v && (supParseLink(v) || /https:\/\//.test(v))) {
+  supResolveLink();
+  return;
+ }
+ const nm = document.getElementById("supName");
+ if (v && nm && !nm.value.trim()) nm.value = v.slice(0, 60);
+ window.supGoogle();
 };
 
 window.supSavePlace = async function() {
