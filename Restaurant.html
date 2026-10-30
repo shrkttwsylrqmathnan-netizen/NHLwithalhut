@@ -1766,6 +1766,8 @@ window.nahlaOpen = window.nahlaOpen || function(what, id) {
         #ittihadStrip .it-tx b { font-size: .95rem; font-weight: 700; }
         #ittihadStrip .it-tx small { font-size: .76rem; font-weight: 500; color: #CDE8DF; }
         #ittihadStrip .it-soon { flex: none; font-size: .72rem; font-weight: 700; color: #3A2A00; background: #F2B33D; border-radius: 999px; padding: 4px 10px; }
+        #ittihadStrip.hot { box-shadow: 0 0 0 3px #F2B33D, 0 6px 16px rgba(11, 93, 75, .22); }   
+        #ittihadStrip.hot .it-soon { font-size: .78rem; padding: 6px 12px; }
         #ittihadModal { position: fixed; inset: 0; z-index: 10000; display: none; align-items: flex-end; justify-content: center; background: rgba(6, 30, 24, .62); }
         .it-sheet { position: relative; width: 100%; max-width: 520px; max-height: 94dvh; overflow-y: auto; background: #F5F8F7; text-align: right;
             border-radius: 24px 24px 0 0; padding-bottom: calc(16px + env(safe-area-inset-bottom)); animation: itUp .28s cubic-bezier(.2, .8, .2, 1); }
@@ -4736,6 +4738,7 @@ window.openIttihad = function(teaser) {
  if (!m) return;
  itInit();
  itPaint();
+ ittModalLive();
  m.style.display = "flex";
  try {
   if (typeof lucide !== "undefined") lucide.createIcons();
@@ -4787,6 +4790,14 @@ window.ittihadJoin = async function() {
     n: IT.o
    });
   } catch (_) {}
+  if (ittModalLive() && typeof window.openIttStore === "function") {
+   try {
+    localStorage.removeItem("itt_state");
+   } catch (_) {}
+   closeIttihad();
+   window.openIttStore();
+   return;
+  }
   try {
    if (typeof lucide !== "undefined") lucide.createIcons();
   } catch (_) {}
@@ -6507,6 +6518,99 @@ function ittStripMine() {
 
 try {
  if (localStorage.getItem("itt_elig") === "1") ittStripMine();
+} catch (_) {}
+
+const ITT_STATE_TTL = 3 * 36e5;
+
+function ittStateGet() {
+ try {
+  return JSON.parse(localStorage.getItem("itt_state") || "null");
+ } catch (_) {
+  return null;
+ }
+}
+
+function ittStateSet(st) {
+ const v = Object.assign({
+  at: Date.now()
+ }, st);
+ try {
+  localStorage.setItem("itt_state", JSON.stringify(v));
+  if (v.elig) localStorage.setItem("itt_elig", "1");
+ } catch (_) {}
+ ittStripPaint(v);
+ return v;
+}
+
+function ittStripPaint(st) {
+ const b = document.getElementById("ittihadStrip");
+ if (!b || !st) return;
+ let sub = "تعبك إلك… مو للعمولة", tag = st.elig ? "متجري" : "قريباً", hot = false;
+ if (st.live) {
+  if (!st.elig) {
+   sub = "الاتحاد مفتوح هسه — افتح متجرك بلا عمولة";
+   tag = "افتح متجرك";
+   hot = true;
+  } else if (!st.pub) {
+   sub = "الزباين يطلبون هسه — 4 خطوات ومتجرك يطلع بجوجل";
+   tag = "كمّل متجرك";
+   hot = true;
+  } else if (!st.o) {
+   sub = "متجرك مسدود — الزباين يشوفونه وما يطلبون";
+   tag = "افتحه";
+   hot = true;
+  } else {
+   sub = "متجرك مفتوح — دزّ رابطك لزباينك";
+   tag = "متجري";
+  }
+ }
+ const sm = b.querySelector(".it-tx small"), pill = b.querySelector(".it-soon");
+ if (sm) sm.textContent = sub;
+ if (pill) pill.textContent = tag;
+ b.classList.toggle("hot", hot);
+ b.setAttribute("aria-label", "اتحاد المتاجر — " + tag);
+}
+
+async function ittStripState(force) {
+ const c = ittStateGet();
+ if (c) ittStripPaint(c);
+ if (!force && c && Date.now() - c.at < ITT_STATE_TTL) return c;
+ try {
+  const r = await ittCall("ittihadRes", {
+   op: "state"
+  }, 15e3);
+  if (r && typeof r.live === "boolean") return ittStateSet(r);
+ } catch (_) {}
+ return c;
+}
+
+window.addEventListener("popstate", () => {
+ const d = !ITM.open && ITM.data;
+ if (d && d.store) ittStateSet({
+  elig: true,
+  live: !!d.live,
+  pub: !!d.store.pub,
+  o: !!d.store.o,
+  slug: d.store.slug || ""
+ });
+});
+
+function ittModalLive() {
+ const st = ittStateGet();
+ if (!st || !st.live) return false;
+ const q = sel => document.querySelector("#ittihadModal " + sel);
+ const k = q(".it-kicker"), cb = q(".it-cta > b"), cs = q(".it-cta > span"), j = document.getElementById("itJoin");
+ if (k) k.textContent = "مفتوح الآن في كركوك · اتحاد المتاجر";
+ if (cb) cb.textContent = "الاتحاد مفتوح هسه";
+ if (cs) cs.textContent = "جهّز متجرك بأربع خطوات — الشعار، وصورة المنيو، والأسعار، وانشر — ومتجرك يطلع للزباين وبجوجل.";
+ if (j) j.textContent = "افتح متجري بالاتحاد";
+ return true;
+}
+
+try {
+ if (localStorage.getItem("hut_res_session")) setTimeout(() => {
+  ittStripState(false);
+ }, 3500);
 } catch (_) {}
 
 try {
