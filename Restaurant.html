@@ -3071,6 +3071,9 @@ window.nahlaOpen = window.nahlaOpen || function(what, id) {
                         <div class="toggle-btn" id="tabVoice" onclick="switchTab('voice')">
                             <i data-lucide="mic" size="15"></i><span>صوتي</span>
                         </div>
+                        <div class="toggle-btn" id="tabSupply" onclick="switchTab('supply')">   
+                            <i data-lucide="shopping-basket" size="15"></i><span>مقاضي</span>
+                        </div>
                     </div>
                     
                     <form id="orderForm">
@@ -3191,6 +3194,54 @@ window.nahlaOpen = window.nahlaOpen || function(what, id) {
                             إرسال الطلب الآن <i data-lucide="arrow-left" size="18"></i>
                         </button>
                     </form>
+
+                    
+                    <style>
+                        #supplyBox .sup-l{font-weight:700;font-size:.85rem;margin:14px 0 6px;color:var(--text,#10231E)}
+                        #supplyBox .sup-chips{display:flex;flex-wrap:wrap;gap:8px}
+                        #supplyBox .sup-chip{border:1px solid rgba(0,0,0,.12);background:#fff;border-radius:12px;padding:8px 12px;font-size:.82rem;cursor:pointer;text-align:right;line-height:1.35}
+                        #supplyBox .sup-chip small{display:block;opacity:.65;font-size:.72rem}
+                        #supplyBox .sup-chip.on{border-color:var(--accent,#0B5D4B);box-shadow:0 0 0 2px var(--accent,#0B5D4B) inset}
+                        #supplyBox .sup-chip.add{border-style:dashed}
+                        #supplyBox input,#supplyBox textarea,#supplyBox select{width:100%;border:1px solid rgba(0,0,0,.12);border-radius:12px;padding:10px 12px;font:inherit;font-size:.9rem;background:#fff}
+                        #supplyBox textarea{resize:vertical;min-height:70px}
+                        #supplyBox .sup-row{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px}
+                        #supplyBox .sup-pay label{display:flex;gap:8px;align-items:flex-start;padding:9px 12px;border:1px solid rgba(0,0,0,.1);border-radius:12px;margin-bottom:6px;font-size:.85rem;cursor:pointer;background:#fff}
+                        #supplyBox .sup-pay input{width:auto;margin-top:3px}
+                        #supplyBox .sup-fee{margin:12px 0 4px;padding:10px 12px;border-radius:12px;background:rgba(11,93,75,.08);font-weight:700;font-size:.9rem}
+                        #supplyBox .sup-fee.bad{background:rgba(180,35,24,.08);color:#B42318}
+                        #supplyBox .sup-new{border:1px solid rgba(0,0,0,.08);border-radius:14px;padding:12px;margin-top:10px;background:rgba(0,0,0,.015)}
+                        #supplyBox .sup-mini-act{display:flex;gap:8px;margin-top:8px}
+                        #supplyBox .sup-mini-act button{flex:1;border-radius:10px;padding:8px;border:1px solid rgba(0,0,0,.12);background:#fff;font:inherit;font-size:.8rem}
+                    </style>
+                    <div id="supplyBox" class="hidden-section">
+                        <div class="sup-l" style="margin-top:4px">من أين يجلبها الكابتن؟</div>
+                        <div class="sup-chips" id="supPlaces"><span style="opacity:.6;font-size:.8rem">جارٍ تحميل أماكنك…</span></div>
+                        <div class="sup-new hidden-section" id="supNew">
+                            <div class="sup-row"><input id="supName" maxlength="60" placeholder="اسم المحلّ (مثلاً: مخبز الأمل)"><input id="supPh" inputmode="tel" maxlength="16" placeholder="هاتف المحلّ (اختياريّ)"></div>
+                            <select id="supArea"></select>
+                            <div style="font-size:.75rem;opacity:.7;margin:8px 0 6px">حرّك الخريطة حتى يقع الدبّوس على المحلّ (أو ابحث باسمه):</div>
+                            <div style="display:flex;gap:6px;margin-bottom:6px"><input id="supSearch" placeholder="ابحث عن المكان…"><button type="button" class="sup-chip" style="white-space:nowrap" onclick="supSearchMap()">بحث</button></div>
+                            <div class="position-relative">
+                                <div id="supMap" style="height:190px;border-radius:12px;border:1px solid rgba(0,0,0,.08)"></div>
+                                <img src="https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png" alt="" style="position:absolute;top:50%;left:50%;transform:translate(-50%,-100%);z-index:1000;pointer-events:none;width:25px;height:35px">
+                            </div>
+                            <div class="sup-mini-act"><button type="button" onclick="supSavePlace()">💾 احفظ المكان</button><button type="button" onclick="supCancelNew()">رجوع</button></div>
+                        </div>
+                        <div class="sup-l">ماذا يجلب؟</div>
+                        <textarea id="supItems" maxlength="600" placeholder="مثلاً: 50 صمونة · رزمة ورق تغليف · 2 كارتون علب"></textarea>
+                        <div class="sup-l">ثمن المقاضي</div>
+                        <div class="sup-pay">
+                            <label><input type="radio" name="supPay" value="pre" checked onchange="supPayChanged()"><span><b>مدفوعة مسبقاً</b><br><small>اتّفقتُ مع المحلّ — الكابتن يستلم فقط</small></span></label>
+                            <label><input type="radio" name="supPay" value="cap" onchange="supPayChanged()"><span><b>يدفعها الكابتن وأردّها له</b><br><small>يدفع للمحلّ ويكتب المبلغ، وتدفعه له مع الأجرة عند الوصول</small></span></label>
+                        </div>
+                        <input id="supMax" class="hidden-section" inputmode="numeric" maxlength="8" placeholder="أقصى مبلغٍ يدفعه الكابتن عنك (دينار)">
+                        <input id="supNote" maxlength="200" placeholder="ملاحظة للكابتن (اختياريّ)" style="margin-top:8px">
+                        <div class="sup-fee" id="supFee">اختر المكان لتظهر الأجرة</div>
+                        <button type="button" id="supSend" class="magical-submit-btn" onclick="supSend(this)">
+                            أرسل كابتن المقاضي <i data-lucide="arrow-left" size="18"></i>
+                        </button>
+                    </div>
 
                     <div id="orderStatusBox" class="hidden-section">
                         <div class="success-toast" id="successToastContent">
@@ -6757,6 +6808,230 @@ window.showLoading = function(s) {
  document.getElementById("loadingOverlay").style.display = s ? "flex" : "none";
 };
 
+let _supNext = null, _supPlaces = {}, _supSel = "", _supMap = null, _supPick = null, _supLoaded = false;
+
+const supResPhone = () => String(regPhone || "").replace(/\D/g, "").replace(/^964/, "").replace(/^0+/, "");
+
+const supNum = s => parseInt(String(s || "").replace(/[٠-٩]/g, d => "٠١٢٣٤٥٦٧٨٩".indexOf(d)).replace(/[^\d]/g, ""), 10) || 0;
+
+const supFeeOf = p => p && p.area && myCustomPriceList && myCustomPriceList[p.area] !== undefined ? parseInt(myCustomPriceList[p.area], 10) || 0 : 0;
+
+async function supInit() {
+ const ph = supResPhone();
+ if (!ph) {
+  setTimeout(supInit, 600);
+  return;
+ }
+ const sel = document.getElementById("supArea");
+ if (sel) sel.innerHTML = '<option value="">منطقة المحلّ (للأجرة)</option>' + Object.keys(myCustomPriceList || {}).sort().map(a => `<option value="${escapeHtml(a)}">${escapeHtml(a)} — ${escapeHtml(String(myCustomPriceList[a]))}</option>`).join("");
+ if (_supLoaded) {
+  supRenderPlaces();
+  return;
+ }
+ try {
+  const s = await get(ref(db, "res_places/" + ph));
+  _supPlaces = s.exists() ? s.val() || {} : {};
+  _supLoaded = true;
+ } catch (e) {
+  _supPlaces = {};
+ }
+ const ids = Object.keys(_supPlaces);
+ if (!_supSel && ids.length) _supSel = ids.sort((a, b) => (_supPlaces[b].at || 0) - (_supPlaces[a].at || 0))[0];
+ supRenderPlaces();
+ if (!ids.length) supNewPlace();
+}
+
+function supRenderPlaces() {
+ const box = document.getElementById("supPlaces");
+ if (!box) return;
+ const ids = Object.keys(_supPlaces).sort((a, b) => (_supPlaces[b].at || 0) - (_supPlaces[a].at || 0));
+ box.innerHTML = ids.map(id => {
+  const p = _supPlaces[id];
+  return `<button type="button" class="sup-chip ${id === _supSel ? "on" : ""}" onclick="supPick('${sid(id)}')">${escapeHtml(p.n)}<small>${escapeHtml(p.area || "بلا منطقة")} · ${supFeeOf(p) ? supFeeOf(p).toLocaleString("en-US") + " د.ع" : "بلا أجرة"}</small></button>`;
+ }).join("") + `<button type="button" class="sup-chip add" onclick="supNewPlace()">＋ مكانٌ جديد</button>` + (_supSel && _supPlaces[_supSel] ? `<button type="button" class="sup-chip" style="opacity:.7" onclick="supDelPlace()">حذف «${escapeHtml(_supPlaces[_supSel].n)}»</button>` : "");
+ supShowFee();
+}
+
+function supShowFee() {
+ const el = document.getElementById("supFee");
+ if (!el) return;
+ const p = _supPlaces[_supSel];
+ if (!p) {
+  el.className = "sup-fee";
+  el.textContent = "اختر المكان لتظهر الأجرة";
+  return;
+ }
+ const fee = supFeeOf(p);
+ el.className = "sup-fee" + (fee ? "" : " bad");
+ el.textContent = fee ? `أجرة المشوار: ${fee.toLocaleString("en-US")} د.ع (من ${p.area})` : "منطقة هذا المحلّ ليست في قائمة أجورك — احذفه وأضفه بمنطقةٍ من القائمة";
+}
+
+window.supPick = function(id) {
+ _supSel = id;
+ document.getElementById("supNew").classList.add("hidden-section");
+ supRenderPlaces();
+};
+
+window.supPayChanged = function() {
+ const cap = document.querySelector('input[name="supPay"]:checked')?.value === "cap";
+ document.getElementById("supMax").classList.toggle("hidden-section", !cap);
+ if (cap) document.getElementById("supMax").focus();
+};
+
+window.supNewPlace = function() {
+ document.getElementById("supNew").classList.remove("hidden-section");
+ [ "supName", "supPh", "supSearch" ].forEach(i => {
+  const e = document.getElementById(i);
+  if (e) e.value = "";
+ });
+ supMapInit(regLat, regLng);
+ setTimeout(() => document.getElementById("supName").focus(), 50);
+};
+
+window.supCancelNew = function() {
+ document.getElementById("supNew").classList.add("hidden-section");
+};
+
+function supMapInit(lat, lng, tries) {
+ if (typeof L === "undefined") {
+  if ((tries || 0) < 60) setTimeout(() => supMapInit(lat, lng, (tries || 0) + 1), 500);
+  return;
+ }
+ const c = [ parseFloat(lat) || 35.468, parseFloat(lng) || 44.392 ];
+ if (!_supMap) {
+  _supMap = L.map("supMap", {
+   zoomControl: false
+  }).setView(c, 15);
+  L.control.zoom({
+   position: "bottomleft"
+  }).addTo(_supMap);
+  L.tileLayer("https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png", {
+   maxZoom: 19
+  }).addTo(_supMap);
+  _supMap.on("move", () => {
+   const p = _supMap.getCenter();
+   _supPick = {
+    lat: p.lat,
+    lng: p.lng
+   };
+  });
+ } else _supMap.setView(c, 15);
+ _supPick = {
+  lat: c[0],
+  lng: c[1]
+ };
+ setTimeout(() => _supMap && _supMap.invalidateSize(), 120);
+}
+
+window.supSearchMap = function() {
+ const q = document.getElementById("supSearch").value.trim();
+ if (!q || !_supMap) return;
+ const m = q.match(/(-?\d{1,2}\.\d{3,})[,\s]+(-?\d{1,3}\.\d{3,})/);
+ if (m) {
+  _supMap.flyTo([ parseFloat(m[1]), parseFloat(m[2]) ], 17);
+  return;
+ }
+ fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(q + ", كركوك, العراق")}&limit=1`).then(r => r.json()).then(d => {
+  if (d && d.length) _supMap.flyTo([ parseFloat(d[0].lat), parseFloat(d[0].lon) ], 17); else alert("لم يُعثر على المكان — حرّك الخريطة بيدك.");
+ }).catch(() => alert("تعذّر البحث — حرّك الخريطة بيدك."));
+};
+
+window.supSavePlace = async function() {
+ const n = document.getElementById("supName").value.trim();
+ const area = document.getElementById("supArea").value;
+ const ph = String(document.getElementById("supPh").value || "").replace(/[٠-٩]/g, d => "٠١٢٣٤٥٦٧٨٩".indexOf(d)).replace(/\D/g, "").slice(0, 16);
+ if (!n) return alert("اكتب اسم المحلّ.");
+ if (!area) return alert("اختر منطقة المحلّ من قائمة مناطقك — منها تُحسب الأجرة.");
+ if (!_supPick || !(_supPick.lat > 34.6 && _supPick.lat < 36.1 && _supPick.lng > 43.2 && _supPick.lng < 45)) return alert("حرّك الخريطة حتى يقع الدبّوس على المحلّ داخل كركوك.");
+ const id = "p" + Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
+ const p = {
+  n: n.slice(0, 60),
+  ph: ph,
+  area: area.slice(0, 80),
+  lat: Math.round(_supPick.lat * 1e6) / 1e6,
+  lng: Math.round(_supPick.lng * 1e6) / 1e6,
+  at: Date.now()
+ };
+ try {
+  await set(ref(db, "res_places/" + supResPhone() + "/" + id), p);
+  _supPlaces[id] = p;
+  _supSel = id;
+  document.getElementById("supNew").classList.add("hidden-section");
+  supRenderPlaces();
+ } catch (e) {
+  alert("تعذّر حفظ المكان — تحقّق من الإنترنت وأعد المحاولة.");
+ }
+};
+
+window.supDelPlace = async function() {
+ const p = _supPlaces[_supSel];
+ if (!p) return;
+ if (!confirm("حذف «" + p.n + "» من أماكنك؟")) return;
+ try {
+  await set(ref(db, "res_places/" + supResPhone() + "/" + _supSel), null);
+  delete _supPlaces[_supSel];
+  _supSel = Object.keys(_supPlaces)[0] || "";
+  supRenderPlaces();
+ } catch (e) {
+  alert("تعذّر الحذف — أعد المحاولة.");
+ }
+};
+
+window.supSend = async function(btn) {
+ const p = _supPlaces[_supSel];
+ if (!p) return alert("اختر المكان أو أضف مكاناً جديداً.");
+ const items = document.getElementById("supItems").value.trim();
+ if (!items) return alert("اكتب ما يجلبه الكابتن.");
+ const fee = supFeeOf(p);
+ if (!fee) return alert("منطقة هذا المحلّ ليست في قائمة أجورك — أضفه من جديد بمنطقةٍ من القائمة.");
+ const pay = document.querySelector('input[name="supPay"]:checked')?.value === "cap" ? "cap" : "pre";
+ const max = pay === "cap" ? supNum(document.getElementById("supMax").value) : 0;
+ if (pay === "cap" && !(max >= 250)) return alert("اكتب أقصى مبلغٍ يدفعه الكابتن عنك.");
+ const note = document.getElementById("supNote").value.trim().slice(0, 200);
+ const area = `🛒 مقاضي من ${p.n} — ${p.area} (توصيل: ${fee})`.slice(0, 200);
+ const details = (`🛒 مقاضي من ${p.n}: ${items.replace(/\s*\n\s*/g, "، ")}` + (pay === "cap" ? ` | الكابتن يدفع الثمن حتى ${max.toLocaleString("en-US")} ويستردّه من المطعم` : " | الثمن مدفوعٌ مسبقاً") + (note ? " | ملاحظة: " + note : "")).slice(0, 3900);
+ const html = btn.innerHTML;
+ btn.innerHTML = `<div class="spinner-border spinner-border-sm me-1"></div> إرسال…`;
+ btn.disabled = true;
+ const nx = _supNext = {
+  kind: "supply",
+  sup: {
+   place: _supSel,
+   n: p.n,
+   ph: p.ph || "",
+   area: p.area,
+   lat: p.lat,
+   lng: p.lng,
+   items: items,
+   pay: pay,
+   max: max,
+   note: note
+  }
+ };
+ try {
+  await finalizeOrderPlacement(details, "", fee, area, btn, html);
+  if (nx.ok) {
+   document.getElementById("supItems").value = "";
+   document.getElementById("supNote").value = "";
+   try {
+    const pl = _supPlaces[_supSel];
+    if (pl) {
+     pl.at = Date.now();
+     set(ref(db, "res_places/" + supResPhone() + "/" + _supSel + "/at"), pl.at).catch(() => {});
+    }
+   } catch (e) {}
+  }
+ } finally {
+  _supNext = null;
+ }
+};
+
+function supMiniHtml(o) {
+ const s = o.sup || {}, fee = Number(o.price) || 0, paid = Number(s.paid) || 0;
+ const pay = s.pay === "cap" ? paid > 0 ? `💵 دفع الكابتن ${paid.toLocaleString("en-US")} للمحلّ — ادفع له ${(paid + fee).toLocaleString("en-US")} د.ع (الثمن + الأجرة)` : `💵 يدفع الكابتن الثمن (حتى ${(Number(s.max) || 0).toLocaleString("en-US")}) وتدفعه له مع الأجرة` : `✅ الثمن مدفوعٌ مسبقاً — تدفع الأجرة ${fee.toLocaleString("en-US")} فقط`;
+ return `<div class="order-details-row mt-1" style="flex-direction:column;align-items:flex-start;gap:4px">\n            <div class="detail-item" style="white-space:pre-line">🛒 ${escapeHtml(s.items || "")}</div>\n            <div class="detail-item" style="font-weight:700">${escapeHtml(pay)}</div></div>`;
+}
+
 window.switchTab = function(mode, triggerSave = true) {
  currentOrderMode = mode;
  document.getElementById("tabManual").classList.remove("active");
@@ -6764,6 +7039,19 @@ window.switchTab = function(mode, triggerSave = true) {
  document.getElementById("tabPhoto").classList.remove("active");
  const tabVoiceEl = document.getElementById("tabVoice");
  if (tabVoiceEl) tabVoiceEl.classList.remove("active");
+ {
+  const tS = document.getElementById("tabSupply"), oF = document.getElementById("orderForm"), sB = document.getElementById("supplyBox");
+  if (tS) tS.classList.remove("active");
+  if (mode === "supply" && tS && sB) {
+   tS.classList.add("active");
+   oF.classList.add("hidden-section");
+   sB.classList.remove("hidden-section");
+   supInit();
+   return;
+  }
+  if (oF) oF.classList.remove("hidden-section");
+  if (sB) sB.classList.add("hidden-section");
+ }
  const sharedArea = document.getElementById("sharedAreaField");
  const manualFields = document.getElementById("manualOnlyFields");
  const photoSection = document.getElementById("photoSection");
@@ -7874,13 +8162,13 @@ function renderActiveOrdersUI() {
     fillWidth = "33%";
    }
   }
-  const STATUS_TEXT = [ "", "نبحث عن كابتن قريب", "الكابتن متوجّه إليك", "الكابتن عند بابك", "الطلب في طريقه للزبون" ];
+  const STATUS_TEXT = o.kind === "supply" ? [ "", "نبحث عن كابتن للمقاضي", "الكابتن متوجّه إلى المحلّ", "الكابتن عند المحلّ", "المقاضي في الطريق إليك" ] : [ "", "نبحث عن كابتن قريب", "الكابتن متوجّه إليك", "الكابتن عند بابك", "الطلب في طريقه للزبون" ];
   const statusLine = offered ? "عُرض على كابتن — بانتظار قبوله" : STATUS_TEXT[step] || "قيد المتابعة";
-  const showReadyBtn = hasDriver && (status === "accepted" || status === "heading" || status === "arrived_at_res");
+  const showReadyBtn = o.kind !== "supply" && hasDriver && (status === "accepted" || status === "heading" || status === "arrived_at_res");
   const readyBtnHtml = showReadyBtn ? readyForPickup ? `<span class="ready-pill"><i data-lucide="check-circle" size="10"></i> جاهز للاستلام</span>` : `<button class="btn-ready" onclick="markOrderReady('${sid(orderId)}', this)"><i data-lucide="package-check" size="14"></i> إبلاغ الكابتن بالجهوزية</button>` : "";
   const photoUrl = o.photoUrl || o.image;
   const imgBtnHtml = photoUrl ? `<button class="oc-icon-btn receipt" onclick="document.getElementById('fullReceiptImage').src='${jss(photoUrl)}'; document.getElementById('imageViewerModal').style.display='flex';" title="عرض الوصل" aria-label="عرض وصل الطلب"><i data-lucide="image" size="18"></i></button>` : "";
-  activeOrdersHtml += `\n            <div class="live-order-card" id="order-${sid(orderId)}">\n                <div class="oc-rail"><div class="oc-rail-fill" style="width: ${fillWidth};"></div></div>\n                <div class="oc-body">\n                <div class="order-header-row">\n                    <div class="oc-status ${hasDriver ? "" : "searching"}">${escapeHtml(statusLine)}</div>\n                    <div class="oc-meta">\n                        <span class="order-id-text">#${escapeHtml(orderId)}</span>\n                        <div class="order-time-text"><i data-lucide="clock" size="10"></i> ${escapeHtml(orderTime)}</div>\n                    </div>\n                </div>\n                <div class="oc-driver ${hasDriver ? "" : "waiting"}">\n                    <div class="oc-av ${hasDriver ? "" : "waiting"}">${hasDriver && driverAvatarHtml(driverPhone) || `<i data-lucide="${hasDriver ? "bike" : "radar"}" size="24"></i>`}</div>\n                    <div class="oc-dwrap">\n                        <div class="oc-dname">${driverName}</div>\n                        <div class="oc-drole">${hasDriver ? "كابتن التوصيل" : "جارٍ الإسناد…"}</div>\n                    </div>\n                    ${hasDriver ? `<button class="oc-call" onclick="window.open('tel:${jss(driverPhone)}')" title="اتصال بالكابتن" aria-label="اتصال بالكابتن"><i data-lucide="phone" size="17"></i></button>` : ""}\n                </div>\n                <div class="order-details-row mt-2">\n                    <div class="detail-item"><i data-lucide="map-pin" size="14" style="color: var(--accent);"></i> ${escapeHtml(orderArea || "غير محددة")}</div>\n                </div>\n                ${o.src === "ittihad" && o.itt ? ittMiniHtml(o) : ""}\n                <div class="progress-tracker mt-3">\n                    <div class="progress-line"></div>\n                    <div class="progress-line-fill" style="width: ${fillWidth};"></div>\n                    <div class="progress-step ${step >= 1 ? step === 1 ? "current" : "active" : ""}"><div class="progress-dot"><i data-lucide="radar" size="10"></i></div><span class="progress-label">بانتظار</span></div>\n                    <div class="progress-step ${step >= 2 ? step === 2 ? "current" : "active" : ""}"><div class="progress-dot"><i data-lucide="truck" size="10"></i></div><span class="progress-label">متوجه</span></div>\n                    <div class="progress-step ${step >= 3 ? step === 3 ? "current" : "active" : ""}"><div class="progress-dot"><i data-lucide="store" size="10"></i></div><span class="progress-label">بالمطعم</span></div>\n                    <div class="progress-step ${step >= 4 ? step === 4 ? "current" : "active" : ""}"><div class="progress-dot"><i data-lucide="user" size="10"></i></div><span class="progress-label">بالطريق</span></div>\n                </div>\n                ${readyBtnHtml || imgBtnHtml || isCancelable ? `<div class="oc-actions">\n                    ${readyBtnHtml}\n                    ${imgBtnHtml}\n                    ${isCancelable ? `<button class="oc-icon-btn danger" onclick="cancelOrderGrace('${sid(orderId)}')" title="إلغاء الطلب" aria-label="إلغاء الطلب"><i data-lucide="x" size="19"></i></button>` : ""}\n                </div>` : ""}\n                </div>\n            </div>`;
+  activeOrdersHtml += `\n            <div class="live-order-card" id="order-${sid(orderId)}">\n                <div class="oc-rail"><div class="oc-rail-fill" style="width: ${fillWidth};"></div></div>\n                <div class="oc-body">\n                <div class="order-header-row">\n                    <div class="oc-status ${hasDriver ? "" : "searching"}">${escapeHtml(statusLine)}</div>\n                    <div class="oc-meta">\n                        <span class="order-id-text">#${escapeHtml(orderId)}</span>\n                        <div class="order-time-text"><i data-lucide="clock" size="10"></i> ${escapeHtml(orderTime)}</div>\n                    </div>\n                </div>\n                <div class="oc-driver ${hasDriver ? "" : "waiting"}">\n                    <div class="oc-av ${hasDriver ? "" : "waiting"}">${hasDriver && driverAvatarHtml(driverPhone) || `<i data-lucide="${hasDriver ? "bike" : "radar"}" size="24"></i>`}</div>\n                    <div class="oc-dwrap">\n                        <div class="oc-dname">${driverName}</div>\n                        <div class="oc-drole">${hasDriver ? "كابتن التوصيل" : "جارٍ الإسناد…"}</div>\n                    </div>\n                    ${hasDriver ? `<button class="oc-call" onclick="window.open('tel:${jss(driverPhone)}')" title="اتصال بالكابتن" aria-label="اتصال بالكابتن"><i data-lucide="phone" size="17"></i></button>` : ""}\n                </div>\n                <div class="order-details-row mt-2">\n                    <div class="detail-item"><i data-lucide="map-pin" size="14" style="color: var(--accent);"></i> ${escapeHtml(orderArea || "غير محددة")}</div>\n                </div>\n                ${o.src === "ittihad" && o.itt ? ittMiniHtml(o) : ""}\n                ${o.kind === "supply" && o.sup ? supMiniHtml(o) : ""}\n                <div class="progress-tracker mt-3">\n                    <div class="progress-line"></div>\n                    <div class="progress-line-fill" style="width: ${fillWidth};"></div>\n                    <div class="progress-step ${step >= 1 ? step === 1 ? "current" : "active" : ""}"><div class="progress-dot"><i data-lucide="radar" size="10"></i></div><span class="progress-label">بانتظار</span></div>\n                    <div class="progress-step ${step >= 2 ? step === 2 ? "current" : "active" : ""}"><div class="progress-dot"><i data-lucide="truck" size="10"></i></div><span class="progress-label">متوجه</span></div>\n                    <div class="progress-step ${step >= 3 ? step === 3 ? "current" : "active" : ""}"><div class="progress-dot"><i data-lucide="store" size="10"></i></div><span class="progress-label">${o.kind === "supply" ? "بالمحلّ" : "بالمطعم"}</span></div>\n                    <div class="progress-step ${step >= 4 ? step === 4 ? "current" : "active" : ""}"><div class="progress-dot"><i data-lucide="user" size="10"></i></div><span class="progress-label">بالطريق</span></div>\n                </div>\n                ${readyBtnHtml || imgBtnHtml || isCancelable ? `<div class="oc-actions">\n                    ${readyBtnHtml}\n                    ${imgBtnHtml}\n                    ${isCancelable ? `<button class="oc-icon-btn danger" onclick="cancelOrderGrace('${sid(orderId)}')" title="إلغاء الطلب" aria-label="إلغاء الطلب"><i data-lucide="x" size="19"></i></button>` : ""}\n                </div>` : ""}\n                </div>\n            </div>`;
  });
  if (lastActiveHtml !== activeOrdersHtml) {
   document.getElementById("activeOrdersList").innerHTML = activeOrdersHtml || `<div class="text-center text-muted fw-bold py-4 small" style="font-size: 0.8rem; background: rgba(255,255,255,0.4); border-radius: 20px;"><i data-lucide="inbox" size="24" class="mb-2 opacity-50"></i><br>لا توجد طلبات نشطة حالياً.</div>`;
@@ -8111,6 +8399,7 @@ function resetCar() {
 async function finalizeOrderPlacement(details, imageUrl, price, area, btn, originalBtnHtml) {
  try {
   await finalizeOrderPlacementSilent(details, imageUrl, price, area, currentResName);
+  if (_supNext) _supNext.ok = true;
   resetCar();
   btn.innerHTML = originalBtnHtml;
   btn.disabled = false;
@@ -8193,7 +8482,12 @@ async function finalizeOrderPlacementSilent(details, imageUrl, price, area, resN
  const authed = await requireCloudAuth();
  if (!authed) throw new Error("NO_AUTH");
  window.__resPhone = normResPhone;
- const _car = applyCar(price, area, currentOrderMode === "quick" ? "quick" : currentOrderMode);
+ const _car = _supNext ? {
+  price: price,
+  area: area,
+  vehicle: "bike",
+  extra: 0
+ } : applyCar(price, area, currentOrderMode === "quick" ? "quick" : currentOrderMode);
  price = _car.price;
  area = _car.area;
  if (_car.vehicle === "car") resTrack("create_car", {
@@ -8213,7 +8507,8 @@ async function finalizeOrderPlacementSilent(details, imageUrl, price, area, resN
     car_extra: _car.extra,
     lat: regLat,
     lng: regLng,
-    dup_confirmed: dupConfirmed
+    dup_confirmed: dupConfirmed,
+    ..._supNext || {}
    });
   } catch (e) {
    if (String(e && e.message) === "SERVER_DEDUP") {
@@ -8228,6 +8523,11 @@ async function finalizeOrderPlacementSilent(details, imageUrl, price, area, resN
    markSent();
    return;
   }
+ }
+ if (_supNext) {
+  const e3 = new Error("SERVER_REJECTED");
+  e3.serverMsg = "تعذّر إرسال طلب المقاضي الآن — أعد المحاولة بعد قليل.";
+  throw e3;
  }
  await set(ref(db, "active_orders/" + uniqueId), {
   id: uniqueId,

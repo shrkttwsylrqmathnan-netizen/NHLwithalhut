@@ -34,7 +34,7 @@
  } catch (_) {}
 })();
 
-const CURRENT_APP_VERSION = "34.69-Nahla";
+const CURRENT_APP_VERSION = "34.70-Nahla";
 
 window.APP_VERSION = CURRENT_APP_VERSION;
 
@@ -6107,7 +6107,11 @@ function _offerScan(fb, myId, pump) {
   comm: f.comm || 0,
   payType: f.payType || "المطعم يدفع",
   is_sovereign: f.is_sovereign || false,
-  itt: f.src === "ittihad"
+  itt: f.src === "ittihad",
+  kind: f.kind || "",
+  sup: f.sup || null,
+  dropLat: f.dropLat,
+  dropLng: f.dropLng
  };
  curOrder.okey = _offerKey(f);
  const _stamp = f.last_update ? new Date(f.last_update).getTime() : 0;
@@ -6121,7 +6125,7 @@ function _offerScan(fb, myId, pump) {
  curOrder.expire = Date.now() + Math.max(1e4, _wLegacy, _wServer);
  document.getElementById("alTitle").innerText = active.length ? "طلب إضافي! 🔥" : "طلب جديد!";
  document.getElementById("alSov").innerText = curOrder.is_sovereign ? "⚠️ تعيين إداري مباشر — لا يمكن تجاهله" : "";
- document.getElementById("alRes").innerText = (f.vehicle === "car" ? "🚗 سيارة · " : "") + f.restaurant;
+ document.getElementById("alRes").innerText = (f.vehicle === "car" ? "🚗 سيارة · " : "") + (f.kind === "supply" && f.sup ? "🛒 مقاضي من " + f.sup.n + " ← " + f.restaurant : f.restaurant);
  document.getElementById("alArea").innerText = f.area || "غير محدد";
  (function() {
   const _pEl = document.getElementById("alPrice");
@@ -6270,7 +6274,11 @@ function listenOrders() {
      pickupApprox: st2 === "picked_up",
      is_sovereign: f.is_sovereign || false,
      readyForPickup: f.ready_for_pickup === true,
-     itt: f.src === "ittihad"
+     itt: f.src === "ittihad",
+     kind: f.kind || "",
+     sup: f.sup || null,
+     dropLat: f.dropLat,
+     dropLng: f.dropLng
     });
     if (f.ready_for_pickup === true) readySet.add(oid);
     restored++;
@@ -6568,7 +6576,11 @@ function finalizeAccept() {
   acceptedTime: Date.now(),
   is_sovereign: curOrder.is_sovereign || false,
   readyForPickup: false,
-  itt: !!curOrder.itt
+  itt: !!curOrder.itt,
+  kind: curOrder.kind || "",
+  sup: curOrder.sup || null,
+  dropLat: curOrder.dropLat,
+  dropLng: curOrder.dropLng
  };
  active.push(o);
  localStorage.setItem("nahla_orders", JSON.stringify(active));
@@ -6851,6 +6863,21 @@ const ICO = {
  bell: '<svg class="si si-s" viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>'
 };
 
+function supRoute(o, s, rpn, rwa, mp) {
+ const sp = String(s.ph || "").replace(/\D/g, "").replace(/^0+/, "");
+ const spn = sp ? "0" + sp : "";
+ const dmp = num(o.dropLat) && num(o.dropLng) ? `https://www.google.com/maps/dir/?api=1&destination=${num(o.dropLat)},${num(o.dropLng)}` : "";
+ const pay = s.pay === "cap" ? `💵 ادفع أنت ثمن المقاضي (حتى ${num(s.max).toLocaleString("ar-EG")} د.ع) واستردّه من المطعم مع الأجرة` : "✅ الثمن مدفوعٌ مسبقاً — استلم فقط";
+ const paid = s.pay === "cap" && num(s.paid) > 0 ? `<div class="rp-t" style="margin-top:6px;font-weight:700">💵 دفعتَ ${num(s.paid).toLocaleString("ar-EG")} — استلم من المطعم ${(num(s.paid) + num(o.price)).toLocaleString("ar-EG")} د.ع</div>` : "";
+ const ask = s.pay === "cap" && o.state === "arrived" ? `<input id="pd-${sid(o.id)}" inputmode="numeric" maxlength="8" value="${esc(o._pd || "")}" oninput="_pdSet('${sid(o.id)}',this.value)"\n        placeholder="كم دفعتَ للمحلّ؟ (حتى ${num(s.max).toLocaleString("ar-EG")})" style="width:100%;margin-top:8px;padding:10px 12px;border-radius:12px;border:1px solid var(--line,#ddd);font:inherit;font-size:1rem">` : "";
+ return `<div class="route">\n    <div class="rp up"><div class="rp-t">🛒 الاستلام من المحلّ</div><div class="rp-n">${esc(s.n || "")}</div>\n      <div class="rp-n" style="font-weight:400;white-space:pre-line">${esc(s.items || "")}</div>\n      <div class="rp-t" style="margin-top:6px">${pay}</div>${s.note ? `<div class="rp-t">📝 ${esc(s.note)}</div>` : ""}${ask}\n      <div class="acts">\n        ${spn ? `<button class="act a-call" onclick="openLink('tel:${spn}')">${ICO.call} اتصال بالمحلّ</button>` : ""}\n        ${mp ? `<button class="act a-map" onclick="openLink('${mp}')">${ICO.map} خريطة المحلّ</button>` : ""}\n      </div></div>\n    <div class="rp dn2"><div class="rp-t">🏪 التسليم إلى المطعم</div><div class="rp-n">${esc(o.resName)}</div>${paid}\n      <div class="acts">\n        ${rpn ? `<button class="act a-call" onclick="openLink('tel:${rpn}')">${ICO.call} اتصال</button>` : ""}\n        ${rwa ? `<button class="act a-wa" onclick="openLink('https://wa.me/${rwa}')">${ICO.wa} واتساب</button>` : ""}\n        ${dmp ? `<button class="act a-map" onclick="openLink('${dmp}')">${ICO.map} خريطة المطعم</button>` : ""}\n      </div></div>\n  </div>`;
+}
+
+window._pdSet = function(id, v) {
+ const o = active.find(x => String(x.id) === String(id));
+ if (o) o._pd = String(v || "").slice(0, 8);
+};
+
 function renderOrders() {
  const box = document.getElementById("orderBox"), rad = document.getElementById("radar");
  if (!active.length) {
@@ -6866,7 +6893,8 @@ function renderOrders() {
   const step = o.state === "heading" ? 1 : o.state === "arrived" ? 2 : o.state === "picked_up" ? 3 : 4;
   const strip = o.state === "heading" ? "st-blue" : o.state === "arrived" ? "st-warn" : "st-ok";
   const act = o.state === "heading" ? "arrive" : o.state === "arrived" ? "pickup" : "finish";
-  const bTxt = o.state === "heading" ? "تأكيد الوصول للمطعم" : o.state === "arrived" ? "تأكيد استلام الطلب" : "تأكيد تسليم الطلب";
+  const sup = o.kind === "supply" && o.sup ? o.sup : null;
+  const bTxt = sup ? o.state === "heading" ? "تأكيد الوصول للمحلّ" : o.state === "arrived" ? "تأكيد استلام المقاضي" : "تأكيد تسليم المقاضي للمطعم" : o.state === "heading" ? "تأكيد الوصول للمطعم" : o.state === "arrived" ? "تأكيد استلام الطلب" : "تأكيد تسليم الطلب";
   const bCls = o.state === "heading" ? "cta-1" : o.state === "arrived" ? "cta-2" : "cta-3";
   let dis = "";
   if (o.state === "picked_up") {
@@ -6893,7 +6921,7 @@ function renderOrders() {
   const photo = o.photoUrl && /^https:\/\//.test(String(o.photoUrl)) ? `<button class="act a-img" data-receipt="${esc(o.photoUrl)}" onclick="openReceipt(this.dataset.receipt)">${ICO.img} الوصل</button>` : "";
   if (!o.resArea) enrichOrder(o);
   const pick = o.resArea ? ` (${esc(o.resArea)})` : "";
-  html += `<div class="ord" id="o-${sid(o.id)}">\n      <div class="ord-strip ${strip}"></div>\n      <div class="ord-b">\n        <div class="ord-hd">\n          <div><div class="ord-no">#${sid(o.id)}</div><div class="ord-tags">${tags}</div>\n            <div id="t-${sid(o.id)}" class="ord-tm tm-ok">${ICO.clk} --:--</div></div>\n          <div class="ord-pr"><div class="ord-pv">${num(o.price).toLocaleString("ar-EG")}<small> د.ع</small></div>\n            <button class="sup" onclick="openChat()" style="margin-top:9px;">${ICO.sup} ليدر<span class="sup-dot" id="d-${sid(o.id)}"></span></button></div>\n        </div>\n        <div class="steps">\n          <div class="step ${step >= 1 ? step === 1 ? "now" : "done" : ""}"><div class="step-d">${step > 1 ? "✓" : "1"}</div><span class="step-l">قبلت</span></div>\n          <div class="step ${step >= 2 ? step === 2 ? "now" : "done" : ""}"><div class="step-d">${step > 2 ? "✓" : "2"}</div><span class="step-l">بالمطعم</span></div>\n          <div class="step ${step >= 3 ? step === 3 ? "now" : "done" : ""}"><div class="step-d">${step > 3 ? "✓" : "3"}</div><span class="step-l">استلمت</span></div>\n          <div class="step ${step >= 4 ? "now" : ""}"><div class="step-d">🏁</div><span class="step-l">سلّمت</span></div>\n        </div>\n        ${ready}\n        <div class="route">\n          <div class="rp up"><div class="rp-t">📍 الاستلام من${pick}</div><div class="rp-n">${esc(o.resName)}</div>\n            <div class="acts">\n              ${rpn ? `<button class="act a-call" onclick="openLink('tel:${rpn}')">${ICO.call} اتصال</button>` : ""}\n              ${rwa ? `<button class="act a-wa" onclick="openLink('https://wa.me/${rwa}')">${ICO.wa} واتساب</button>` : ""}\n              ${mp ? `<button class="act a-map" onclick="openLink('${mp}')">${ICO.map} خريطة</button>` : ""}\n            </div></div>\n          <div class="rp dn2"><div class="rp-t">🏠 التسليم إلى (${esc(o.area)})</div><div class="rp-n">${esc(det)}</div>\n            <div class="acts">\n              ${cp ? `<button class="act a-call" onclick="openLink('tel:${cp}')">${ICO.call} اتصال</button>` : ""}\n              ${cp ? `<button class="act a-wa" onclick="smartWa('${jss(cp)}','${jss(o.resName)}','${jss(o.area)}','${sid(o.id)}','${num(o.price)}')">${ICO.wa} رسالة الزبون</button>` : ""}\n              ${cmp ? `<button class="act a-map" onclick="openLink('${cmp}')">${ICO.map} موقع الزبون</button>` : ""}\n              ${photo}\n            </div></div>\n        </div>\n        <button class="cta ${bCls}" ${dis} onclick="orderAction('${sid(o.id)}','${sid(act)}',this)">${bTxt}</button>\n        ${isItt && o.state === "picked_up" ? `<button class="refz" onclick="ittRefused('${sid(o.id)}',this)">📵 الزبون رفض الاستلام</button>` : ""}\n      </div></div>`;
+  html += `<div class="ord" id="o-${sid(o.id)}">\n      <div class="ord-strip ${strip}"></div>\n      <div class="ord-b">\n        <div class="ord-hd">\n          <div><div class="ord-no">#${sid(o.id)}</div><div class="ord-tags">${tags}</div>\n            <div id="t-${sid(o.id)}" class="ord-tm tm-ok">${ICO.clk} --:--</div></div>\n          <div class="ord-pr"><div class="ord-pv">${num(o.price).toLocaleString("ar-EG")}<small> د.ع</small></div>\n            <button class="sup" onclick="openChat()" style="margin-top:9px;">${ICO.sup} ليدر<span class="sup-dot" id="d-${sid(o.id)}"></span></button></div>\n        </div>\n        <div class="steps">\n          <div class="step ${step >= 1 ? step === 1 ? "now" : "done" : ""}"><div class="step-d">${step > 1 ? "✓" : "1"}</div><span class="step-l">قبلت</span></div>\n          <div class="step ${step >= 2 ? step === 2 ? "now" : "done" : ""}"><div class="step-d">${step > 2 ? "✓" : "2"}</div><span class="step-l">${sup ? "بالمحلّ" : "بالمطعم"}</span></div>\n          <div class="step ${step >= 3 ? step === 3 ? "now" : "done" : ""}"><div class="step-d">${step > 3 ? "✓" : "3"}</div><span class="step-l">استلمت</span></div>\n          <div class="step ${step >= 4 ? "now" : ""}"><div class="step-d">🏁</div><span class="step-l">سلّمت</span></div>\n        </div>\n        ${ready}\n        ${sup ? supRoute(o, sup, rpn, rwa, mp) : `<div class="route">\n          <div class="rp up"><div class="rp-t">📍 الاستلام من${pick}</div><div class="rp-n">${esc(o.resName)}</div>\n            <div class="acts">\n              ${rpn ? `<button class="act a-call" onclick="openLink('tel:${rpn}')">${ICO.call} اتصال</button>` : ""}\n              ${rwa ? `<button class="act a-wa" onclick="openLink('https://wa.me/${rwa}')">${ICO.wa} واتساب</button>` : ""}\n              ${mp ? `<button class="act a-map" onclick="openLink('${mp}')">${ICO.map} خريطة</button>` : ""}\n            </div></div>\n          <div class="rp dn2"><div class="rp-t">🏠 التسليم إلى (${esc(o.area)})</div><div class="rp-n">${esc(det)}</div>\n            <div class="acts">\n              ${cp ? `<button class="act a-call" onclick="openLink('tel:${cp}')">${ICO.call} اتصال</button>` : ""}\n              ${cp ? `<button class="act a-wa" onclick="smartWa('${jss(cp)}','${jss(o.resName)}','${jss(o.area)}','${sid(o.id)}','${num(o.price)}')">${ICO.wa} رسالة الزبون</button>` : ""}\n              ${cmp ? `<button class="act a-map" onclick="openLink('${cmp}')">${ICO.map} موقع الزبون</button>` : ""}\n              ${photo}\n            </div></div>\n        </div>`}\n        <button class="cta ${bCls}" ${dis} onclick="orderAction('${sid(o.id)}','${sid(act)}',this)">${bTxt}</button>\n        ${isItt && o.state === "picked_up" ? `<button class="refz" onclick="ittRefused('${sid(o.id)}',this)">📵 الزبون رفض الاستلام</button>` : ""}\n      </div></div>`;
  });
  if (lastHtml !== html) {
   box.innerHTML = html;
@@ -6960,7 +6988,7 @@ window.orderAction = function(id, act, btn) {
   } else {
    const d = dist(drv.currentLat, drv.currentLng, o.resLat, o.resLng);
    if (d > 150) {
-    toast(`⚠️ لا يمكنك تأكيد الوصول!<br>أنت تبعد <b>${Math.round(d)} متر</b> عن المطعم 📍`, "bad");
+    toast(`⚠️ لا يمكنك تأكيد الوصول!<br>أنت تبعد <b>${Math.round(d)} متر</b> عن ${o.kind === "supply" ? "المحلّ" : "المطعم"} 📍`, "bad");
     return;
    }
   }
@@ -6999,10 +7027,28 @@ window.orderAction = function(id, act, btn) {
   })();
   return;
  } else if (act === "pickup") {
+  const _up = {
+   [`active_orders/${id}/status`]: "picked_up"
+  };
+  if (o.kind === "supply" && o.sup && o.sup.pay === "cap") {
+   const v = parseInt(String(o._pd || "").replace(/[٠-٩]/g, d => "٠١٢٣٤٥٦٧٨٩".indexOf(d)).replace(/[^\d]/g, ""), 10) || 0;
+   if (!(v > 0)) {
+    btn.innerHTML = orig;
+    btn.disabled = false;
+    toast("✍️ اكتب المبلغ الذي دفعته للمحلّ أوّلاً", "bad");
+    return;
+   }
+   if (v > num(o.sup.max)) {
+    btn.innerHTML = orig;
+    btn.disabled = false;
+    toast(`⚠️ المبلغ أكبر من حدّ المطعم (${num(o.sup.max).toLocaleString("ar-EG")}) — اتّصل بالمطعم قبل الدفع`, "bad");
+    return;
+   }
+   _up[`active_orders/${id}/sup/paid`] = v;
+   o.sup.paid = v;
+  }
   (async () => {
-   const done = await guaranteedWrite({
-    [`active_orders/${id}/status`]: "picked_up"
-   }, `active_orders/${id}/status`, "picked_up");
+   const done = await guaranteedWrite(_up, `active_orders/${id}/status`, "picked_up");
    if (done) {
     o.state = "picked_up";
     o.pickupTime = Date.now();
@@ -7015,9 +7061,7 @@ window.orderAction = function(id, act, btn) {
     try {
      queue.push({
       type: "multi",
-      updates: {
-       [`active_orders/${id}/status`]: "picked_up"
-      },
+      updates: _up,
       ts: Date.now()
      });
      localStorage.setItem("hut_offline_queue", JSON.stringify(queue));
