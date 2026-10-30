@@ -329,6 +329,156 @@ window.nahlaOpen = window.nahlaOpen || function(what, id) {
   "اضغط المايكروفون وتكلّم، ثم أرسل": "کرتە لە مایکرۆفۆن بکە و قسە بکە، پاشان بینێرە",
   "أو اختر موضوعاً من الأزرار في الأعلى": "یان بابەتێک لە دوگمەکانی سەرەوە هەڵبژێرە",
   "متجري في الاتحاد": "دوکانەکەم لە یەکێتی",
+  "متجري بالاتحاد": "دوکانەکەم لە یەکێتی",
+  "اتحاد المتاجر — بلا عمولة": "یەکێتیی دوکانەکان — بێ کۆمیسیۆن",
+  "الاتحاد يفتح للزباين قريباً": "یەکێتی بەم زووانە بۆ کڕیاران دەکرێتەوە",
+  "مسدود": "داخراو",
+  "جهّز متجرك بالاتحاد": "دوکانەکەت لە یەکێتی ئامادە بکە",
+  "المرحلة 1 من 4 — الشعار": "قۆناغی 1 لە 4 — لۆگۆ",
+  "المرحلة 2 من 4 — المنيو": "قۆناغی 2 لە 4 — مینیو",
+  "المرحلة 3 من 4 — المراجعة": "قۆناغی 3 لە 4 — پێداچوونەوە",
+  "المرحلة 4 من 4 — النشر": "قۆناغی 4 لە 4 — بڵاوکردنەوە",
+  "الشعار": "لۆگۆ",
+  "المنيو": "مینیو",
+  "المراجعة": "پێداچوونەوە",
+  "النشر": "بڵاوکردنەوە",
+  "دزّ رابطك": "لینکەکەت بنێرە",
+  "أقسام متجري": "بەشەکانی دوکانەکەم",
+  "كمّل": "بەردەوام بە",
+  "ارجع": "بگەڕێوە",
+  "احفظ": "پاشەکەوت بکە",
+  "انحفظ ✓": "پاشەکەوت کرا ✓",
+  "شعار محلّك واسمه": "لۆگۆ و ناوی دوکانەکەت",
+  "الزبون يعرف محلّك من شعاره. صوّر الشعار (اللوگو) أو اختاره من المعرض.": "کڕیار دوکانەکەت لە لۆگۆکەیەوە دەناسێتەوە. وێنەی لۆگۆکە بگرە یان لە گەلەری هەڵیبژێرە.",
+  "ضيف الشعار": "لۆگۆ زیاد بکە",
+  "اسم المحلّ": "ناوی دوکان",
+  "(مثل ما يعرفه الزبون)": "(وەک کڕیار دەیناسێت)",
+  "بعد ما تضيف الشعار، يشتغل زرّ «كمّل».": "دوای زیادکردنی لۆگۆ، دوگمەی «بەردەوام بە» کار دەکات.",
+  "عندك سؤال؟ اسأل «مستشارك»": "پرسیارت هەیە؟ لە «ڕاوێژکارەکەت» بپرسە",
+  "عندك سؤال؟": "پرسیارت هەیە؟",
+  "فريق «مستشارك» يجاوبك هسه. وإذا سأل زبون عن طلبه، يوصلك سؤاله بـ«مستشارك» وجوابك يوصله.": "تیمی «ڕاوێژکارەکەت» ئێستا وەڵامت دەداتەوە. ئەگەر کڕیارێک پرسیاری داواکارییەکەی کرد، پرسیارەکەی لە «ڕاوێژکارەکەت» بۆت دێت و وەڵامەکەت بۆی دەچێت.",
+  "صوّر المنيو مالتك": "وێنەی مینیوەکەت بگرە",
+  "صفحة وحدة أو أكثر (لحد 6). الذكاء يكتب الأقسام والأكلات والأسعار بدالك.": "لاپەڕەیەک یان زیاتر (تا 6). زیرەکی بەشەکان و خواردنەکان و نرخەکان لە جیاتی تۆ دەنووسێت.",
+  "عندك منيو مقروء:": "مینیوی خوێندراوەت هەیە:",
+  "أكلة. دوس «كمّل»، أو صوّر صفحة ثانية تنضاف عليه.": "خواردن. «بەردەوام بە» دابگرە، یان وێنەی لاپەڕەیەکی تر بگرە کە بۆی زیاد دەبێت.",
+  "صوّر صفحة ثانية": "وێنەی لاپەڕەیەکی تر بگرە",
+  "صوّر كل صفحة واضحة وقريبة، بضوء زين.": "هەر لاپەڕەیەک ڕوون و نزیک، لە ڕووناکیی باشدا وێنە بگرە.",
+  "ما عندي منيو مطبوع؟ اكتبه بإيدك": "مینیوی چاپکراوت نییە؟ بە دەستی خۆت بینووسە",
+  "راجع الأسعار": "پێداچوونەوەی نرخەکان",
+  "الذكاء قرا المنيو. شوف الأسعار بس، والمعلّم بالأصفر يحتاج تصحيح.": "زیرەکی مینیوەکەی خوێندەوە. تەنها سەیری نرخەکان بکە، ئەوەی بە زەرد نیشانکراوە ڕاستکردنەوەی دەوێت.",
+  "تعديل المنيو": "دەستکاریی مینیو",
+  "غيّر اللي تريده، وبالأخير دوس «انشر التعديل».": "ئەوەی دەتەوێت بیگۆڕە، لە کۆتاییدا «دەستکارییەکە بڵاو بکەوە» دابگرە.",
+  "أكلة تحتاج تشوفها (بالأصفر). السعر بالدينار كامل: 5000 مو 5.": "خواردن پێویستە سەیری بکەیت (بە زەرد). نرخ بە دیناری تەواو: 5000 نەک 5.",
+  "اسم الأكلة": "ناوی خواردن",
+  "امسح القسم": "بەشەکە بسڕەوە",
+  "امسح الأكلة": "خواردنەکە بسڕەوە",
+  "قسم جديد": "بەشی نوێ",
+  "صور الأكلات": "وێنەی خواردنەکان",
+  "اختار صور من المعرض، والذكاء يحط كل صورة على أكلتها. أو دوس خانة الصورة جنب الأكلة.": "وێنە لە گەلەری هەڵبژێرە، زیرەکی هەر وێنەیەک دەخاتە سەر خواردنەکەی. یان خانەی وێنەی تەنیشت خواردنەکە دابگرە.",
+  "اختار صور من المعرض": "وێنە لە گەلەری هەڵبژێرە",
+  "انشر التعديل": "دەستکارییەکە بڵاو بکەوە",
+  "آخر خطوة: انشر": "دوایین هەنگاو: بڵاو بکەوە",
+  "شوف ملخّص متجرك، واختار شگد ياخذ تحضير الطلب.": "پوختەی دوکانەکەت ببینە، و هەڵبژێرە ئامادەکردنی داواکاری چەندی پێدەچێت.",
+  "شگد ياخذ تحضير الطلب عادةً؟": "ئامادەکردنی داواکاری بە ئاسایی چەندی پێدەچێت؟",
+  "الزبون يشوف هالوقت قبل ما يطلب، وتگدر تغيّره ويّا كل طلب.": "کڕیار ئەم کاتە پێش داواکردن دەبینێت، و دەتوانیت لەگەڵ هەر داواکارییەک بیگۆڕیت.",
+  "يدفعها الزبون للكابتن، وما تنحسب عليك.": "کڕیار بە کاپتنی دەدات، و لەسەر تۆ حساب ناکرێت.",
+  "الاتحاد بعده ما انفتح للزباين — متجرك يطلع يوم الافتتاح.": "یەکێتی هێشتا بۆ کڕیاران نەکراوەتەوە — دوکانەکەت ڕۆژی کردنەوە دەردەکەوێت.",
+  "انشر وافتح متجري": "بڵاوی بکەوە و دوکانەکەم بکەرەوە",
+  "المنيو فارغ": "مینیو بەتاڵە",
+  "صوّر المنيو والذكاء يكتبه بدالك.": "وێنەی مینیو بگرە و زیرەکی لە جیاتی تۆ دەینووسێت.",
+  "صفحة وحدة أو أكثر (لحد 6).": "لاپەڕەیەک یان زیاتر (تا 6).",
+  "أو اكتبه بإيدك": "یان بە دەستی خۆت بینووسە",
+  "عندك تعديلات محفوظة، بعدها ما انتشرت.": "دەستکاریی پاشەکەوتکراوت هەیە کە هێشتا بڵاو نەکراوەتەوە.",
+  "كمّلها": "تەواوی بکە",
+  "أكلة": "خواردن",
+  "بصورها": "بە وێنەوە",
+  "ماكو اليوم": "ئەمڕۆ نییە",
+  "ضيف صور أكلاتك": "وێنەی خواردنەکانت زیاد بکە",
+  "الزبون يطلب بعينه. اختار صور من المعرض، والذكاء يحط كل صورة على أكلتها.": "کڕیار بە چاو داوا دەکات. وێنە لە گەلەری هەڵبژێرە، زیرەکی هەر وێنەیەک دەخاتە سەر خواردنەکەی.",
+  "خلصت أكلة اليوم؟ دوس «موجود» تصير «ماكو» وتختفي من الطلب.": "خواردنێک ئەمڕۆ تەواو بوو؟ «هەیە» دابگرە دەبێتە «نییە» و لە داواکردن ون دەبێت.",
+  "موجود": "هەیە",
+  "ماكو": "نییە",
+  "عدّل المنيو أو ضيف أكلات": "مینیو دەستکاری بکە یان خواردن زیاد بکە",
+  "متجرك بلا شعار — الزبون يعرفك منه.": "دوکانەکەت لۆگۆی نییە — کڕیار لێیەوە دەتناسێت.",
+  "متجرك مسدود — الزباين يشوفونه بس ما يگدرون يطلبون. افتحه من الزرّ اللي فوق.": "دوکانەکەت داخراوە — کڕیاران دەیبینن بەڵام ناتوانن داوا بکەن. لە دوگمەی سەرەوە بیکەرەوە.",
+  "متجرك مفتوح — الطلبات توصلك بقائمة الطلبات، بالصوت.": "دوکانەکەت کراوەیە — داواکارییەکان بە دەنگەوە لە لیستی داواکارییەکان بۆت دێن.",
+  "إعدادات أكثر": "ڕێکخستنی زیاتر",
+  "(إذا تحب)": "(ئەگەر بتەوێت)",
+  "واجهة محلّك أو أشهر أكلة عندك": "ڕووی دوکانەکەت یان بەناوبانگترین خواردنت",
+  "نوع المحلّ": "جۆری دوکان",
+  "شنو تبيع؟": "چی دەفرۆشیت؟",
+  "(سطر قصير)": "(دێڕێکی کورت)",
+  "مثلاً: برگر · سندويچات · مشروبات": "بۆ نموونە: بەرگر · ساندویچ · خواردنەوە",
+  "ساعات الدوام": "کاتژمێرەکانی کار",
+  "مثلاً: مفتوح لحد 12 بالليل": "بۆ نموونە: تا 12ی شەو کراوەیە",
+  "رابط متجرك": "لینکی دوکانەکەت",
+  "(حروف إنگليزية صغيرة وأرقام وشَرطة)": "(پیتی بچووکی ئینگلیزی و ژمارە و هێڵ)",
+  "مبروك، متجرك جاهز!": "پیرۆزە، دوکانەکەت ئامادەیە!",
+  "هسه دزّ رابطك لزباينك، وحطّ الباركود بباب المحلّ.": "ئێستا لینکەکەت بۆ کڕیارەکانت بنێرە، و بارکۆدەکە لە دەرگای دوکان دابنێ.",
+  "دزّه": "بینێرە",
+  "انسخه": "کۆپی بکە",
+  "حطّه بالبايو وبكل إعلان. الزبون يفتحه ويطلب منك مباشرة، بسعرك وبلا عمولة.": "لە بایۆ و هەموو ڕیکلامێکدا دایبنێ. کڕیار دەیکاتەوە و ڕاستەوخۆ لە تۆ داوا دەکات، بە نرخی خۆت و بێ کۆمیسیۆن.",
+  "باركود لباب المحلّ والأكياس": "بارکۆد بۆ دەرگای دوکان و کیسەکان",
+  "منيو الصالة": "مینیوی هۆڵ",
+  "بطاقة بيها باركود تحطها على كل طاولة. زبون المحلّ يمسحها ويشوف المنيو بالصور بتلفونه — للعرض بس، والطلب من النادل مثل العادة.": "کارتێکی بارکۆددار لەسەر هەموو مێزێک دابنێ. کڕیاری ناو دوکان سکانی دەکات و مینیو بە وێنە لە مۆبایلەکەی دەبینێت — تەنها بۆ بینین، و داواکردن لە گارسۆنەوە وەک هەمیشە.",
+  "شلون أنشر الرابط بالسوشيال؟": "چۆن لینکەکە لە سۆشیال میدیا بڵاو بکەمەوە؟",
+  "الرابط بالفيديو أو الوصف أو التعليق ما ينضغط. حطّه بـ«الموقع الإلكتروني» بملفّك (فعّل «حساب أعمال» ببلاش من الإعدادات)، وگول بالفيديو «الرابط بالبايو».": "لینک لە ڤیدیۆ یان وەسف یان کۆمێنتدا دانادگیرێت. لە «ماڵپەڕ»ی پرۆفایلەکەت دایبنێ (لە ڕێکخستنەکان «هەژماری بازرگانی» بەخۆڕایی چالاک بکە)، و لە ڤیدیۆکەدا بڵێ «لینکەکە لە بایۆدایە».",
+  "بالستوري ضيف ملصق «رابط» وينضغط. وحطّه بالبايو. (وصف الريلز ما ينضغط.)": "لە ستۆریدا ستیکەری «لینک» زیاد بکە و دادەگیرێت. و لە بایۆشدا دایبنێ. (وەسفی ڕیلز دانادگیرێت.)",
+  "الرابط ينضغط، ويطلع ببطاقة بيها صورة محلّك.": "لینکەکە دادەگیرێت، و بە کارتێک دەردەکەوێت کە وێنەی دوکانەکەتی تێدایە.",
+  "لزّگ الرابط بالسناب من زرّ المشبك.": "لە دوگمەی گیرەوە لینکەکە بە سناپەکەوە بلکێنە.",
+  "بالفيديو گول:": "لە ڤیدیۆکەدا بڵێ:",
+  "رابط لكل منصّة، حتى تعرف منين إجاك الطلب:": "لینکێک بۆ هەر پلاتفۆرمێک، تا بزانیت داواکاری لە کوێوە هات:",
+  "رابط لأكلة وحدة أو عرض": "لینک بۆ یەک خواردن یان ئۆفەرێک",
+  "الأكلة": "خواردن",
+  "دزّ رابط الأكلة": "لینکی خواردنەکە بنێرە",
+  "رابط عرض": "لینکی ئۆفەر",
+  "عروضك": "ئۆفەرەکانت",
+  "رابط الأكلة يفتحها عند الزبون. ورابط العرض يحطها بسلّته مباشرة — حطّه ويّا صورة الأكلة بالستوري.": "لینکی خواردن لای کڕیار دەیکاتەوە. و لینکی ئۆفەر ڕاستەوخۆ دەیخاتە سەبەتەکەیەوە — لەگەڵ وێنەی خواردنەکە لە ستۆری دایبنێ.",
+  "منين إجتك الطلبات هالشهر": "ئەم مانگە داواکارییەکانت لە کوێوە هاتن",
+  "انشر المنيو أوّل.": "سەرەتا مینیو بڵاو بکەوە.",
+  "رابطك يطلع بعد ما تكمّل اسم محلّك من «متجري».": "لینکەکەت دوای تەواوکردنی ناوی دوکانەکەت لە «دوکانەکەم» دەردەکەوێت.",
+  "صور أكلاتك": "وێنەی خواردنەکانت",
+  "— لا تستعملها —": "— بەکاری مەهێنە —",
+  "تأكّد — يمكن أكلة تشبهها": "دڵنیا ببەرەوە — لەوانەیە خواردنێکی هاوشێوە بێت",
+  "صورة ثانية لنفس الأكلة — اختارها إذا أحلى": "وێنەیەکی تری هەمان خواردن — ئەگەر جوانترە هەڵیبژێرە",
+  "ما تبيّن أكل": "خواردن ناچێت",
+  "✓ جنب الاسم = الأكلة عندها صورة، والاعتماد يبدّلها.": "✓ لە تەنیشت ناو = خواردنەکە وێنەی هەیە، و پەسەندکردن دەیگۆڕێت.",
+  "لحظة، دنجيب متجرك…": "تۆزێک، دوکانەکەت دەهێنین…",
+  "الذكاء ديقرا المنيو مالتك…": "زیرەکی مینیوەکەت دەخوێنێتەوە…",
+  "تاخذ لحد دقيقة — لا تسدّ الشاشة": "تا خولەکێک دەخایەنێت — شاشەکە دامەخە",
+  "دنحفظ…": "پاشەکەوت دەکەین…",
+  "دنحفظ متجرك…": "دوکانەکەت پاشەکەوت دەکەین…",
+  "دننشر المنيو…": "مینیو بڵاو دەکەینەوە…",
+  "دنفتح متجرك…": "دوکانەکەت دەکەینەوە…",
+  "دنرفع الصورة…": "وێنەکە بار دەکەین…",
+  "دنرفع الصور…": "وێنەکان بار دەکەین…",
+  "دنجهّز الصور…": "وێنەکان ئامادە دەکەین…",
+  "الذكاء ديتعرّف على أكلاتك…": "زیرەکی خواردنەکانت دەناسێتەوە…",
+  "دنقصّ صور الأكلات من المنيو…": "وێنەی خواردنەکان لە مینیوەکە دەبڕین…",
+  "دنسوّي الرابط…": "لینکەکە دروست دەکەین…",
+  "ضيف شعار محلّك أوّل.": "سەرەتا لۆگۆی دوکانەکەت زیاد بکە.",
+  "اكتب اسم محلّك.": "ناوی دوکانەکەت بنووسە.",
+  "المنيو فارغ — ضيف أكلة وحدة على الأقلّ.": "مینیو بەتاڵە — لانیکەم یەک خواردن زیاد بکە.",
+  "انضافت الصورة ✓": "وێنەکە زیاد کرا ✓",
+  "نسخنا الرابط ✓": "لینکەکە کۆپی کرا ✓",
+  "ما انضافت صور.": "هیچ وێنەیەک زیاد نەکرا.",
+  "سدّيت متجرك بالاتحاد": "دوکانەکەت لە یەکێتی داخست",
+  "ضيف المنيو أوّل — بعدين صور أكلاته.": "سەرەتا مینیو زیاد بکە — پاشان وێنەی خواردنەکانی.",
+  "نزلت بطاقة الطاولة — اطبعها بحجم A6 وحطّها على كل طاولة.": "کارتی مێز داگیرا — بە قەبارەی A6 چاپی بکە و لەسەر هەموو مێزێک دایبنێ.",
+  "ما گدرنا نرسم البطاقة — جرّب مرّة ثانية.": "نەمانتوانی کارتەکە بکێشین — دووبارە هەوڵ بدەرەوە.",
+  "جرّب مرّة ثانية": "دووبارە هەوڵ بدەرەوە",
+  "نمسح القسم وكل أكلاته؟": "بەشەکە و هەموو خواردنەکانی بسڕینەوە؟",
+  "نمسح رابط العرض؟ اللي يدوسه بعدين يشوف متجرك بس.": "لینکی ئۆفەرەکە بسڕینەوە؟ ئەوەی دوایی دایدەگرێت تەنها دوکانەکەت دەبینێت.",
+  "هذا الرابط مأخوذ — اختار غيره.": "ئەم لینکە گیراوە — یەکێکی تر هەڵبژێرە.",
+  "الذكاء مشغول هسه — جرّب بعد دقيقة.": "زیرەکی ئێستا سەرقاڵە — دوای خولەکێک هەوڵ بدەرەوە.",
+  "ما لگينا أكلات بالصورة — صوّرها أوضح وأقرب.": "هیچ خواردنێکمان لە وێنەکەدا نەدۆزییەوە — ڕوونتر و نزیکتر وێنەی بگرە.",
+  "انقطع الاتصال — جرّب مرّة ثانية.": "پەیوەندی پچڕا — دووبارە هەوڵ بدەرەوە.",
+  "صحّح الأسعار المعلّمة بالأصفر": "نرخە زەردکراوەکان ڕاست بکەرەوە",
+  "بالدينار كامل.": "بە دیناری تەواو.",
+  "نشرنا المنيو": "مینیوەکەمان بڵاو کردەوە",
+  "وفتحنا متجرك ✓": "و دوکانەکەتمان کردەوە ✓",
+  "الذكاء قرا": "زیرەکی خوێندییەوە",
+  "غير موجود": "نییە",
   "الدعم: فريق «مستشارك»": "پشتگیری: تیمی «ڕاوێژکارەکەت»",
   "صورة متجرك": "وێنەی دوکانەکەت",
   "شعار متجرك": "لۆگۆی دوکانەکەت",
@@ -2601,6 +2751,55 @@ window.nahlaOpen = window.nahlaOpen || function(what, id) {
         @media (prefers-reduced-motion: reduce) { .itm-spin { animation-duration: 2s; } }
         #itSetup { margin-top: 8px; }
         
+        .itm-prog { display: none; gap: 6px; max-width: 640px; margin: 10px auto 2px; }
+        #ittView.wiz .itm-prog { display: flex; }
+        .itm-prog span { flex: 1; display: flex; flex-direction: column; gap: 5px; font-size: .72rem; font-weight: 600; color: var(--muted); text-align: center; }
+        .itm-prog i { display: block; height: 6px; border-radius: 999px; background: #E2E8F0; }
+        .itm-prog span.done i, .itm-prog span.on i { background: var(--itg); }
+        .itm-prog span.done { color: var(--ink-2); }
+        .itm-prog span.on { color: var(--itg); font-weight: 700; }
+        #ittView.flow .itm-open { display: none; }
+        .itm-nav { flex: none; display: flex; justify-content: center; gap: 4px; background: #fff; border-top: 1px solid var(--line); padding: 4px 8px calc(4px + env(safe-area-inset-bottom)); }
+        #ittView.flow .itm-nav { display: none; }
+        #ittView:not(.flow) .itm-body { padding-bottom: 24px; }
+        .itm-nb { flex: 1; max-width: 200px; height: 58px; border: 0; background: none; border-radius: 14px; font-family: inherit; font-size: .8rem; font-weight: 600; color: var(--muted); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; position: relative; cursor: pointer; }
+        .itm-nb svg { width: 22px; height: 22px; }
+        .itm-nb.on { color: var(--itg); font-weight: 700; }
+        .itm-nb.on::before { content: ""; position: absolute; top: -4px; width: 40px; height: 3px; border-radius: 0 0 3px 3px; background: var(--itg); }
+        .itm-stephead h2 { margin: 2px 0 6px; font-size: 1.25rem; font-weight: 700; color: var(--ink); line-height: 1.5; }
+        .itm-stephead p { margin: 0; font-size: .9rem; color: var(--ink-2); line-height: 1.8; font-weight: 500; }
+        .itm-logo-card { display: flex; flex-direction: column; align-items: center; gap: 4px; }
+        .itm-logo-card .itm-lbl, .itm-logo-card .itm-in { align-self: stretch; }
+        .itm-ph.big { width: 132px; height: 132px; border-radius: 24px; font-size: .84rem; gap: 6px; grid-row: auto; }
+        .itm-ph.big svg { width: 34px; height: 34px; }
+        .itm-link-btn { align-self: center; border: 0; background: none; color: var(--itg); font-family: inherit; font-weight: 600; font-size: .86rem; padding: 8px 10px; text-decoration: underline; text-underline-offset: 4px; cursor: pointer; }
+        .itm-hint { text-align: center; font-size: .8rem; color: var(--muted); margin: 0; font-weight: 500; line-height: 1.7; }
+        .itm-cta .itm-backb { flex: none; width: auto; min-width: 104px; }
+        .itm-banner .itm-copy { flex: none; margin-inline-start: auto; align-self: center; }
+        .itm-banner span { flex: 1; min-width: 0; }
+        .itm-stats { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+        .itm-stats div { background: #fff; border: 1px solid var(--line); border-radius: 14px; padding: 10px 6px; text-align: center; }
+        .itm-stats b { display: block; font-size: 1.25rem; font-weight: 700; color: var(--ink); font-variant-numeric: tabular-nums; line-height: 1.3; }
+        .itm-stats span { font-size: .74rem; color: var(--muted); font-weight: 600; }
+        .itm-more { background: #fff; border: 1px solid var(--line); border-radius: 18px; }
+        .itm-more summary { list-style: none; cursor: pointer; padding: 14px; font-weight: 700; font-size: .92rem; display: flex; align-items: center; gap: 8px; color: var(--ink); }
+        .itm-more summary::-webkit-details-marker { display: none; }
+        .itm-more summary svg { width: 18px; height: 18px; color: var(--itg); flex: none; }
+        .itm-more summary small { color: var(--muted); font-weight: 500; }
+        .itm-more summary::after { content: ""; margin-inline-start: auto; width: 8px; height: 8px; border-right: 2px solid var(--muted); border-bottom: 2px solid var(--muted); transform: rotate(45deg); transition: transform .15s ease; flex: none; }
+        .itm-more[open] summary::after { transform: rotate(-135deg); }
+        .itm-more .in { padding: 0 14px 14px; }
+        .itm-more .itm-lbl:first-child { margin-top: 0; }
+        .itm-sum { display: flex; align-items: center; gap: 12px; }
+        .itm-sum img { width: 56px; height: 56px; border-radius: 14px; object-fit: contain; border: 1px solid var(--line); background: #fff; flex: none; }
+        .itm-sum b { display: block; font-size: 1rem; }
+        .itm-sum small { color: var(--muted); font-weight: 500; font-size: .82rem; }
+        
+        .itm-it { grid-template-columns: 52px minmax(0, 1fr) 92px 36px; align-items: center; }
+        .itm-it .itm-ph { grid-row: auto; width: 52px; height: 52px; }
+        .itm-it .w { padding-inline-start: 58px; }
+        .itm-cat-h > b { font-size: .92rem; }
+        
         .itt-in { background: #fff; border: 2px solid var(--itg); border-radius: 20px; padding: 14px; margin-bottom: 12px; box-shadow: 0 8px 22px rgba(11, 93, 75, .14); font-family: 'IBM Plex Sans Arabic', sans-serif; }
         .itt-in.acc { border-width: 1px; border-color: var(--itg-line); box-shadow: none; }
         .itt-top { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
@@ -2758,16 +2957,17 @@ window.nahlaOpen = window.nahlaOpen || function(what, id) {
         <div class="itm-row">
             <button type="button" class="itm-back" data-itm="close" aria-label="رجوع"><i data-lucide="arrow-right"></i></button>
             <span class="itm-ic" aria-hidden="true"><i data-lucide="store"></i></span>
-            <div class="itm-ttl"><b id="itmTitle">متجري في الاتحاد</b><small id="itmSub">اتحاد المتاجر — صفر عمولة</small></div>
-            <label class="itm-open"><span id="itmOpenTx">مغلق</span><span class="itm-sw"><input type="checkbox" id="itmOpen" aria-label="استقبال طلبات الاتحاد" disabled><span></span></span></label>
+            <div class="itm-ttl"><b id="itmTitle">متجري بالاتحاد</b><small id="itmSub">اتحاد المتاجر — بلا عمولة</small></div>
+            <label class="itm-open"><span id="itmOpenTx">مسدود</span><span class="itm-sw"><input type="checkbox" id="itmOpen" aria-label="استقبال طلبات الاتحاد" disabled><span></span></span></label>
         </div>
-        <nav class="itm-tabs" role="tablist">
-            <button type="button" class="itm-tab on" data-itm="tab" data-t="menu" role="tab"><i data-lucide="book-open"></i>القائمة</button>
-            <button type="button" class="itm-tab" data-itm="tab" data-t="store" role="tab"><i data-lucide="store"></i>المتجر</button>
-            <button type="button" class="itm-tab" data-itm="tab" data-t="links" role="tab"><i data-lucide="link"></i>الروابط</button>
-        </nav>
+        <div class="itm-prog" id="itmProg" aria-hidden="true"></div>
     </header>
     <div class="itm-body" id="itmBody"><div class="itm-wrap" id="itmWrap"></div></div>
+    <nav class="itm-nav" role="tablist" aria-label="أقسام متجري">
+        <button type="button" class="itm-nb on" data-itm="tab" data-t="menu" role="tab" aria-selected="true"><i data-lucide="book-open"></i><span>المنيو</span></button>
+        <button type="button" class="itm-nb" data-itm="tab" data-t="store" role="tab" aria-selected="false"><i data-lucide="store"></i><span>متجري</span></button>
+        <button type="button" class="itm-nb" data-itm="tab" data-t="share" role="tab" aria-selected="false"><i data-lucide="share-2"></i><span>دزّ رابطك</span></button>
+    </nav>
     <div class="itm-cta" id="itmCta" hidden><div class="in" id="itmCtaIn"></div></div>
     <div class="itm-busy" id="itmBusy"><span class="itm-spin"></span><span id="itmBusyTx">لحظة…</span><small id="itmBusySub"></small></div>
     <input type="file" id="itmFile" accept="image/*" multiple hidden>
@@ -4637,6 +4837,7 @@ const ittFail = (msg, code, st) => Object.assign(new Error(msg), {
 });
 
 async function ittCall(name, data, ms) {
+ if (ITT_MOCK) return ITT_MOCK(name, data);
  const fn = name === "ittihadMenuScan" ? "scan" : "res";
  const wait = ms || (fn === "scan" ? 15e4 : 3e4);
  if (!await requireCloudAuth() || !auth.currentUser) throw ittFail("انتهت الجلسة — ادخل من جديد.", "auth", "unauthenticated");
@@ -4708,6 +4909,8 @@ function ittErr(e) {
  return M[c] || (e && e.message && !/^(internal|INTERNAL)$/.test(e.message) ? e.message : "تعذّر — حاول مرّة ثانية.");
 }
 
+let ITT_MOCK = null;
+
 const ITM = {
  data: null,
  tab: "menu",
@@ -4717,8 +4920,34 @@ const ITM = {
  busy: false,
  open: false,
  pages: [],
- photoTarget: null
+ photoTarget: null,
+ wiz: 0,
+ form: {},
+ more: {},
+ fresh: false,
+ saved: false,
+ dirty: false
 };
+
+function itmErr(e) {
+ const c = e && e.details && e.details.code;
+ const M = {
+  slug_taken: "هذا الرابط مأخوذ — اختار غيره.",
+  bad_slug: "الرابط: حروف إنگليزية صغيرة وأرقام وشَرطة، من 3 لـ 30.",
+  not_elig: "سجّل بالاتحاد أوّل.",
+  ai_busy: "الذكاء مشغول هسه — جرّب بعد دقيقة.",
+  quota: "وصلت حدّ اليوم — كمّل بإيدك أو جرّب باچر.",
+  not_menu: "ما لگينا أكلات بالصورة — صوّرها أوضح وأقرب.",
+  no_logo: "ضيف شعار محلّك أوّل.",
+  no_profile: "كمّل اسم محلّك أوّل.",
+  no_menu: "انشر المنيو أوّل.",
+  empty_menu: "المنيو فارغ — ضيف أكلة وحدة على الأقلّ.",
+  bad_img: "الصورة ما تصلح — صوّرها مرّة ثانية.",
+  bad_name: "اكتب اسم محلّك.",
+  timeout: "انقطع الاتصال — جرّب مرّة ثانية."
+ };
+ return M[c] || ittErr(e);
+}
 
 function itmLoadImg(src) {
  return new Promise((ok, no) => {
@@ -4852,7 +5081,7 @@ async function itmCropPhotos() {
  for (const it of jobs) {
   const im = ims[it.ph.p];
   if (im) {
-   itmBusy(true, "نقصّ صور الأطباق من المنيو…", ittN(done + 1) + " من " + ittN(jobs.length));
+   itmBusy(true, "دنقصّ صور الأكلات من المنيو…", ittN(done + 1) + " من " + ittN(jobs.length));
    const [y0, x0, y1, x1] = it.ph.b;
    try {
     const r = await itmUploadPair(itmCropPair(im, x0 / 1e3 * im.width, y0 / 1e3 * im.height, (x1 - x0) / 1e3 * im.width, (y1 - y0) / 1e3 * im.height));
@@ -4868,7 +5097,7 @@ async function itmCropPhotos() {
 
 const ITM_DISH_MAX = 24;
 
-const itmPics = n => n === 1 ? "صورةً واحدة" : n === 2 ? "صورتين" : n <= 10 ? ittN(n) + " صور" : ittN(n) + " صورة";
+const itmPics = n => n === 1 ? "صورة وحدة" : n === 2 ? "صورتين" : n <= 10 ? ittN(n) + " صور" : ittN(n) + " صورة";
 
 const itmReadUrl = file => new Promise((ok, no) => {
  const fr = new FileReader;
@@ -4933,11 +5162,11 @@ async function itmDishes(files) {
  if (!list.length) return;
  const src = itmDishItems();
  if (!src.items.length) {
-  showToastMsg("أضف قائمتك أوّلاً — ثمّ صور أطباقها.", 5e3);
+  showToastMsg("ضيف المنيو أوّل — بعدين صور أكلاته.", 5e3);
   return;
  }
- if ((files || []).length > ITM_DISH_MAX) showToastMsg("أخذنا أوّل " + ITM_DISH_MAX + " صورة — والباقي في دفعةٍ ثانية.", 4e3);
- itmBusy(true, "نجهّز الصور…", "");
+ if ((files || []).length > ITM_DISH_MAX) showToastMsg("أخذنا أوّل " + ITM_DISH_MAX + " صورة — والباقي بدفعة ثانية.", 4e3);
+ itmBusy(true, "دنجهّز الصور…", "");
  const ph = [];
  for (const fl of list) {
   try {
@@ -4951,7 +5180,7 @@ async function itmDishes(files) {
  const got = [];
  try {
   for (let b = 0; b < ph.length; b += 8) {
-   itmBusy(true, "الذكاء يتعرّف على أطباقك…", ittN(Math.min(b + 8, ph.length)) + " من " + ittN(ph.length));
+   itmBusy(true, "الذكاء ديتعرّف على أكلاتك…", ittN(Math.min(b + 8, ph.length)) + " من " + ittN(ph.length));
    const chunk = ph.slice(b, b + 8);
    const r = await ittCall("ittihadMenuScan", {
     mode: "dishes",
@@ -4983,10 +5212,10 @@ async function itmDishes(files) {
  } catch (e) {
   itmBusy(false);
   if (!got.length) {
-   showToastMsg(ittErr(e), 6e3);
+   showToastMsg(itmErr(e), 6e3);
    return;
   }
-  showToastMsg(ittErr(e) + " — نعرض ما قُرئ.", 5e3);
+  showToastMsg(itmErr(e) + " — نعرض اللي انقرا.", 5e3);
  }
  const used = new Set;
  got.forEach(p => {
@@ -5002,11 +5231,12 @@ async function itmDishes(files) {
   photos: got
  };
  itmRender();
+ itmTop();
 }
 
 function itmDishHtml() {
  const D = ITM.dish, items = D.items, n = D.photos.filter(p => p.on).length;
- return '<div class="itm-card"><h4><i data-lucide="images"></i>صور أطباقك — راجعها قبل الاعتماد</h4><p class="itm-note">الذكاء وضع كلّ صورة على صنفها (' + ittN(n) + " من " + ittN(D.photos.length) + "). غيّر الصنف من القائمة إن أخطأ، أو اختر «تجاهل».</p></div>" + D.photos.map((p, k) => '<div class="itm-dish ' + (p.on ? "on" : "") + '"><img src="' + p.prev + '" alt=""><div class="t"><select class="itm-in" data-dish="' + k + '" data-noku><option value="">— تجاهل هذه الصورة —</option>' + items.map(x => '<option value="' + ittEsc(x.i) + '"' + (p.on && x.i === p.i ? " selected" : "") + ">" + ittEsc(x.n) + (x.th ? " ✓" : "") + "</option>").join("") + "</select>" + (p.on && !p.sure ? '<small class="w">⚠ تأكّد — قد يكون صنفاً مشابهاً</small>' : "") + (p.dup ? "<small>صورةٌ ثانية للصنف نفسه — اخترها بدل الأولى إن كانت أجمل</small>" : "") + (!p.i && p.name ? "<small data-noku>يبدو: " + ittEsc(p.name) + "</small>" : "") + (!p.food ? "<small>لا يبدو طعاماً</small>" : "") + "</div></div>").join("") + '<p class="itm-note">✓ بجانب الاسم = للصنف صورةٌ الآن، والاعتماد يستبدلها.</p>';
+ return '<div class="itm-stephead"><h2>صور أكلاتك</h2><p>الذكاء حطّ كل صورة على أكلتها (' + ittN(n) + " من " + ittN(D.photos.length) + "). إذا غلط بدّلها من القائمة، أو اختار «لا تستعملها».</p></div>" + D.photos.map((p, k) => '<div class="itm-dish ' + (p.on ? "on" : "") + '"><img src="' + p.prev + '" alt=""><div class="t"><select class="itm-in" data-dish="' + k + '" data-noku><option value="">— لا تستعملها —</option>' + items.map(x => '<option value="' + ittEsc(x.i) + '"' + (p.on && x.i === p.i ? " selected" : "") + ">" + ittEsc(x.n) + (x.th ? " ✓" : "") + "</option>").join("") + "</select>" + (p.on && !p.sure ? '<small class="w">تأكّد — يمكن أكلة تشبهها</small>' : "") + (p.dup ? "<small>صورة ثانية لنفس الأكلة — اختارها إذا أحلى</small>" : "") + (!p.i && p.name ? "<small data-noku>تبيّن: " + ittEsc(p.name) + "</small>" : "") + (!p.food ? "<small>ما تبيّن أكل</small>" : "") + "</div></div>").join("") + '<p class="itm-note">✓ جنب الاسم = الأكلة عندها صورة، والاعتماد يبدّلها.</p>';
 }
 
 function itmDishCta() {
@@ -5014,7 +5244,7 @@ function itmDishCta() {
  if (!D) return;
  const n = D.photos.filter(p => p.on && p.i).length;
  itmEl("itmCta").hidden = false;
- itmEl("itmCtaIn").innerHTML = '<button type="button" class="itm-btn" data-itm="dishok"' + (n ? "" : " disabled") + '><i data-lucide="check"></i>اعتمد ' + itmPics(n) + '</button><button type="button" class="itm-btn ghost" style="max-width:120px" data-itm="dishx">إلغاء</button>';
+ itmEl("itmCtaIn").innerHTML = '<button type="button" class="itm-btn ghost itm-backb" data-itm="dishx">إلغاء</button><button type="button" class="itm-btn" data-itm="dishok"' + (n ? "" : " disabled") + '><i data-lucide="check"></i>اعتمد ' + itmPics(n) + "</button>";
  itmIcons();
 }
 
@@ -5024,7 +5254,7 @@ async function itmDishApply() {
  const seen = new Set, jobs = D.photos.filter(p => p.on && p.i && !seen.has(p.i) && seen.add(p.i));
  let done = 0;
  for (const p of jobs) {
-  itmBusy(true, "نرفع الصور…", ittN(done + 1) + " من " + ittN(jobs.length));
+  itmBusy(true, "دنرفع الصور…", ittN(done + 1) + " من " + ittN(jobs.length));
   try {
    const [sx, sy, sw, sh] = itmBoxRect(p.im, p.box);
    const r = await itmUploadPair(itmCropPair(p.im, sx, sy, sw, sh));
@@ -5051,8 +5281,8 @@ async function itmDishApply() {
    }
    done++;
   } catch (e) {
-   showToastMsg(ittErr(e), 4e3);
-   if (/حدّ/.test(ittErr(e))) break;
+   showToastMsg(itmErr(e), 4e3);
+   if (/حدّ/.test(itmErr(e))) break;
   }
  }
  if (D.from === "draft" && done) {
@@ -5063,7 +5293,8 @@ async function itmDishApply() {
  itmBusy(false);
  ITM.dish = null;
  itmRender();
- showToastMsg(done ? "أُضيفت " + itmPics(done) + " لأطباقك ✓" : "لم تُضف صور.", 4e3);
+ itmTop();
+ showToastMsg(done ? "انضافت " + itmPics(done) + " لأكلاتك ✓" : "ما انضافت صور.", 4e3);
  try {
   resTrack("itt_dish_photos", {
    n: done
@@ -5085,6 +5316,22 @@ function itmItemLink(id) {
    text: (nm ? nm + " — " : "") + "اطلبه من " + (st.n || "") + " بسعر المحلّ",
    url: u
   }).catch(() => itmCopy(u));
+  return;
+ }
+ itmCopy(u);
+}
+
+function itmShare(u) {
+ const st = ITM.data && ITM.data.store || {};
+ if (!u) return;
+ if (navigator.share) {
+  navigator.share({
+   title: st.n || "",
+   text: "اطلب من " + (st.n || "") + " بسعر المحلّ",
+   url: u
+  }).catch(e => {
+   if (!e || e.name !== "AbortError") itmCopy(u);
+  });
   return;
  }
  itmCopy(u);
@@ -5132,9 +5379,9 @@ async function itmTableCard() {
   document.body.appendChild(l);
   l.click();
   l.remove();
-  showToastMsg("نزلت بطاقة الطاولة — اطبعها بحجم A6 وضعها على كلّ طاولة.", 5e3);
+  showToastMsg("نزلت بطاقة الطاولة — اطبعها بحجم A6 وحطّها على كل طاولة.", 5e3);
  } catch (e) {
-  showToastMsg("تعذّر رسم البطاقة — أعد المحاولة.", 4e3);
+  showToastMsg("ما گدرنا نرسم البطاقة — جرّب مرّة ثانية.", 4e3);
  }
 }
 
@@ -5142,7 +5389,7 @@ async function itmPhotoFile(file) {
  const tg = ITM.photoTarget;
  ITM.photoTarget = null;
  if (!file || !tg) return;
- itmBusy(true, "نرفع الصورة…");
+ itmBusy(true, "دنرفع الصورة…");
  try {
   const url = await new Promise((ok, no) => {
    const fr = new FileReader;
@@ -5182,14 +5429,14 @@ async function itmPhotoFile(file) {
   }
   itmBusy(false);
   itmRender();
-  showToastMsg("أُضيفت الصورة ✓", 2500);
+  showToastMsg("انضافت الصورة ✓", 2500);
  } catch (e) {
   itmBusy(false);
-  showToastMsg(ittErr(e), 5e3);
+  showToastMsg(itmErr(e), 5e3);
  }
 }
 
-const itmPhBtn = (attrs, th, small) => '<button type="button" class="itm-ph ' + (th ? "has" : "") + '" ' + attrs + ' aria-label="' + (th ? "غيّر الصورة" : "أضف صورة") + '">' + (th ? '<img src="' + ittEsc(th) + '" alt="" loading="lazy">' : '<i data-lucide="camera"></i>' + (small ? "" : "صورة")) + "</button>";
+const itmPhBtn = (attrs, th, small) => '<button type="button" class="itm-ph ' + (th ? "has" : "") + '" ' + attrs + ' aria-label="' + (th ? "بدّل الصورة" : "ضيف صورة") + '">' + (th ? '<img src="' + ittEsc(th) + '" alt="" loading="lazy">' : '<i data-lucide="camera"></i>' + (small ? "" : "صورة")) + "</button>";
 
 const itmEl = id => document.getElementById(id);
 
@@ -5208,6 +5455,11 @@ function itmIcons() {
  } catch (_) {}
 }
 
+function itmTop() {
+ const b = itmEl("itmBody");
+ if (b) b.scrollTop = 0;
+}
+
 const itmBase = () => (ITM.data && ITM.data.base || ITT_BASE_DEFAULT).replace(/\/+$/, "");
 
 const itmLink = (src, offer) => {
@@ -5216,7 +5468,7 @@ const itmLink = (src, offer) => {
 };
 
 function itmCopy(t) {
- const ok = () => showToastMsg("نُسخ الرابط ✓", 2500);
+ const ok = () => showToastMsg("نسخنا الرابط ✓", 2500);
  try {
   if (navigator.clipboard && navigator.clipboard.writeText) {
    navigator.clipboard.writeText(t).then(ok, () => fb());
@@ -5241,6 +5493,112 @@ function itmCopy(t) {
  }
 }
 
+const ITM_LAT = {
+ "ا": "a",
+ "أ": "a",
+ "إ": "e",
+ "آ": "a",
+ "ب": "b",
+ "ت": "t",
+ "ث": "th",
+ "ج": "j",
+ "ح": "h",
+ "خ": "kh",
+ "د": "d",
+ "ذ": "th",
+ "ر": "r",
+ "ز": "z",
+ "س": "s",
+ "ش": "sh",
+ "ص": "s",
+ "ض": "d",
+ "ط": "t",
+ "ظ": "z",
+ "ع": "a",
+ "غ": "gh",
+ "ف": "f",
+ "ق": "q",
+ "ك": "k",
+ "گ": "g",
+ "ل": "l",
+ "م": "m",
+ "ن": "n",
+ "ه": "h",
+ "ة": "a",
+ "و": "w",
+ "ي": "y",
+ "ى": "a",
+ "ئ": "e",
+ "ؤ": "o",
+ "ء": "",
+ "پ": "p",
+ "چ": "ch",
+ "ژ": "zh",
+ "ڤ": "v",
+ "ک": "k",
+ "ی": "y",
+ "ە": "a",
+ "ۆ": "o",
+ "ێ": "e",
+ "ڵ": "l",
+ "ڕ": "r"
+};
+
+function itmSlugify(name) {
+ let s = ittLatin(String(name || "")).replace(/^\s*مطعم\s+/, "").replace(/[⌚⏰🔓()]/g, " ");
+ s = [ ...s ].map(c => ITM_LAT[c] !== undefined ? ITM_LAT[c] : c).join("").toLowerCase();
+ s = s.replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "").replace(/-{2,}/g, "-").slice(0, 24).replace(/-+$/g, "");
+ return s.length >= 3 ? s : "";
+}
+
+const itmResName = () => String(currentResName || "").replace(/[⌚⏰🔓]/g, "").replace(/\d{2}\s*$/, "").trim();
+
+const itmAutoK = cats => (cats || []).map(c => String(c.n || "").trim()).filter(n => n && n !== "القائمة" && n !== "المنيو").slice(0, 3).join(" · ").slice(0, 60);
+
+function itmAutoCat(cats) {
+ let n = 0, cafe = 0, sweet = 0;
+ (cats || []).forEach(c => (c.items || []).forEach(it => {
+  n++;
+  const t = (c.n || "") + " " + (it.n || "");
+  if (/قهو|كوفي|لاتيه|كابتشينو|كابوتشينو|موكا|اسبريسو|إسبريسو|فرابي/.test(t)) cafe++; else if (/حلو|كيك|بقلاو|كنافة|كنافه|دونات|آيس ?كريم|ايس ?كريم|بوظة|جاتو/.test(t)) sweet++;
+ }));
+ return n && cafe / n > .5 ? "cafe" : n && sweet / n > .5 ? "sweet" : "food";
+}
+
+async function itmProfileAuto(o) {
+ const st = ITM.data && ITM.data.store || {};
+ const cats = o.cats || ITM.data.menu && ITM.data.menu.cats || ITM.draft && ITM.draft.cats || [];
+ const auto = !st.k, k = auto ? itmAutoK(cats) : st.k;
+ const p = {
+  n: String(o.n || st.n || itmResName()).trim().slice(0, 60),
+  slug: st.slug || "",
+  k: k,
+  c: auto && k ? itmAutoCat(cats) : st.c || "food",
+  p: Number(o.p || st.p) || 20,
+  h: st.h || "",
+  min: st.min || 0
+ };
+ if (st.slug && p.n === st.n && p.k === (st.k || "") && p.c === st.c && p.p === st.p) return st;
+ const base = st.suggest || itmSlugify(p.n) || "store-" + Math.random().toString(36).slice(2, 7);
+ for (let t = 0; t < 10; t++) {
+  if (!st.slug) p.slug = t === 0 ? base : t < 9 ? base.slice(0, 26) + "-" + (t + 1) : base.slice(0, 22) + "-" + Math.random().toString(36).slice(2, 6);
+  try {
+   const r = await ittCall("ittihadRes", {
+    op: "profile",
+    p: p
+   });
+   ITM.data.store = r.store;
+   return r.store;
+  } catch (e) {
+   const c = e && e.details && e.details.code;
+   if (st.slug || c !== "slug_taken" && c !== "bad_slug") throw e;
+  }
+ }
+ throw Object.assign(new Error("ما گدرنا نسوّي رابط لمحلّك — جرّب مرّة ثانية."), {
+  details: {}
+ });
+}
+
 window.openIttStore = async function() {
  const v = itmEl("ittView");
  if (!v) return;
@@ -5261,6 +5619,10 @@ window.openIttStore = async function() {
 };
 
 function itmClose(fromPop) {
+ if (ITM.edit && ITM.draft && ITM.dirty && !ITM.busy) {
+  ITM.dirty = false;
+  itmSaveDraft(true);
+ }
  const v = itmEl("ittView");
  if (v) v.classList.remove("open");
  document.body.classList.remove("itm-lock");
@@ -5277,8 +5639,15 @@ window.addEventListener("popstate", () => {
  if (ITM.open) itmClose(true);
 });
 
+function itmWizStart() {
+ const st = ITM.data && ITM.data.store || {};
+ if (st.pub) return 0;
+ if (!(st.logo || st.img) || !st.slug) return 1;
+ return ITM.draft && ITM.draft.cats && ITM.draft.cats.length ? 3 : 2;
+}
+
 async function itmLoad() {
- itmBusy(true, "نحمّل متجرك…");
+ itmBusy(true, "لحظة، دنجيب متجرك…");
  try {
   const d = await ittCall("ittihadRes", {
    op: "get"
@@ -5295,27 +5664,46 @@ async function itmLoad() {
   } catch (_) {}
   ittStripMine();
   ittApplyLogo(d.store && (d.store.logo || d.store.img) || "");
-  ITM.draft = d.draft && d.draft.cats ? JSON.parse(JSON.stringify(d.draft)) : null;
-  ITM.edit = !!ITM.draft;
-  if (!d.store || !d.store.slug) ITM.tab = d.menu || ITM.draft ? "store" : "menu";
+  ITM.draft = d.draft && d.draft.cats && d.draft.cats.length ? JSON.parse(JSON.stringify(d.draft)) : null;
+  ITM.form = {};
+  ITM.fresh = false;
+  ITM.dish = null;
+  ITM.saved = !!ITM.draft;
+  ITM.dirty = false;
+  ITM.wiz = itmWizStart();
+  ITM.edit = !!ITM.draft && !!ITM.wiz;
+  if ([ "menu", "store", "share" ].indexOf(ITM.tab) < 0) ITM.tab = "menu";
   itmBusy(false);
   itmRender();
+  itmTop();
  } catch (e) {
   itmBusy(false);
-  itmEl("itmWrap").innerHTML = '<div class="itm-banner bad"><i data-lucide="wifi-off"></i><span>' + ittEsc(ittErr(e)) + '</span></div><button type="button" class="itm-btn ghost" data-itm="reload">أعد المحاولة</button>';
+  itmEl("itmWrap").innerHTML = '<div class="itm-banner bad"><i data-lucide="wifi-off"></i><span>' + ittEsc(itmErr(e)) + '</span></div><button type="button" class="itm-btn ghost" data-itm="reload">جرّب مرّة ثانية</button>';
   itmIcons();
  }
 }
 
+const ITM_STEPS = [ "الشعار", "المنيو", "المراجعة", "النشر" ];
+
+const ITM_STEP_SUB = [ "المرحلة 1 من 4 — الشعار", "المرحلة 2 من 4 — المنيو", "المرحلة 3 من 4 — المراجعة", "المرحلة 4 من 4 — النشر" ];
+
 function itmHeader() {
- const d = ITM.data || {}, st = d.store || {};
- itmEl("itmTitle").textContent = st.slug && st.n ? st.n : "متجري في الاتحاد";
- itmEl("itmSub").textContent = d.live ? "اتحاد المتاجر — صفر عمولة" : "اتحاد المتاجر — يفتح للزبائن قريباً";
+ const d = ITM.data || {}, st = d.store || {}, v = itmEl("ittView");
+ const editing = !ITM.wiz && ITM.edit && ITM.draft;
+ v.classList.toggle("wiz", !!ITM.wiz);
+ v.classList.toggle("flow", !!(ITM.wiz || ITM.dish || editing));
+ itmEl("itmTitle").textContent = ITM.wiz ? "جهّز متجرك بالاتحاد" : st.slug && st.n || "متجري بالاتحاد";
+ itmEl("itmSub").textContent = ITM.wiz ? ITM_STEP_SUB[ITM.wiz - 1] : d.live ? "اتحاد المتاجر — بلا عمولة" : "الاتحاد يفتح للزباين قريباً";
  const sw = itmEl("itmOpen");
  sw.checked = !!st.o;
  sw.disabled = !st.pub;
- itmEl("itmOpenTx").textContent = st.o ? "مفتوح" : "مغلق";
- document.querySelectorAll("#ittView .itm-tab").forEach(b => b.classList.toggle("on", b.dataset.t === ITM.tab));
+ itmEl("itmOpenTx").textContent = st.o ? "مفتوح" : "مسدود";
+ itmEl("itmProg").innerHTML = ITM.wiz ? ITM_STEPS.map((t, k) => '<span class="' + (k + 1 < ITM.wiz ? "done" : k + 1 === ITM.wiz ? "on" : "") + '"><i></i>' + t + "</span>").join("") : "";
+ document.querySelectorAll("#ittView .itm-nb").forEach(b => {
+  const on = b.dataset.t === ITM.tab;
+  b.classList.toggle("on", on);
+  b.setAttribute("aria-selected", on ? "true" : "false");
+ });
 }
 
 function itmRender() {
@@ -5328,44 +5716,195 @@ function itmRender() {
   itmIcons();
   return;
  }
- const d = ITM.data || {}, st = d.store || {};
- let top = "";
- if (!d.live) top = '<div class="itm-banner soon"><i data-lucide="rocket"></i><span>الاتحاد يفتح للزبائن قريباً — جهّز قائمتك ورابطك الآن، ومتجرك يظهر يوم الإطلاق.</span></div>'; else if (st.pub && !st.o) top = '<div class="itm-banner bad"><i data-lucide="power"></i><span>متجرك مغلق في الاتحاد — الزبائن يرونه ولا يطلبون. افتحه من الزرّ في الأعلى.</span></div>'; else if (st.pub && st.o) top = '<div class="itm-banner ok"><i data-lucide="check-circle-2"></i><span>متجرك مفتوح — الطلبات تصلك هنا في قائمة الطلبات، بالصوت.</span></div>';
- const help = '<div class="itm-card"><h4><i data-lucide="messages-square"></i>الدعم: فريق «مستشارك»</h4><p class="itm-note">سؤالٌ عن الاتحاد أو عن طلبٍ منه؟ فريق الدعم يجاوبك هسه. وإذا سأل زبونٌ عن طلبه يوصلك سؤاله في «مستشارك»، وجوابك يوصله.</p><button type="button" class="itm-btn ghost" style="margin-top:10px" data-itm="advisor"><i data-lucide="messages-square"></i>اسأل «مستشارك»</button></div>';
- const noLogo = !(st.logo || st.img);
- if (noLogo && ITM.tab !== "store") top += '<div class="itm-banner bad"><i data-lucide="badge-check"></i><span>قبل النشر: شعار متجرك ضروري — الزبون يطلب ممّن يعرفه. <button type="button" class="itm-copy" style="margin-inline-start:6px" data-itm="storephoto" data-k2="logo">أضف الشعار</button></span></div>';
- if (ITM.tab === "store") w.innerHTML = top + itmStoreHtml() + help; else if (ITM.tab === "links") w.innerHTML = top + itmLinksHtml() + help; else w.innerHTML = top + itmMenuHtml() + help;
+ if (ITM.wiz) {
+  w.innerHTML = itmWizHtml();
+  itmIcons();
+  return;
+ }
+ if (ITM.edit && ITM.draft) {
+  w.innerHTML = itmEditorHtml(false);
+  itmIcons();
+  return;
+ }
+ const st = ITM.data && ITM.data.store || {};
+ const noLogo = !(st.logo || st.img) && ITM.tab !== "store" ? '<div class="itm-banner bad"><i data-lucide="badge-check"></i><span>متجرك بلا شعار — الزبون يعرفك منه.</span><button type="button" class="itm-copy" data-itm="storephoto" data-k2="logo">ضيف الشعار</button></div>' : "";
+ w.innerHTML = noLogo + (ITM.tab === "store" ? itmStoreHtml() : ITM.tab === "share" ? itmShareHtml() : itmMenuHtml());
  itmIcons();
- if (ITM.tab === "links") itmQr();
+ if (ITM.tab === "share") itmQr();
+}
+
+const itmHead = (h, p) => '<div class="itm-stephead"><h2>' + h + "</h2>" + (p ? "<p>" + p + "</p>" : "") + "</div>";
+
+const itmAsk = '<button type="button" class="itm-link-btn" data-itm="advisor">عندك سؤال؟ اسأل «مستشارك»</button>';
+
+const itmPriceOk = pr => {
+ const n = Number(pr);
+ return n >= 250 && n <= 2e6;
+};
+
+function itmDraftCount() {
+ let n = 0;
+ (ITM.draft && ITM.draft.cats || []).forEach(c => {
+  n += c.items.length;
+ });
+ return n;
+}
+
+function itmWizHtml() {
+ const st = ITM.data && ITM.data.store || {}, s = ITM.wiz, logo = st.logo || st.img || "";
+ const next = (on, tx, act) => '<button type="button" class="itm-btn" data-itm="' + (act || "wnext") + '"' + (on ? "" : " disabled") + ">" + (act === "launch" ? '<i data-lucide="check"></i>' : "") + tx + (act === "launch" ? "" : '<i data-lucide="arrow-left"></i>') + "</button>";
+ let h = "", btn = "";
+ if (s === 1) {
+  const nm = ITM.form.n != null ? ITM.form.n : st.n || itmResName();
+  h = itmHead("شعار محلّك واسمه", "الزبون يعرف محلّك من شعاره. صوّر الشعار (اللوگو) أو اختاره من المعرض.") + '<div class="itm-card itm-logo-card">' + itmPhBtn('data-itm="storephoto" data-k2="logo"', logo).replace('class="itm-ph', 'class="itm-ph logo big').replace('<i data-lucide="camera"></i>صورة', '<i data-lucide="camera"></i>ضيف الشعار') + '<label class="itm-lbl" for="itmN">اسم المحلّ <small>(مثل ما يعرفه الزبون)</small></label><input class="itm-in" id="itmN" maxlength="60" value="' + ittEsc(nm) + '"></div>' + (logo ? "" : '<p class="itm-hint">بعد ما تضيف الشعار، يشتغل زرّ «كمّل».</p>') + itmAsk;
+  btn = next(!!logo, "كمّل");
+ } else if (s === 2) {
+  const n = itmDraftCount();
+  h = itmHead("صوّر المنيو مالتك", "صفحة وحدة أو أكثر (لحد 6). الذكاء يكتب الأقسام والأكلات والأسعار بدالك.") + (n ? '<div class="itm-banner ok"><i data-lucide="check-circle-2"></i><span>عندك منيو مقروء: <b>' + ittN(n) + "</b> أكلة. دوس «كمّل»، أو صوّر صفحة ثانية تنضاف عليه.</span></div>" : "") + '<button type="button" class="itm-scan" data-itm="scan"' + (n ? ' data-append="1"' : "") + '><i data-lucide="camera"></i><b>' + (n ? "صوّر صفحة ثانية" : "صوّر المنيو") + "</b><span>صوّر كل صفحة واضحة وقريبة، بضوء زين.</span></button>" + (n ? "" : '<button type="button" class="itm-link-btn" data-itm="manual">ما عندي منيو مطبوع؟ اكتبه بإيدك</button>') + itmAsk;
+  btn = n ? next(true, "كمّل") : "";
+ } else if (s === 3) {
+  h = itmEditorHtml(true);
+  btn = next(true, "كمّل");
+ } else {
+  h = itmLaunchHtml();
+  btn = next(true, "انشر وافتح متجري", "launch");
+ }
+ itmEl("itmCta").hidden = false;
+ itmEl("itmCtaIn").innerHTML = (s > 1 ? '<button type="button" class="itm-btn ghost itm-backb" data-itm="wback"><i data-lucide="arrow-right"></i>ارجع</button>' : "") + btn;
+ return h;
+}
+
+function itmLaunchHtml() {
+ const d = ITM.data || {}, st = d.store || {}, logo = st.logo || st.img || "", p = ITM.form.p || st.p || 20;
+ let n = 0, ph = 0;
+ (ITM.draft && ITM.draft.cats || []).forEach(c => c.items.forEach(it => {
+  n++;
+  if (it.th) ph++;
+ }));
+ return itmHead("آخر خطوة: انشر", "شوف ملخّص متجرك، واختار شگد ياخذ تحضير الطلب.") + '<div class="itm-card itm-sum">' + (logo ? '<img src="' + ittEsc(logo) + '" alt="">' : "") + "<div><b>" + ittEsc(st.n || itmResName()) + "</b><small>" + ittN(n) + " أكلة · " + ittN(ph) + " بصورها</small></div></div>" + '<div class="itm-card"><h4><i data-lucide="timer"></i>شگد ياخذ تحضير الطلب عادةً؟</h4><div class="itm-chips" id="itmP">' + ITT_PREPS.map(x => '<button type="button" class="itm-chip ' + (p === x ? "on" : "") + '" data-itm="pick" data-g="itmP" data-v="' + x + '">' + ittN(x) + " د</button>").join("") + '</div><p class="itm-note" style="margin-top:8px">الزبون يشوف هالوقت قبل ما يطلب، وتگدر تغيّره ويّا كل طلب.</p></div>' + '<div class="itm-card"><h4><i data-lucide="bike"></i>أجرة التوصيل</h4><p class="itm-note">يدفعها الزبون للكابتن، وما تنحسب عليك.</p></div>' + (d.live ? "" : '<div class="itm-banner soon"><i data-lucide="rocket"></i><span>الاتحاد بعده ما انفتح للزباين — متجرك يطلع يوم الافتتاح.</span></div>');
+}
+
+async function itmWizNext() {
+ const s = ITM.wiz, st = ITM.data && ITM.data.store || {};
+ if (s === 1) {
+  if (!(st.logo || st.img)) return showToastMsg("ضيف شعار محلّك أوّل.", 4e3);
+  const n = String(ITM.form.n != null ? ITM.form.n : st.n || itmResName()).trim();
+  if (n.length < 2) {
+   const i = itmEl("itmN");
+   if (i) i.focus();
+   return showToastMsg("اكتب اسم محلّك.", 4e3);
+  }
+  itmBusy(true, "دنحفظ…");
+  try {
+   await itmProfileAuto({
+    n: n
+   });
+  } catch (e) {
+   itmBusy(false);
+   return showToastMsg(itmErr(e), 6e3);
+  }
+  itmBusy(false);
+  ITM.wiz = itmDraftCount() ? 3 : 2;
+ } else if (s === 2) {
+  if (!itmDraftCount()) return;
+  ITM.wiz = 3;
+ } else if (s === 3) {
+  const m = itmCleanDraft();
+  if (!m.cats.length) return showToastMsg("المنيو فارغ — ضيف أكلة وحدة على الأقلّ.", 5e3);
+  if (m.bad) {
+   itmRender();
+   return showToastMsg("صحّح الأسعار المعلّمة بالأصفر (" + ittN(m.bad) + ") — بالدينار كامل.", 6e3);
+  }
+  itmBusy(true, "دنحفظ…");
+  await itmSaveDraft(true);
+  itmBusy(false);
+  ITM.wiz = 4;
+ }
+ itmRender();
+ itmTop();
+}
+
+async function itmLaunch() {
+ const m = itmCleanDraft();
+ if (!m.cats.length || m.bad) {
+  ITM.wiz = 3;
+  itmRender();
+  itmTop();
+  return showToastMsg(m.bad ? "صحّح الأسعار المعلّمة بالأصفر (" + ittN(m.bad) + ") — بالدينار كامل." : "المنيو فارغ — ضيف أكلة وحدة على الأقلّ.", 6e3);
+ }
+ try {
+  itmBusy(true, "دنحفظ متجرك…");
+  await itmProfileAuto({
+   p: ITM.form.p,
+   cats: m.cats
+  });
+  itmBusy(true, "دننشر المنيو…");
+  const r = await ittCall("ittihadRes", {
+   op: "publish",
+   menu: {
+    cats: m.cats
+   }
+  });
+  ITM.data.menu = r.menu;
+  ITM.data.draft = null;
+  ITM.draft = null;
+  ITM.edit = false;
+  ITM.data.store.pub = true;
+  ITM.saved = false;
+  ITM.dirty = false;
+  itmBusy(true, "دنفتح متجرك…");
+  try {
+   await ittCall("ittihadRes", {
+    op: "open",
+    o: true
+   });
+   ITM.data.store.o = true;
+   ITM.data.store.miss = 0;
+  } catch (_) {}
+  itmBusy(false);
+  ITM.wiz = 0;
+  ITM.tab = "share";
+  ITM.fresh = true;
+  ITM.form = {};
+  itmRender();
+  itmTop();
+  showToastMsg("نشرنا المنيو (" + ittN(r.count) + " أكلة)" + (ITM.data.store.o ? " وفتحنا متجرك ✓" : " ✓"), 6e3);
+  try {
+   resTrack("itt_launch", {
+    n: r.count
+   });
+  } catch (_) {}
+ } catch (e) {
+  itmBusy(false);
+  showToastMsg(itmErr(e), 6e3);
+ }
 }
 
 function itmMenuHtml() {
- const d = ITM.data || {};
- if (ITM.edit && ITM.draft) return itmEditorHtml();
- if (d.menu && d.menu.cats && d.menu.cats.length) {
-  let n = 0;
-  d.menu.cats.forEach(c => {
-   n += c.items.length;
-  });
-  let ph = 0;
-  d.menu.cats.forEach(c => c.items.forEach(it => {
-   if (it.th) ph++;
-  }));
-  return '<div class="itm-card"><h4><i data-lucide="book-open"></i>قائمتك المنشورة · ' + ittN(n) + ' صنفاً</h4><p class="itm-note">غيّر التوفّر بنقرة — «غير متوفّر» يختفي من الطلب فوراً.</p></div>' + '<div class="itm-banner ' + (ph >= n ? "ok" : "soon") + '"><i data-lucide="image"></i><span>الصور: ' + ittN(ph) + " من " + ittN(n) + (ph >= n ? " — كلّ أصنافك بصورها ✓" : " — الزبون يطلب بعينه: اضغط خانة الصورة بجانب الصنف وصوّر الطبق بإضاءةٍ جيّدة.") + "</span></div>" + '<button type="button" class="itm-btn" data-itm="dishes"><i data-lucide="images"></i>صور أطباقك من المعرض — الذكاء يضعها بأصنافها</button>' + '<p class="itm-note" style="margin:6px 2px 10px">اختر حتى 24 صورة من معرض هاتفك أو لقطات منشوراتك، وتراجع قبل الاعتماد. وبجانب كلّ صنف 🔗 رابطه — ضعه مع صورة الطبق في الستوري.</p>' + d.menu.cats.map(c => '<div class="itm-cat"><div class="itm-cat-h"><b>' + ittEsc(c.n) + "</b></div>" + c.items.map(it => '<div class="itm-mi ' + (it.a === 0 ? "na" : "") + '">' + itmPhBtn('data-itm="pubphoto" data-i="' + ittEsc(it.i) + '"', it.th, true) + '<div class="t"><b>' + ittEsc(it.n) + "</b><small>" + ittN(it.pr) + ' د.ع</small></div><button type="button" class="itm-lk" data-itm="itlink" data-i="' + ittEsc(it.i) + '" aria-label="رابط الصنف"><i data-lucide="link"></i></button><button type="button" class="itm-av ' + (it.a === 0 ? "" : "on") + '" data-itm="avail" data-i="' + ittEsc(it.i) + '" data-a="' + (it.a === 0 ? 1 : 0) + '">' + (it.a === 0 ? "غير متوفّر" : "متوفّر") + "</button></div>").join("") + "</div>").join("") + '<div class="itm-two"><button type="button" class="itm-btn ghost" data-itm="edit"><i data-lucide="pencil"></i>عدّل القائمة</button><button type="button" class="itm-btn ghost" data-itm="scan" data-append="1"><i data-lucide="camera"></i>صوّر صفحة أخرى</button></div>';
- }
- return '<div class="itm-steps"><span class="on">١ صوّر المنيو</span><span>٢ راجع ما قُرئ</span><span>٣ انشر</span></div>' + '<button type="button" class="itm-scan" data-itm="scan"><i data-lucide="camera"></i><b>صوّر المنيو</b><span>صفحةً أو أكثر (حتى ٦) — الذكاء الاصطناعيّ يكتب الأقسام والأصناف والأسعار، وأنت تراجع قبل النشر.</span></button>' + '<button type="button" class="itm-btn ghost" data-itm="manual"><i data-lucide="keyboard"></i>أو اكتب القائمة بيدك</button>';
-}
-
-function itmEditorHtml() {
- const cats = ITM.draft.cats || [];
- let n = 0, warn = 0;
+ const cats = (ITM.data && ITM.data.menu || {}).cats || [];
+ if (!cats.length) return itmHead("المنيو فارغ", "صوّر المنيو والذكاء يكتبه بدالك.") + '<button type="button" class="itm-scan" data-itm="scan"><i data-lucide="camera"></i><b>صوّر المنيو</b><span>صفحة وحدة أو أكثر (لحد 6).</span></button>' + '<button type="button" class="itm-link-btn" data-itm="manual">أو اكتبه بإيدك</button>';
+ let n = 0, ph = 0, na = 0;
  cats.forEach(c => c.items.forEach(it => {
   n++;
-  if (it.u || !(Number(it.pr) > 0)) warn++;
+  if (it.th) ph++;
+  if (it.a === 0) na++;
  }));
- itmEl("itmCta").hidden = false;
- itmEl("itmCtaIn").innerHTML = '<button type="button" class="itm-btn" data-itm="publish"><i data-lucide="send"></i>انشر القائمة</button><button type="button" class="itm-btn ghost" style="max-width:150px" data-itm="save">احفظ مسوّدة</button>';
- return '<div class="itm-steps"><span>١ صوّر المنيو ✓</span><span class="on">٢ راجع ما قُرئ</span><span>٣ انشر</span></div>' + '<div class="itm-card"><h4><i data-lucide="sparkles"></i>' + (n ? "في القائمة " + ittN(n) + " صنفاً" : "قائمةٌ جديدة") + '</h4><p class="itm-note">' + (warn ? '<b style="color:#9A5B00">' + ittN(warn) + " تحتاج مراجعتك</b> — المعلّمة بالأصفر. " : "") + "السعر بالدينار كاملاً (5000 لا 5). الأسعار نفسها التي في مطعمك — هذا «السعر الأصليّ».</p></div>" + cats.map((c, ci) => '<div class="itm-cat"><div class="itm-cat-h"><input class="itm-in" data-f="cat" data-c="' + ci + '" value="' + ittEsc(c.n) + '" maxlength="40" aria-label="اسم القسم"><button type="button" class="itm-x" data-itm="delcat" data-c="' + ci + '" aria-label="احذف القسم"><i data-lucide="trash-2"></i></button></div>' + c.items.map((it, ii) => '<div class="itm-it ' + (it.u || !(Number(it.pr) > 0) ? "warn" : "") + '">' + itmPhBtn('data-itm="itphoto" data-c="' + ci + '" data-k="' + ii + '"', it.th) + '<input class="itm-in" data-f="n" data-c="' + ci + '" data-k="' + ii + '" value="' + ittEsc(it.n) + '" maxlength="80" placeholder="اسم الصنف"><input class="itm-in pr" data-f="pr" data-c="' + ci + '" data-k="' + ii + '" value="' + (it.pr ? ittEsc(it.pr) : "") + '" inputmode="numeric" placeholder="السعر"><button type="button" class="itm-x" data-itm="delit" data-c="' + ci + '" data-k="' + ii + '" aria-label="احذف الصنف"><i data-lucide="x"></i></button>' + '<input class="itm-in sm d" data-f="d" data-c="' + ci + '" data-k="' + ii + '" value="' + ittEsc(it.d || "") + '" maxlength="140" placeholder="وصفٌ قصير (اختياريّ)">' + (it.u ? '<span class="w">⚠ ' + ittEsc(it.u) + "</span>" : "") + "</div>").join("") + '<button type="button" class="itm-add" data-itm="addit" data-c="' + ci + '">＋ صنفٌ في «' + ittEsc(c.n) + "»</button></div>").join("") + '<div class="itm-two"><button type="button" class="itm-btn ghost" data-itm="addcat"><i data-lucide="plus"></i>قسمٌ جديد</button><button type="button" class="itm-btn ghost" data-itm="scan" data-append="1"><i data-lucide="camera"></i>صوّر صفحة أخرى</button></div>' + '<button type="button" class="itm-btn ghost" data-itm="dishes"><i data-lucide="images"></i>صور أطباقك من المعرض — الذكاء يضعها بأصنافها</button>' + (ITM.data && ITM.data.menu ? '<button type="button" class="itm-btn ghost" data-itm="canceledit">ألغِ التعديل وارجع للمنشورة</button>' : "");
+ return (ITM.draft ? '<div class="itm-banner soon"><i data-lucide="pencil"></i><span>عندك تعديلات محفوظة، بعدها ما انتشرت.</span><button type="button" class="itm-copy" data-itm="resume">كمّلها</button></div>' : "") + '<div class="itm-stats"><div><b>' + ittN(n) + "</b><span>أكلة</span></div><div><b>" + ittN(ph) + "</b><span>بصورها</span></div><div><b>" + ittN(na) + "</b><span>ماكو اليوم</span></div></div>" + (ph < n ? '<div class="itm-card"><h4><i data-lucide="image-plus"></i>ضيف صور أكلاتك</h4><p class="itm-note">الزبون يطلب بعينه. اختار صور من المعرض، والذكاء يحط كل صورة على أكلتها.</p><button type="button" class="itm-btn" style="margin-top:10px" data-itm="dishes"><i data-lucide="image-plus"></i>اختار صور من المعرض</button></div>' : "") + '<p class="itm-hint">خلصت أكلة اليوم؟ دوس «موجود» تصير «ماكو» وتختفي من الطلب.</p>' + cats.map(c => '<div class="itm-cat"><div class="itm-cat-h"><b>' + ittEsc(c.n) + "</b></div>" + c.items.map(it => '<div class="itm-mi ' + (it.a === 0 ? "na" : "") + '">' + itmPhBtn('data-itm="pubphoto" data-i="' + ittEsc(it.i) + '"', it.th, true) + '<div class="t"><b>' + ittEsc(it.n) + "</b><small>" + ittN(it.pr) + ' د.ع</small></div><button type="button" class="itm-av ' + (it.a === 0 ? "" : "on") + '" data-itm="avail" data-i="' + ittEsc(it.i) + '" data-a="' + (it.a === 0 ? 1 : 0) + '">' + (it.a === 0 ? "ماكو" : "موجود") + "</button></div>").join("") + "</div>").join("") + '<button type="button" class="itm-btn ghost" data-itm="edit"><i data-lucide="pencil"></i>عدّل المنيو أو ضيف أكلات</button>';
+}
+
+function itmEditorHtml(wiz) {
+ const cats = ITM.draft.cats || [];
+ let n = 0, warn = 0, ph = 0;
+ cats.forEach(c => c.items.forEach(it => {
+  n++;
+  if (it.u || !itmPriceOk(it.pr)) warn++;
+  if (it.th) ph++;
+ }));
+ if (!wiz) {
+  itmEl("itmCta").hidden = false;
+  itmEl("itmCtaIn").innerHTML = '<button type="button" class="itm-btn ghost itm-backb" data-itm="canceledit">إلغاء</button><button type="button" class="itm-btn" data-itm="publish"><i data-lucide="send"></i>انشر التعديل</button>';
+ }
+ return itmHead(wiz ? "راجع الأسعار" : "تعديل المنيو", wiz ? "الذكاء قرا المنيو. شوف الأسعار بس، والمعلّم بالأصفر يحتاج تصحيح." : "غيّر اللي تريده، وبالأخير دوس «انشر التعديل».") + (warn ? '<div class="itm-banner soon"><i data-lucide="alert-triangle"></i><span><b>' + ittN(warn) + "</b> أكلة تحتاج تشوفها (بالأصفر). السعر بالدينار كامل: 5000 مو 5.</span></div>" : n ? '<div class="itm-banner ok"><i data-lucide="check-circle-2"></i><span>' + ittN(n) + " أكلة، كل أسعارها تمام.</span></div>" : "") + cats.map((c, ci) => '<div class="itm-cat"><div class="itm-cat-h"><input class="itm-in" data-f="cat" data-c="' + ci + '" value="' + ittEsc(c.n) + '" maxlength="40" aria-label="اسم القسم"><button type="button" class="itm-x" data-itm="delcat" data-c="' + ci + '" aria-label="امسح القسم"><i data-lucide="trash-2"></i></button></div>' + c.items.map((it, ii) => '<div class="itm-it ' + (it.u || !itmPriceOk(it.pr) ? "warn" : "") + '">' + itmPhBtn('data-itm="itphoto" data-c="' + ci + '" data-k="' + ii + '"', it.th, true) + '<input class="itm-in" data-f="n" data-c="' + ci + '" data-k="' + ii + '" value="' + ittEsc(it.n) + '" maxlength="80" placeholder="اسم الأكلة"><input class="itm-in pr" data-f="pr" data-c="' + ci + '" data-k="' + ii + '" value="' + (it.pr ? ittEsc(it.pr) : "") + '" inputmode="numeric" placeholder="السعر"><button type="button" class="itm-x" data-itm="delit" data-c="' + ci + '" data-k="' + ii + '" aria-label="امسح الأكلة"><i data-lucide="x"></i></button>' + (it.u ? '<span class="w">تأكّد: ' + ittEsc(it.u) + "</span>" : "") + "</div>").join("") + '<button type="button" class="itm-add" data-itm="addit" data-c="' + ci + '">+ أكلة بـ«' + ittEsc(c.n) + "»</button></div>").join("") + '<div class="itm-two"><button type="button" class="itm-btn ghost" data-itm="addcat"><i data-lucide="plus"></i>قسم جديد</button><button type="button" class="itm-btn ghost" data-itm="scan" data-append="1"><i data-lucide="camera"></i>صوّر صفحة ثانية</button></div>' + '<div class="itm-card"><h4><i data-lucide="image-plus"></i>صور الأكلات <small style="font-weight:500;color:var(--muted)">(' + ittN(ph) + " من " + ittN(n) + ')</small></h4><p class="itm-note">اختار صور من المعرض، والذكاء يحط كل صورة على أكلتها. أو دوس خانة الصورة جنب الأكلة.</p><button type="button" class="itm-btn ghost" style="margin-top:10px" data-itm="dishes"><i data-lucide="image-plus"></i>اختار صور من المعرض</button></div>';
 }
 
 function itmCompress(file) {
@@ -5395,24 +5934,29 @@ function itmCompress(file) {
 async function itmScan(files) {
  const list = Array.from(files || []).slice(0, 6);
  if (!list.length) return;
- itmBusy(true, "يقرأ الذكاء منيوك…", "حتى دقيقة — لا تغلق الشاشة");
+ itmBusy(true, "الذكاء ديقرا المنيو مالتك…", "تاخذ لحد دقيقة — لا تسدّ الشاشة");
  try {
+  const append = ITM.append && !!ITM.draft;
+  if (append) await itmSaveDraft(true);
   const images = [];
   for (const f of list) images.push(await itmCompress(f));
   const r = await ittCall("ittihadMenuScan", {
    images: images,
-   append: ITM.append && !!ITM.draft
+   append: append
   }, 16e4);
   ITM.draft = r.draft;
   ITM.edit = true;
   ITM.tab = "menu";
   ITM.pages = images;
+  ITM.saved = true;
+  if (ITM.wiz) ITM.wiz = 3;
   const cut = r.photos ? await itmCropPhotos() : 0;
   ITM.pages = [];
   if (r.photos) await itmSaveDraft(true);
   itmBusy(false);
   itmRender();
-  showToastMsg("قرأ الذكاء " + ittN(r.read) + " صنفاً" + (cut ? " وقصّ " + ittN(cut) + " صورة طبق من المنيو" : "") + (r.unsure ? " — " + ittN(r.unsure) + " تحتاج مراجعتك" : ""), 7e3);
+  itmTop();
+  showToastMsg("الذكاء قرا " + ittN(r.read) + " أكلة" + (cut ? " وقصّ " + ittN(cut) + " صورة من المنيو" : "") + (r.unsure ? " — " + ittN(r.unsure) + " تحتاج تشوفها" : ""), 7e3);
   try {
    resTrack("itt_scan", {
     n: r.read
@@ -5420,7 +5964,7 @@ async function itmScan(files) {
   } catch (_) {}
  } catch (e) {
   itmBusy(false);
-  showToastMsg(ittErr(e), 6e3);
+  showToastMsg(itmErr(e), 6e3);
  }
 }
 
@@ -5428,10 +5972,10 @@ function itmCleanDraft() {
  const cats = ITM.draft && ITM.draft.cats || [];
  let bad = 0;
  const out = cats.map(c => ({
-  n: String(c.n || "").trim() || "القائمة",
+  n: String(c.n || "").trim() || "المنيو",
   items: c.items.filter(it => String(it.n || "").trim()).map(it => {
    const pr = parseInt(ittLatin(it.pr).replace(/[^\d]/g, ""), 10);
-   if (!(pr >= 250 && pr <= 2e6)) bad++;
+   if (!itmPriceOk(pr)) bad++;
    const x = {
     n: String(it.n).trim(),
     d: String(it.d || "").trim(),
@@ -5454,24 +5998,12 @@ function itmCleanDraft() {
 
 async function itmPublish() {
  const m = itmCleanDraft();
- if (!m.cats.length) return showToastMsg("القائمة فارغة — أضف صنفاً واحداً على الأقلّ.", 5e3);
+ if (!m.cats.length) return showToastMsg("المنيو فارغ — ضيف أكلة وحدة على الأقلّ.", 5e3);
  if (m.bad) {
   itmRender();
-  return showToastMsg("أكمل الأسعار المعلّمة بالأصفر (" + ittN(m.bad) + ") — بالدينار كاملاً.", 6e3);
+  return showToastMsg("صحّح الأسعار المعلّمة بالأصفر (" + ittN(m.bad) + ") — بالدينار كامل.", 6e3);
  }
- if (!ITM.data.store || !ITM.data.store.slug) {
-  await itmSaveDraft(true);
-  ITM.tab = "store";
-  itmRender();
-  return showToastMsg("بقي اسم متجرك ورابطه — ثمّ انشر.", 6e3);
- }
- if (!(ITM.data.store.logo || ITM.data.store.img)) {
-  await itmSaveDraft(true);
-  ITM.tab = "store";
-  itmRender();
-  return showToastMsg("بقي شعار متجرك — أضفه ثمّ انشر.", 6e3);
- }
- itmBusy(true, "ننشر قائمتك…");
+ itmBusy(true, "دننشر المنيو…");
  try {
   const r = await ittCall("ittihadRes", {
    op: "publish",
@@ -5484,12 +6016,16 @@ async function itmPublish() {
   ITM.draft = null;
   ITM.edit = false;
   ITM.data.store.pub = true;
+  ITM.saved = false;
+  ITM.dirty = false;
+  ITM.tab = "menu";
   itmBusy(false);
   itmRender();
-  showToastMsg("نُشرت قائمتك — " + ittN(r.count) + " صنفاً ✓" + (ITM.data.store.o ? "" : " · افتح متجرك من الزرّ في الأعلى"), 6e3);
+  itmTop();
+  showToastMsg("نشرنا المنيو — " + ittN(r.count) + " أكلة ✓", 5e3);
  } catch (e) {
   itmBusy(false);
-  showToastMsg(ittErr(e), 6e3);
+  showToastMsg(itmErr(e), 6e3);
  }
 }
 
@@ -5507,17 +6043,38 @@ async function itmSaveDraft(quiet) {
     }))
    }
   });
-  if (!quiet) showToastMsg("حُفظت المسوّدة ✓", 3e3);
+  ITM.saved = true;
+  ITM.dirty = false;
+  if (!quiet) showToastMsg("انحفظ ✓", 3e3);
  } catch (e) {
-  if (!quiet) showToastMsg(ittErr(e), 5e3);
+  if (!quiet) showToastMsg(itmErr(e), 5e3);
+ }
+}
+
+async function itmCancelEdit() {
+ const had = ITM.saved;
+ ITM.draft = null;
+ ITM.edit = false;
+ ITM.saved = false;
+ ITM.dirty = false;
+ itmRender();
+ itmTop();
+ if (had) {
+  try {
+   await ittCall("ittihadRes", {
+    op: "save",
+    draft: {
+     cats: []
+    }
+   });
+  } catch (_) {}
  }
 }
 
 function itmStoreHtml() {
- const st = ITM.data && ITM.data.store || {};
- const slug = st.slug || st.suggest || "";
- const logo = st.logo || st.img || "";
- return '<div class="itm-card"><h4><i data-lucide="badge-check"></i>شعار متجرك' + (logo ? "" : '<span class="itm-req">ضروري</span>') + '</h4><div class="itm-store-ph">' + itmPhBtn('data-itm="storephoto" data-k2="logo"', logo).replace('class="itm-ph', 'class="itm-ph logo') + '<p class="itm-note">شعارك الخاصّ — يراه الزبون في قائمة المتاجر وأعلى صفحتك، ويظهر بجانب اسمك في هذه اللوحة. صوّره واضحاً أو اختره من المعرض.</p></div></div>' + '<div class="itm-card"><h4><i data-lucide="image"></i>صورة الغلاف <small style="font-weight:500;color:var(--muted)">(اختياريّ)</small></h4>' + itmPhBtn('data-itm="storephoto" data-k2="cover"', st.cover).replace('class="itm-ph', 'class="itm-ph cover').replace('<i data-lucide="camera"></i>صورة', '<i data-lucide="camera"></i>واجهة محلّك أو أشهر أطباقك') + '<p class="itm-note" style="margin-top:8px">تظهر عريضةً أعلى صفحة متجرك عند الزبون.</p></div>' + '<div class="itm-card"><h4><i data-lucide="store"></i>بيانات متجرك</h4>' + '<label class="itm-lbl" for="itmN">اسم المتجر <small>(كما يبحث عنه الزبون)</small></label><input class="itm-in" id="itmN" maxlength="60" value="' + ittEsc(st.n || "") + '">' + '<label class="itm-lbl" for="itmSlug">رابطك <small>(أحرف إنجليزيّة صغيرة وأرقام وشَرطة)</small></label><input class="itm-in pr" id="itmSlug" maxlength="30" value="' + ittEsc(slug) + '" autocapitalize="off" autocomplete="off" spellcheck="false"><p class="itm-note" id="itmSlugPrev" style="direction:ltr;text-align:left;margin-top:4px">' + ittEsc(itmBase() + "/" + slug) + "</p>" + '<label class="itm-lbl" for="itmK">ماذا تبيع؟ <small>(سطرٌ قصير)</small></label><input class="itm-in" id="itmK" maxlength="60" placeholder="مثلاً: برجر · ساندويتشات · مشروبات" value="' + ittEsc(st.k || "") + '">' + '<span class="itm-lbl">القسم</span><div class="itm-chips" id="itmC">' + ITT_CATS.map(c => '<button type="button" class="itm-chip ' + ((st.c || "food") === c[0] ? "on" : "") + '" data-itm="pick" data-g="itmC" data-v="' + c[0] + '">' + c[1] + "</button>").join("") + "</div>" + '<span class="itm-lbl">وقت التحضير المعتاد</span><div class="itm-chips" id="itmP">' + ITT_PREPS.map(p => '<button type="button" class="itm-chip ' + ((st.p || 20) === p ? "on" : "") + '" data-itm="pick" data-g="itmP" data-v="' + p + '">' + ittN(p) + " د</button>").join("") + "</div>" + '<label class="itm-lbl" for="itmH">ساعات العمل <small>(اختياريّ — تظهر للزبون)</small></label><input class="itm-in" id="itmH" maxlength="40" placeholder="مثلاً: مفتوح حتى ١٢ ليلاً" value="' + ittEsc(st.h || "") + '">' + '<label class="itm-lbl" for="itmMin">أقلّ مبلغ للطلب <small>(اختياريّ)</small></label><input class="itm-in pr" id="itmMin" inputmode="numeric" maxlength="7" value="' + (st.min ? ittEsc(st.min) : "") + '" placeholder="0">' + '</div><div class="itm-card"><h4><i data-lucide="map-pin"></i>أجرة التوصيل</h4><p class="itm-note">' + ittN(ITM.data && ITM.data.km_fee || 250) + " د.ع لكلّ كيلومتر بين مطعمك وموقع الزبون على الخريطة، أقلّها " + ittN(ITM.data && ITM.data.fee_min || 1e3) + " وتُقرَّب لأعلى إلى " + ittN(ITM.data && ITM.data.fee_step || 500) + " — الزبون يدفعها للكابتن، ولا تُسجَّل عليك.</p></div>" + '<button type="button" class="itm-btn" data-itm="saveprof"><i data-lucide="check"></i>احفظ بيانات المتجر</button>';
+ const d = ITM.data || {}, st = d.store || {}, logo = st.logo || st.img || "", slug = st.slug || st.suggest || "";
+ const top = !d.live ? '<div class="itm-banner soon"><i data-lucide="rocket"></i><span>الاتحاد بعده ما انفتح للزباين — متجرك يطلع يوم الافتتاح.</span></div>' : !st.o ? '<div class="itm-banner bad"><i data-lucide="power"></i><span>متجرك مسدود — الزباين يشوفونه بس ما يگدرون يطلبون. افتحه من الزرّ اللي فوق.</span></div>' : '<div class="itm-banner ok"><i data-lucide="check-circle-2"></i><span>متجرك مفتوح — الطلبات توصلك بقائمة الطلبات، بالصوت.</span></div>';
+ return top + '<div class="itm-card itm-logo-card">' + itmPhBtn('data-itm="storephoto" data-k2="logo"', logo).replace('class="itm-ph', 'class="itm-ph logo big').replace('<i data-lucide="camera"></i>صورة', '<i data-lucide="camera"></i>ضيف الشعار') + '<label class="itm-lbl" for="itmN">اسم المحلّ</label><input class="itm-in" id="itmN" maxlength="60" value="' + ittEsc(st.n || "") + '"></div>' + '<div class="itm-card"><h4><i data-lucide="timer"></i>شگد ياخذ تحضير الطلب عادةً؟</h4><div class="itm-chips" id="itmP">' + ITT_PREPS.map(p => '<button type="button" class="itm-chip ' + ((st.p || 20) === p ? "on" : "") + '" data-itm="pick" data-g="itmP" data-v="' + p + '">' + ittN(p) + " د</button>").join("") + "</div></div>" + '<details class="itm-more" data-more="store"' + (ITM.more.store ? " open" : "") + '><summary><i data-lucide="settings-2"></i>إعدادات أكثر <small>(إذا تحب)</small></summary><div class="in">' + '<span class="itm-lbl">صورة الغلاف</span>' + itmPhBtn('data-itm="storephoto" data-k2="cover"', st.cover).replace('class="itm-ph', 'class="itm-ph cover').replace('<i data-lucide="camera"></i>صورة', '<i data-lucide="camera"></i>واجهة محلّك أو أشهر أكلة عندك') + '<span class="itm-lbl">نوع المحلّ</span><div class="itm-chips" id="itmC">' + ITT_CATS.map(c => '<button type="button" class="itm-chip ' + ((st.c || "food") === c[0] ? "on" : "") + '" data-itm="pick" data-g="itmC" data-v="' + c[0] + '">' + c[1] + "</button>").join("") + "</div>" + '<label class="itm-lbl" for="itmK">شنو تبيع؟ <small>(سطر قصير)</small></label><input class="itm-in" id="itmK" maxlength="60" placeholder="مثلاً: برگر · سندويچات · مشروبات" value="' + ittEsc(st.k || "") + '">' + '<label class="itm-lbl" for="itmH">ساعات الدوام</label><input class="itm-in" id="itmH" maxlength="40" placeholder="مثلاً: مفتوح لحد 12 بالليل" value="' + ittEsc(st.h || "") + '">' + '<label class="itm-lbl" for="itmMin">أقلّ مبلغ للطلب</label><input class="itm-in pr" id="itmMin" inputmode="numeric" maxlength="7" value="' + (st.min ? ittEsc(st.min) : "") + '" placeholder="0">' + '<label class="itm-lbl" for="itmSlug">رابط متجرك <small>(حروف إنگليزية صغيرة وأرقام وشَرطة)</small></label><input class="itm-in pr" id="itmSlug" maxlength="30" value="' + ittEsc(slug) + '" autocapitalize="off" autocomplete="off" spellcheck="false"><p class="itm-note" id="itmSlugPrev" style="direction:ltr;text-align:left;margin-top:4px">' + ittEsc(itmBase() + "/" + slug) + "</p>" + '<span class="itm-lbl">أجرة التوصيل</span><p class="itm-note">' + ittN(d.km_fee || 250) + " د.ع لكل كيلو بين محلّك والزبون، أقلّها " + ittN(d.fee_min || 1e3) + " وتتقرّب لـ" + ittN(d.fee_step || 500) + ". يدفعها الزبون للكابتن، وما تنحسب عليك.</p>" + "</div></details>" + '<button type="button" class="itm-btn" data-itm="saveprof"><i data-lucide="check"></i>احفظ</button>' + '<div class="itm-card"><h4><i data-lucide="messages-square"></i>عندك سؤال؟</h4><p class="itm-note">فريق «مستشارك» يجاوبك هسه. وإذا سأل زبون عن طلبه، يوصلك سؤاله بـ«مستشارك» وجوابك يوصله.</p><button type="button" class="itm-btn ghost" style="margin-top:10px" data-itm="advisor"><i data-lucide="messages-square"></i>اسأل «مستشارك»</button></div>';
 }
 
 async function itmSaveProfile() {
@@ -5535,9 +6092,17 @@ async function itmSaveProfile() {
   h: g("itmH").trim(),
   min: parseInt(ittLatin(g("itmMin")).replace(/[^\d]/g, ""), 10) || 0
  };
- if (p.n.length < 2) return showToastMsg("اكتب اسم المتجر.", 4e3);
- if (!/^[a-z0-9][a-z0-9-]{1,28}[a-z0-9]$/.test(p.slug)) return showToastMsg("الرابط: أحرف إنجليزيّة صغيرة وأرقام وشَرطة، من ٣ إلى ٣٠.", 6e3);
- itmBusy(true, "نحفظ…");
+ if (p.n.length < 2) return showToastMsg("اكتب اسم محلّك.", 4e3);
+ if (!/^[a-z0-9][a-z0-9-]{1,28}[a-z0-9]$/.test(p.slug)) {
+  ITM.more.store = true;
+  itmRender();
+  return showToastMsg(itmErr({
+   details: {
+    code: "bad_slug"
+   }
+  }), 6e3);
+ }
+ itmBusy(true, "دنحفظ…");
  try {
   const r = await ittCall("ittihadRes", {
    op: "profile",
@@ -5545,29 +6110,24 @@ async function itmSaveProfile() {
   });
   ITM.data.store = r.store;
   itmBusy(false);
-  if (ITM.edit && ITM.draft) {
-   ITM.tab = "menu";
-   itmRender();
-   showToastMsg("حُفظ — الآن انشر قائمتك ✓", 5e3);
-  } else {
-   itmRender();
-   showToastMsg("حُفظت بيانات المتجر ✓", 3e3);
-  }
+  itmRender();
+  showToastMsg("انحفظ ✓", 3e3);
  } catch (e) {
   itmBusy(false);
-  showToastMsg(ittErr(e), 6e3);
+  showToastMsg(itmErr(e), 6e3);
  }
 }
 
-function itmLinksHtml() {
+function itmShareHtml() {
  const d = ITM.data || {}, st = d.store || {};
- if (!st.slug) return '<div class="itm-card"><h4><i data-lucide="link"></i>رابطك</h4><p class="itm-note">اختر اسم متجرك ورابطه أوّلاً من تبويب «المتجر».</p></div>';
- const offers = d.offers || {}, ok = Object.keys(offers);
+ if (!st.slug) return '<div class="itm-card"><h4><i data-lucide="link"></i>رابطك</h4><p class="itm-note">رابطك يطلع بعد ما تكمّل اسم محلّك من «متجري».</p></div>';
+ const u = itmLink(""), offers = d.offers || {}, ok = Object.keys(offers);
  const items = [];
  (d.menu && d.menu.cats || []).forEach(c => c.items.forEach(it => items.push(it)));
  const stats = d.stats || {}, srcs = Object.keys(ITT_SRC).map(k => [ k, Number(stats[k]) || 0 ]).filter(x => x[1] > 0).sort((a, b) => b[1] - a[1]);
  const max = Math.max(1, ...srcs.map(x => x[1]));
- return '<div class="itm-card"><h4><i data-lucide="link"></i>رابط متجرك — ضعه في كلّ إعلان</h4><div class="itm-link"><code>' + ittEsc(itmLink("")) + '</code><button type="button" class="itm-copy" data-itm="copy" data-u="' + ittEsc(itmLink("")) + '">انسخ</button></div>' + '<p class="itm-note" style="margin-top:8px">لكلّ منصّة رابطها — فتعرف من أين جاءك كلّ طلب:</p><div class="itm-chips" style="margin-top:6px">' + [ "ig", "tt", "wa", "fb", "sn" ].map(k => '<button type="button" class="itm-chip" data-itm="copy" data-u="' + ittEsc(itmLink(k)) + '">' + ITT_SRC[k] + "</button>").join("") + "</div></div>" + '<div class="itm-card"><h4><i data-lucide="mouse-pointer-click"></i>أين يُضغط رابطك في كلّ منصّة</h4><ul class="itm-plat">' + "<li><b>تيك توك:</b> الرابط في الفيديو أو الوصف أو التعليق لا يُضغط. ضعه في «الموقع الإلكترونيّ» في ملفّك (فعّل «حساب أعمال» مجّاناً من الإعدادات)، وقل في الفيديو «الرابط بالبايو». وإن روّجت الفيديو بإعلان يظهر تحته زرٌّ يفتح رابطك مباشرة.</li>" + "<li><b>إنستغرام:</b> في الستوري أضف ملصق «رابط» — يُضغط. وضعه في البايو. (وصف الريلز لا يُضغط.)</li>" + "<li><b>واتساب وفيسبوك وتلغرام:</b> الرابط يُضغط، ويظهر ببطاقة فيها صورة متجرك و«اطلب الآن بسعر المحلّ».</li>" + "<li><b>سناب:</b> أرفق الرابط بالسناب من زرّ المشبك 📎.</li>" + "<li><b>صورة طبقٍ واحد؟</b> انسخ رابطه من 🔗 بجانبه في «القائمة» — يفتح الطبق نفسه.</li></ul></div>" + '<div class="itm-card"><h4><i data-lucide="video"></i>في الفيديو قل</h4><div class="itm-say">«اطلبوا من ' + ittEsc(st.n || "") + ' على اتحاد المتاجر — بنفس أسعار المطعم، وبلا عمولة»</div><p class="itm-note" style="margin-top:6px">الزبون يكتب اسم متجرك في بحث الاتحاد فيجدك.</p></div>' + '<div class="itm-card itm-qr"><h4 style="align-self:stretch"><i data-lucide="qr-code"></i>باركود للباب والطاولات والأكياس</h4><canvas id="itmQr" width="400" height="400" aria-label="باركود رابط المتجر"></canvas><button type="button" class="itm-btn ghost" data-itm="qrdl"><i data-lucide="download"></i>نزّله للطباعة</button></div>' + '<div class="itm-card itm-qr"><h4 style="align-self:stretch"><i data-lucide="utensils"></i>منيو الصالة — باركود على كلّ طاولة</h4><p class="itm-note" style="align-self:stretch">زبون المحلّ يمسحه فيرى منيوك بالصور على هاتفه — للعرض فقط، والطلب من النادل كعادتك. يعمل من اليوم، حتى قبل فتح الاتحاد.</p><canvas id="itmQrM" width="400" height="400" aria-label="باركود منيو الصالة"></canvas><div class="itm-two"><button type="button" class="itm-btn ghost" data-itm="tblcard"><i data-lucide="download"></i>نزّل بطاقة الطاولة</button><button type="button" class="itm-btn ghost" data-itm="copy" data-u="' + ittEsc(itmMenuLink()) + '">انسخ الرابط</button></div></div>' + '<div class="itm-card"><h4><i data-lucide="megaphone"></i>روابط العروض — العرض يدخل السلّة مباشرة</h4>' + (ok.length ? ok.map(k => '<div class="itm-mi"><div class="t"><b>' + ittEsc(offers[k].t) + '</b><small style="direction:ltr;display:block;text-align:left">' + ittEsc(itmLink("ig", k)) + '</small></div><button type="button" class="itm-copy" data-itm="copy" data-u="' + ittEsc(itmLink("ig", k)) + '">انسخ</button><button type="button" class="itm-x" data-itm="deloffer" data-o="' + ittEsc(k) + '" aria-label="احذف العرض"><i data-lucide="trash-2"></i></button></div>').join("") : '<p class="itm-note">أعلنت عن وجبة؟ اصنع لها رابطاً — من يضغطه تدخل الوجبة سلّته فوراً.</p>') + (items.length ? '<label class="itm-lbl" for="itmOfI">الصنف</label><select class="itm-in" id="itmOfI">' + items.map(it => '<option value="' + ittEsc(it.i) + '">' + ittEsc(it.n) + " — " + ittN(it.pr) + "</option>").join("") + '</select><label class="itm-lbl" for="itmOfT">عنوان العرض <small>(اختياريّ)</small></label><input class="itm-in" id="itmOfT" maxlength="60" placeholder="مثلاً: وجبة دبل برجر"><button type="button" class="itm-btn ghost" style="margin-top:10px" data-itm="addoffer"><i data-lucide="plus"></i>اصنع رابط العرض</button>' : '<p class="itm-note">انشر قائمتك أوّلاً.</p>') + "</div>" + '<div class="itm-card"><h4><i data-lucide="bar-chart-3"></i>من أين جاءتك الطلبات هذا الشهر</h4>' + (srcs.length ? srcs.map(x => '<div class="itm-bar"><span>' + ITT_SRC[x[0]] + '</span><i style="width:' + Math.round(x[1] / max * 100) + '%"></i><span>' + ittN(x[1]) + "</span></div>").join("") : '<p class="itm-note">لا طلبات بعد — يظهر هنا عدد طلبات كلّ إعلان.</p>') + "</div>";
+ const det = (k, ic, t, body) => '<details class="itm-more" data-more="' + k + '"' + (ITM.more[k] ? " open" : "") + '><summary><i data-lucide="' + ic + '"></i>' + t + '</summary><div class="in">' + body + "</div></details>";
+ return (ITM.fresh ? '<div class="itm-banner ok"><i data-lucide="check-circle-2"></i><span><b>مبروك، متجرك جاهز!</b> هسه دزّ رابطك لزباينك، وحطّ الباركود بباب المحلّ.</span></div>' : "") + '<div class="itm-card"><h4><i data-lucide="link"></i>رابط متجرك</h4><div class="itm-link"><code>' + ittEsc(u) + "</code></div>" + '<div class="itm-two" style="margin-top:10px"><button type="button" class="itm-btn" data-itm="share" data-u="' + ittEsc(u) + '"><i data-lucide="share-2"></i>دزّه</button><button type="button" class="itm-btn ghost" data-itm="copy" data-u="' + ittEsc(u) + '"><i data-lucide="copy"></i>انسخه</button></div>' + '<p class="itm-note" style="margin-top:8px">حطّه بالبايو وبكل إعلان. الزبون يفتحه ويطلب منك مباشرة، بسعرك وبلا عمولة.</p></div>' + '<div class="itm-card itm-qr"><h4 style="align-self:stretch"><i data-lucide="qr-code"></i>باركود لباب المحلّ والأكياس</h4><canvas id="itmQr" width="400" height="400" aria-label="باركود رابط المتجر"></canvas><button type="button" class="itm-btn ghost" data-itm="qrdl"><i data-lucide="download"></i>نزّله للطباعة</button></div>' + '<div class="itm-card"><h4><i data-lucide="utensils"></i>منيو الصالة</h4><p class="itm-note">بطاقة بيها باركود تحطها على كل طاولة. زبون المحلّ يمسحها ويشوف المنيو بالصور بتلفونه — للعرض بس، والطلب من النادل مثل العادة.</p><button type="button" class="itm-btn ghost" style="margin-top:10px" data-itm="tblcard"><i data-lucide="download"></i>نزّل بطاقة الطاولة</button></div>' + det("how", "help-circle", "شلون أنشر الرابط بالسوشيال؟", '<ul class="itm-plat">' + "<li><b>تيك توك:</b> الرابط بالفيديو أو الوصف أو التعليق ما ينضغط. حطّه بـ«الموقع الإلكتروني» بملفّك (فعّل «حساب أعمال» ببلاش من الإعدادات)، وگول بالفيديو «الرابط بالبايو».</li>" + "<li><b>إنستغرام:</b> بالستوري ضيف ملصق «رابط» وينضغط. وحطّه بالبايو. (وصف الريلز ما ينضغط.)</li>" + "<li><b>واتساب وفيسبوك وتلغرام:</b> الرابط ينضغط، ويطلع ببطاقة بيها صورة محلّك.</li>" + "<li><b>سناب:</b> لزّگ الرابط بالسناب من زرّ المشبك.</li></ul>" + '<span class="itm-lbl">بالفيديو گول:</span><div class="itm-say">«اطلبوا من ' + ittEsc(st.n || "") + " على اتحاد المتاجر — بنفس أسعار المحلّ، وبلا عمولة»</div>" + '<span class="itm-lbl">رابط لكل منصّة، حتى تعرف منين إجاك الطلب:</span><div class="itm-chips">' + [ "ig", "tt", "wa", "fb", "sn" ].map(k => '<button type="button" class="itm-chip" data-itm="copy" data-u="' + ittEsc(itmLink(k)) + '">' + ITT_SRC[k] + "</button>").join("") + "</div>") + det("one", "megaphone", "رابط لأكلة وحدة أو عرض", items.length ? '<label class="itm-lbl" for="itmOfI">الأكلة</label><select class="itm-in" id="itmOfI">' + items.map(it => '<option value="' + ittEsc(it.i) + '">' + ittEsc(it.n) + " — " + ittN(it.pr) + "</option>").join("") + "</select>" + '<div class="itm-two" style="margin-top:10px"><button type="button" class="itm-btn ghost" data-itm="itlink"><i data-lucide="link"></i>دزّ رابط الأكلة</button><button type="button" class="itm-btn ghost" data-itm="addoffer"><i data-lucide="shopping-bag"></i>رابط عرض</button></div>' + '<p class="itm-note" style="margin-top:8px">رابط الأكلة يفتحها عند الزبون. ورابط العرض يحطها بسلّته مباشرة — حطّه ويّا صورة الأكلة بالستوري.</p>' + (ok.length ? '<span class="itm-lbl">عروضك</span>' + ok.map(k => '<div class="itm-mi"><div class="t"><b>' + ittEsc(offers[k].t) + '</b><small style="direction:ltr;display:block;text-align:left">' + ittEsc(itmLink("ig", k)) + '</small></div><button type="button" class="itm-copy" data-itm="copy" data-u="' + ittEsc(itmLink("ig", k)) + '">انسخ</button><button type="button" class="itm-x" data-itm="deloffer" data-o="' + ittEsc(k) + '" aria-label="امسح العرض"><i data-lucide="trash-2"></i></button></div>').join("") : "") : '<p class="itm-note">انشر المنيو أوّل.</p>') + (srcs.length ? '<div class="itm-card"><h4><i data-lucide="bar-chart-3"></i>منين إجتك الطلبات هالشهر</h4>' + srcs.map(x => '<div class="itm-bar"><span>' + ITT_SRC[x[0]] + '</span><i style="width:' + Math.round(x[1] / max * 100) + '%"></i><span>' + ittN(x[1]) + "</span></div>").join("") + "</div>" : "");
 }
 
 let _qrLib = null;
@@ -5590,7 +6150,6 @@ function itmQrLib() {
 
 async function itmQr() {
  await itmQrDraw(itmEl("itmQr"), itmLink("qr"));
- await itmQrDraw(itmEl("itmQrM"), itmMenuLink());
 }
 
 function itmMenuLink() {
@@ -5614,7 +6173,7 @@ async function itmQrDraw(cv, text) {
   const x = cv.getContext("2d");
   x.fillStyle = "#64748B";
   x.font = "20px sans-serif";
-  x.fillText("تعذّر رسم الباركود", 100, 200);
+  x.fillText("ما گدرنا نرسم الباركود", 90, 200);
  }
 }
 
@@ -5637,10 +6196,18 @@ async function itmQrDraw(cv, text) {
   }
   if (a === "reload") return itmLoad();
   if (a === "tab") {
-   if (ITM.edit && ITM.draft && b.dataset.t !== "menu") await itmSaveDraft(true);
    ITM.tab = b.dataset.t;
-   return itmRender();
+   if (ITM.tab !== "share") ITM.fresh = false;
+   itmRender();
+   return itmTop();
   }
+  if (a === "wnext") return itmWizNext();
+  if (a === "wback") {
+   ITM.wiz = Math.max(1, ITM.wiz - 1);
+   itmRender();
+   return itmTop();
+  }
+  if (a === "launch") return itmLaunch();
   if (a === "scan") {
    ITM.append = b.dataset.append === "1";
    const f = itmEl("itmFile");
@@ -5665,7 +6232,7 @@ async function itmQrDraw(cv, text) {
   if (a === "manual") {
    ITM.draft = {
     cats: [ {
-     n: "القائمة",
+     n: "المنيو",
      items: [ {
       n: "",
       pr: null
@@ -5673,23 +6240,29 @@ async function itmQrDraw(cv, text) {
     } ]
    };
    ITM.edit = true;
-   return itmRender();
+   if (ITM.wiz) ITM.wiz = 3;
+   itmRender();
+   return itmTop();
   }
   if (a === "edit") {
    ITM.draft = JSON.parse(JSON.stringify(ITM.data.menu));
    ITM.edit = true;
-   return itmRender();
+   ITM.saved = false;
+   itmRender();
+   return itmTop();
   }
-  if (a === "canceledit") {
-   ITM.draft = null;
-   ITM.edit = false;
-   return itmRender();
+  if (a === "resume") {
+   ITM.edit = true;
+   itmRender();
+   return itmTop();
   }
+  if (a === "canceledit") return itmCancelEdit();
   if (a === "addit") {
    ITM.draft.cats[+b.dataset.c].items.push({
     n: "",
     pr: null
    });
+   ITM.dirty = true;
    itmRender();
    const ins = document.querySelectorAll('#itmWrap .itm-in[data-f="n"][data-c="' + b.dataset.c + '"]');
    if (ins.length) ins[ins.length - 1].focus();
@@ -5697,32 +6270,39 @@ async function itmQrDraw(cv, text) {
   }
   if (a === "delit") {
    ITM.draft.cats[+b.dataset.c].items.splice(+b.dataset.k, 1);
+   ITM.dirty = true;
    return itmRender();
   }
   if (a === "addcat") {
    ITM.draft.cats.push({
-    n: "قسمٌ جديد",
+    n: "قسم جديد",
     items: [ {
      n: "",
      pr: null
     } ]
    });
+   ITM.dirty = true;
    return itmRender();
   }
   if (a === "delcat") {
-   if (!confirm("نحذف القسم وكلّ أصنافه؟")) return;
+   if (!confirm("نمسح القسم وكل أكلاته؟")) return;
    ITM.draft.cats.splice(+b.dataset.c, 1);
+   ITM.dirty = true;
    return itmRender();
   }
   if (a === "publish") return itmPublish();
-  if (a === "save") return itmSaveDraft(false);
   if (a === "saveprof") return itmSaveProfile();
   if (a === "pick") {
    document.querySelectorAll("#" + b.dataset.g + " .itm-chip").forEach(x => x.classList.toggle("on", x === b));
+   if (b.dataset.g === "itmP") ITM.form.p = Number(b.dataset.v);
    return;
   }
   if (a === "copy") return itmCopy(b.dataset.u);
-  if (a === "itlink") return itmItemLink(b.dataset.i);
+  if (a === "share") return itmShare(b.dataset.u);
+  if (a === "itlink") {
+   const s = itmEl("itmOfI");
+   return itmItemLink(s && s.value);
+  }
   if (a === "dishes") {
    const f = itmEl("itmDishFiles");
    f.value = "";
@@ -5731,7 +6311,8 @@ async function itmQrDraw(cv, text) {
   if (a === "dishok") return itmDishApply();
   if (a === "dishx") {
    ITM.dish = null;
-   return itmRender();
+   itmRender();
+   return itmTop();
   }
   if (a === "tblcard") return itmTableCard();
   if (a === "qrdl") {
@@ -5759,33 +6340,35 @@ async function itmQrDraw(cv, text) {
     itmRender();
    } catch (err) {
     b.disabled = false;
-    showToastMsg(ittErr(err), 5e3);
+    showToastMsg(itmErr(err), 5e3);
    }
    return;
   }
   if (a === "addoffer") {
-   itmBusy(true, "نصنع الرابط…");
+   const s = itmEl("itmOfI");
+   if (!s || !s.value) return;
+   itmBusy(true, "دنسوّي الرابط…");
    try {
     const r = await ittCall("ittihadRes", {
      op: "offer",
-     items: [ [ itmEl("itmOfI").value, 1 ] ],
-     t: itmEl("itmOfT").value.trim()
+     items: [ [ s.value, 1 ] ],
+     t: ""
     });
     (ITM.data.offers = ITM.data.offers || {})[r.oid] = {
      t: r.t,
-     items: [ [ itmEl("itmOfI").value, 1 ] ]
+     items: [ [ s.value, 1 ] ]
     };
     itmBusy(false);
     itmRender();
     itmCopy(itmLink("ig", r.oid));
    } catch (err) {
     itmBusy(false);
-    showToastMsg(ittErr(err), 5e3);
+    showToastMsg(itmErr(err), 5e3);
    }
    return;
   }
   if (a === "deloffer") {
-   if (!confirm("نحذف رابط العرض؟ من يضغطه بعدها يرى متجرك فقط.")) return;
+   if (!confirm("نمسح رابط العرض؟ اللي يدوسه بعدين يشوف متجرك بس.")) return;
    try {
     await ittCall("ittihadRes", {
      op: "offer",
@@ -5794,12 +6377,20 @@ async function itmQrDraw(cv, text) {
     delete ITM.data.offers[b.dataset.o];
     itmRender();
    } catch (err) {
-    showToastMsg(ittErr(err), 5e3);
+    showToastMsg(itmErr(err), 5e3);
    }
   }
  });
+ v.addEventListener("toggle", e => {
+  const t = e.target;
+  if (t && t.dataset && t.dataset.more) ITM.more[t.dataset.more] = t.open;
+ }, true);
  v.addEventListener("input", e => {
   const t = e.target;
+  if (t.id === "itmN" && ITM.wiz) {
+   ITM.form.n = t.value;
+   return;
+  }
   if (t.id === "itmSlug") {
    const c = t.value.toLowerCase().replace(/[^a-z0-9-]/g, "");
    if (c !== t.value) t.value = c;
@@ -5810,6 +6401,7 @@ async function itmQrDraw(cv, text) {
   if (!t.dataset || !t.dataset.f || !ITM.draft) return;
   const c = ITM.draft.cats[+t.dataset.c];
   if (!c) return;
+  ITM.dirty = true;
   if (t.dataset.f === "cat") {
    c.n = t.value;
    return;
@@ -5819,10 +6411,11 @@ async function itmQrDraw(cv, text) {
   if (t.dataset.f === "pr") {
    const n = parseInt(ittLatin(t.value).replace(/[^\d]/g, ""), 10);
    it.pr = n || null;
-   if (n >= 250) {
+   if (itmPriceOk(n)) {
     delete it.u;
-    t.closest(".itm-it").classList.remove("warn");
-    const w = t.closest(".itm-it").querySelector(".w");
+    const row = t.closest(".itm-it");
+    row.classList.remove("warn");
+    const w = row.querySelector(".w");
     if (w) w.remove();
    }
   } else it[t.dataset.f] = t.value;
@@ -5857,11 +6450,11 @@ async function itmQrDraw(cv, text) {
    ITM.data.store.o = want;
    ITM.data.store.miss = 0;
    itmRender();
-   showToastMsg(want ? "متجرك مفتوح لطلبات الاتحاد ✓" : "أغلقت متجرك في الاتحاد", 3500);
+   showToastMsg(want ? "متجرك مفتوح لطلبات الاتحاد ✓" : "سدّيت متجرك بالاتحاد", 3500);
   } catch (err) {
    e.target.checked = !want;
    e.target.disabled = false;
-   showToastMsg(ittErr(err), 5e3);
+   showToastMsg(itmErr(err), 5e3);
   }
  });
 })();
@@ -5871,13 +6464,20 @@ if (/^(localhost|127\.0\.0\.1)$/.test(location.hostname)) {
   store(d) {
    ITM.data = d;
    ITM.draft = d.draft || null;
-   ITM.edit = !!d.draft;
    ITM.tab = d.tab || "menu";
+   ITM.form = {};
+   ITM.dish = null;
+   ITM.fresh = !!d.fresh;
+   ITM.saved = !!ITM.draft;
+   ITM.dirty = false;
+   ITM.wiz = d.wiz != null ? d.wiz : itmWizStart();
+   ITM.edit = !!ITM.draft && (!!ITM.wiz || !!d.edit);
    const v = itmEl("ittView");
    v.classList.add("open");
    document.body.classList.add("itm-lock");
    ITM.open = true;
    itmRender();
+   itmTop();
   },
   orders(list) {
    liveActiveOrders = list;
@@ -5891,6 +6491,9 @@ if (/^(localhost|127\.0\.0\.1)$/.test(location.hostname)) {
   dish(d) {
    ITM.dish = d;
    itmRender();
+  },
+  mock(fn) {
+   ITT_MOCK = fn;
   }
  };
 }
