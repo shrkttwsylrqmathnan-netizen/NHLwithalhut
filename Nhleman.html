@@ -18,7 +18,7 @@ try {
 <meta charset="UTF-8">
 <meta name="robots" content="noindex, nofollow">
 <script>
-const ADMIN_APP_VERSION = "5.5-Quota-Visible";
+const ADMIN_APP_VERSION = "5.6-PlaceFind";
 
 try {
  if (localStorage.getItem("hut_adm_version") !== ADMIN_APP_VERSION) {
@@ -640,6 +640,11 @@ button,input,select,textarea{font-family:'Cairo',sans-serif;}
 .map-msg.ok{display:block;background:var(--jade-l,#e6faf3);color:var(--jade,#05A357);}
 .map-msg.er{display:block;background:var(--rose-l,#fef2f2);color:var(--rose,#ef4444);}
 .map-msg.wn{display:block;background:var(--amber-l,#fffbeb);color:#b45309;}   
+.map-res{display:flex;flex-direction:column;gap:5px;margin-bottom:7px;}
+.map-res:empty{display:none;}
+.map-res button{text-align:right;border:1px solid var(--line,#e5e7eb);background:#fff;border-radius:10px;padding:7px 10px;font-family:'Cairo';font-size:.8rem;font-weight:700;cursor:pointer;line-height:1.5;}
+.map-res button small{display:block;font-weight:400;opacity:.7;font-size:.72rem;}
+                                  وكذلك كلّ نصٍّ تحذيريّ جديد في اللوحة (الشفت · التصفير · الاشتراكات · الخريطة). */
 #eModal{position:fixed;inset:0;background:rgba(0,0,0,.55);
   z-index:40000;display:none;
   align-items:center;justify-content:center;padding:20px;}
@@ -1001,7 +1006,7 @@ button,input,select,textarea{font-family:'Cairo',sans-serif;}
       
       <label class="el">📍 الموقع الجغرافي — من خرائط جوجل</label>
       <div style="display:flex;gap:6px;margin-bottom:7px">
-        <input type="text" id="mapSearchInp" class="fc" style="flex:1;margin-bottom:0" placeholder="الصق رابط خرائط جوجل أو الإحداثيات هنا" autocomplete="off">
+        <input type="text" id="mapSearchInp" class="fc" style="flex:1;margin-bottom:0" placeholder="اكتب اسم المكان، أو الصق رابط خرائط جوجل أو الإحداثيات" autocomplete="off">
         <button type="button" id="btnMapSearch" onclick="applyMapLink()" style="background:var(--sky);color:#fff;border:none;border-radius:10px;padding:0 14px;font-weight:800;cursor:pointer;white-space:nowrap;font-family:'Cairo'">📍 طبّق</button>
       </div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:7px">
@@ -1009,6 +1014,7 @@ button,input,select,textarea{font-family:'Cairo',sans-serif;}
         <button type="button" class="map-b" onclick="gOpenCurrent()">🧭 افتح موقعه الحالي</button>
       </div>
       <div id="mapMsg" class="map-msg"></div>
+      <div id="mapResults" class="map-res"></div>
       <div id="gPrevWrap"><iframe id="gPrev" title="معاينة الموقع على خرائط جوجل" loading="lazy" referrerpolicy="no-referrer" allowfullscreen></iframe></div>
       <button type="button" class="map-b" id="manBtn" onclick="toggleManualMap()" style="width:100%;margin-bottom:7px">✋ ضبط يدوي بسحب الدبّوس</button>
       <div id="editPickerMap" style="display:none"></div>
@@ -4342,12 +4348,10 @@ window.applyMapLink = async function() {
  const el = document.getElementById("mapSearchInp"), v = (el && el.value || "").trim();
  if (!v) return mapMsg("الصق رابط المكان من خرائط جوجل، أو الإحداثيات مثل: 35.4681, 44.3922", "er");
  const p = parseMapLink(v);
+ mapShowResults([]);
  if (p && !p.short) return setEditPos(p.lat, p.lng, "أُخذ الموقع من الرابط");
  if (!p) {
-  if (!/^https?:\/\//i.test(v)) {
-   mapMsg("هذا اسمٌ لا رابط — فتحتُ بحثه في خرائط جوجل. انسخ رابط المكان من هناك والصقه هنا.", "wn");
-   return gSearch(v);
-  }
+  if (!/^https?:\/\//i.test(v)) return gFindIn(v);
   if (!mapLinkHostOk_(v)) return mapMsg("هذا الرابط ليس من خرائط جوجل.", "er");
  }
  if (_mapBusy) return;
@@ -4375,11 +4379,57 @@ function gSearch(q) {
  window.open("https://www.google.com/maps/search/" + encodeURIComponent(q), "_blank", "noopener");
 }
 
+let _mapRes = [];
+
+function mapShowResults(list) {
+ _mapRes = Array.isArray(list) ? list : [];
+ const box = document.getElementById("mapResults");
+ if (!box) return;
+ const e = s => String(s || "").replace(/[&<>"']/g, c => ({
+  "&": "&amp;",
+  "<": "&lt;",
+  ">": "&gt;",
+  '"': "&quot;",
+  "'": "&#39;"
+ }[c]));
+ box.innerHTML = _mapRes.map((p, i) => '<button type="button" onclick="mapPickResult(' + i + ')">📍 ' + e(p.name) + (p.addr ? "<small>" + e(p.addr) + "</small>" : "") + "</button>").join("");
+}
+
+window.mapPickResult = function(i) {
+ const p = _mapRes[i];
+ if (!p) return;
+ mapShowResults([]);
+ setEditPos(p.lat, p.lng, "أُخذ موقع «" + p.name + "» من خرائط جوجل");
+};
+
+async function gFindIn(q) {
+ if (_mapBusy) return;
+ _mapBusy = true;
+ mapShowResults([]);
+ mapMsg("أبحث عن «" + q + "» في خرائط جوجل…", "wn");
+ try {
+  const r = await Promise.race([ fnCall("resolveMapLink", {
+   q: q
+  }), new Promise((_, rej) => setTimeout(() => rej(new Error("timeout")), 25e3)) ]);
+  const d = r && r.data || {};
+  if (d.success) {
+   mapShowResults(d.places);
+   mapMsg("اختر المكان من القائمة — ثم راجعه على الخريطة واضغط «حفظ».", "ok");
+  } else if (d.off) {
+   gSearch(q);
+   mapMsg("البحث داخل اللوحة غير متاحٍ الآن — فتحتُ خرائط جوجل. انسخ رابط المكان من هناك والصقه هنا.", "wn");
+  } else mapMsg(d.msg || "لم أجد هذا المكان.", "er");
+ } catch (e) {
+  mapMsg("تعذّر البحث الآن. الصق رابط المكان من خرائط جوجل، أو الإحداثيات.", "er");
+ } finally {
+  _mapBusy = false;
+ }
+}
+
 window.gFindPartner = function() {
- const nm = (document.getElementById("eN").value || "").trim(), ar = (document.getElementById("eArea").value || "").trim();
+ const nm = (document.getElementById("eN").value || "").trim();
  if (!nm) return mapMsg("اكتب اسم المطعم أوّلاً.", "er");
- gSearch(nm + " " + (ar ? ar + " " : "") + "كركوك");
- mapMsg("فتحتُ بحث «" + nm + "» في خرائط جوجل. اختر المكان ← «مشاركة» ← «نسخ الرابط»، ثم الصقه هنا واضغط «طبّق».", "wn");
+ gFindIn(nm);
 };
 
 window.gOpenCurrent = function() {
@@ -4608,6 +4658,7 @@ window.opEdit = function(type, phone) {
   opMod("editMod");
   document.getElementById("mapSearchInp").value = "";
   mapMsg("", "");
+  mapShowResults([]);
   _manOn = false;
   document.getElementById("editPickerMap").style.display = "none";
   document.getElementById("manBtn").textContent = "✋ ضبط يدوي بسحب الدبّوس";
