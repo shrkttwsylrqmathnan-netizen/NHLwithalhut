@@ -2728,6 +2728,9 @@ window.nahlaOpen = window.nahlaOpen || function(what, id) {
         .itm-mi.na b { color: var(--muted); text-decoration: line-through; }
         .itm-av { height: 32px; padding: 0 10px; border-radius: 999px; border: 1px solid var(--line); background: #fff; font-family: inherit; font-size: .74rem; font-weight: 600; white-space: nowrap; color: var(--ink-2); }
         .itm-av.on { background: var(--itg-soft); border-color: var(--itg-line); color: var(--itg); }
+        .itm-off { display: block; margin-top: 5px; height: 28px; border-radius: 8px; border: 1px solid var(--line); background: #fff; font-family: inherit; font-size: .74rem; font-weight: 600; color: var(--ink-2); padding: 0 6px; max-width: 160px; }   
+        .itm-off.on { border-color: #C62828; color: #C62828; background: #FDECEC; }
+        .itm-mi s { color: var(--muted); font-size: .74rem; }
         .itm-lbl { display: block; font-size: .84rem; font-weight: 600; margin: 12px 0 6px; color: var(--ink); }
         .itm-lbl:first-child { margin-top: 0; }
         .itm-lbl small { color: var(--muted); font-weight: 500; }
@@ -5754,6 +5757,8 @@ const itmPriceOk = pr => {
  return n >= 250 && n <= 2e6;
 };
 
+const itmDisc = (pr, off) => off ? Math.max(250, Math.round(pr * (100 - off) / 100 / 250) * 250) : pr;
+
 function itmDraftCount() {
  let n = 0;
  (ITM.draft && ITM.draft.cats || []).forEach(c => {
@@ -5901,7 +5906,10 @@ function itmMenuHtml() {
   if (it.th) ph++;
   if (it.a === 0) na++;
  }));
- return (ITM.draft ? '<div class="itm-banner soon"><i data-lucide="pencil"></i><span>عندك تعديلات محفوظة، بعدها ما انتشرت.</span><button type="button" class="itm-copy" data-itm="resume">كمّلها</button></div>' : "") + '<div class="itm-stats"><div><b>' + ittN(n) + "</b><span>أكلة</span></div><div><b>" + ittN(ph) + "</b><span>بصورها</span></div><div><b>" + ittN(na) + "</b><span>ماكو اليوم</span></div></div>" + (ph < n ? '<div class="itm-card"><h4><i data-lucide="image-plus"></i>ضيف صور أكلاتك</h4><p class="itm-note">الزبون يطلب بعينه. اختار صور من المعرض، والذكاء يحط كل صورة على أكلتها.</p><button type="button" class="itm-btn" style="margin-top:10px" data-itm="dishes"><i data-lucide="image-plus"></i>اختار صور من المعرض</button></div>' : "") + '<p class="itm-hint">خلصت أكلة اليوم؟ دوس «موجود» تصير «ماكو» وتختفي من الطلب.</p>' + cats.map(c => '<div class="itm-cat"><div class="itm-cat-h"><b>' + ittEsc(c.n) + "</b></div>" + c.items.map(it => '<div class="itm-mi ' + (it.a === 0 ? "na" : "") + '">' + itmPhBtn('data-itm="pubphoto" data-i="' + ittEsc(it.i) + '"', it.th, true) + '<div class="t"><b>' + ittEsc(it.n) + "</b><small>" + ittN(it.pr) + ' د.ع</small></div><button type="button" class="itm-av ' + (it.a === 0 ? "" : "on") + '" data-itm="avail" data-i="' + ittEsc(it.i) + '" data-a="' + (it.a === 0 ? 1 : 0) + '">' + (it.a === 0 ? "ماكو" : "موجود") + "</button></div>").join("") + "</div>").join("") + '<button type="button" class="itm-btn ghost" data-itm="edit"><i data-lucide="pencil"></i>عدّل المنيو أو ضيف أكلات</button>';
+ return (ITM.draft ? '<div class="itm-banner soon"><i data-lucide="pencil"></i><span>عندك تعديلات محفوظة، بعدها ما انتشرت.</span><button type="button" class="itm-copy" data-itm="resume">كمّلها</button></div>' : "") + '<div class="itm-stats"><div><b>' + ittN(n) + "</b><span>أكلة</span></div><div><b>" + ittN(ph) + "</b><span>بصورها</span></div><div><b>" + ittN(na) + "</b><span>ماكو اليوم</span></div></div>" + (ph < n ? '<div class="itm-card"><h4><i data-lucide="image-plus"></i>ضيف صور أكلاتك</h4><p class="itm-note">الزبون يطلب بعينه. اختار صور من المعرض، والذكاء يحط كل صورة على أكلتها.</p><button type="button" class="itm-btn" style="margin-top:10px" data-itm="dishes"><i data-lucide="image-plus"></i>اختار صور من المعرض</button></div>' : "") + '<p class="itm-hint">خلصت أكلة اليوم؟ دوس «موجود» تصير «ماكو» وتختفي من الطلب.</p>' + '<div class="itm-card"><h4><i data-lucide="percent"></i>سوّي خصم على أكلة</h4><p class="itm-note">اختار نسبة الخصم جنب الأكلة، وتطلع فوراً بقسم «الخصومات» بالاتحاد بسعرها الجديد. الزبون يدفع السعر بعد الخصم، وهو اللي يوصلك.</p></div>' + cats.map(c => '<div class="itm-cat"><div class="itm-cat-h"><b>' + ittEsc(c.n) + "</b></div>" + c.items.map(it => {
+  const off = Number(((ITM.data.promo || {}).off || {})[it.i]) || 0;
+  return '<div class="itm-mi ' + (it.a === 0 ? "na" : "") + '">' + itmPhBtn('data-itm="pubphoto" data-i="' + ittEsc(it.i) + '"', it.th, true) + '<div class="t"><b>' + ittEsc(it.n) + "</b><small>" + (off ? "<s>" + ittN(it.pr) + "</s> " + ittN(itmDisc(it.pr, off)) + " د.ع" : ittN(it.pr) + " د.ع") + "</small>" + '<select class="itm-off' + (off ? " on" : "") + '" data-off="' + ittEsc(it.i) + '" aria-label="خصم ' + ittEsc(it.n) + '">' + [ 0 ].concat((ITM.data.promo || {}).offs || [ 20, 30, 40, 50, 60 ]).map(o => '<option value="' + o + '"' + (o === off ? " selected" : "") + ">" + (o ? "خصم " + o + "%" : "بدون خصم") + "</option>").join("") + '</select></div><button type="button" class="itm-av ' + (it.a === 0 ? "" : "on") + '" data-itm="avail" data-i="' + ittEsc(it.i) + '" data-a="' + (it.a === 0 ? 1 : 0) + '">' + (it.a === 0 ? "ماكو" : "موجود") + "</button></div>";
+ }).join("") + "</div>").join("") + '<button type="button" class="itm-btn ghost" data-itm="edit"><i data-lucide="pencil"></i>عدّل المنيو أو ضيف أكلات</button>';
 }
 
 function itmEditorHtml(wiz) {
@@ -6440,8 +6448,28 @@ async function itmQrDraw(cv, text) {
  itmEl("itmFile").addEventListener("change", e => itmScan(e.target.files));
  itmEl("itmPhotoFile").addEventListener("change", e => itmPhotoFile(e.target.files && e.target.files[0]));
  itmEl("itmDishFiles").addEventListener("change", e => itmDishes(e.target.files));
- itmEl("ittView").addEventListener("change", e => {
+ itmEl("ittView").addEventListener("change", async e => {
   const t = e.target;
+  if (t && t.dataset && t.dataset.off != null) {
+   const off = Number(t.value) || 0;
+   t.disabled = true;
+   try {
+    const r = await ittCall("ittihadRes", {
+     op: "promo",
+     i: t.dataset.off,
+     off: off
+    });
+    ITM.data.promo = Object.assign({}, ITM.data.promo, {
+     off: r.off || {}
+    });
+    itmRender();
+    showToastMsg(off ? "خصم " + off + "% — طلعت الأكلة بقسم «الخصومات» بالاتحاد ✓" : "شلنا الخصم ✓", 4500);
+   } catch (err) {
+    t.disabled = false;
+    showToastMsg(itmErr(err), 5e3);
+   }
+   return;
+  }
   if (!t || !t.dataset || t.dataset.dish == null || !ITM.dish) return;
   const p = ITM.dish.photos[+t.dataset.dish];
   if (!p) return;
