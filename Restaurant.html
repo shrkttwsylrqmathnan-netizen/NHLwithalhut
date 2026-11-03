@@ -6,7 +6,7 @@
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://www.gstatic.com https://unpkg.com https://cdn.jsdelivr.net https://*.firebasedatabase.app https://*.firebaseio.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://unpkg.com https://cdn.jsdelivr.net; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: blob: https:; media-src 'self' data: blob: https://actions.google.com; connect-src 'self' https://*.firebasedatabase.app https://*.firebaseio.com wss://*.firebasedatabase.app wss://*.firebaseio.com https://script.google.com https://script.googleusercontent.com https://*.googleapis.com https://securetoken.googleapis.com https://*.cloudfunctions.net https://*.run.app https://nominatim.openstreetmap.org; object-src 'none'; base-uri 'none'; form-action 'self'; frame-ancestors 'none'">
 
     <script>
-const CURRENT_APP_VERSION = "43.27.Nahla-PlaceFind";
+const CURRENT_APP_VERSION = "43.28.Nahla-IttBell";
 
 const RES_VERSION_KEY = "hut_res_app_version";
 
@@ -780,6 +780,7 @@ window.nahlaOpen = window.nahlaOpen || function(what, id) {
   "منطقة غير مدرجة": "ناوچەیەک کە لە لیستدا نییە",
   "ابحث عن منطقة...": "بەدوای ناوچەیەکدا بگەڕێ...",
   "🔎 ابحث عن منطقة…": "🔎 بەدوای ناوچەیەکدا بگەڕێ…",
+  "🔇 الصوت مقفل — اضغط هنا ليرنّ جرس الطلبات": "🔇 دەنگ داخراوە — لێرە دابگرە با زەنگی داواکارییەکان لێبدات",
   "اسم المنطقة": "ناوی ناوچە",
   "السعر": "نرخ",
   "أجرة هذه المنطقة غير معروفة": "کرێی ئەم ناوچەیە نەزانراوە",
@@ -2873,6 +2874,7 @@ window.nahlaOpen = window.nahlaOpen || function(what, id) {
         .ia-acts .itt-ok { margin-top: 0; flex: 1; }
         .ia-acts .ia-more { min-height: 52px; padding: 0 14px; border-radius: 14px; border: 1px solid var(--line); background: #FFFFFF; color: var(--ink-2); font-family: inherit; font-weight: 600; font-size: .84rem; }
         .ia-next { display: block; text-align: center; margin-top: 8px; font-size: .76rem; font-weight: 600; color: var(--muted); }
+        .ia-sound { display: block; width: 100%; margin-top: 10px; min-height: 44px; border: 0; border-radius: 12px; background: #B42318; color: #FFFFFF; font: inherit; font-weight: 700; font-size: .88rem; cursor: pointer; }   
         #ittAskPill { position: fixed; top: calc(70px + env(safe-area-inset-top)); left: 50%; transform: translateX(-50%); z-index: 2700; display: flex; align-items: center; gap: 8px;
                       height: 40px; padding: 0 14px; border-radius: 999px; border: 0; background: var(--itg); color: #FFFFFF; font-family: 'IBM Plex Sans Arabic', sans-serif; font-weight: 700; font-size: .84rem; box-shadow: 0 8px 22px rgba(11, 61, 51, .3); white-space: nowrap; }
         #ittAskPill svg { width: 17px; height: 17px; }
@@ -6664,7 +6666,7 @@ try {
 
 const ittPrepSel = {};
 
-let ittRingT = null, ittSeen = new Set;
+let ittRingT = null, ittAlarmT = null, ittSeen = new Set;
 
 function ittMoney(it) {
  return '<div class="itt-money"><div><span>ثمن الطلب (يُسلَّم لك)</span><b>' + ittN(it.sub) + " د.ع</b></div><div><span>التوصيل يدفعه الزبون</span><b>" + ittN(it.fee) + ' د.ع</b></div><div><span>عمولة الاتحاد</span><b class="z">صفر</b></div></div>';
@@ -6871,7 +6873,7 @@ function ittAskPaint() {
  pill.className = late ? "late" : "";
  pill.innerHTML = IA_BELL + "طلب الاتحاد ينتظر قرارك · " + (left > 0 ? "باقي " + ittN(left) + " د" : "يُلغى الآن") + (wait.length > 1 ? " · " + ittN(wait.length) : "");
  if (ittAskMin) return;
- box.innerHTML = '<div class="ia-top"><span class="ia-bell" aria-hidden="true">' + IA_BELL + '</span><div class="ia-t"><b id="iaTitle">طلب من «اتحاد المتاجر»</b><small>يحتاج قرارك' + (late ? " — قبل أن يُلغى" : "") + "</small></div>" + '<div class="ia-ring ' + (late ? "late" : "") + '" aria-label="الوقت الباقي"><svg viewBox="0 0 52 52"><circle class="bg" cx="26" cy="26" r="21"></circle><circle class="fg" cx="26" cy="26" r="21" stroke-dasharray="' + C.toFixed(1) + '" stroke-dashoffset="' + off.toFixed(1) + '"></circle></svg><span>' + (left > 0 ? ittN(left) : "0") + "<small>دقيقة</small></span></div>" + '<button type="button" class="ia-min" onclick="ittAskMinimize()" aria-label="صغّر"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M6 9l6 6 6-6"></path></svg></button></div>' + '<div class="ia-info" data-noku><span>📍 <b>' + ittEsc(area) + "</b></span><span>" + ittN(n) + " صنف · <b>" + ittN(it.sub) + "</b> د.ع</span>" + (it.km ? "<span>" + ittEsc(it.km) + " كم</span>" : "") + "</div>" + '<div class="itt-preps">' + ITT_PREPS.map(m => '<button type="button" class="' + (m === p ? "on" : "") + '" onclick="ittPrep(\'' + id + "'," + m + ')">' + ittN(m) + " د</button>").join("") + "</div>" + '<div class="ia-acts"><button type="button" class="itt-ok" onclick="ittAccept(\'' + id + "', this)\">اقبل · جاهز خلال " + ittN(p) + ' د</button><button type="button" class="ia-more" onclick="ittAskShow(\'' + id + "')\">التفاصيل أو اعتذر</button></div>" + (wait.length > 1 ? '<span class="ia-next">+' + ittN(wait.length - 1) + " طلب آخر ينتظر بعده</span>" : "");
+ box.innerHTML = '<div class="ia-top"><span class="ia-bell" aria-hidden="true">' + IA_BELL + '</span><div class="ia-t"><b id="iaTitle">طلب من «اتحاد المتاجر»</b><small>يحتاج قرارك' + (late ? " — قبل أن يُلغى" : "") + "</small></div>" + '<div class="ia-ring ' + (late ? "late" : "") + '" aria-label="الوقت الباقي"><svg viewBox="0 0 52 52"><circle class="bg" cx="26" cy="26" r="21"></circle><circle class="fg" cx="26" cy="26" r="21" stroke-dasharray="' + C.toFixed(1) + '" stroke-dashoffset="' + off.toFixed(1) + '"></circle></svg><span>' + (left > 0 ? ittN(left) : "0") + "<small>دقيقة</small></span></div>" + '<button type="button" class="ia-min" onclick="ittAskMinimize()" aria-label="صغّر"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M6 9l6 6 6-6"></path></svg></button></div>' + '<div class="ia-info" data-noku><span>📍 <b>' + ittEsc(area) + "</b></span><span>" + ittN(n) + " صنف · <b>" + ittN(it.sub) + "</b> د.ع</span>" + (it.km ? "<span>" + ittEsc(it.km) + " كم</span>" : "") + "</div>" + '<div class="itt-preps">' + ITT_PREPS.map(m => '<button type="button" class="' + (m === p ? "on" : "") + '" onclick="ittPrep(\'' + id + "'," + m + ')">' + ittN(m) + " د</button>").join("") + "</div>" + '<div class="ia-acts"><button type="button" class="itt-ok" onclick="ittAccept(\'' + id + "', this)\">اقبل · جاهز خلال " + ittN(p) + ' د</button><button type="button" class="ia-more" onclick="ittAskShow(\'' + id + "')\">التفاصيل أو اعتذر</button></div>" + (wait.length > 1 ? '<span class="ia-next">+' + ittN(wait.length - 1) + " طلب آخر ينتظر بعده</span>" : "") + (!audioCtx || audioCtx.state !== "running" ? '<button type="button" class="ia-sound" onclick="ittSoundOn()">🔇 الصوت مقفل — اضغط هنا ليرنّ جرس الطلبات</button>' : "");
 }
 
 window.ittAskMinimize = function() {
@@ -6908,6 +6910,52 @@ window.ittAskShow = function(id) {
  }, 120);
 };
 
+function playIttAlarm() {
+ try {
+  const ctx = audioCtx || (audioCtx = new (window.AudioContext || window.webkitAudioContext));
+  if (ctx.state === "suspended" && ctx.resume) ctx.resume().catch(() => {});
+  const comp = ctx.createDynamicsCompressor(), out = ctx.createGain();
+  comp.threshold.value = -12;
+  comp.knee.value = 0;
+  comp.ratio.value = 20;
+  comp.attack.value = .002;
+  comp.release.value = .12;
+  out.gain.value = 1.8;
+  comp.connect(out);
+  out.connect(ctx.destination);
+  const t0 = ctx.currentTime + .03;
+  for (let r = 0; r < 2; r++) for (let k = 0; k < 20; k++) {
+   const t = t0 + r * 1.25 + k * .05, o = ctx.createOscillator(), g = ctx.createGain();
+   o.type = "square";
+   o.frequency.value = k % 2 ? 1318 : 1046;
+   g.gain.setValueAtTime(1e-4, t);
+   g.gain.exponentialRampToValueAtTime(.9, t + .004);
+   g.gain.setValueAtTime(.9, t + .042);
+   g.gain.exponentialRampToValueAtTime(1e-4, t + .05);
+   o.connect(g);
+   g.connect(comp);
+   o.start(t);
+   o.stop(t + .055);
+  }
+  setTimeout(() => {
+   try {
+    comp.disconnect();
+    out.disconnect();
+   } catch (_) {}
+  }, 3e3);
+ } catch (e) {}
+}
+
+window.ittSoundOn = function() {
+ try {
+  if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext);
+  audioCtx.resume().then(() => {
+   playIttAlarm();
+   ittAskPaint();
+  }).catch(() => {});
+ } catch (_) {}
+};
+
 function ittRingSync(list) {
  const wait = list.filter(o => o.src === "ittihad" && o.status === "res_pending" && !actionBlacklist.includes(String(o.id))).sort((a, b) => (a.itt && a.itt.cancel_at || 0) - (b.itt && b.itt.cancel_at || 0));
  const fresh = wait.filter(o => !ittSeen.has(String(o.id)));
@@ -6925,20 +6973,24 @@ function ittRingSync(list) {
    clearInterval(ittRingT);
    ittRingT = null;
   }
+  if (ittAlarmT) {
+   clearInterval(ittAlarmT);
+   ittAlarmT = null;
+  }
   return;
  }
- const ring = vib => {
-  playAskChime();
-  if (vib && navigator.vibrate) {
+ const ring = () => {
+  playIttAlarm();
+  if (navigator.vibrate) {
    try {
-    navigator.vibrate([ 180, 80, 180 ]);
+    navigator.vibrate([ 400, 150, 400, 150, 400 ]);
    } catch (_) {}
   }
  };
- if (fresh.length) ring(true);
+ if (fresh.length) ring();
+ if (!ittAlarmT) ittAlarmT = setInterval(ring, 6e3);
  if (!ittRingT) ittRingT = setInterval(() => {
   ittTicks++;
-  if (ittTicks % 2 === 0) ring(false);
   renderActiveOrdersUI();
   ittAskPaint();
  }, 2e4);
@@ -7148,6 +7200,7 @@ function playWelcomeChime() {
 }
 
 function unlockAudio() {
+ if (audioCtx && audioCtx.state === "suspended" && audioCtx.resume) audioCtx.resume().catch(() => {});
  if (!audioCtx) {
   try {
    audioCtx = new (window.AudioContext || window.webkitAudioContext);
