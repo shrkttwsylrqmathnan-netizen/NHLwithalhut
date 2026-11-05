@@ -6,7 +6,7 @@
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://www.gstatic.com https://unpkg.com https://cdn.jsdelivr.net https://*.firebasedatabase.app https://*.firebaseio.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://unpkg.com https://cdn.jsdelivr.net; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: blob: https:; media-src 'self' data: blob: https://actions.google.com; connect-src 'self' https://*.firebasedatabase.app https://*.firebaseio.com wss://*.firebasedatabase.app wss://*.firebaseio.com https://script.google.com https://script.googleusercontent.com https://*.googleapis.com https://securetoken.googleapis.com https://*.cloudfunctions.net https://*.run.app https://nominatim.openstreetmap.org; object-src 'none'; base-uri 'none'; form-action 'self'; frame-ancestors 'none'">
 
     <script>
-const CURRENT_APP_VERSION = "43.28.Nahla-IttBell";
+const CURRENT_APP_VERSION = "43.29.Nahla-Perf";
 
 const RES_VERSION_KEY = "hut_res_app_version";
 
@@ -102,6 +102,177 @@ window.nahlaOpen = window.nahlaOpen || function(what, id) {
     
     <title>مطاعم نحلة | منصة الحوت</title>
 
+    <script>
+(function() {
+ var K = "res_perf", S = {}, send = null, tm = 0, readyDone = false;
+ function pad(n) {
+  return (n < 10 ? "0" : "") + n;
+ }
+ function today() {
+  var d = new Date;
+  return d.getFullYear() + "-" + pad(d.getMonth() + 1) + "-" + pad(d.getDate());
+ }
+ function hm() {
+  var d = new Date;
+  return pad(d.getHours()) + ":" + pad(d.getMinutes());
+ }
+ function save() {
+  try {
+   localStorage.setItem(K, JSON.stringify(S));
+  } catch (e) {}
+ }
+ function fresh() {
+  if (S.day === today()) return;
+  S = {
+   day: today(),
+   alive: S.alive,
+   fgk: 0,
+   n1: 0,
+   n5: 0,
+   max: 0,
+   scr: "",
+   dom: 0,
+   mt: "",
+   lt: "",
+   ready: 0,
+   rlast: 0,
+   load: 0,
+   sentAt: 0,
+   sentN: 0,
+   sig: ""
+  };
+ }
+ try {
+  S = JSON.parse(localStorage.getItem(K) || "{}") || {};
+ } catch (e) {
+  S = {};
+ }
+ var died = S.alive === 1;
+ fresh();
+ if (died) S.fgk++;
+ S.alive = 1;
+ save();
+ document.addEventListener("visibilitychange", function() {
+  fresh();
+  S.alive = document.hidden ? 0 : 1;
+  save();
+ });
+ window.addEventListener("pagehide", function() {
+  S.alive = 0;
+  save();
+ });
+ function scr() {
+  var s = "main";
+  try {
+   var b = document.body, a = document.getElementById("advisorView"), o = document.getElementById("orderSection"), k = document.getElementById("ittAsk");
+   if (!b) return "boot";
+   if (b.classList.contains("itm-lock")) s = "itm"; else if (a && a.classList.contains("open")) s = "adv"; else if (!o || o.classList.contains("hidden-section")) s = "start";
+   if (k && !k.hidden) s += "+ask";
+   if (document.hidden) s += "+bg";
+  } catch (e) {}
+  return s;
+ }
+ function later(ms) {
+  clearTimeout(tm);
+  tm = setTimeout(maybe, ms);
+ }
+ function note(d) {
+  d = Math.round(d);
+  if (d < 200) return;
+  fresh();
+  if (d > S.max) {
+   S.max = d;
+   S.scr = scr();
+   S.mt = hm();
+   try {
+    S.dom = document.getElementsByTagName("*").length;
+   } catch (e) {}
+  }
+  if (d >= 1e3) {
+   S.n1++;
+   if (d >= 5e3) S.n5++;
+   S.lt = (hm() + " " + d + " " + scr() + (S.lt ? "; " + S.lt : "")).slice(0, 280);
+  }
+  save();
+  if (d >= 5e3) later(4e3);
+ }
+ try {
+  new PerformanceObserver(function(l) {
+   var es = l.getEntries();
+   for (var i = 0; i < es.length; i++) note(es[i].duration);
+  }).observe({
+   type: "longtask",
+   buffered: true
+  });
+ } catch (e) {}
+ function dev() {
+  var ua = navigator.userAgent || "", m = /Android ([\d.]+);\s*([^;)]*?)(?:\s+Build\/|\))/.exec(ua), c = /Chrome\/(\d+)/.exec(ua);
+  return ((m ? (m[2] || "?") + " · a" + m[1] : ua.slice(0, 50)) + " · wv" + (c ? c[1] : "?") + (/; wv\)/.test(ua) ? "" : " متصفّح") + " · " + (navigator.deviceMemory || "?") + "GB · " + (navigator.hardwareConcurrency || "?") + "c").slice(0, 150);
+ }
+ function maybe() {
+  if (!send) return;
+  fresh();
+  var sig = [ S.n1, S.n5, S.max, S.fgk, S.ready ].join(","), now = Date.now();
+  if (S.sentN >= 8 || S.sentN > 0 && sig === S.sig) return;
+  if (S.sentN > 0 && now - S.sentAt < 12e5) {
+   later(12e5 - (now - S.sentAt) + 1e3);
+   return;
+  }
+  var nv = "", pv = "";
+  try {
+   nv = window.NahlaRes && window.NahlaRes.getNativeVersion ? String(window.NahlaRes.getNativeVersion()) : "";
+  } catch (e) {}
+  try {
+   pv = localStorage.getItem("hut_res_app_version") || "";
+  } catch (e) {}
+  var p = {
+   day: S.day,
+   dev: dev(),
+   app: (pv + (nv ? " · " + nv : "")).slice(0, 70),
+   load: S.load || 0,
+   ready: S.ready || 0,
+   rlast: S.rlast || 0,
+   n1: S.n1 || 0,
+   n5: S.n5 || 0,
+   max: S.max || 0,
+   scr: S.scr || "",
+   dom: S.dom || 0,
+   mt: S.mt || "",
+   lt: S.lt || "",
+   fgk: S.fgk || 0
+  };
+  try {
+   Promise.resolve(send(p)).then(function() {
+    S.sentAt = now;
+    S.sentN++;
+    S.sig = sig;
+    save();
+   }, function() {});
+  } catch (e) {}
+ }
+ window.__perf = {
+  ready: function() {
+   if (readyDone) return;
+   readyDone = true;
+   fresh();
+   var t = Math.round(performance.now());
+   S.rlast = t;
+   if (t > S.ready) {
+    S.ready = t;
+    try {
+     var n = performance.getEntriesByType("navigation")[0];
+     S.load = n ? Math.round(n.domContentLoadedEventEnd) : 0;
+    } catch (e) {}
+   }
+   save();
+   later(15e3);
+  },
+  sender: function(fn) {
+   send = fn;
+  }
+ };
+})();
+</script>
     <script id="i18n-ckb">
 (function() {
  var LANG = "ar";
@@ -8660,11 +8831,15 @@ function hotRetry(kind, myPhone, attempt, err) {
 }
 
 function attachOrdersListener(myPhone, attempt) {
+ if (window.__perf) window.__perf.sender(p => set(ref(db, "res_perf/" + myPhone), Object.assign({}, p, {
+  at: serverTimestamp()
+ })));
  const myOrdersQuery = query(ref(db, "active_orders"), orderByChild("resPhone"), equalTo(myPhone));
  onValue(myOrdersQuery, snapshot => {
   lastOrdersSnapshot = snapshot.val() || {};
   noteAutoCancelled(lastOrdersSnapshot);
   rebuildOrderLists();
+  if (window.__perf) window.__perf.ready();
  }, err => hotRetry("orders", myPhone, attempt || 0, err));
 }
 
