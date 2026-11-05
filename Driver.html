@@ -34,7 +34,7 @@
  } catch (_) {}
 })();
 
-const CURRENT_APP_VERSION = "34.71-Nahla";
+const CURRENT_APP_VERSION = "34.72-Nahla";
 
 window.APP_VERSION = CURRENT_APP_VERSION;
 
@@ -6901,12 +6901,45 @@ async function ittSlugFor(resPhone) {
  return ittRsBusy[ph];
 }
 
+function waUserIn(t) {
+ const m = String(t || "").match(/واتساب\s*@([A-Za-z0-9._]{3,35})/);
+ if (!m) return null;
+ const u = m[1].replace(/\.+$/, "").toLowerCase();
+ return u.length >= 3 && /[a-z]/.test(u) && u[0] !== "." ? "@" + u : null;
+}
+
+function copyText(t) {
+ const old = () => {
+  try {
+   const a = document.createElement("textarea");
+   a.value = t;
+   a.setAttribute("readonly", "");
+   a.style.cssText = "position:fixed;top:-99px;opacity:0";
+   document.body.appendChild(a);
+   a.select();
+   document.execCommand("copy");
+   a.remove();
+  } catch (e) {}
+ };
+ try {
+  navigator.clipboard.writeText(t).catch(old);
+ } catch (e) {
+  old();
+ }
+}
+
 window.smartWa = async function(phone, res, area, id, price, resPhone) {
  if (!phone) return;
  const n = drv?.name || "الكابتن", a = String(area).split("(")[0].trim();
  const slug = await ittSlugFor(resPhone || (resCache[String(res || "").trim()] || {}).phone);
  const itt = slug ? `\n\n🛒 المرّة الجاية اطلب من (${res}) من «اتحاد المتاجر»:\nالمنيو بالصور، تطلب بضغطة بدون اتّصال،\nوتتابع الكابتن على الخريطة، وبنفس سعر المطعم.\nhttps://ittihad.web.app/${slug}?src=cap` : "";
  const msg = encodeURIComponent(`مرحباً 🌹\nمعك الكابتن ${n} من فريق نحلة للتوصيل 🛵\nطلبك من (${res}) متجه إلى ${a}.\n💵 الفاتورة: ${price} د.ع\n\nأرسل موقعك 📍 لأسرع توصيل!${itt ? itt + "\n\n" : "\n"}شكراً لاختيارك نحلة ✨`);
+ if (phone[0] === "@") {
+  copyText(decodeURIComponent(msg));
+  toast("نُسخت الرسالة أيضاً — إن لم تظهر في المحادثة الصقها", "info");
+  openLink(`https://wa.me/${phone.slice(1)}?text=${msg}`);
+  return;
+ }
  const c = phone.startsWith("0") ? "964" + phone.substring(1) : phone;
  openLink(`https://wa.me/${c}?text=${msg}`);
 };
@@ -6971,6 +7004,7 @@ function renderOrders() {
   const det = String(o.details || "");
   const cm = det.match(/(07[0-9]{8,9})/);
   const cp = cm ? String(cm[0]) : null;
+  const cu = cp ? null : waUserIn(det);
   const mp = o.resLat ? `https://www.google.com/maps/dir/?api=1&destination=${o.resLat},${o.resLng}` : "";
   const cpin = det.match(/maps\.google\.com\/\?q=(-?\d{1,3}\.\d+),(-?\d{1,3}\.\d+)/);
   const cmp = cpin ? `https://www.google.com/maps/dir/?api=1&destination=${cpin[1]},${cpin[2]}` : "";
@@ -6980,7 +7014,7 @@ function renderOrders() {
   const photo = o.photoUrl && /^https:\/\//.test(String(o.photoUrl)) ? `<button class="act a-img" data-receipt="${esc(o.photoUrl)}" onclick="openReceipt(this.dataset.receipt)">${ICO.img} الوصل</button>` : "";
   if (!o.resArea) enrichOrder(o);
   const pick = o.resArea ? ` (${esc(o.resArea)})` : "";
-  html += `<div class="ord" id="o-${sid(o.id)}">\n      <div class="ord-strip ${strip}"></div>\n      <div class="ord-b">\n        <div class="ord-hd">\n          <div><div class="ord-no">#${sid(o.id)}</div><div class="ord-tags">${tags}</div>\n            <div id="t-${sid(o.id)}" class="ord-tm tm-ok">${ICO.clk} --:--</div></div>\n          <div class="ord-pr"><div class="ord-pv">${num(o.price).toLocaleString("ar-EG")}<small> د.ع</small></div>\n            <button class="sup" onclick="openChat()" style="margin-top:9px;">${ICO.sup} ليدر<span class="sup-dot" id="d-${sid(o.id)}"></span></button></div>\n        </div>\n        <div class="steps">\n          <div class="step ${step >= 1 ? step === 1 ? "now" : "done" : ""}"><div class="step-d">${step > 1 ? "✓" : "1"}</div><span class="step-l">قبلت</span></div>\n          <div class="step ${step >= 2 ? step === 2 ? "now" : "done" : ""}"><div class="step-d">${step > 2 ? "✓" : "2"}</div><span class="step-l">${sup ? "بالمحلّ" : "بالمطعم"}</span></div>\n          <div class="step ${step >= 3 ? step === 3 ? "now" : "done" : ""}"><div class="step-d">${step > 3 ? "✓" : "3"}</div><span class="step-l">استلمت</span></div>\n          <div class="step ${step >= 4 ? "now" : ""}"><div class="step-d">🏁</div><span class="step-l">سلّمت</span></div>\n        </div>\n        ${ready}\n        ${sup ? supRoute(o, sup, rpn, rwa, mp) : `<div class="route">\n          <div class="rp up"><div class="rp-t">📍 الاستلام من${pick}</div><div class="rp-n">${esc(o.resName)}</div>\n            <div class="acts">\n              ${rpn ? `<button class="act a-call" onclick="openLink('tel:${rpn}')">${ICO.call} اتصال</button>` : ""}\n              ${rwa ? `<button class="act a-wa" onclick="openLink('https://wa.me/${rwa}')">${ICO.wa} واتساب</button>` : ""}\n              ${mp ? `<button class="act a-map" onclick="openLink('${mp}')">${ICO.map} خريطة</button>` : ""}\n            </div></div>\n          <div class="rp dn2"><div class="rp-t">🏠 التسليم إلى (${esc(o.area)})</div><div class="rp-n">${esc(det)}</div>\n            <div class="acts">\n              ${cp ? `<button class="act a-call" onclick="openLink('tel:${cp}')">${ICO.call} اتصال</button>` : ""}\n              ${cp ? `<button class="act a-wa" onclick="smartWa('${jss(cp)}','${jss(o.resName)}','${jss(o.area)}','${sid(o.id)}','${num(o.price)}','${jss(rpn || "")}')">${ICO.wa} رسالة الزبون</button>` : ""}\n              ${cmp ? `<button class="act a-map" onclick="openLink('${cmp}')">${ICO.map} موقع الزبون</button>` : ""}\n              ${photo}\n            </div></div>\n        </div>`}\n        <button class="cta ${bCls}" ${dis} onclick="orderAction('${sid(o.id)}','${sid(act)}',this)">${bTxt}</button>\n        ${isItt && o.state === "picked_up" ? `<button class="refz" onclick="ittRefused('${sid(o.id)}',this)">📵 الزبون رفض الاستلام</button>` : ""}\n      </div></div>`;
+  html += `<div class="ord" id="o-${sid(o.id)}">\n      <div class="ord-strip ${strip}"></div>\n      <div class="ord-b">\n        <div class="ord-hd">\n          <div><div class="ord-no">#${sid(o.id)}</div><div class="ord-tags">${tags}</div>\n            <div id="t-${sid(o.id)}" class="ord-tm tm-ok">${ICO.clk} --:--</div></div>\n          <div class="ord-pr"><div class="ord-pv">${num(o.price).toLocaleString("ar-EG")}<small> د.ع</small></div>\n            <button class="sup" onclick="openChat()" style="margin-top:9px;">${ICO.sup} ليدر<span class="sup-dot" id="d-${sid(o.id)}"></span></button></div>\n        </div>\n        <div class="steps">\n          <div class="step ${step >= 1 ? step === 1 ? "now" : "done" : ""}"><div class="step-d">${step > 1 ? "✓" : "1"}</div><span class="step-l">قبلت</span></div>\n          <div class="step ${step >= 2 ? step === 2 ? "now" : "done" : ""}"><div class="step-d">${step > 2 ? "✓" : "2"}</div><span class="step-l">${sup ? "بالمحلّ" : "بالمطعم"}</span></div>\n          <div class="step ${step >= 3 ? step === 3 ? "now" : "done" : ""}"><div class="step-d">${step > 3 ? "✓" : "3"}</div><span class="step-l">استلمت</span></div>\n          <div class="step ${step >= 4 ? "now" : ""}"><div class="step-d">🏁</div><span class="step-l">سلّمت</span></div>\n        </div>\n        ${ready}\n        ${sup ? supRoute(o, sup, rpn, rwa, mp) : `<div class="route">\n          <div class="rp up"><div class="rp-t">📍 الاستلام من${pick}</div><div class="rp-n">${esc(o.resName)}</div>\n            <div class="acts">\n              ${rpn ? `<button class="act a-call" onclick="openLink('tel:${rpn}')">${ICO.call} اتصال</button>` : ""}\n              ${rwa ? `<button class="act a-wa" onclick="openLink('https://wa.me/${rwa}')">${ICO.wa} واتساب</button>` : ""}\n              ${mp ? `<button class="act a-map" onclick="openLink('${mp}')">${ICO.map} خريطة</button>` : ""}\n            </div></div>\n          <div class="rp dn2"><div class="rp-t">🏠 التسليم إلى (${esc(o.area)})</div><div class="rp-n">${esc(det)}</div>\n            <div class="acts">\n              ${cp ? `<button class="act a-call" onclick="openLink('tel:${cp}')">${ICO.call} اتصال</button>` : ""}\n              ${cp || cu ? `<button class="act a-wa" onclick="smartWa('${jss(cp || cu)}','${jss(o.resName)}','${jss(o.area)}','${sid(o.id)}','${num(o.price)}','${jss(rpn || "")}')">${ICO.wa} رسالة الزبون</button>` : ""}\n              ${cmp ? `<button class="act a-map" onclick="openLink('${cmp}')">${ICO.map} موقع الزبون</button>` : ""}\n              ${photo}\n            </div></div>\n        </div>`}\n        <button class="cta ${bCls}" ${dis} onclick="orderAction('${sid(o.id)}','${sid(act)}',this)">${bTxt}</button>\n        ${isItt && o.state === "picked_up" ? `<button class="refz" onclick="ittRefused('${sid(o.id)}',this)">📵 الزبون رفض الاستلام</button>` : ""}\n      </div></div>`;
  });
  if (lastHtml !== html) {
   box.innerHTML = html;
