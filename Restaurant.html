@@ -8151,7 +8151,7 @@ function itcParse(t) {
   area: p[6],
   extra: p.slice(7).join("/")
  };
- if (!/^[A-Za-z0-9_-]{8,80}$/.test(q.cid) || !/^7\d{9}$/.test(q.ph)) return null;
+ if (!/^[A-Za-z0-9_-]{8,80}$/.test(q.cid) || !/^(7\d{9}|@[a-z0-9._]{3,35})$/.test(q.ph)) return null;
  return q;
 }
 
@@ -9205,7 +9205,7 @@ document.getElementById("orderForm").onsubmit = function(e) {
    _attemptCid = q.cid;
    btn.innerHTML = `<div class="spinner-border spinner-border-sm me-1"></div> إرسال إلى الرادار...`;
    btn.disabled = true;
-   finalizeOrderPlacement("الهاتف: 0" + q.ph + " | " + q.extra, "", q.price, q.area, btn, originalBtnHtml).then(() => {
+   finalizeOrderPlacement((q.ph[0] === "@" ? "الهاتف: واتساب " + q.ph + " (يوزر واتساب بلا رقم — تواصلوا معه بالواتساب)" : "الهاتف: 0" + q.ph) + " | " + q.extra, "", q.price, q.area, btn, originalBtnHtml).then(() => {
     if (!_attemptCid) window.removePhoto();
    });
    return;
