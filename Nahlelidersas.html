@@ -2360,8 +2360,8 @@ function attachDataListeners() {
    paintEve();
   } catch (_) {}
  });
- listen("system_settings/shifts_enabled", snap => {
-  window._emerg = snap.val() === false;
+ const emgRecalc = () => {
+  window._emerg = !!window._shOff && !window._emgOk;
   try {
    paintEmg();
   } catch (_) {}
@@ -2369,6 +2369,14 @@ function attachDataListeners() {
   try {
    scheduleRadar();
   } catch (_) {}
+ };
+ listen("system_settings/shifts_enabled", snap => {
+  window._shOff = snap.val() === false;
+  emgRecalc();
+ });
+ listen("system_settings/flags/emg_staff_ok", snap => {
+  window._emgOk = snap.val() === true;
+  emgRecalc();
  });
  listen("ledgers/drivers", snap => {
   liveLed.drivers = snap.val() || {};
