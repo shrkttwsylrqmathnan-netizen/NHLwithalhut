@@ -1271,6 +1271,9 @@ body.adv-on #fbSt{bottom:calc(154px + env(safe-area-inset-bottom));}
       <button class="fp fo" onclick="doFilt('dlyr',this)">🕐 متأخر بالمطعم <span class="fc" id="cDR">0</span></button>
       <button class="fp fa" onclick="doFilt('dlyd',this)">🛵 متأخر بالطريق <span class="fc" id="cDD">0</span></button>
     </div>
+    <div id="eveCard" style="display:none;margin:8px 10px 0"></div>
+    <div id="emgBar" style="display:none;margin:8px 10px 0;padding:11px 14px;border-radius:12px;background:#fff4e5;border:1px solid #f6c77d;color:#8a4b00;font-weight:800;font-size:.86rem;line-height:1.6">🆘 وضع الطوارئ مفعّل: التوزيع وإنهاء الطلبات آليّان الآن. لا تعيين ولا إنهاء من اللوحة — تابعوا المحادثات والتأمين واتّصلوا بكباتن المساء.</div>
+    <div id="greenBar" style="display:none;margin:8px 10px 0"></div>
     <div id="radar" class="og"></div>
   </div>
 </div>
@@ -2351,6 +2354,22 @@ function attachDataListeners() {
   scheduleMap();
  };
  listen("drivers_locations", _locCb);
+ listen("ops_eve/now", snap => {
+  window._eveNow = snap.val() || null;
+  try {
+   paintEve();
+  } catch (_) {}
+ });
+ listen("system_settings/shifts_enabled", snap => {
+  window._emerg = snap.val() === false;
+  try {
+   paintEmg();
+  } catch (_) {}
+  radarHtml = "";
+  try {
+   scheduleRadar();
+  } catch (_) {}
+ });
  listen("ledgers/drivers", snap => {
   liveLed.drivers = snap.val() || {};
   scheduleHof();
@@ -3278,9 +3297,20 @@ function renderRadar() {
   const trackBtn = hD ? `<button class="ob" style="width:auto;padding:0 8px;background:var(--blue-l);color:var(--blue-d);font-size:.68rem;font-weight:800;border:1px solid #c8dbfb;" onclick="trackDriver('${jDP}','${jRN}')">📍 مسار</button>` : "";
   const msgBtn = hD && canDo("message") ? `<button class="ob b-msg" onclick="msgCaptain('${jDP}','${ej(dn)}','','${jOId}')" title="رسالة مباشرة">💬</button>` : "";
   const wdBtn = hD && canDo("withdraw") ? `<button class="ob b-del" style="width:auto;padding:0 8px;font-size:.68rem;font-weight:800;height:32px" onclick="wdOrder('${jOId}','${jDP}',this)">${isSov ? "👑↩ سحب سيادي" : "↩ سحب"}</button>` : "";
-  const okBtn = canDo("complete") ? `<button class="ob b-ok" onclick="forceComplete('${jOId}',this)" title="إكمال">✓</button>` : "";
+  const okBtn = canDo("complete") && !window._emerg ? `<button class="ob b-ok" onclick="forceComplete('${jOId}',this)" title="إكمال">✓</button>` : "";
+  let evH = hD && !window._emerg ? evChip(doneEv(String(oId))) : "";
+  try {
+   const _r = rawOrders[oId] || {};
+   if (!hD && _r.eta_band === "defer") evH += evChip({
+    k: "gray",
+    t: "⏳ متجرٌ غير مستعجل — مؤجَّل وقت الزحمة"
+   }); else if (!hD && _r.prep_hold_until && Date.parse(_r.prep_hold_until) > Date.now()) evH += evChip({
+    k: "gray",
+    t: "⏱️ يُعرض قرب جاهزيّة المطعم " + fmtHM(_r.prep_hold_until)
+   });
+  } catch (_) {}
   const delBtn = canDo("delete") ? `<button class="ob b-del" onclick="delOrder('${jOId}',this)" title="إلغاء">✕</button>` : "";
-  const asgBtn = canDo("assign") && !(itt && ittWait(o)) ? `<button class="asel" style="cursor:pointer;display:flex;align-items:center;justify-content:center;gap:5px" onclick="openAssign('${jOId}')">👑 تعيين كابتن</button>` : "";
+  const asgBtn = canDo("assign") && !window._emerg && !(itt && ittWait(o)) ? `<button class="asel" style="cursor:pointer;display:flex;align-items:center;justify-content:center;gap:5px" onclick="openAssign('${jOId}')">👑 تعيين كابتن</button>` : "";
   let advBtn = "";
   try {
    const rp = _ccResPhone(oId);
@@ -3306,7 +3336,7 @@ function renderRadar() {
    ittHead = `<div class="itt-band"><span>🏪 اتحاد المتاجر</span><span class="z">عمولة صفر</span></div>`;
    ittBox = `<div class="itt-box"><div>الزبون يدفع <b>${(Number(itt.total) || 0).toLocaleString("en-US")}</b> د.ع · طلب ${(Number(itt.sub) || 0).toLocaleString("en-US")} + توصيل ${(Number(itt.fee) || 0).toLocaleString("en-US")}${itt.km ? " (" + itt.km + " كم)" : ""}</div>${its ? `<div class="itt-it">${its}</div>` : ""}${stage ? `<div>${stage}</div>` : ""}${itt.refused ? `<div class="itt-ref">📵 الكابتن أبلغ: الزبون رفض الاستلام — ${itt.refused.near ? "موقعه عند باب الزبون ✓" : "موقعه لا يؤكّد"} · قرّروا إرجاع الطلب للمطعم</div>` : ""}\n        <div class="itt-acts">${rp && st === "res_pending" ? `<button onclick="waOpen('0${ej(rp)}')">💬 واتساب المطعم</button>` : ""}${itt.cust ? `<button onclick="waOpen('${ej(itt.cust)}')">💬 واتساب الزبون</button>` : ""}</div></div>`;
   }
-  html += `<div class="oc ${clsCls}${itt ? " oc-itt" : ""}">${ittHead}${delH}\n      <div class="oc-head" style="${delH ? "margin-top:24px" : ""}">\n        <div><div class="oc-id">#${esc(oId)} ${dblB}${sovB}</div><div class="oc-tm">⏰ ${tF}${!delH && dMins > 0 ? ` · ${dMins} د` : ""}</div></div>\n      </div>\n      <div class="oc-acts">\n        <div style="display:flex;align-items:center;gap:4px;flex-wrap:wrap">\n          <span class="stb ${sbCls}">${sbTxt}</span>\n          ${isReady ? '<span class="stb stb-g" style="font-size:.58rem">✔ جاهز</span>' : ""}\n        </div>\n        <div style="display:flex;align-items:center;gap:4px">\n          ${trackBtn}\n          <button class="ob b-tl" onclick="openTimeline('${jOId}')" title="مسار الطلب الزمني">📜</button>\n          ${advBtn}\n          ${jPU ? `<button class="ob b-img" onclick="opImg('${jPU}')" title="صورة">🖼</button>` : ""}\n          ${okBtn}\n          ${delBtn}\n        </div>\n      </div>\n      <div class="oc-body">\n        <div class="oc-row"><div class="oc-res">🍽 ${esc(rN)}</div><div class="oc-pr">${Number(oP) || 0} د.ع</div></div>\n\n        <div class="oc-dr">\n          <div class="oc-dn"><div class="ocd-av">${hD && drvAvatar(dp) || "🛵"}</div><span>${esc(dn)}</span></div>\n          <div class="oc-dc">\n            ${""}${hD ? `<button class="cb-sm" onclick="waOpen('${jDP}')" title="واتساب">💬</button>` : ""}\n            ${msgBtn}\n            ${wdBtn}\n            ${asgBtn}\n          </div>\n        </div>\n\n        ${oA && oA !== "غير محدد" ? `<div class="oc-ar">📍 ${esc(oA)}${rejH}</div>` : ""}\n        ${ittBox}\n      </div>\n    </div>`;
+  html += `<div class="oc ${clsCls}${itt ? " oc-itt" : ""}">${ittHead}${delH}\n      <div class="oc-head" style="${delH ? "margin-top:24px" : ""}">\n        <div><div class="oc-id">#${esc(oId)} ${dblB}${sovB}</div><div class="oc-tm">⏰ ${tF}${!delH && dMins > 0 ? ` · ${dMins} د` : ""}</div></div>\n      </div>\n      <div class="oc-acts">\n        <div style="display:flex;align-items:center;gap:4px;flex-wrap:wrap">\n          <span class="stb ${sbCls}">${sbTxt}</span>\n          ${isReady ? '<span class="stb stb-g" style="font-size:.58rem">✔ جاهز</span>' : ""}\n        </div>\n        <div style="display:flex;align-items:center;gap:4px">\n          ${trackBtn}\n          <button class="ob b-tl" onclick="openTimeline('${jOId}')" title="مسار الطلب الزمني">📜</button>\n          ${advBtn}\n          ${jPU ? `<button class="ob b-img" onclick="opImg('${jPU}')" title="صورة">🖼</button>` : ""}\n          ${okBtn}\n          ${delBtn}\n        </div>\n      </div>\n      <div class="oc-body">\n        <div class="oc-row"><div class="oc-res">🍽 ${esc(rN)}</div><div class="oc-pr">${Number(oP) || 0} د.ع</div></div>\n\n        <div class="oc-dr">\n          <div class="oc-dn"><div class="ocd-av">${hD && drvAvatar(dp) || "🛵"}</div><span>${esc(dn)}</span></div>\n          <div class="oc-dc">\n            ${""}${hD ? `<button class="cb-sm" onclick="waOpen('${jDP}')" title="واتساب">💬</button>` : ""}\n            ${msgBtn}\n            ${wdBtn}\n            ${asgBtn}\n          </div>\n        </div>\n\n        ${oA && oA !== "غير محدد" ? `<div class="oc-ar">📍 ${esc(oA)}${rejH}</div>` : ""}\n        ${evH}\n        ${ittBox}\n      </div>\n    </div>`;
  });
  if (_total > _page.length) {
   html += `<div style="text-align:center;padding:14px 10px">\n      <button class="cc-f" style="padding:9px 20px;font-size:.8rem" onclick="_radarShown+=RADAR_PAGE*2;radarHtml='';renderRadar()">\n        ⬇ عرض المزيد — ${_total - _page.length} طلباً متبقياً</button></div>`;
@@ -3315,11 +3345,169 @@ function renderRadar() {
   c.innerHTML = html;
   radarHtml = html;
  }
+ try {
+  paintEmg();
+  paintGreen(window._emerg ? [] : liveOrd.map(o => String(o[O.ID])).filter(id => {
+   const e = doneEv(id);
+   return e && e.k === "green";
+  }));
+ } catch (_) {}
 }
 
-window.forceComplete = async function(oId, el) {
+function _km(a, b, c, d) {
+ a = +a;
+ b = +b;
+ c = +c;
+ d = +d;
+ if (!a || !b || !c || !d) return 9999;
+ const R = 6371, x = (c - a) * Math.PI / 180, y = (d - b) * Math.PI / 180, h = Math.sin(x / 2) ** 2 + Math.cos(a * Math.PI / 180) * Math.cos(c * Math.PI / 180) * Math.sin(y / 2) ** 2;
+ return R * 2 * Math.atan2(Math.sqrt(h), Math.sqrt(1 - h));
+}
+
+function _drvLoc(ph) {
+ try {
+  const L = drvLocs && (drvLocs[nP(ph)] || drvLocs[ph]);
+  if (!L || !L.lat || !L.lng) return null;
+  const lu = Date.parse(L.last_update);
+  if (!isFinite(lu) || Date.now() - lu > 5 * 6e4) return null;
+  return L;
+ } catch (_) {
+  return null;
+ }
+}
+
+function doneEv(oid) {
+ const r = rawOrders[oid];
+ if (!r) return null;
+ const st = String(r.status || "").toLowerCase().trim();
+ if (![ "accepted", "arrived_at_res", "picked_up" ].includes(st)) return null;
+ const L = _drvLoc(r.driverPhone || "");
+ if (!L) return {
+  k: "gray",
+  t: "لا موقع حديث للكابتن"
+ };
+ const km = _km(L.lat, L.lng, r.resLat, r.resLng);
+ if (!(km < 9999)) return {
+  k: "gray",
+  t: "لا موقع للمطعم"
+ };
+ if (km <= .3) return {
+  k: "red",
+  t: "الكابتن ما زال عند المطعم"
+ };
+ if (st === "accepted") return {
+  k: "gray",
+  t: "لم يضغط «وصلت» — على " + km.toFixed(1) + " كم من المطعم"
+ };
+ if (km >= .5) {
+  const m = r.accepted_at ? Math.round((Date.now() - (typeof r.accepted_at === "number" ? r.accepted_at : Date.parse(r.accepted_at))) / 6e4) : null;
+  return {
+   k: "green",
+   t: "ابتعد عن المطعم " + km.toFixed(1) + " كم" + (m != null && isFinite(m) ? " · منذ قبوله " + m + " د" : "")
+  };
+ }
+ return {
+  k: "gray",
+  t: "قرب المطعم (" + Math.round(km * 1e3) + " م)"
+ };
+}
+
+function evChip(ev) {
+ if (!ev) return "";
+ const c = ev.k === "green" ? "background:#e7f7ee;color:#0b7a43;border:1px solid #b8e6cb" : ev.k === "red" ? "background:#fdecec;color:#b3261e;border:1px solid #f5c2c0" : "background:#f1f3f6;color:#5b6472;border:1px solid #e1e5ea";
+ return '<div style="margin-top:6px;display:inline-block;padding:3px 9px;border-radius:9px;font-size:.7rem;font-weight:800;' + c + '">' + (ev.k === "gray" ? "○ " : "● ") + esc(ev.t) + "</div>";
+}
+
+function paintEve() {
+ const b = document.getElementById("eveCard");
+ if (!b) return;
+ const e = window._eveNow;
+ let hide = "";
+ try {
+  hide = localStorage.getItem("eve_hide") || "";
+ } catch (_) {}
+ if (!e || !e.at || Date.now() - Number(e.at) > 3 * 36e5 || hide === String(e.day)) {
+  b.style.display = "none";
+  b.innerHTML = "";
+  return;
+ }
+ const list = Array.isArray(e.list) ? e.list : Object.values(e.list || {});
+ const rows = list.slice(0, 30).map(x => '<div style="display:flex;align-items:center;justify-content:space-between;gap:8px;padding:6px 0;border-top:1px solid #f1e3c8"><span style="font-weight:800">' + esc(x.n || "0" + x.p) + ' <small style="color:#8a6d3b;font-weight:600">· يعمل ' + (e.part === "am" ? "صباحاً" : "مساءً") + " " + (Number(x.d) || 0) + ' من 14 يوماً</small></span><button class="cc-f" style="padding:6px 12px;font-size:.75rem;font-weight:800;background:#0b7a43;color:#fff;border:0;border-radius:9px" onclick="ccDial(\'' + esc(String(x.p)) + "')\">💬 واتساب</button></div>").join("");
+ const rain = Number(e.rain) >= 1 ? " · <b>مطرٌ متوقّع</b>" : "";
+ b.innerHTML = '<div style="padding:12px 14px;border-radius:12px;background:#fff8ec;border:1px solid #f3cf8d;color:#5b3b00;font-size:.84rem;line-height:1.7">' + '<div style="font-weight:900;font-size:.95rem">📣 ' + (e.part === "am" ? "صباح" : "مساء") + " اليوم: الكباتن أقلّ من المعتاد</div>" + "<div>المتّصلون الآن <b>" + (Number(e.on) >= 0 ? e.on : "؟") + "</b>، والمعتاد في هذا الوقت <b>" + (Number(e.base) >= 0 ? e.base : "؟") + "</b> — ينقصنا <b>" + (Number(e.short) > 0 ? e.short : "؟") + "</b>" + rain + ". اتّصلوا بكباتن " + (e.part === "am" ? "الصباح" : "المساء") + " ليدخلوا قبل الزحمة:</div>" + (rows || '<div style="margin-top:6px">لا أسماء متاحة الآن.</div>') + '<div style="text-align:left;margin-top:6px"><button class="cc-f" style="padding:4px 10px;font-size:.7rem;background:transparent;border:1px solid #e5c389;border-radius:8px;color:#8a6d3b" onclick="try{localStorage.setItem(\'eve_hide\',\'' + esc(String(e.day)) + "')}catch(_){}paintEve()\">إخفاء لليوم</button></div></div>";
+ b.style.display = "";
+}
+
+function paintEmg() {
+ const b = document.getElementById("emgBar");
+ if (b) b.style.display = window._emerg ? "" : "none";
+}
+
+function paintGreen(ids) {
+ const b = document.getElementById("greenBar");
+ if (!b) return;
+ if (window._emerg || !canDo("complete") || ids.length < 2) {
+  b.style.display = "none";
+  b.innerHTML = "";
+  return;
+ }
+ const h = '<button class="cc-f" style="width:100%;padding:11px;font-size:.85rem;font-weight:800;background:#0b7a43;color:#fff;border:0;border-radius:12px" onclick="completeAllGreen(this)">✓ أنهِ كلّ الأخضر (' + ids.length + ") — الكابتن ابتعد عن المطعم</button>";
+ if (b.innerHTML !== h) b.innerHTML = h;
+ b.style.display = "";
+}
+
+window.completeAllGreen = async function(el) {
+ if (window._emerg) return toast("وضع الطوارئ: الإنهاء آليّ الآن", "e");
  if (!needPerm("complete", "إنهاء الطلبات")) return;
- if (!confirm("تأكيد إكمال الطلب؟")) return;
+ const ids = liveOrd.map(o => String(o[O.ID])).filter(id => {
+  const e = doneEv(id);
+  return e && e.k === "green";
+ });
+ if (!ids.length) return toast("لا طلبات خضراء الآن");
+ if (!confirm("إنهاء " + ids.length + " طلباً ابتعد كباتنها عن المطاعم؟")) return;
+ if (el) {
+  el.disabled = true;
+  el.classList.add("loading");
+ }
+ let ok = 0, bad = 0;
+ for (const id of ids) {
+  const e = doneEv(id);
+  if (!(e && e.k === "green")) continue;
+  try {
+   const order = liveOrd.find(o => String(o[O.ID]) === id);
+   const d = await staffAction({
+    action: "STAFF_COMPLETE",
+    orderId: id,
+    comm: order && order[O.COMM] != null ? order[O.COMM] : 0,
+    payType: order ? order[O.PAY] || "" : ""
+   });
+   if (d && d.success) ok++; else {
+    bad++;
+    if (d && d.emergency) {
+     toast(d.msg, "e");
+     break;
+    }
+   }
+  } catch (_) {
+   bad++;
+  }
+ }
+ if (el) {
+  el.disabled = false;
+  el.classList.remove("loading");
+ }
+ toast("✅ أُنهي " + ok + (bad ? " · تعذّر " + bad : ""), bad ? "e" : undefined);
+};
+
+window.forceComplete = async function(oId, el) {
+ if (window._emerg) return toast("وضع الطوارئ: إنهاء الطلبات آليّ الآن — لا إنهاء من اللوحة", "e");
+ if (!needPerm("complete", "إنهاء الطلبات")) return;
+ const _ev = doneEv(String(oId));
+ if (_ev && _ev.k === "red") {
+  if (!confirm("⚠️ الكابتن ما زال عند المطعم — الطلب لم يُسلَّم غالباً.\nإنهاؤه الآن يجعل النظام يرسل له طلباً جديداً وهو يحمل هذا.\n\nهل سلّمه فعلاً؟")) return;
+ } else if (!(_ev && _ev.k === "green")) {
+  if (!confirm("تأكيد إكمال الطلب؟")) return;
+ }
  if (el) {
   el.disabled = true;
   el.classList.add("loading");
@@ -3394,6 +3582,7 @@ window.asgnDrv = async function(oId, dPhone) {
 let _assignOrderId = "", _assignSearch = "";
 
 window.openAssign = function(oId) {
+ if (window._emerg) return toast("وضع الطوارئ: التوزيع آليّ الآن — لا تعيين من اللوحة", "e");
  if (!needPerm("assign", "تعيين الكباتن")) return;
  _assignOrderId = oId;
  _assignSearch = "";
@@ -3425,11 +3614,35 @@ function renderAssignList() {
   const n = nP(d.phone);
   if (!actDrv.has(n)) return;
   const cp = liveLed.drivers?.[n]?.completed_orders || 0;
+  let carry = 0, onRoad = false;
+  try {
+   Object.values(rawOrders).forEach(r => {
+    if (r && nP(r.driverPhone || "") === n) {
+     const st = String(r.status || "").toLowerCase();
+     if ([ "accepted", "arrived_at_res", "picked_up" ].includes(st)) {
+      carry++;
+      if (st === "picked_up") onRoad = true;
+     }
+    }
+   });
+  } catch (_) {}
+  let km = null;
+  try {
+   const ro = rawOrders[_assignOrderId];
+   const L = _drvLoc(n);
+   if (ro && L) {
+    const k = _km(L.lat, L.lng, ro.resLat, ro.resLng);
+    if (k < 9999) km = k;
+   }
+  } catch (_) {}
   avail.push({
    phone: n,
    name: d.name || dN(n),
    ledger: cp,
-   busy: busySet.has(n)
+   busy: busySet.has(n),
+   carry: carry,
+   onRoad: onRoad,
+   km: km
   });
  });
  const q = _assignSearch.trim().toLowerCase();
@@ -3447,13 +3660,33 @@ function renderAssignList() {
   const tier = c.ledger >= 100 ? "💎" : c.ledger >= 30 ? "⭐" : "🟢";
   const initial = c.name !== "غير محدد" ? c.name.charAt(0) : "🛵";
   const badge = c.busy ? `<span class="asn-badge b-busy">🔴 مشغول</span>` : `<span class="asn-badge b-free">🟢 متاح</span>`;
-  html += `<div class="asn-item" onclick="doAssign('${ej(c.phone)}')">\n      <div class="asn-av">${esc(initial)}</div>\n      <div class="asn-info">\n        <div class="asn-nm">${tier} ${esc(c.name)}</div>\n        <div class="asn-meta">${esc(c.phone)} · ${c.ledger} طلب إجمالي</div>\n      </div>\n      ${badge}\n    </div>`;
+  html += `<div class="asn-item" onclick="doAssign('${ej(c.phone)}')">\n      <div class="asn-av">${esc(initial)}</div>\n      <div class="asn-info">\n        <div class="asn-nm">${tier} ${esc(c.name)}</div>\n        <div class="asn-meta">${esc(c.phone)} · ${c.ledger} طلب إجمالي${c.km != null ? " · على " + c.km.toFixed(1) + " كم من المطعم" : ""}</div>\n        ${c.carry >= 3 || c.onRoad || c.km != null && c.km > 3 ? `<div class="asn-meta" style="color:#b3261e;font-weight:800">⚠️ ${[ c.carry >= 3 ? "معه " + c.carry + " طلبات" : "", c.onRoad ? "خرج بطلبه من المطعم" : "", c.km != null && c.km > 3 ? "المطعم بعيد عنه" : "" ].filter(Boolean).join(" · ")}</div>` : ""}\n      </div>\n      ${badge}\n    </div>`;
  });
  box.innerHTML = html;
 }
 
 window.doAssign = async function(dPhone) {
  if (!_assignOrderId || !dPhone) return;
+ if (window._emerg) {
+  clSheet("assignModal");
+  return toast("وضع الطوارئ: التوزيع آليّ الآن", "e");
+ }
+ try {
+  const n = nP(dPhone);
+  let carry = 0, onRoad = false;
+  Object.values(rawOrders).forEach(r => {
+   if (r && nP(r.driverPhone || "") === n) {
+    const st = String(r.status || "").toLowerCase();
+    if ([ "accepted", "arrived_at_res", "picked_up" ].includes(st)) {
+     carry++;
+     if (st === "picked_up") onRoad = true;
+    }
+   }
+  });
+  const ro = rawOrders[_assignOrderId], L = _drvLoc(n), km = ro && L ? _km(L.lat, L.lng, ro.resLat, ro.resLng) : null;
+  const w = [ carry >= 3 ? "معه " + carry + " طلبات" : "", onRoad ? "خرج بطلبه من المطعم" : "", km != null && km < 9999 && km > 3 ? "مطعم هذا الطلب على " + km.toFixed(1) + " كم منه" : "" ].filter(Boolean);
+  if (w.length && !confirm("⚠️ " + w.join(" · ") + "\nهذا يؤخّر طلباته كلّها. أتعيّنه مع ذلك؟")) return;
+ } catch (_) {}
  clSheet("assignModal");
  await asgnDrv(_assignOrderId, dPhone);
 };
@@ -7010,7 +7243,7 @@ function _avSmartActs(p, o, sit, c, d) {
  });
  if (o) {
   const st = String(o.status || ""), live = [ "completed", "deleted" ].indexOf(st) < 0, hasD = _avHasDrv(o);
-  if (live && !hasD && canDo("assign")) add("assign", {
+  if (live && !hasD && canDo("assign") && !window._emerg) add("assign", {
    t: "🎯 إسناد كابتن الآن",
    on: `openAssign('${ej(o._id)}')`,
    hint: "تختار كابتناً ويرنّ عنده فوراً",

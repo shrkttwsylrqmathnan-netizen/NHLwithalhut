@@ -18,7 +18,7 @@ try {
 <meta charset="UTF-8">
 <meta name="robots" content="noindex, nofollow">
 <script>
-const ADMIN_APP_VERSION = "5.6-PlaceFind";
+const ADMIN_APP_VERSION = "5.9-NonUrgent";
 
 try {
  if (localStorage.getItem("hut_adm_version") !== ADMIN_APP_VERSION) {
@@ -1022,6 +1022,8 @@ button,input,select,textarea{font-family:'Cairo',sans-serif;}
         <div><label class="el" style="margin-bottom:3px">خط العرض (Lat)</label><input type="number" id="eLat" class="fc" placeholder="35.468" step="any" oninput="gPrevSoon()"></div>
         <div><label class="el" style="margin-bottom:3px">خط الطول (Lng)</label><input type="number" id="eLng" class="fc" placeholder="44.392" step="any" oninput="gPrevSoon()"></div>
       </div>
+      
+      <button type="button" class="map-b" id="nuBtn" onclick="nuToggle()" style="width:100%;margin-bottom:11px">⏳ …</button>
     </div>
     <div id="eDF" style="display:none">
       
@@ -4643,6 +4645,9 @@ window.opEdit = function(type, phone) {
  if (!entity) return toast("لم يُعثر على البيانات", "e");
  document.getElementById("eTitle").textContent = type === "DRV" ? "تحديث بيانات الكابتن" : "تحديث بيانات المطعم";
  document.getElementById("eSub").textContent = type === "DRV" ? "الكابتن: " + entity[D.NAME] : "المطعم: " + entity[R.NAME];
+ try {
+  if (type !== "DRV") nuPaint(phone);
+ } catch (_) {}
  document.getElementById("eN").value = entity[1] || "";
  document.getElementById("ePH").value = "0" + nP(entity[2] || phone);
  document.getElementById("ePW").value = "";
@@ -4775,6 +4780,43 @@ window.svPhone = async function() {
  } finally {
   go.textContent = "انقل الرقم";
  }
+};
+
+async function nuPaint(phone) {
+ const b = document.getElementById("nuBtn");
+ if (!b) return;
+ b.textContent = "⏳ …";
+ b.style.background = "";
+ try {
+  const on = (await db.ref("system_settings/non_urgent/" + nP(phone)).once("value")).val() === true;
+  b.textContent = on ? "⏳ متجرٌ غير مستعجل — يتأخّر وقت الضغط (اضغط للإلغاء)" : "⏳ اجعله «غير مستعجل» (يتأخّر وقت الضغط الشديد)";
+  b.style.background = on ? "#fff4e5" : "";
+  b.dataset.on = on ? "1" : "";
+ } catch (e) {
+  b.textContent = "⏳ تعذّرت القراءة";
+ }
+}
+
+window.nuToggle = async function() {
+ if (!ePh) return;
+ const p = nP(ePh), name = document.getElementById("eN") && document.getElementById("eN").value || "";
+ const b = document.getElementById("nuBtn"), on = b && b.dataset.on === "1";
+ if (!on && /صيدل/.test(name)) return toast("الصيدليّات لا تُؤجَّل — الدواء قد يكون مستعجلاً", "e");
+ if (!on && !confirm("«" + name + "» متجرٌ غير مستعجل؟\nوقت الضغط الشديد تتأخّر طلباته في الدور إلى أن يتوفّر كابتن (40 دقيقة على الأكثر)، ويرى في لوحته: «طلبك يخرج بعد الزحمة».")) return;
+ try {
+  if (on) {
+   await db.ref("system_settings/non_urgent/" + p).remove();
+   logAudit("NON_URGENT_OFF", "المطعم " + name + " · " + p);
+   toast("أُلغي «غير مستعجل»");
+  } else {
+   await db.ref("system_settings/non_urgent/" + p).set(true);
+   logAudit("NON_URGENT_ON", "المطعم " + name + " · " + p);
+   toast("صار «غير مستعجل» ⏳");
+  }
+ } catch (e) {
+  toast("تعذّر: " + esc(e.message || e), "e");
+ }
+ nuPaint(ePh);
 };
 
 window.svEdit = async function() {
@@ -5447,11 +5489,30 @@ window.insLeadSettle = async function(lp) {
 };
 
 window.insSetDay = async function(p, d) {
+ const from = insAccs[p] && insAccs[p].day != null ? Number(insAccs[p].day) : null, to = Number(d);
+ try {
+  const cnt = {};
+  let n = 0;
+  Object.values(insAccs || {}).forEach(a => {
+   if (a && !a.left_at && a.day != null) {
+    cnt[a.day] = (cnt[a.day] || 0) + 1;
+    n++;
+   }
+  });
+  const avg = n / INS_DAYS_AR.length, after = (cnt[to] || 0) + (from === to ? 0 : 1);
+  if (n >= 14 && after > avg * 1.15 && !confirm("⚠️ يوم " + INS_DAYS_AR[to] + " فيه الآن " + (cnt[to] || 0) + " حساباً، والمتوسّط " + Math.round(avg) + ".\nتكديس الحسابات في يومٍ واحد يمنع كباتن كثيرين معاً في اليوم التالي.\n\nأتنقله إليه مع ذلك؟")) {
+   try {
+    insRender();
+   } catch (_) {}
+   return;
+  }
+ } catch (_) {}
  try {
   await db.ref("insurance/accounts/" + p).update({
-   day: Number(d)
+   day: to
   });
-  toast("تغيّر يوم القسط إلى " + INS_DAYS_AR[Number(d)]);
+  logAudit("INS_SET_DAY", "الكابتن " + p + " · من " + (from != null && INS_DAYS_AR[from] ? INS_DAYS_AR[from] : "؟") + " إلى " + INS_DAYS_AR[to]);
+  toast("تغيّر يوم القسط إلى " + INS_DAYS_AR[to]);
  } catch (e) {
   toast("تعذّر: " + esc(e.message || e), "e");
  }

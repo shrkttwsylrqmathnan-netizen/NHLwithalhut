@@ -34,7 +34,7 @@
  } catch (_) {}
 })();
 
-const CURRENT_APP_VERSION = "34.72-Nahla";
+const CURRENT_APP_VERSION = "34.75-Nahla";
 
 window.APP_VERSION = CURRENT_APP_VERSION;
 
@@ -385,6 +385,7 @@ select.inp-clay{appearance:none;-webkit-appearance:none;cursor:pointer;
 @keyframes bellRing{0%,100%{transform:scale(1) rotate(0)}25%{transform:scale(1.05) rotate(-7deg)}75%{transform:scale(1.05) rotate(7deg)}}
 .al-t{font-size:2.1rem;font-weight:800;letter-spacing:-.8px;}
 .al-sov{font-size:.9rem;font-weight:800;color:#FFD8A8;margin-top:7px;}
+.al-trip{font-size:1.02rem;font-weight:800;color:#fff;margin-top:8px;line-height:1.7;}   
 .tmr{width:172px;height:172px;margin:18px auto;position:relative;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
 .tmr svg{transform:rotate(-90deg);width:172px;height:172px;}
 .tmr circle{fill:none;stroke:#fff;stroke-width:6;stroke-dasharray:471;stroke-dashoffset:0;transition:1s linear;stroke-linecap:round;}
@@ -1030,6 +1031,7 @@ window.__SND = {
     <div class="al-bell"><svg class="si" style="width:44px;height:44px;" viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg></div>
     <div class="al-t" id="alTitle">طلب جديد!</div>
     <p class="al-sov" id="alSov"></p>
+    <p class="al-trip dn" id="alTrip"></p>
   </div>
   <div class="tmr">
     <svg><circle id="tmrRing" cx="86" cy="86" r="75"/></svg>
@@ -1818,6 +1820,9 @@ function markFix(lat, lng, acc) {
   drv.currentLng = lng;
   if (acc) drv.gpsAccuracy = acc;
  }
+ try {
+  if (window.dpCheck) window.dpCheck(lat, lng);
+ } catch (_) {}
 }
 
 function locFresh() {
@@ -2906,6 +2911,8 @@ let TAP_TIMEOUT_MS = 18e3, HB_BUSY_MS = 1e4, HB_IDLE_MS = 2e4;
 
 let HB_THIN = 0, HB_NATIVE_MS = 6e4;
 
+let OFFER_RING_MS = 54e3;
+
 let RESLOC_MS = 18e5, _resLocAt = 0, _resLocTimer = null;
 
 const TUNE_LIMITS = {
@@ -2916,7 +2923,8 @@ const TUNE_LIMITS = {
  RESLOC_MS: [ 3e5, 216e5 ],
  CLOUD_RACE_MS: [ 2e3, 12e3 ],
  HB_THIN: [ 0, 1 ],
- HB_NATIVE_MS: [ 2e4, 6e4 ]
+ HB_NATIVE_MS: [ 2e4, 6e4 ],
+ OFFER_RING_MS: [ 4e4, 6e4 ]
 };
 
 const _rtt = [];
@@ -2944,7 +2952,7 @@ function _tuneSet(k, v) {
  v = Number(v);
  if (!lim || !isFinite(v)) return;
  v = Math.min(lim[1], Math.max(lim[0], v));
- if (k === "NET_TIMEOUT_MS") NET_TIMEOUT_MS = v; else if (k === "TAP_TIMEOUT_MS") TAP_TIMEOUT_MS = v; else if (k === "HB_BUSY_MS") HB_BUSY_MS = v; else if (k === "HB_IDLE_MS") HB_IDLE_MS = v; else if (k === "RESLOC_MS") RESLOC_MS = v; else if (k === "CLOUD_RACE_MS") CLOUD_RACE_MS = v; else if (k === "HB_THIN") HB_THIN = v >= .5 ? 1 : 0; else if (k === "HB_NATIVE_MS") HB_NATIVE_MS = v;
+ if (k === "NET_TIMEOUT_MS") NET_TIMEOUT_MS = v; else if (k === "TAP_TIMEOUT_MS") TAP_TIMEOUT_MS = v; else if (k === "HB_BUSY_MS") HB_BUSY_MS = v; else if (k === "HB_IDLE_MS") HB_IDLE_MS = v; else if (k === "RESLOC_MS") RESLOC_MS = v; else if (k === "CLOUD_RACE_MS") CLOUD_RACE_MS = v; else if (k === "HB_THIN") HB_THIN = v >= .5 ? 1 : 0; else if (k === "HB_NATIVE_MS") HB_NATIVE_MS = v; else if (k === "OFFER_RING_MS") OFFER_RING_MS = v;
 }
 
 function applyTunables(t) {
@@ -4330,7 +4338,86 @@ function startDayRollover(initial) {
  }, 6e4);
 }
 
+function _rushSheetDue() {
+ try {
+  if (!(Date.now() - (window._rushAt || 0) < 30 * 6e4)) return false;
+  const h = new Date(srvNow() + 3 * 36e5).getUTCHours();
+  if (h < 15 || h >= 22) return false;
+  return !localStorage.getItem("suf_rush_sheet_" + bizDay());
+ } catch (_) {
+  return false;
+ }
+}
+
+function _rushSheetShow() {
+ try {
+  localStorage.setItem("suf_rush_sheet_" + bizDay(), "1");
+ } catch (_) {}
+ const bt = new Date(srvNow() + 3 * 36e5), hm = bt.getUTCHours() + bt.getUTCMinutes() / 60;
+ const ask = hm < 19.5 ? "إذا تكدر تبقى لحد 7 ونص تساعدنا هواية" : "إذا تكدر تبقى ساعة بعد تساعدنا هواية";
+ let el = document.getElementById("rushSheet");
+ if (el) el.remove();
+ el = document.createElement("div");
+ el.id = "rushSheet";
+ el.style.cssText = "position:fixed;inset:0;z-index:39500;background:rgba(14,23,41,.45);display:flex;align-items:flex-end;justify-content:center;direction:rtl;font-family:inherit";
+ el.innerHTML = '<div style="background:#fff;width:100%;max-width:520px;border-radius:22px 22px 0 0;padding:20px 18px max(18px,env(safe-area-inset-bottom));text-align:center">' + '<div style="font-size:1.25rem;font-weight:800;color:var(--ink)">الطلبات هسه هواية 🙏</div>' + '<div style="font-size:1rem;color:var(--ink2);margin-top:6px">' + ask + ".</div>" + '<button id="rsStay" style="width:100%;margin-top:14px;border:0;border-radius:14px;padding:15px;background:var(--ok);color:#fff;font-size:1.1rem;font-weight:800">أكمل متاح</button>' + '<div style="display:flex;gap:10px;margin-top:10px"><button id="rsBreak" style="flex:1;border:0;border-radius:14px;padding:13px 6px;background:var(--bg2);color:var(--ink2);font-size:.98rem;font-weight:700">استراحة 15 دقيقة</button>' + '<button id="rsEnd" style="flex:1;border:0;border-radius:14px;padding:13px 6px;background:var(--bg2);color:var(--ink2);font-size:.98rem;font-weight:700">أنهيت يومي</button></div></div>';
+ document.body.appendChild(el);
+ track("rush_sheet_shown");
+ const off = function(why) {
+  el.remove();
+  track("rush_sheet_" + why);
+  if (why === "break") {
+   try {
+    localStorage.setItem("suf_break_until", String(Date.now() + 15 * 6e4));
+   } catch (_) {}
+   setTimeout(_breakOver, 15 * 6e4 + 2e3);
+  }
+  const t = document.getElementById("onlineTog");
+  if (t) t.checked = false;
+  window._rushSheetBypass = true;
+  window.toggleOnline();
+ };
+ document.getElementById("rsStay").onclick = function() {
+  el.remove();
+  track("rush_sheet_stay");
+  toast("شكراً كابتن 🌟", "ok");
+ };
+ document.getElementById("rsBreak").onclick = function() {
+  off("break");
+ };
+ document.getElementById("rsEnd").onclick = function() {
+  off("end");
+ };
+}
+
+function _breakOver() {
+ try {
+  const u = Number(localStorage.getItem("suf_break_until") || 0);
+  if (!u || Date.now() < u) return;
+  localStorage.removeItem("suf_break_until");
+  if (!isOnline) {
+   toast("☕ انتهت استراحتك — تكدر ترجع متاح هسه", "info");
+   try {
+    if (navigator.vibrate) navigator.vibrate(200);
+   } catch (_) {}
+  }
+ } catch (_) {}
+}
+
+document.addEventListener("visibilitychange", function() {
+ if (document.visibilityState === "visible") _breakOver();
+});
+
 window.toggleOnline = async function() {
+ try {
+  const t0 = document.getElementById("onlineTog");
+  if (t0 && !t0.checked && isOnline && !window._rushSheetBypass && _rushSheetDue()) {
+   t0.checked = true;
+   _rushSheetShow();
+   return;
+  }
+ } catch (_) {}
+ window._rushSheetBypass = false;
  const _tog = document.getElementById("onlineTog");
  if (_tog && _tog.checked && !window.locConsentGiven()) {
   _tog.checked = false;
@@ -4351,7 +4438,14 @@ window.toggleOnline = async function() {
    openOnboarding(true);
    return;
   }
-  const s = ENFORCE_SHIFT_WINDOW && window._shiftsOff !== true ? myShift() : null;
+  let _so = window._shiftsOff;
+  if (_so === undefined) {
+   try {
+    const v = localStorage.getItem("suf_shifts_off");
+    _so = v === null ? undefined : v === "1";
+   } catch (_) {}
+  }
+  const s = ENFORCE_SHIFT_WINDOW && _so === false ? myShift() : null;
   if (s) {
    const w = inWindowLocal(s.h, s.len, srvNow());
    if (!w.inside) {
@@ -5684,6 +5778,9 @@ function startListeners() {
  listen(() => ref(db, "system_settings/shifts_enabled"), s => {
   window._shiftsOff = s.val() === false;
   try {
+   localStorage.setItem("suf_shifts_off", window._shiftsOff ? "1" : "0");
+  } catch (_) {}
+  try {
    paintShiftInfo();
   } catch (e) {
    _crumb("shift_paint_fail");
@@ -6115,18 +6212,35 @@ function _offerScan(fb, myId, pump) {
  };
  curOrder.okey = _offerKey(f);
  const _stamp = f.last_update ? new Date(f.last_update).getTime() : 0;
- let _wLegacy = 6e4, _wServer = 6e4;
+ let _wLegacy = OFFER_RING_MS, _wServer = OFFER_RING_MS;
  if (_stamp && isFinite(_stamp)) {
   const _ageDev = Date.now() - _stamp;
   const _ageSrv = srvNow() - _stamp;
-  if (isFinite(_ageDev)) _wLegacy = 6e4 - Math.max(0, _ageDev);
-  if (isFinite(_ageSrv)) _wServer = 6e4 - Math.max(0, _ageSrv);
+  if (isFinite(_ageDev)) _wLegacy = OFFER_RING_MS - Math.max(0, _ageDev);
+  if (isFinite(_ageSrv)) _wServer = OFFER_RING_MS - Math.max(0, _ageSrv);
  }
  curOrder.expire = Date.now() + Math.max(1e4, _wLegacy, _wServer);
+ try {
+  if (Number(f.rush_lv) >= 1) window._rushAt = Date.now();
+ } catch (_) {}
  document.getElementById("alTitle").innerText = active.length ? "طلب إضافي! 🔥" : "طلب جديد!";
  document.getElementById("alSov").innerText = curOrder.is_sovereign ? "⚠️ تعيين إداري مباشر — لا يمكن تجاهله" : "";
  document.getElementById("alRes").innerText = (f.vehicle === "car" ? "🚗 سيارة · " : "") + (f.kind === "supply" && f.sup ? "🛒 مقاضي من " + f.sup.n + " ← " + f.restaurant : f.restaurant);
  document.getElementById("alArea").innerText = f.area || "غير محدد";
+ (function() {
+  const el = document.getElementById("alTrip"), t = f.trip;
+  if (!el) return;
+  if (t && Number(t.n) >= 2) {
+   document.getElementById("alTitle").innerText = "🚗 رحلة " + t.n + " طلبات!";
+   const ar = (Array.isArray(t.areas) ? t.areas : Object.values(t.areas || {})).filter(Boolean);
+   if (ar.length) document.getElementById("alArea").innerText = ar.join(" · ");
+   el.textContent = "طريقٌ واحد · أجرة التوصيل كلّها " + (Number(t.fee) || 0).toLocaleString("ar-EG") + " د.ع" + (Number(t.unk) > 0 ? " + " + t.unk + " غير مؤكّدة" : "") + " · المسار نحو " + (Number(t.km) || 0).toLocaleString("ar-EG") + " كم · قبولك يقبلها كلّها";
+   el.classList.remove("dn");
+  } else {
+   el.textContent = "";
+   el.classList.add("dn");
+  }
+ })();
  (function() {
   const _pEl = document.getElementById("alPrice");
   _pEl.textContent = (Number(f.price) || 0).toLocaleString("ar-EG") + " ";
@@ -6242,7 +6356,7 @@ function listenOrders() {
   if (rm.length) removeOrdersBatch(rm);
   {
    const DONE_R = [ "completed", "مكتمل", "settled", "delivered", "done", "تم التسليم", "تم", "deleted" ];
-   let restored = 0;
+   let restored = 0, tripN = 0;
    const restoredIds = [];
    Object.keys(fb).forEach(kk => {
     const f = fb[kk];
@@ -6283,6 +6397,7 @@ function listenOrders() {
     if (f.ready_for_pickup === true) readySet.add(oid);
     restored++;
     restoredIds.push(oid);
+    if (f.trip_of || f.trip) tripN++;
    });
    if (restored) {
     localStorage.setItem("nahla_orders", JSON.stringify(active));
@@ -6297,7 +6412,7 @@ function listenOrders() {
      try {
       window._selfAccepted = null;
      } catch (_) {}
-    } else toast(`♻️ استُرجع ${restored === 1 ? "طلب" : restored + " طلبات"} ما زال باسمك.<br>راجع الحالة قبل المتابعة.`, "info");
+    } else if (tripN === restored) toast(`🚗 أُضيفت ${restored === 1 ? "طلبٌ" : restored + " طلبات"} من رحلتك — كلّها في قائمتك الآن.`, "info"); else toast(`♻️ استُرجع ${restored === 1 ? "طلب" : restored + " طلبات"} ما زال باسمك.<br>راجع الحالة قبل المتابعة.`, "info");
    }
   }
   active.forEach(mo => {
@@ -7060,6 +7175,115 @@ window.ittRefused = async function(id, btn) {
  }
  btn.disabled = false;
  btn.innerHTML = orig;
+};
+
+const DP_FAR_M = 600, DP_STOP_M = 50, DP_STOP_S = 50, DP_REMIND_MINS = 25, DP_SNOOZE_MS = 6 * 6e4;
+
+const _dp = {};
+
+let _dpAt = 0, _dpOpen = null;
+
+function _dpClose() {
+ _dpOpen = null;
+ try {
+  const el = document.getElementById("dpSheet");
+  if (el) el.remove();
+ } catch (_) {}
+}
+
+function _dpShow(o, why, d) {
+ _dpOpen = String(o.id);
+ let el = document.getElementById("dpSheet");
+ if (el) el.remove();
+ el = document.createElement("div");
+ el.id = "dpSheet";
+ el.style.cssText = "position:fixed;left:12px;right:12px;bottom:max(14px,env(safe-area-inset-bottom));z-index:39000;background:#fff;border-radius:20px;box-shadow:0 10px 40px rgba(14,23,41,.28);padding:18px 18px 16px;direction:rtl;text-align:center;font-family:inherit";
+ el.innerHTML = '<div style="font-size:1.25rem;font-weight:800;color:var(--ink)">سلّمت طلب ' + esc(o.restaurant || "المطعم") + "؟</div>" + (o.area ? '<div style="font-size:.95rem;color:var(--muted);margin-top:4px">' + esc(o.area) + "</div>" : "") + '<div style="display:flex;gap:10px;margin-top:14px"><button id="dpYes" style="flex:2;border:0;border-radius:14px;padding:15px 8px;background:var(--ok);color:#fff;font-size:1.1rem;font-weight:800">نعم، سلّمت</button>' + '<button id="dpNo" style="flex:1;border:0;border-radius:14px;padding:15px 8px;background:var(--bg2);color:var(--ink2);font-size:1rem;font-weight:700">ليس بعد</button></div>';
+ document.body.appendChild(el);
+ const id = String(o.id);
+ document.getElementById("dpYes").onclick = function() {
+  track("dp_yes", {
+   orderId: id,
+   reason: why
+  });
+  let b = null;
+  try {
+   b = document.querySelector("#o-" + sid(id) + ' button[onclick*="finish"]');
+  } catch (_) {}
+  if (!b) {
+   b = document.createElement("button");
+  }
+  _dpClose();
+  try {
+   orderAction(id, "finish", b);
+  } catch (e) {
+   track("dp_yes_fail", {
+    reason: String(e && e.message || e).slice(0, 40)
+   });
+  }
+ };
+ document.getElementById("dpNo").onclick = function() {
+  const s = _dp[id];
+  if (s) {
+   s.snoozeUntil = Date.now() + DP_SNOOZE_MS;
+   s.snoozeLat = s.stopLat;
+   s.snoozeLng = s.stopLng;
+  }
+  track("dp_later", {
+   orderId: id,
+   reason: why
+  });
+  _dpClose();
+ };
+ try {
+  if (navigator.vibrate) navigator.vibrate([ 150, 80, 150 ]);
+ } catch (_) {}
+ track("dp_shown", {
+  orderId: id,
+  reason: why,
+  d: d
+ });
+}
+
+window.dpCheck = function(lat, lng) {
+ const now = Date.now();
+ if (now - _dpAt < 8e3) return;
+ _dpAt = now;
+ lat = Number(lat);
+ lng = Number(lng);
+ if (!isFinite(lat) || !isFinite(lng)) return;
+ if (_dpOpen && !active.some(x => String(x.id) === _dpOpen && x.state === "picked_up")) _dpClose();
+ let offerUp = false;
+ try {
+  offerUp = !document.getElementById("alertOv").classList.contains("dn");
+ } catch (_) {}
+ for (const o of active) {
+  if (o.state !== "picked_up" || o.kind === "supply" || !o.resLat || !o.resLng) continue;
+  const k = String(o.id);
+  const s = _dp[k] || (_dp[k] = {
+   stopLat: lat,
+   stopLng: lng,
+   stopAt: now,
+   snoozeUntil: 0,
+   snoozeLat: null,
+   snoozeLng: null
+  });
+  if (dist(lat, lng, s.stopLat, s.stopLng) > DP_STOP_M) {
+   s.stopLat = lat;
+   s.stopLng = lng;
+   s.stopAt = now;
+  }
+  if (_dpOpen || offerUp) continue;
+  if (now < s.snoozeUntil && !(s.snoozeLat != null && dist(lat, lng, s.snoozeLat, s.snoozeLng) > 300)) continue;
+  const el = now - (o.pickupTime || now);
+  if (el < MIN_PICKUP_SECS * 1e3) continue;
+  const dRes = dist(lat, lng, Number(o.resLat), Number(o.resLng));
+  const stopped = now - s.stopAt >= DP_STOP_S * 1e3;
+  const why = dRes >= DP_FAR_M && stopped ? "stop" : el >= DP_REMIND_MINS * 6e4 && dRes >= AT_RES_BLOCK_M ? "time" : "";
+  if (!why) continue;
+  _dpShow(o, why, Math.round(dRes));
+  break;
+ }
 };
 
 window.orderAction = function(id, act, btn) {
