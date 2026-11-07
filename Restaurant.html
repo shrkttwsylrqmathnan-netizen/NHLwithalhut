@@ -6,7 +6,7 @@
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://www.gstatic.com https://unpkg.com https://cdn.jsdelivr.net https://*.firebasedatabase.app https://*.firebaseio.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://unpkg.com https://cdn.jsdelivr.net; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: blob: https:; media-src 'self' data: blob: https://actions.google.com; connect-src 'self' https://*.firebasedatabase.app https://*.firebaseio.com wss://*.firebasedatabase.app wss://*.firebaseio.com https://script.google.com https://script.googleusercontent.com https://*.googleapis.com https://securetoken.googleapis.com https://*.cloudfunctions.net https://*.run.app https://nominatim.openstreetmap.org; object-src 'none'; base-uri 'none'; form-action 'self'; frame-ancestors 'none'">
 
     <script>
-const CURRENT_APP_VERSION = "43.38.Nahla-Brake";
+const CURRENT_APP_VERSION = "43.29.Nahla-Perf";
 
 const RES_VERSION_KEY = "hut_res_app_version";
 
@@ -3396,13 +3396,6 @@ window.nahlaOpen = window.nahlaOpen || function(what, id) {
 
     </div>
 
-    
-    <div id="brakeBanner" class="container mt-2 mb-2 hidden-section">
-        <div style="background: #FFF6E0; border: 1px solid #F5D78E; border-radius: 16px; padding: 12px 16px; color: #7A4F00; font-size: 0.85rem; font-weight: 700; line-height: 1.8;">
-            <span id="brakeText"></span>
-        </div>
-    </div>
-
     <div id="friendlyMessageBanner" class="container mt-2 mb-3 hidden-section" style="animation: slideDown 0.5s ease;">
         <div style="background: linear-gradient(135deg, #FFF8E1, #f8fafc); border: 1px solid #FDE68A; border-radius: 16px; padding: 12px 16px; display: flex; align-items: center; gap: 12px; box-shadow: 0 4px 15px rgba(255,179,0,0.05);">
             <div id="friendlyIcon" style="font-size: 24px;">🌤️</div>
@@ -3801,7 +3794,6 @@ async function sendToAI(payload, {queueOnFail: queueOnFail = true} = {}) {
    const err = new Error(data.err || "HTTP " + r.status);
    err.status = r.status;
    err.terminal = !!data.terminal || [ 400, 403, 413, 429 ].includes(r.status);
-   err.reason = String(data.reason || "");
    throw err;
   }
   return data;
@@ -3959,7 +3951,7 @@ async function aiSendItem(item) {
  } catch (e) {
   if (e && e.terminal) {
    aiRemoveItem(item.id);
-   reportLostIntake(item, "terminal", e.message, e.reason);
+   reportLostIntake(item, "terminal", e.message);
   } else {
    const tries = aiBumpTries(item.id);
    if (tries >= 6) {
@@ -3985,7 +3977,7 @@ function queueAndSendAI(payload) {
 
 let aiQueueBusy = false;
 
-function reportLostIntake(item, why, serverMsg, reason) {
+function reportLostIntake(item, why, serverMsg) {
  try {
   const kind = item && item.payload && item.payload.kind || "";
   const label = kind === "voice" ? "الطلب الصوتي" : kind === "receipt" ? "طلب الوصل" : "الطلب";
@@ -3994,14 +3986,10 @@ function reportLostIntake(item, why, serverMsg, reason) {
    minute: "2-digit"
   }) : "";
   resTrack("intake_lost", {
-   reason: (why || "") + "|" + kind + (reason ? "|" + reason : "")
+   reason: (why || "") + "|" + kind
   });
   setTimeout(() => {
    try {
-    if (reason === "res_brake") {
-     alert(label + " المُرسَل الساعة " + t + ":\n\n" + String(serverMsg || "").slice(0, 300));
-     return;
-    }
     alert("🛑 لم يصل " + label + " المُرسَل الساعة " + t + ".\n\n" + (why === "expired" ? "بقي في الانتظار أكثر من ٢٠ دقيقة بلا شبكة، فأُسقط كي لا يدخل الرادار متأخراً بعد أن سُلّم الطعام.\n\n" : why === "terminal" ? "رفضه الخادم: " + String(serverMsg || "").slice(0, 200) + "\n\n" : "فشل الإرسال بعد ستّ محاولات.\n\n") + "⚠️ هذا الطلب غير موجود في النظام. أعد إدخاله.");
    } catch (e) {}
   }, 400);
@@ -4508,8 +4496,7 @@ async function createOrderOnServer(payload) {
     });
     endAttemptCid();
     const er = new Error("SERVER_REJECTED");
-    er.serverMsg = String(e && e.message || "").slice(0, 300);
-    er.reason = String(e && e.details && e.details.reason || "");
+    er.serverMsg = String(e && e.message || "").slice(0, 200);
     throw er;
    }
    if (isSafeToFallback(lastCode)) {
@@ -8873,7 +8860,6 @@ async function startHotDataListeners() {
  if (!had) resTrack("listen_before_auth", {});
  attachOrdersListener(myPhone, 0);
  attachLedgerListener(myPhone, 0);
- attachBrakeListener(0);
  attachMirrorListener(myPhone, 0);
  attachAdvisorMetaListener(myPhone, 0);
 }
@@ -8887,42 +8873,6 @@ function attachMirrorListener(myPhone, attempt) {
  }, _ => {
   if ((attempt || 0) < 5) setTimeout(() => attachMirrorListener(myPhone, (attempt || 0) + 1), 6e4);
  });
-}
-
-let _brakeT = null;
-
-function attachBrakeListener(attempt) {
- onValue(ref(db, "system_settings/res_brake"), snap => {
-  window.__resBrake = snap.val() || null;
-  renderBrakeBanner();
- }, _ => {
-  if ((attempt || 0) < 5) setTimeout(() => attachBrakeListener((attempt || 0) + 1), 6e4);
- });
-}
-
-function renderBrakeBanner() {
- const el = document.getElementById("brakeBanner"), tx = document.getElementById("brakeText");
- if (!el || !tx) return;
- clearTimeout(_brakeT);
- const b = window.__resBrake, age = Date.now() - Number(b && b.at || 0);
- if (!b || !(Number(b.lv) > 0) || Number(b.live) !== 1 || age >= 12 * 6e4) {
-  el.classList.add("hidden-section");
-  return;
- }
- _brakeT = setTimeout(renderBrakeBanner, 12 * 6e4 - age + 1e3);
- let far = false;
- try {
-  const c = Array.isArray(b.c) ? b.c : [ 35.4408, 44.3791 ], R = 6371, rad = Math.PI / 180;
-  const real = regLat && regLng && !(Math.abs(regLat - 35.468) < .001 && Math.abs(regLng - 44.392) < .001);
-  if (Number(b.rkm) > 0 && real) {
-   const x = (regLat - c[0]) * rad, y = (regLng - c[1]) * rad;
-   const h = Math.sin(x / 2) ** 2 + Math.cos(c[0] * rad) * Math.cos(regLat * rad) * Math.sin(y / 2) ** 2;
-   far = R * 2 * Math.atan2(Math.sqrt(h), Math.sqrt(1 - h)) > Number(b.rkm);
-  }
- } catch (e) {}
- const km = String(b.km || "").replace(/\.0$/, "");
- tx.textContent = far ? "⏳ الضغط عالٍ الآن، ومطعمكم بعيدٌ عن مركز الطلبات، فاستقبال طلباتكم متوقّفٌ دقائق قليلة، ويعود تلقائيّاً حين يخفّ الضغط. شكراً لصبركم 🌷" : "⏳ الضغط عالٍ الآن، فنستقبل مؤقّتاً الطلبات القريبة وحدها" + (b.mode === "trip" && km ? " (إلى " + km + " كم تقريباً من مطعمكم)" : "") + "، والبعيدة تعود تلقائيّاً حين يخفّ الضغط. شكراً لصبركم 🌷";
- el.classList.remove("hidden-section");
 }
 
 function attachLedgerListener(myPhone, attempt) {
@@ -9195,9 +9145,6 @@ function rebuildOrderLists() {
     area: fbOrder.area,
     readyForPickup: fbOrder.ready_for_pickup || false,
     photoUrl: fbOrder.photoUrl,
-    eta: fbOrder.eta_band || "",
-    resEta: fbOrder.res_eta || "",
-    holdUntil: fbOrder.prep_hold_until || "",
     src: fbOrder.src || "",
     itt: fbOrder.src === "ittihad" ? fbOrder.itt || null : null
    });
@@ -9276,57 +9223,8 @@ window.filterArchiveOrders = function() {
  });
 };
 
-function resEtaOn() {
- try {
-  let p = regPhone || "";
-  if (!p) {
-   const x = localStorage.getItem("hut_res_session");
-   if (x) p = JSON.parse(x).phone || "";
-  }
-  p = normalizeSystemPhone(p) || "";
-  return !!p && (parseInt(String(p).slice(-1), 10) || 0) % 2 === 0;
- } catch (_) {
-  return false;
- }
-}
-
-function etaTxt(b) {
- b = String(b || "");
- return b.slice(-1) === "+" ? b.slice(0, -1) + " أو أكثر" : b.replace("-", "–");
-}
-
-function etaCancelAsk(o) {
- return new Promise(resolve => {
-  let el = document.getElementById("etaCancel");
-  if (el) el.remove();
-  el = document.createElement("div");
-  el.id = "etaCancel";
-  el.style.cssText = "position:fixed;inset:0;z-index:99999;background:rgba(15,23,42,.45);display:flex;align-items:center;justify-content:center;padding:16px;direction:rtl";
-  el.innerHTML = '<div style="background:#fff;border-radius:18px;max-width:420px;width:100%;padding:20px 18px;text-align:center;box-shadow:0 12px 40px rgba(0,0,0,.25)">' + '<div style="font-size:1.15rem;font-weight:800;color:#0f172a">طلبك محفوظ بالدور</div>' + '<div style="font-size:.95rem;color:#475569;margin-top:8px;line-height:1.7">كابتن خلال ' + escapeHtml(etaTxt(o.eta)) + " دقيقة تقريباً.<br>إذا ألغيته وأعدت إرساله بعد وقت، يرجع لآخر الدور.</div>" + '<div style="display:flex;gap:10px;margin-top:16px"><button id="etaKeep" style="flex:2;border:0;border-radius:12px;padding:13px;background:#0b7a43;color:#fff;font-weight:800;font-size:1rem">خلّيه بالدور</button>' + '<button id="etaGo" style="flex:1;border:0;border-radius:12px;padding:13px;background:#f1f5f9;color:#b91c1c;font-weight:800;font-size:.95rem">ألغِ الطلب</button></div></div>';
-  document.body.appendChild(el);
-  document.getElementById("etaKeep").onclick = () => {
-   el.remove();
-   try {
-    resTrack("eta_keep", {});
-   } catch (_) {}
-   resolve(false);
-  };
-  document.getElementById("etaGo").onclick = () => {
-   el.remove();
-   try {
-    resTrack("eta_cancel", {});
-   } catch (_) {}
-   resolve(true);
-  };
- });
-}
-
 window.cancelOrderGrace = async function(orderId) {
- const _o = liveActiveOrders.find(x => String(x.id) === String(orderId));
- const _noDrv = _o && !(_o.driverPhone && ![ "pending_driver", "manual_pending", "system_routing" ].includes(_o.driverPhone));
- if (_o && _noDrv && _o.eta && resEtaOn()) {
-  if (!await etaCancelAsk(_o)) return;
- } else if (!confirm("تأكيد الإلغاء؟")) return;
+ if (!confirm("تأكيد الإلغاء؟")) return;
  const card = document.getElementById(`order-${orderId}`);
  if (card) {
   card.style.opacity = "0";
@@ -9403,11 +9301,8 @@ function renderActiveOrdersUI() {
    }
   }
   const STATUS_TEXT = o.kind === "supply" ? [ "", "نبحث عن كابتن للمقاضي", "الكابتن متوجّه إلى المحلّ", "الكابتن عند المحلّ", "المقاضي في الطريق إليك" ] : [ "", "نبحث عن كابتن قريب", "الكابتن متوجّه إليك", "الكابتن عند بابك", "الطلب في طريقه للزبون" ];
-  let statusLine = offered ? "عُرض على كابتن — بانتظار قبوله" : STATUS_TEXT[step] || "قيد المتابعة";
-  if (!hasDriver && o.eta === "defer") statusLine = "وقت زحمة — طلبك يخرج بعد الزحمة خلال 30 دقيقة تقريباً"; else if (!hasDriver && o.holdUntil && Date.parse(o.holdUntil) > Date.now()) statusLine = "نرسل الكابتن ليصل مع جاهزيّة طلبك — اضغط «جاهز» إن جهز قبل"; else if (resEtaOn()) {
-   if (!hasDriver && o.eta && o.eta !== "defer" && o.kind !== "supply") statusLine = "طلبك محفوظ بالدور · كابتن خلال " + etaTxt(o.eta) + " دقيقة تقريباً"; else if (hasDriver && !offered && status === "accepted" && o.resEta) statusLine = "الكابتن بالطريق إلك · يوصل خلال " + etaTxt(o.resEta) + " دقائق تقريباً";
-  }
-  const showReadyBtn = o.kind !== "supply" && (hasDriver && (status === "accepted" || status === "heading" || status === "arrived_at_res") || !hasDriver && o.holdUntil && Date.parse(o.holdUntil) > Date.now());
+  const statusLine = offered ? "عُرض على كابتن — بانتظار قبوله" : STATUS_TEXT[step] || "قيد المتابعة";
+  const showReadyBtn = o.kind !== "supply" && hasDriver && (status === "accepted" || status === "heading" || status === "arrived_at_res");
   const readyBtnHtml = showReadyBtn ? readyForPickup ? `<span class="ready-pill"><i data-lucide="check-circle" size="10"></i> جاهز للاستلام</span>` : `<button class="btn-ready" onclick="markOrderReady('${sid(orderId)}', this)"><i data-lucide="package-check" size="14"></i> إبلاغ الكابتن بالجهوزية</button>` : "";
   const photoUrl = o.photoUrl || o.image;
   const imgBtnHtml = photoUrl ? `<button class="oc-icon-btn receipt" onclick="document.getElementById('fullReceiptImage').src='${jss(photoUrl)}'; document.getElementById('imageViewerModal').style.display='flex';" title="عرض الوصل" aria-label="عرض وصل الطلب"><i data-lucide="image" size="18"></i></button>` : "";
@@ -9657,10 +9552,6 @@ async function finalizeOrderPlacement(details, imageUrl, price, area, btn, origi
    return;
   }
   if (e && e.message === "SERVER_REJECTED") {
-   if (e.reason === "res_brake") {
-    alert(e.serverMsg || "⏳ الضغط عالٍ الآن — أعد الإرسال بعد قليل.");
-    return;
-   }
    alert("🛑 لم يُرسَل الطلب.\n\n" + (e.serverMsg || "رفضه الخادم."));
    return;
   }
