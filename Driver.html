@@ -34,7 +34,7 @@
  } catch (_) {}
 })();
 
-const CURRENT_APP_VERSION = "34.72-Nahla";
+const CURRENT_APP_VERSION = "34.73-Nahla";
 
 window.APP_VERSION = CURRENT_APP_VERSION;
 
@@ -330,7 +330,17 @@ select.inp-clay{appearance:none;-webkit-appearance:none;cursor:pointer;
   font-size:.78rem;font-weight:800;display:flex;align-items:center;justify-content:center;gap:5px;
   background:#fff;border:1px solid var(--line);transition:border-color .16s var(--ease);}
 .act:active{border-color:currentColor;}
-.a-call{color:var(--royal-dp);} .a-wa{color:var(--ok-dp);} .a-map{color:var(--warn-dp);} .a-img{color:#7048E8;}
+.a-call{color:var(--royal-dp);} .a-wa{color:var(--ok-dp);} .a-map{color:var(--warn-dp);}
+
+.nav-pick{display:block;text-align:center;margin-top:6px;font-size:.8rem;font-weight:700;color:var(--royal);cursor:pointer;}
+.nav-ask{position:fixed;inset:0;z-index:10050;background:rgba(15,23,42,.55);display:flex;align-items:flex-end;justify-content:center;}
+.nav-ask .na-box{width:100%;max-width:480px;background:#fff;border-radius:18px 18px 0 0;padding:18px 16px 22px;direction:rtl;}
+.nav-ask .na-t{font-weight:800;font-size:1.05rem;margin-bottom:6px;text-align:center;color:#0f172a;}
+.nav-ask .na-b{display:flex;align-items:center;justify-content:center;width:100%;min-height:54px;margin-top:10px;border:none;border-radius:12px;font-family:inherit;font-size:1.08rem;font-weight:800;color:#fff;cursor:pointer;}
+.nav-ask .na-w{background:#33ccff;color:#0b2540;}.nav-ask .na-g{background:#1a73e8;}.nav-ask .na-a{background:#e2e8f0;color:#334155;font-size:.95rem;min-height:46px;}
+.nav-ask .na-r{display:flex;align-items:center;justify-content:center;gap:7px;margin-top:12px;font-size:.9rem;font-weight:700;color:#475569;}
+.nav-ask .na-r input{width:18px;height:18px;}
+.nav-ask .na-x{display:block;margin:12px auto 0;background:none;border:none;color:#64748b;font-family:inherit;font-size:.92rem;font-weight:700;cursor:pointer;} .a-img{color:#7048E8;}
 .cta{width:100%;padding:17px;border:none;border-radius:var(--r);font-family:'Cairo',sans-serif;font-size:1.05rem;
   font-weight:800;color:#fff;cursor:pointer;margin-top:16px;display:flex;align-items:center;justify-content:center;gap:10px;
   transition:opacity .18s var(--ease);}
@@ -6828,6 +6838,86 @@ window.closeLedger = () => document.getElementById("ledger").classList.add("dn")
 
 const SAFE_LINK_SCHEMES = [ "https:", "tel:", "whatsapp:", "geo:", "mailto:", "sms:" ];
 
+const NAV_KEY = "nav_app";
+
+function navPref_() {
+ try {
+  return localStorage.getItem(NAV_KEY) || "";
+ } catch (e) {
+  return "";
+ }
+}
+
+function navSet_(v) {
+ try {
+  localStorage.setItem(NAV_KEY, v);
+ } catch (e) {}
+}
+
+function navParse_(raw) {
+ try {
+  const u = new URL(raw);
+  if (!/(^|\.)google\.[a-z.]+$/i.test(u.hostname) || !/^\/maps/.test(u.pathname)) return null;
+  const v = u.searchParams.get("destination") || u.searchParams.get("query");
+  if (!v) return null;
+  const m = v.match(/^\s*(-?\d{1,3}(?:\.\d+)?)\s*,\s*(-?\d{1,3}(?:\.\d+)?)\s*$/);
+  return m ? {
+   ll: [ Number(m[1]), Number(m[2]) ]
+  } : {
+   q: v
+  };
+ } catch (e) {
+  return null;
+ }
+}
+
+const wazeUrl_ = p => p.ll ? "https://waze.com/ul?ll=" + p.ll[0] + "%2C" + p.ll[1] + "&navigate=yes" : "https://waze.com/ul?q=" + encodeURIComponent(p.q) + "&navigate=yes";
+
+function navLbl_() {
+ const p = navPref_();
+ return p === "waze" ? "يفتح بـ Waze · تغيير" : p === "google" ? "يفتح بخرائط جوجل · تغيير" : p === "ask" ? "يسألك كلّ مرّة · تغيير" : "اختر تطبيق الملاحة";
+}
+
+function navPaint_() {
+ document.querySelectorAll(".nav-pick").forEach(e => {
+  e.textContent = navLbl_();
+ });
+}
+
+function openRaw_(raw) {
+ if (window.AndroidRadar?.openExternalApp) window.AndroidRadar.openExternalApp(raw); else window.open(raw, "_blank", "noopener,noreferrer");
+}
+
+window.navAsk = function(raw, nv) {
+ document.querySelector(".nav-ask")?.remove();
+ const pf = navPref_(), setOnly = !raw;
+ const el = document.createElement("div");
+ el.className = "nav-ask";
+ el.innerHTML = '<div class="na-box"><div class="na-t">' + (setOnly ? "أيّ تطبيقٍ تفضّل للملاحة؟" : "افتح الملاحة بـ") + "</div>" + '<button class="na-b na-w" data-v="waze">Waze</button><button class="na-b na-g" data-v="google">خرائط جوجل</button>' + (setOnly ? '<button class="na-b na-a" data-v="ask">اسألني كلّ مرّة</button>' : '<label class="na-r"><input type="checkbox" id="naRem"' + (pf === "ask" ? "" : " checked") + "> تذكّر اختياري</label>") + '<button class="na-x">إلغاء</button></div>';
+ el.onclick = e => {
+  if (e.target === el || e.target.classList.contains("na-x")) {
+   el.remove();
+   return;
+  }
+  const b = e.target.closest("[data-v]");
+  if (!b) return;
+  const v = b.dataset.v;
+  if (setOnly) {
+   navSet_(v);
+   el.remove();
+   navPaint_();
+   toast(v === "waze" ? "الملاحة تفتح بـ Waze" : v === "google" ? "الملاحة تفتح بخرائط جوجل" : "سيسألك التطبيق كلّ مرّة");
+   return;
+  }
+  const rem = document.getElementById("naRem");
+  navSet_(rem && rem.checked ? v : "ask");
+  el.remove();
+  navPaint_();
+  openRaw_(v === "waze" ? wazeUrl_(nv) : raw);
+ };
+ document.body.appendChild(el);
+};
+
 window.openLink = function(u) {
  const raw = String(u || "").trim();
  if (!raw) return;
@@ -6842,7 +6932,16 @@ window.openLink = function(u) {
   toast("رابط غير صالح", "bad");
   return;
  }
- if (window.AndroidRadar?.openExternalApp) window.AndroidRadar.openExternalApp(raw); else window.open(raw, "_blank", "noopener,noreferrer");
+ const nv = navParse_(raw);
+ if (nv) {
+  const pf = navPref_();
+  if (pf === "waze") return openRaw_(wazeUrl_(nv));
+  if (pf !== "google") {
+   window.navAsk(raw, nv);
+   return;
+  }
+ }
+ openRaw_(raw);
 };
 
 const ITT_CO = "nahla", ITT_RS_KEY = "itt_rs_cache";
@@ -7014,7 +7113,7 @@ function renderOrders() {
   const photo = o.photoUrl && /^https:\/\//.test(String(o.photoUrl)) ? `<button class="act a-img" data-receipt="${esc(o.photoUrl)}" onclick="openReceipt(this.dataset.receipt)">${ICO.img} الوصل</button>` : "";
   if (!o.resArea) enrichOrder(o);
   const pick = o.resArea ? ` (${esc(o.resArea)})` : "";
-  html += `<div class="ord" id="o-${sid(o.id)}">\n      <div class="ord-strip ${strip}"></div>\n      <div class="ord-b">\n        <div class="ord-hd">\n          <div><div class="ord-no">#${sid(o.id)}</div><div class="ord-tags">${tags}</div>\n            <div id="t-${sid(o.id)}" class="ord-tm tm-ok">${ICO.clk} --:--</div></div>\n          <div class="ord-pr"><div class="ord-pv">${num(o.price).toLocaleString("ar-EG")}<small> د.ع</small></div>\n            <button class="sup" onclick="openChat()" style="margin-top:9px;">${ICO.sup} ليدر<span class="sup-dot" id="d-${sid(o.id)}"></span></button></div>\n        </div>\n        <div class="steps">\n          <div class="step ${step >= 1 ? step === 1 ? "now" : "done" : ""}"><div class="step-d">${step > 1 ? "✓" : "1"}</div><span class="step-l">قبلت</span></div>\n          <div class="step ${step >= 2 ? step === 2 ? "now" : "done" : ""}"><div class="step-d">${step > 2 ? "✓" : "2"}</div><span class="step-l">${sup ? "بالمحلّ" : "بالمطعم"}</span></div>\n          <div class="step ${step >= 3 ? step === 3 ? "now" : "done" : ""}"><div class="step-d">${step > 3 ? "✓" : "3"}</div><span class="step-l">استلمت</span></div>\n          <div class="step ${step >= 4 ? "now" : ""}"><div class="step-d">🏁</div><span class="step-l">سلّمت</span></div>\n        </div>\n        ${ready}\n        ${sup ? supRoute(o, sup, rpn, rwa, mp) : `<div class="route">\n          <div class="rp up"><div class="rp-t">📍 الاستلام من${pick}</div><div class="rp-n">${esc(o.resName)}</div>\n            <div class="acts">\n              ${rpn ? `<button class="act a-call" onclick="openLink('tel:${rpn}')">${ICO.call} اتصال</button>` : ""}\n              ${rwa ? `<button class="act a-wa" onclick="openLink('https://wa.me/${rwa}')">${ICO.wa} واتساب</button>` : ""}\n              ${mp ? `<button class="act a-map" onclick="openLink('${mp}')">${ICO.map} خريطة</button>` : ""}\n            </div></div>\n          <div class="rp dn2"><div class="rp-t">🏠 التسليم إلى (${esc(o.area)})</div><div class="rp-n">${esc(det)}</div>\n            <div class="acts">\n              ${cp ? `<button class="act a-call" onclick="openLink('tel:${cp}')">${ICO.call} اتصال</button>` : ""}\n              ${cp || cu ? `<button class="act a-wa" onclick="smartWa('${jss(cp || cu)}','${jss(o.resName)}','${jss(o.area)}','${sid(o.id)}','${num(o.price)}','${jss(rpn || "")}')">${ICO.wa} رسالة الزبون</button>` : ""}\n              ${cmp ? `<button class="act a-map" onclick="openLink('${cmp}')">${ICO.map} موقع الزبون</button>` : ""}\n              ${photo}\n            </div></div>\n        </div>`}\n        <button class="cta ${bCls}" ${dis} onclick="orderAction('${sid(o.id)}','${sid(act)}',this)">${bTxt}</button>\n        ${isItt && o.state === "picked_up" ? `<button class="refz" onclick="ittRefused('${sid(o.id)}',this)">📵 الزبون رفض الاستلام</button>` : ""}\n      </div></div>`;
+  html += `<div class="ord" id="o-${sid(o.id)}">\n      <div class="ord-strip ${strip}"></div>\n      <div class="ord-b">\n        <div class="ord-hd">\n          <div><div class="ord-no">#${sid(o.id)}</div><div class="ord-tags">${tags}</div>\n            <div id="t-${sid(o.id)}" class="ord-tm tm-ok">${ICO.clk} --:--</div></div>\n          <div class="ord-pr"><div class="ord-pv">${num(o.price).toLocaleString("ar-EG")}<small> د.ع</small></div>\n            <button class="sup" onclick="openChat()" style="margin-top:9px;">${ICO.sup} ليدر<span class="sup-dot" id="d-${sid(o.id)}"></span></button></div>\n        </div>\n        <div class="steps">\n          <div class="step ${step >= 1 ? step === 1 ? "now" : "done" : ""}"><div class="step-d">${step > 1 ? "✓" : "1"}</div><span class="step-l">قبلت</span></div>\n          <div class="step ${step >= 2 ? step === 2 ? "now" : "done" : ""}"><div class="step-d">${step > 2 ? "✓" : "2"}</div><span class="step-l">${sup ? "بالمحلّ" : "بالمطعم"}</span></div>\n          <div class="step ${step >= 3 ? step === 3 ? "now" : "done" : ""}"><div class="step-d">${step > 3 ? "✓" : "3"}</div><span class="step-l">استلمت</span></div>\n          <div class="step ${step >= 4 ? "now" : ""}"><div class="step-d">🏁</div><span class="step-l">سلّمت</span></div>\n        </div>\n        ${ready}\n        ${sup ? supRoute(o, sup, rpn, rwa, mp) : `<div class="route">\n          <div class="rp up"><div class="rp-t">📍 الاستلام من${pick}</div><div class="rp-n">${esc(o.resName)}</div>\n            <div class="acts">\n              ${rpn ? `<button class="act a-call" onclick="openLink('tel:${rpn}')">${ICO.call} اتصال</button>` : ""}\n              ${rwa ? `<button class="act a-wa" onclick="openLink('https://wa.me/${rwa}')">${ICO.wa} واتساب</button>` : ""}\n              ${mp ? `<button class="act a-map" onclick="openLink('${mp}')">${ICO.map} خريطة</button>` : ""}\n            </div></div>\n          <div class="rp dn2"><div class="rp-t">🏠 التسليم إلى (${esc(o.area)})</div><div class="rp-n">${esc(det)}</div>\n            <div class="acts">\n              ${cp ? `<button class="act a-call" onclick="openLink('tel:${cp}')">${ICO.call} اتصال</button>` : ""}\n              ${cp || cu ? `<button class="act a-wa" onclick="smartWa('${jss(cp || cu)}','${jss(o.resName)}','${jss(o.area)}','${sid(o.id)}','${num(o.price)}','${jss(rpn || "")}')">${ICO.wa} رسالة الزبون</button>` : ""}\n              ${cmp ? `<button class="act a-map" onclick="openLink('${cmp}')">${ICO.map} موقع الزبون</button>` : ""}\n              ${photo}\n            </div></div>\n        </div>`}\n        ${mp || cmp ? `<div class="nav-pick" onclick="navAsk()">${navLbl_()}</div>` : ""}   \x3c!-- 🧭 [V35.66] الكابتن يغيّر تطبيق الملاحة --\x3e\n        <button class="cta ${bCls}" ${dis} onclick="orderAction('${sid(o.id)}','${sid(act)}',this)">${bTxt}</button>\n        ${isItt && o.state === "picked_up" ? `<button class="refz" onclick="ittRefused('${sid(o.id)}',this)">📵 الزبون رفض الاستلام</button>` : ""}\n      </div></div>`;
  });
  if (lastHtml !== html) {
   box.innerHTML = html;
