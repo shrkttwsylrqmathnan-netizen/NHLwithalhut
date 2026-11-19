@@ -1163,6 +1163,7 @@ button,input,select,textarea{font-family:'Cairo',sans-serif;}
     <button class="nb" id="nb-posbridge" onclick="goTab('posbridge',this)"><div class="ni">🖨</div> جسر الطابعة<span id="nbPbDot" style="display:none;width:7px;height:7px;border-radius:50%;background:var(--rose);margin-right:auto;flex-shrink:0"></span></button>
     <button class="nb" id="nb-insurance" onclick="goTab('insurance',this)"><div class="ni">🛡</div> التأمينات<span id="nbInsDot" style="display:none;width:7px;height:7px;border-radius:50%;background:var(--rose);margin-right:auto;flex-shrink:0"></span></button>
     <button class="nb" id="nb-opsblock" onclick="goTab('opsblock',this)"><div class="ni">⛔</div> الإيقاف<span id="nbObDot" style="display:none;width:7px;height:7px;border-radius:50%;background:var(--rose);margin-right:auto;flex-shrink:0"></span></button>
+    <button class="nb" id="nb-ittihad" onclick="goTab('ittihad',this)"><div class="ni">🏪</div> اتحاد المتاجر<span id="nbIttDot" style="display:none;width:7px;height:7px;border-radius:50%;background:var(--rose);margin-inline-start:6px"></span></button>
     <div class="sidebar-foot"><button class="sidebar-out" onclick="doLogout()">🚪 تسجيل الخروج</button></div>
   </aside>
   <main class="main">
@@ -1448,6 +1449,30 @@ button,input,select,textarea{font-family:'Cairo',sans-serif;}
     </div>
 
     
+    <div id="pg-ittihad" class="pg tab-p">
+      <div class="pg-ttl">🏪 اتحاد المتاجر</div>
+      <div class="arch-alert" style="margin-bottom:12px;display:block;line-height:1.9" id="ittHead">🏪 جاري التحميل…</div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px">
+        <button class="abt" style="background:var(--base2);color:var(--ink);box-shadow:none;border:1px solid var(--line2)" onclick="ittStart()">🔄 تحديث</button>
+      </div>
+      <div class="pg-ttl" style="font-size:1rem;margin-top:6px">📊 أداء الاتحاد <span id="ittStDays" style="display:inline-flex;gap:6px;margin-inline-start:8px"></span></div>
+      <div class="eg" style="display:block;margin-bottom:12px" id="ittStats"></div>
+      <div class="pg-ttl" style="font-size:1rem;margin-top:6px">💬 محادثات الزبائن <span style="font-size:.78rem;font-weight:500;color:var(--mute)">— يردّ عليها فريق الليدرز الأذكياء، والمُحالة لكم بالأحمر</span></div>
+      <div class="eg" style="display:block;margin-bottom:12px" id="ittHelp"></div>
+      <div class="pg-ttl" style="font-size:1rem;margin-top:6px">المتاجر</div>
+      <div class="eg" style="display:block" id="ittStores"></div>
+      
+      <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-top:12px">
+        <button class="abt" onclick="document.getElementById('ittImpFile').click()">📥 استيراد متجرٍ جاهز</button>
+        <input type="file" id="ittImpFile" accept=".json,application/json" multiple hidden onchange="ittImport(this)">
+        <span style="font-size:.78rem;color:var(--mute)">ملفّ متجرٍ جاهز (‎.itt.json) أو عدّة ملفّات معاً — يُنشر مغلقاً، والمطعم يفتحه من «متجري».</span>
+      </div>
+      <div class="eg" style="display:none;margin-top:10px;line-height:1.9" id="ittImp"></div>
+      
+      <div class="pg-ttl" style="font-size:1rem;margin-top:18px">⭐ الوجبات الخاصّة والخصومات <span style="font-size:.78rem;font-weight:500;color:var(--mute)">— الوجبات الكبيرة تُلتقط آليّاً، و⭐ يُدخل طبقاً أو يُخرجه · الخصم يضعه صاحب المطعم من «متجري» في لوحته، ويظهر هنا للعرض</span></div>
+      <div class="eg" style="display:block" id="ittPromo"></div>
+    </div>
+
     <div id="pg-posbridge" class="pg tab-p">
       <div class="pg-ttl">جسر الطابعة</div>
       <div class="arch-alert" style="margin-bottom:12px">
@@ -6553,6 +6578,498 @@ window.obManual = async function() {
  if (done) obLoad(1);
 };
 
+const ITT_HUB = "https://ittihadlink-941542380637.europe-west1.run.app", ITT_NO_VISITS = true;
+
+async function ittFn(data) {
+ const u = auth.currentUser;
+ if (!u) throw new Error("انتهت الجلسة — ادخل من جديد.");
+ const t = await u.getIdToken();
+ const r = await fetch(ITT_HUB, {
+  method: "POST",
+  headers: {
+   "content-type": "application/json",
+   authorization: "Bearer " + t
+  },
+  body: JSON.stringify({
+   co: "nahla",
+   fn: "admin",
+   data: data || {}
+  })
+ });
+ const j = await r.json().catch(() => null);
+ if (!r.ok || !j || j.error) {
+  const e = new Error(j && j.error && j.error.message || "تعذّر الاتّصال (" + r.status + ")");
+  e.details = j && j.error && j.error.details;
+  e.code = e.details && e.details.code;
+  throw e;
+ }
+ return {
+  data: j.data
+ };
+}
+
+const ITT_BASE_DEF = "https://ittihad.web.app";
+
+let ITTA = null;
+
+const ittE = s => String(s == null ? "" : s).replace(/[&<>"']/g, c => ({
+ "&": "&amp;",
+ "<": "&lt;",
+ ">": "&gt;",
+ '"': "&quot;",
+ "'": "&#39;"
+}[c]));
+
+window.ittStart = async function() {
+ const h = document.getElementById("ittHead");
+ if (h) h.textContent = "🏪 جاري التحميل…";
+ try {
+  const r = await ittFn({
+   op: "admin_list"
+  });
+  ITTA = r.data;
+  ittPaint();
+  ittHelpLoad();
+  ittStatsLoad();
+  ittPromoLoad();
+ } catch (e) {
+  if (h) h.textContent = "⚠️ تعذّر التحميل: " + (e && e.message || e);
+ }
+};
+
+let ITTS_D = 1;
+
+const ITT_SRCN = {
+ ig: "إنستغرام",
+ tt: "تيك توك",
+ wa: "واتساب",
+ fb: "فيسبوك",
+ qr: "الباركود",
+ sn: "سناب",
+ yt: "يوتيوب",
+ web: "البحث والموقع",
+ cap: "رسائل الكباتن"
+};
+
+window.ittStatsLoad = async function(d) {
+ if (d) ITTS_D = d;
+ const bx = document.getElementById("ittStats"), dd = document.getElementById("ittStDays");
+ if (dd) dd.innerHTML = [ [ 1, "اليوم" ], [ 7, "٧ أيّام" ], [ 30, "٣٠ يوماً" ] ].map(([k, l]) => '<button class="abt" style="height:28px;padding:0 10px;font-size:.74rem;' + (k === ITTS_D ? "" : "background:var(--base2);color:var(--ink);box-shadow:none;border:1px solid var(--line2)") + '" onclick="ittStatsLoad(' + k + ')">' + l + "</button>").join("");
+ if (!bx) return;
+ bx.textContent = "جاري الحساب…";
+ try {
+  const r = (await ittFn({
+   op: "admin_stats",
+   days: ITTS_D
+  })).data || {}, N = v => (Number(v) || 0).toLocaleString("en-US");
+  const pct = (a, b) => b ? Math.round(a * 100 / b) + "%" : "—";
+  const decided = r.n - r.live, okR = r.n ? pct(r.done, decided || r.n) : "—";
+  const box = (lbl, val, sub, col) => '<div style="flex:1;min-width:120px;border:1px solid var(--line2);border-radius:12px;padding:10px 12px;background:var(--base)"><div style="font-size:.74rem;color:var(--mute);font-weight:700">' + lbl + '</div><div style="font-size:1.25rem;font-weight:900;' + (col ? "color:" + col : "") + '">' + val + "</div>" + (sub ? '<div style="font-size:.7rem;color:var(--mute)">' + sub + "</div>" : "") + "</div>";
+  const H = r.hits || {}, hk = Object.keys(H).sort((a, b) => (H[b].v || 0) - (H[a].v || 0)), T = {
+   v: 0,
+   cart: 0,
+   co: 0,
+   sent: 0
+  };
+  hk.forEach(k => [ "v", "cart", "co", "sent" ].forEach(f => T[f] += Number(H[k][f]) || 0));
+  const fun = x => "زيارة " + N(x.v) + " ← أضاف للسلّة " + N(x.cart) + " ← فتح الإتمام " + N(x.co) + " ← أرسل " + N(x.sent);
+  const ALL = {};
+  hk.forEach(k => Object.keys(H[k]).forEach(f => {
+   ALL[f] = (ALL[f] || 0) + (Number(H[k][f]) || 0);
+  }));
+  const EN = {
+   e_no_pin: "لم يحدّد موقعه",
+   e_far: "موقعه بعيد",
+   e_bad_phone: "رقمٌ غير صحيح",
+   e_closed: "المتجر مغلق",
+   e_rate: "طلباتٌ كثيرة",
+   e_blocked: "رقمٌ موقوف",
+   e_item_gone: "صنفٌ نفد",
+   e_price: "تغيّر السعر",
+   e_need_otp: "طُلب رمز تحقّق",
+   e_net: "انقطاع الإنترنت"
+  };
+  const errs = Object.keys(ALL).filter(f => /^e_/.test(f) && ALL[f]).sort((a, b) => ALL[b] - ALL[a]).map(f => ittE(EN[f] || f.slice(2)) + " " + N(ALL[f])).join(" · ");
+  const steps = ALL.pin || ALL.try || errs ? "<br><b>🧾 في صفحة الإتمام:</b> حدّد موقعه " + N(ALL.pin || 0) + " ← ضغط «أرسل» " + N(ALL.try || 0) + " ← أُرسل " + N(ALL.sent || 0) + (errs ? '<br><b style="color:var(--rose)">أين توقّفوا:</b> ' + errs : "") : "";
+  const visits = ITT_NO_VISITS ? "" : '<div style="margin-bottom:10px;line-height:2;font-size:.84rem;border:1px solid var(--line2);border-radius:12px;padding:8px 12px;background:var(--base)"><b>👣 الزوّار:</b> ' + (T.v ? fun(T) : "لا زيارات مسجَّلة بعد في هذه الفترة (العدّاد بدأ 18-11)") + hk.map(k => '<br><span style="color:var(--mute)">' + ittE(ITT_SRCN[k] || (k === "direct" ? "دخول مباشر" : k)) + ":</span> " + fun(H[k])).join("") + steps + "</div>";
+  if (!r.n) {
+   bx.innerHTML = visits + '<div style="color:var(--mute)">لا طلبات في هذه الفترة' + (ITTA && ITTA.cfg && !ITTA.cfg.live ? " — الاتحاد مغلقٌ للزبائن بعد." : ".") + "</div>";
+   return;
+  }
+  const CXN = {
+   edit: "عدّل طلبه",
+   mind: "غيّر رأيه",
+   phone: "سيطلب بالهاتف",
+   fee: "الأجرة عالية",
+   slow: "تأخّر ردّ المطعم",
+   mistake: "أرسله بالخطأ",
+   other: "سببٌ آخر",
+   "?": "بلا سبب (قبل 18-11)"
+  };
+  const cxs = (r.cx_s || []).slice().sort((a, b) => a - b), cxMed = cxs.length ? cxs[Math.floor(cxs.length / 2)] : null;
+  const cxw = Object.keys(r.cxw || {}).sort((a, b) => r.cxw[b] - r.cxw[a]).map(k => ittE(CXN[k] || k) + " " + r.cxw[k]).join(" · ");
+  const lost = (r.lost || []).map(x => ittE(x.store) + ' <span style="color:var(--mute)">' + new Date(x.at).toLocaleDateString("en-GB", {
+   day: "2-digit",
+   month: "2-digit"
+  }) + " · " + N(x.sub) + "</span>").join(" · ");
+  const acc = r.acc_avg_s == null ? "—" : r.acc_avg_s < 60 ? r.acc_avg_s + " ث" : Math.round(r.acc_avg_s / 6) / 10 + " د";
+  const src = Object.keys(r.src || {}).sort((a, b) => r.src[b] - r.src[a]).map(k => ittE(ITT_SRCN[k] || k) + " " + r.src[k]).join(" · ");
+  bx.innerHTML = visits + '<div style="display:flex;gap:8px;flex-wrap:wrap">' + box("الطلبات", N(r.n), N(r.custs) + " زبون") + box("وصلت", N(r.done), "نسبة النجاح " + okR, "var(--jade)") + box("زمن قرار المطعم", acc, "متوسّط القبول") + box("مبيعات المطاعم", N(r.sub) + " د.ع", "أجور التوصيل " + N(r.fee)) + '</div><div style="margin-top:10px;line-height:2;font-size:.84rem">' + "<b>لم تكتمل:</b> اعتذر المطعم " + N(r.declined) + " · لم يردّ المطعم " + N(r.timeout) + " · ألغى الزبون " + N(r.customer) + " · انتهت صلاحيّته " + N(r.expired) + " · أخرى " + N(r.other) + (r.live ? " · <b>قيد التنفيذ " + N(r.live) + "</b>" : "") + (r.refused || r.reported ? '<br><b style="color:var(--rose)">بلاغات:</b> رفض الاستلام (كابتن) ' + N(r.refused) + " · زبونٌ وهميّ (مطعم) " + N(r.reported) : "") + (cxw ? "<br><b>لماذا ألغى الزبون:</b> " + cxw + (cxMed != null ? ' <span style="color:var(--mute)">(بعد ' + cxMed + " ث من الإرسال عادةً)</span>" : "") : "") + (lost ? '<br><b style="color:var(--rose)">قبلها المطعم ثمّ لم تكتمل:</b> ' + lost : "") + (src ? "<br><b>من أين جاءت:</b> " + src : "") + "<br><b>المتاجر:</b> " + (r.stores || []).map(x => ittE(x.name || x.res) + " " + x.done + "/" + x.n + (x.miss ? ' <span style="color:var(--rose)">(لم يردّ ' + x.miss + ")</span>" : "")).join(" · ") + "</div>";
+ } catch (e) {
+  bx.textContent = "⚠️ تعذّر: " + (e && e.message || e);
+ }
+};
+
+function ittPaint() {
+ const d = ITTA || {}, c = d.cfg || {}, base = (c.base_url || ITT_BASE_DEF).replace(/\/+$/, "");
+ const pub = (d.stores || []).filter(x => x.pub).length, open = (d.stores || []).filter(x => x.pub && x.o && !x.hidden).length, on = !!(c.co && c.co.nahla && c.co.nahla.on);
+ document.getElementById("ittHead").innerHTML = (c.live && on ? "🟢 <b>مطاعم نحلة ظاهرةٌ للزبائن في «اتحاد المتاجر»</b>" : "🟡 <b>مطاعم نحلة غير ظاهرة للزبائن الآن</b> — تفعيلها من الإدارة العامّة للاتحاد") + "<br>متاجر نحلة: " + (d.stores || []).length + " بدأت · " + pub + " نشرت قائمتها · " + open + " مفتوحة الآن" + (d.live ? " · <b style='color:var(--rose)'>" + d.live + " طلب ينتظر قرار المطعم</b>" : "") + "<br><span style='font-size:.8rem;color:var(--mute)'>كلّ شركةٍ تدير مطاعمها: هنا متاجر مطاعم نحلة وحدها — طلباتها يوصلها كباتن نحلة.</span>";
+ const st = (d.stores || []).slice().sort((a, b) => b.pub - a.pub || (b.last || 0) - (a.last || 0));
+ document.getElementById("ittStores").innerHTML = st.length ? st.map(x => '<div style="display:flex;gap:10px;align-items:center;padding:10px 0;border-bottom:1px solid var(--line2)"><div style="flex:1;min-width:0"><b>' + ittE(x.n || "—") + '</b> <span style="font-size:.78rem;color:var(--mute)">0' + ittE(String(x.res).replace(/^[a-z]_/, "")) + '</span><div style="font-size:.8rem;direction:ltr;text-align:right">' + (x.slug ? '<a href="' + ittE(base + "/" + x.slug) + '" target="_blank" rel="noopener">' + ittE(base + "/" + x.slug) + "</a>" : "—") + '</div><div style="font-size:.78rem">' + (x.pub ? "✅ نشر القائمة" : "✏️ يجهّز") + " · " + (x.o ? "🟢 مفتوح" : "⚪ مغلق") + (x.hidden ? ' · <b style="color:var(--rose)">مخفيّ</b>' : "") + (x.last ? " · آخر طلب " + new Date(x.last).toLocaleString("ar-EG", {
+  day: "numeric",
+  month: "numeric",
+  hour: "2-digit",
+  minute: "2-digit"
+ }) : "") + '</div></div><button class="abt" style="padding:6px 12px;font-size:.8rem;' + (x.hidden ? "" : "background:var(--rose)") + '" data-res="' + ittE(x.res) + '" data-hide="' + (x.hidden ? "0" : "1") + '" onclick="ittHide(this.dataset.res,this.dataset.hide===\'1\')">' + (x.hidden ? "أظهره" : "أخفِه") + "</button></div>").join("") : '<div style="color:var(--mute);padding:10px 0">لا متجر بعد — مطاعم نحلة تجهّز متاجرها من «متجري» في لوحتها، أو استورد متجراً جاهزاً من هنا.</div>';
+ const dot = document.getElementById("nbIttDot");
+ if (dot) dot.style.display = d.live ? "" : "none";
+}
+
+let ITTH_OPEN = "";
+
+window.ittHelpLoad = async function() {
+ const box = document.getElementById("ittHelp");
+ if (!box) return;
+ try {
+  const r = await ittFn({
+   op: "help_list"
+  });
+  const rows = r.data && r.data.rows || [];
+  const esc = rows.filter(x => x.esc).length;
+  const dot = document.getElementById("nbIttDot");
+  if (dot && esc) dot.style.display = "";
+  box.innerHTML = rows.length ? rows.map(x => '<div style="border-bottom:1px solid var(--line2);padding:8px 0"><div style="display:flex;gap:8px;align-items:center;cursor:pointer" onclick="ittHelpOpen(\'' + ittE(x.sid) + '\')"><span style="width:9px;height:9px;border-radius:50%;flex:none;background:' + (x.esc ? "var(--rose)" : "var(--jade)") + '"></span><div style="flex:1;min-width:0"><b>' + (x.cust ? "زبون 0" + ittE(x.cust) : "زبون بلا طلب") + '</b> <span style="font-size:.78rem;color:var(--mute)">· ' + ittE(x.n) + " رسالة · " + new Date(x.last_at).toLocaleString("ar-EG", {
+   day: "numeric",
+   month: "numeric",
+   hour: "2-digit",
+   minute: "2-digit"
+  }) + (x.persona ? " · " + ittE(x.persona) : "") + "</span>" + (x.esc ? '<div style="font-size:.82rem;color:var(--rose);font-weight:700">مُحالة: ' + ittE(x.esc_sum) + "</div>" : "") + '</div><span style="font-size:.8rem">' + (ITTH_OPEN === x.sid ? "▲" : "▼") + '</span></div><div id="itth-' + ittE(x.sid) + '"></div></div>').join("") : '<div style="color:var(--mute);padding:8px 0">لا محادثات بعد.</div>';
+  if (ITTH_OPEN) ittHelpOpen(ITTH_OPEN, true);
+ } catch (e) {
+  box.textContent = "تعذّر تحميل المحادثات: " + (e && e.message || e);
+ }
+};
+
+window.ittHelpOpen = async function(sid, keep) {
+ const el = document.getElementById("itth-" + sid);
+ if (!el) return;
+ if (ITTH_OPEN === sid && !keep) {
+  ITTH_OPEN = "";
+  el.innerHTML = "";
+  return;
+ }
+ ITTH_OPEN = sid;
+ el.innerHTML = '<div style="color:var(--mute);font-size:.82rem;padding:6px 0">جاري التحميل…</div>';
+ try {
+  const r = await ittFn({
+   op: "help_get",
+   sid: sid
+  });
+  const ms = r.data && r.data.msgs || [], ch = r.data && r.data.ch || {};
+  el.innerHTML = '<div style="background:var(--base2);border-radius:12px;padding:8px 10px;margin-top:6px;max-height:320px;overflow:auto">' + ms.map(m => '<div style="margin:4px 0;' + (m.from === "cust" ? "" : "padding-inline-start:18px") + '"><b style="font-size:.78rem;color:' + (m.from === "cust" ? "var(--ink)" : m.from === "res" ? "#9a5b00" : "var(--jade)") + '">' + (m.from === "cust" ? "الزبون" : ittE(m.name || "الفريق")) + '</b> <span style="font-size:.72rem;color:var(--mute)">' + new Date(m.ts).toLocaleTimeString("ar-EG", {
+   hour: "2-digit",
+   minute: "2-digit"
+  }) + '</span><div style="font-size:.88rem;white-space:pre-wrap">' + ittE(m.text) + "</div></div>").join("") + "</div>" + '<div style="display:flex;gap:6px;margin-top:6px;flex-wrap:wrap"><input id="itthTx-' + ittE(sid) + '" class="srch" style="margin:0;flex:1;min-width:180px" placeholder="ردّك للزبون (باسم فريق دعم الاتحاد)…"><button class="abt" onclick="ittHelpReply(\'' + ittE(sid) + "')\">أرسل</button>" + (ch.esc ? '<button class="abt" style="background:var(--base2);color:var(--ink);box-shadow:none;border:1px solid var(--line2)" onclick="ittHelpClose(\'' + ittE(sid) + "')\">✓ أغلق الإحالة</button>" : "") + "</div>";
+ } catch (e) {
+  el.textContent = "تعذّر: " + (e && e.message || e);
+ }
+};
+
+window.ittHelpReply = async function(sid) {
+ const i = document.getElementById("itthTx-" + sid);
+ const t = (i && i.value || "").trim();
+ if (!t) return;
+ try {
+  await ittFn({
+   op: "help_reply",
+   sid: sid,
+   text: t
+  });
+  toast("وصل ردّك للزبون ✓", "s");
+  ittHelpOpen(sid, true);
+ } catch (e) {
+  toast("تعذّر: " + (e && e.message || e), "e");
+ }
+};
+
+window.ittHelpClose = async function(sid) {
+ try {
+  await ittFn({
+   op: "help_close",
+   sid: sid
+  });
+  toast("أُغلقت الإحالة — المحادثة للفريق الذكيّ", "s");
+  ittHelpLoad();
+ } catch (e) {
+  toast("تعذّر: " + (e && e.message || e), "e");
+ }
+};
+
+window.ittHide = async function(res, hide) {
+ if (!confirm(hide ? "إخفاء هذا المتجر من الاتحاد؟" : "إظهار المتجر في الاتحاد؟")) return;
+ try {
+  await ittFn({
+   op: "admin_hide",
+   res: res,
+   hidden: hide
+  });
+  await ittStart();
+ } catch (e) {
+  toast("تعذّر: " + (e && e.message || e), "e");
+ }
+};
+
+let ITT_IMP = [], ITT_PARTS = {}, ITT_ROWS = {};
+
+const ittImpPaint = () => {
+ const box = document.getElementById("ittImp"), keys = Object.keys(ITT_ROWS);
+ box.innerHTML = keys.map(k => ITT_ROWS[k]()).join("<br>") + (ITT_IMP.length ? '<div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap;align-items:center"><button class="abt" id="ittImpGo" onclick="ittImportGo()">✅ انشرها الآن (' + ITT_IMP.length + ')</button><button class="abt" style="background:var(--base2);color:var(--ink);box-shadow:none;border:1px solid var(--line2)" onclick="ITT_IMP=[];ITT_PARTS={};ITT_ROWS={};document.getElementById(\'ittImp\').style.display=\'none\'">إلغاء</button><span style="font-size:.78rem;color:var(--mute)">تُنشر مغلقة — كلّ مطعمٍ يفتح متجره من «متجري». يمكنك إضافة ملفّاتٍ أخرى قبل النشر.</span></div>' : "");
+};
+
+window.ittImport = async function(inp) {
+ const files = [ ...inp.files || [] ];
+ inp.value = "";
+ if (!files.length) return;
+ const box = document.getElementById("ittImp");
+ box.style.display = "block";
+ const base = (ITTA && ITTA.cfg && ITTA.cfg.base_url || ITT_BASE_DEF).replace(/\/+$/, "");
+ for (const f of files) {
+  let P;
+  try {
+   P = JSON.parse(await f.text());
+  } catch (e) {
+   ITT_ROWS["bad:" + f.name] = () => "⚠️ " + ittE(f.name) + ": ملفٌّ غير صالح";
+   continue;
+  }
+  if (P && P.v === 1 && P.res && P.part && P.imgs) {
+   ITT_PARTS[P.res] = Object.assign(ITT_PARTS[P.res] || {}, P.imgs);
+   if (!ITT_IMP.some(x => x.res === P.res)) ITT_ROWS["part:" + P.res] = () => "🖼 صورٌ إضافيّة لـ0" + ittE(String(P.res).replace(/^[a-z]_/, "")) + ": " + Object.keys(ITT_PARTS[P.res] || {}).length + " — تنتظر ملفّ متجرها";
+   continue;
+  }
+  if (!P || P.v !== 1 || !P.res || !P.store || !P.menu || !Array.isArray(P.menu.cats)) {
+   ITT_ROWS["bad:" + f.name] = () => "⚠️ " + ittE(f.name) + ": ليس ملفّ متجرٍ جاهز";
+   continue;
+  }
+  const items = P.menu.cats.reduce((n, c) => n + (c.items || []).length, 0), opt = P.menu.cats.reduce((n, c) => n + (c.items || []).filter(it => it.v || it.x).length, 0);
+  try {
+   const g = (await ittFn({
+    op: "admin_as",
+    res: P.res,
+    sub: {
+     op: "get"
+    }
+   })).data, had = g.store && g.store.slug;
+   ITT_IMP = ITT_IMP.filter(x => x.res !== P.res);
+   ITT_IMP.push(P);
+   delete ITT_ROWS["part:" + P.res];
+   ITT_ROWS["res:" + P.res] = () => "☑️ <b>" + ittE(P.store.n) + "</b> ⇐ في شركته: " + ittE(g.res_name || "—") + " (0" + ittE(String(P.res).replace(/^[a-z]_/, "")) + ") · " + P.menu.cats.length + " قسماً · " + items + " صنفاً" + (opt ? " (" + opt + " بأحجام أو نكهات)" : "") + " · " + (Object.keys(P.imgs || {}).length + Object.keys(ITT_PARTS[P.res] || {}).length) + (P.img_total ? " من " + P.img_total : "") + ' صورة · <span style="direction:ltr;display:inline-block">' + ittE(base + "/" + P.store.slug) + "</span>" + (had ? ' · <b style="color:var(--rose)">له متجرٌ سابق («' + ittE(g.store.n || "") + "») — ستُستبدل قائمته</b>" : "");
+  } catch (e) {
+   ITT_ROWS["err:" + P.res] = () => "⚠️ <b>" + ittE(P.store.n) + "</b>: " + ittE(e && e.message || e);
+  }
+ }
+ ittImpPaint();
+};
+
+window.ittImportGo = async function() {
+ const list = ITT_IMP.slice(), parts = ITT_PARTS;
+ ITT_IMP = [];
+ ITT_PARTS = {};
+ ITT_ROWS = {};
+ if (!list.length) return;
+ const box = document.getElementById("ittImp");
+ const log = [];
+ const say = (t, last) => {
+  if (last) log[log.length - 1] = t; else log.push(t);
+  box.innerHTML = log.join("<br>");
+ };
+ for (const P of list) {
+  const as = sub => ittFn({
+   op: "admin_as",
+   res: P.res,
+   sub: sub
+  }).then(r => r.data);
+  const imgs = Object.assign({}, P.imgs || {}, parts[P.res] || {}), keys = Object.keys(imgs);
+  say("⏳ <b>" + ittE(P.store.n) + "</b>…");
+  try {
+   say("⏳ <b>" + ittE(P.store.n) + "</b>: الملفّ والرابط…", 1);
+   await as({
+    op: "profile",
+    p: P.store
+   });
+   if (P.logo) {
+    say("⏳ <b>" + ittE(P.store.n) + "</b>: الشعار…", 1);
+    await as({
+     op: "img",
+     kind: "logo",
+     big: P.logo.big,
+     th: P.logo.th
+    });
+   }
+   if (P.cover) {
+    say("⏳ <b>" + ittE(P.store.n) + "</b>: الغلاف…", 1);
+    await as({
+     op: "img",
+     kind: "cover",
+     big: P.cover.big,
+     th: P.cover.th
+    });
+   }
+   const up = {};
+   let done = 0, bad = 0, next = 0;
+   const worker = async () => {
+    while (next < keys.length) {
+     const k = keys[next++];
+     try {
+      const r = await as({
+       op: "img",
+       kind: "item",
+       big: imgs[k].big,
+       th: imgs[k].th
+      });
+      up[k] = {
+       img: r.img,
+       th: r.th
+      };
+     } catch (e) {
+      bad++;
+     }
+     done++;
+     say("⏳ <b>" + ittE(P.store.n) + "</b>: صور الأصناف " + done + "/" + keys.length + (bad ? " (تعذّر " + bad + ")" : ""), 1);
+    }
+   };
+   await Promise.all([ worker(), worker(), worker() ]);
+   say("⏳ <b>" + ittE(P.store.n) + "</b>: نشر القائمة…", 1);
+   const menu = {
+    cats: P.menu.cats.map(c => ({
+     n: c.n,
+     items: (c.items || []).map(it => Object.assign({
+      n: it.n,
+      d: it.d || "",
+      pr: it.pr,
+      a: it.a === 0 ? 0 : 1
+     }, it.v ? {
+      v: it.v
+     } : {}, it.x ? {
+      x: it.x
+     } : {}, it.im && up[it.im] ? up[it.im] : {}))
+    }))
+   };
+   const r = await as({
+    op: "publish",
+    menu: menu
+   });
+   const url = (ITTA && ITTA.cfg && ITTA.cfg.base_url || ITT_BASE_DEF) + "/" + P.store.slug;
+   say("✅ <b>" + ittE(P.store.n) + "</b>: نُشر " + r.count + " صنفاً بـ" + Object.keys(up).length + " صورة" + (bad ? " (تعذّرت " + bad + ")" : "") + ' — <a href="' + ittE(url) + '" target="_blank" rel="noopener" style="direction:ltr">' + ittE(url) + "</a> · مغلقٌ حتى يفتحه المطعم", 1);
+  } catch (e) {
+   say("⚠️ <b>" + ittE(P.store.n) + "</b>: توقّف — " + ittE(e && e.message || e) + " (أعد الملفّ نفسه: يُكمل ويستبدل)", 1);
+  }
+ }
+ ittStart();
+};
+
+let ITTP = null, ITTP_Q = "";
+
+const ittDisc = (pr, off) => off ? Math.max(250, Math.round(pr * (100 - off) / 100 / 250) * 250) : pr;
+
+const ITT_LBTN = "height:28px;padding:0 10px;font-size:.76rem;background:var(--base2);color:var(--ink);box-shadow:none;border:1px solid var(--line2)";
+
+window.ittPromoLoad = async function() {
+ const bx = document.getElementById("ittPromo");
+ if (!bx || !ITTA) return;
+ const st = (ITTA.stores || []).filter(s => s.pub && s.slug).sort((a, b) => String(a.n).localeCompare(String(b.n), "ar"));
+ let sum = "";
+ try {
+  const L = ((await ittFn({
+   op: "admin_promo",
+   all: true
+  })).data || {}).list || [];
+  sum = L.map(x => {
+   const no = Object.keys(x.off || {}).length, ns = Object.values(x.sp || {}).filter(v => v === true).length;
+   return no || ns ? '<button class="abt" style="' + ITT_LBTN + '" onclick="ittPromoOpen(\'' + ittE(x.res) + "')\">" + ittE(x.n) + (no ? " · خصم " + no : "") + (ns ? " · ⭐ " + ns : "") + "</button>" : "";
+  }).join(" ");
+ } catch (e) {}
+ bx.innerHTML = '<div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center"><select id="ittPrSel" onchange="ittPromoOpen(this.value)" style="height:34px;border-radius:9px;border:1px solid var(--line2);background:var(--base);color:var(--ink);padding:0 10px;font:inherit;min-width:220px"><option value="">اختر المتجر…</option>' + st.map(s => '<option value="' + ittE(s.res) + '">' + ittE(s.n) + "</option>").join("") + "</select>" + (sum ? '<span style="font-size:.78rem;color:var(--mute)">المعيَّنة الآن:</span> ' + sum : '<span style="font-size:.78rem;color:var(--mute)">لا خصومات ولا وجبات خاصّة بعد.</span>') + '</div><div id="ittPrList" style="margin-top:10px"></div>';
+};
+
+window.ittPromoOpen = async function(res) {
+ const bx = document.getElementById("ittPrList");
+ if (!bx) return;
+ if (!res) {
+  bx.innerHTML = "";
+  ITTP = null;
+  return;
+ }
+ const sel = document.getElementById("ittPrSel");
+ if (sel) sel.value = res;
+ bx.textContent = "جاري تحميل الأطباق…";
+ ITTP_Q = "";
+ try {
+  ITTP = Object.assign({
+   res: res
+  }, (await ittFn({
+   op: "admin_promo",
+   res: res
+  })).data);
+  ittPromoPaint();
+ } catch (e) {
+  bx.textContent = "⚠️ تعذّر: " + (e && e.message || e);
+ }
+};
+
+window.ittPromoPaint = function() {
+ const bx = document.getElementById("ittPrList");
+ if (!bx || !ITTP) return;
+ const q = ITTP_Q.trim(), its = (ITTP.items || []).filter(it => !q || String(it.n).indexOf(q) > -1);
+ const row = it => {
+  const off = Number(ITTP.off[it.i]) || 0, spv = ITTP.sp[it.i], sp = spv === true || !!it.sa && spv !== false, nx = sp ? it.sa ? "false" : "null" : it.sa ? "null" : "true", N = v => (Number(v) || 0).toLocaleString("en-US");
+  return '<div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--line2)">' + (it.th ? '<img src="' + ittE(it.th) + '" alt="" loading="lazy" style="width:46px;height:46px;border-radius:10px;object-fit:cover;flex:none">' : '<span style="width:46px;height:46px;border-radius:10px;background:var(--base2);flex:none"></span>') + '<div style="flex:1;min-width:0"><div style="font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">' + ittE(it.n) + '</div><div style="font-size:.8rem;color:var(--mute)">' + (it.f ? "من " : "") + (off ? "<s>" + N(it.pr) + '</s> ← <b style="color:var(--rose)">' + N(ittDisc(it.pr, off)) + " د.ع</b> (−" + off + "%)" : N(it.pr) + " د.ع") + "</div></div>" + (off ? '<span style="color:var(--rose);font-weight:700;font-size:.78rem;white-space:nowrap" title="يقرّره صاحب المطعم من لوحته">خصم المطعم ' + off + "%</span>" : "") + '<button class="abt" style="' + (sp ? "height:32px;padding:0 10px;font-size:.78rem" : ITT_LBTN + ";height:32px") + '" onclick="ittPromoSet(\'' + ittE(it.i) + "',{sp:" + nx + '})">' + (sp ? "⭐ خاصّة" : "☆ خاصّة") + (sp && it.sa && spv !== true ? ' <small style="opacity:.75">آليّ</small>' : "") + "</button></div>";
+ };
+ bx.innerHTML = '<div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:6px"><b>' + ittE(ITTP.n) + '</b><span style="font-size:.78rem;color:var(--mute)">' + (ITTP.o ? "مفتوح" : "مغلق — تظهر أطباقه وعليها «مغلق الآن»") + " · " + (ITTP.items || []).length + " طبقاً</span>" + '<input type="search" placeholder="ابحث عن طبق…" value="' + ittE(ITTP_Q) + '" oninput="ITTP_Q=this.value;ittPromoPaint();this.focus()" style="height:32px;border-radius:9px;border:1px solid var(--line2);background:var(--base);color:var(--ink);padding:0 10px;font:inherit;font-size:.82rem;margin-inline-start:auto"></div>' + (its.length ? its.map(row).join("") : '<div style="color:var(--mute)">لا أطباق بهذا الاسم.</div>');
+ const inp = bx.querySelector("input[type=search]");
+ if (inp && q) {
+  inp.focus();
+  inp.setSelectionRange(inp.value.length, inp.value.length);
+ }
+};
+
+window.ittPromoSet = async function(i, ch) {
+ if (!ITTP) return;
+ try {
+  const r = (await ittFn(Object.assign({
+   op: "admin_promo",
+   res: ITTP.res,
+   i: i
+  }, ch))).data;
+  ITTP = Object.assign({
+   res: ITTP.res
+  }, r);
+  ittPromoPaint();
+  toast(ch.off !== undefined ? ch.off ? "✓ خصم " + ch.off + "% — يظهر في «الخصومات» الآن" : "✓ أُزيل الخصم" : ch.sp === false ? "أُخرج من «الوجبات الخاصّة»" : ch.sp ? "⭐ أُضيف إلى «الوجبات الخاصّة»" : "عاد للاختيار الآليّ", "s");
+ } catch (e) {
+  toast("تعذّر: " + (e && e.message || e), "e");
+  ittPromoPaint();
+ }
+};
+
+window.doFilt = function(f, btn) {
+ rfilt = f;
+ [ "rfM", "rfD" ].forEach(bId => {
+  const bar = document.getElementById(bId);
+  if (bar) bar.querySelectorAll(".fp").forEach(b => b.classList.toggle("on", (b.getAttribute("onclick") || "").includes("'" + f + "'")));
+ });
+ renderRadar();
+};
+
 window.goTab = function(name) {
  document.querySelectorAll(".pg").forEach(t => t.classList.remove("on"));
  const panel = document.getElementById("pg-" + name);
@@ -6583,6 +7100,7 @@ window.goTab = function(name) {
     if (name === "posbridge") pbStart();
     if (name === "advisor") advStart();
     if (name === "opsblock") obStart();
+    if (name === "ittihad") ittStart();
     if (name === "staff") {
      loadStaffRoster();
      renderStaffOnline();
