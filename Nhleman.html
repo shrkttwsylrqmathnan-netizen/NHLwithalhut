@@ -400,7 +400,7 @@ button,input,select,textarea{font-family:'Cairo',sans-serif;}
   position:relative;overflow:hidden;}
 .ec:hover{transform:translateY(-2px);box-shadow:var(--sh-md);}
 .ec::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;}
-.ec.ea::before{background:linear-gradient(90deg,var(--jade),#047857);}
+.ec.ek::before{background:linear-gradient(90deg,var(--jade),#047857);}
 .ec.ei::before{background:linear-gradient(90deg,var(--amber),#d97706);}
 .ec.ep::before{background:linear-gradient(90deg,var(--sky),var(--sky-d));}
 .ec.eb::before{background:linear-gradient(90deg,var(--rose),#dc2626);}
@@ -4979,7 +4979,7 @@ function pbRender() {
    const ago = d.last_seen ? age < 12e4 ? "الآن" : age < 36e5 ? Math.round(age / 6e4) + " د" : age < 864e5 ? Math.round(age / 36e5) + " س" : Math.round(age / 864e5) + " يوم" : "—";
    return `<div style="font-size:.72rem;font-weight:800;padding:6px 8px;border-radius:8px;background:var(--base2);margin-bottom:5px">\n        ${live ? "🟢" : "🔴"} ${esc(d.id)} · آخر نبض: ${ago} · الإصدار ${esc(d.ver || "?")}<br>\n        🖨 ${esc(d.printers || "—")}<br>\n        ${d.day === today ? `اليوم: التُقط ${Number(d.captured) || 0} · أُرسل ${Number(d.sent) || 0} · ليس توصيلاً ${Number(d.dismissed) || 0} · ينتظر ${Number(d.pending) || 0}` : "لا نشاط اليوم"}\n        ${Number(d.errors) ? ` · <span style="color:var(--rose)">أخطاء ${Number(d.errors)}</span>` : ""}\n        ${d.last_error ? `<div style="color:var(--rose);margin-top:3px;direction:ltr;text-align:right">${esc(d.last_error)}</div>` : ""}\n        ${pbDiagHtml(d)}${pbCmdHtml(p, d)}</div>`;
   }).join("") : `<div style="font-size:.72rem;font-weight:800;opacity:.6;margin-bottom:6px">البرنامج غير مثبَّت على أيّ جهاز بعد.</div>`;
-  const cls = eff === "auto" ? "ea" : eff === "off" ? "ep" : "ei";
+  const cls = eff === "auto" ? "ek" : eff === "off" ? "ep" : "ei";
   return `<div class="ec ${cls}">\n      <div class="ec-top"><div><div class="ec-n">${esc(name || "مطعم")}</div><div class="ec-ph">0${esc(p)}</div></div><div style="font-size:.72rem;font-weight:900">يعمل الآن: ${PB_MODE_AR[eff]}</div></div>\n      <div style="display:flex;gap:6px;align-items:center;margin-bottom:8px;font-size:.74rem;font-weight:800">وضع المطعم:\n        <select onchange="pbSetMode('${p}',this.value,this)" style="font:inherit;padding:3px 6px;border-radius:7px;border:1px solid var(--line2)">${opts}</select>\n        ${eff !== mm ? `<span style="color:var(--amber)">(زرٌّ عامّ يغيّره)</span>` : ""}</div>\n      ${devHtml}\n      ${devs.length ? `<button class="abt" style="background:var(--base2);color:var(--ink);box-shadow:none;border:1px solid var(--line2);font-size:.7rem" onclick="pbRelearn('${p}')">🔄 انسَ ما تعلّمته (ابدأ التعرّف من جديد)</button>` : ""}</div>`;
  }).join("") : `<div class="empty-s" style="grid-column:1/-1">${pbF === "inst" ? "لم يُثبَّت البرنامج عند أيّ مطعم بعد — اختر «كلّ المطاعم» لتضبط الوضع مسبقاً." : "لا مطاعم."}</div>`;
 }
@@ -5325,8 +5325,8 @@ function insRender() {
   overdue: [ "⚠️ متأخّر — تنبيه فقط", "ei" ],
   due_today: [ "⚠️ قسطه اليوم", "ei" ],
   upcoming: [ "🗓 قادم", "ep" ],
-  ok: [ "✅ دفع هذا الأسبوع", "ea" ],
-  complete: [ "🎉 مكتمل", "ea" ],
+  ok: [ "✅ دفع هذا الأسبوع", "ek" ],
+  complete: [ "🎉 مكتمل", "ek" ],
   exempt: [ "معفى", "ep" ],
   left: [ "ترك العمل", "ep" ],
   not_started: [ "لم يبدأ", "ep" ],
