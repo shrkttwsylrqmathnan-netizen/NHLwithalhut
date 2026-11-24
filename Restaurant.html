@@ -3,10 +3,10 @@
 <html lang="ar" dir="rtl">
 <head>
 
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://www.gstatic.com https://unpkg.com https://cdn.jsdelivr.net https://*.firebasedatabase.app https://*.firebaseio.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://unpkg.com https://cdn.jsdelivr.net; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: blob: https:; media-src 'self' data: blob: https://actions.google.com; connect-src 'self' https://*.firebasedatabase.app https://*.firebaseio.com wss://*.firebasedatabase.app wss://*.firebaseio.com https://script.google.com https://script.googleusercontent.com https://*.googleapis.com https://securetoken.googleapis.com https://*.cloudfunctions.net https://*.run.app https://nominatim.openstreetmap.org; object-src 'none'; base-uri 'none'; form-action 'self'; frame-ancestors 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://www.gstatic.com https://unpkg.com https://cdn.jsdelivr.net https://*.firebasedatabase.app https://*.firebaseio.com https://maps.googleapis.com https://maps.gstatic.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://unpkg.com https://cdn.jsdelivr.net; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: blob: https:; media-src 'self' data: blob: https://actions.google.com; connect-src 'self' https://maps.gstatic.com https://*.firebasedatabase.app https://*.firebaseio.com wss://*.firebasedatabase.app wss://*.firebaseio.com https://script.google.com https://script.googleusercontent.com https://*.googleapis.com https://securetoken.googleapis.com https://*.cloudfunctions.net https://*.run.app https://nominatim.openstreetmap.org; object-src 'none'; base-uri 'none'; form-action 'self'; frame-ancestors 'none'">
 
     <script>
-const CURRENT_APP_VERSION = "43.29.Nahla-Perf";
+const CURRENT_APP_VERSION = "43.45.Nahla-V36";
 
 const RES_VERSION_KEY = "hut_res_app_version";
 
@@ -962,6 +962,12 @@ window.nahlaOpen = window.nahlaOpen || function(what, id) {
   "التوصيل بسيارة": "گەیاندن بە ئۆتۆمبێل",
   "— سيُرسَل الطلب بسعر الدراجة بلا زيادة. اكتب الأجرة لتُحسب تلقائياً.": "— داواکارییەکە بە نرخی ماتۆڕ دەنێردرێت بێ زیادکردن. کرێکە بنووسە تا خۆکارانە حیساب بکرێت.",
   "(سيارة — بلا زيادة: الأجرة غير معروفة)": "(ئۆتۆمبێل — بێ زیادکردن: کرێ نەزانراوە)",
+  "زيادة المطر لطلب السيّارة:": "زیادەی باران بۆ داواکاریی ئۆتۆمبێل:",
+  "زيادة السيّارة:": "زیادەی ئۆتۆمبێل:",
+  "د.ع على المطعم للكابتن": "د.ع لەسەر چێشتخانە بۆ کاپتن",
+  "د.ع (على المطعم أو على الزبون)": "د.ع (لەسەر چێشتخانە یان کڕیار)",
+  "حدّث اللوحة ووافق ثمّ أرسل.": "پەڕەکە نوێ بکەرەوە و ڕەزامەندی بدە پاشان بنێرە.",
+  "الطلب بعيد": "داواکارییەکە دوورە",
   "إرسال الطلب الآن": "ئێستا داواکارییەکە بنێرە",
   "إرسال إلى الرادار...": "ناردن بۆ ڕادار...",
   "تم إرسال الطلب!": "داواکارییەکە نێردرا!",
@@ -972,6 +978,8 @@ window.nahlaOpen = window.nahlaOpen || function(what, id) {
   "الرجاء إدخال السعر الكلي.": "تکایە کۆی نرخەکە بنووسە.",
   "يرجى كتابة رقم الزبون المستلم.": "تکایە ژمارەی ئەو کڕیارەی وەریدەگرێت بنووسە.",
   "⚡ طلب سريع (التفاصيل والفاتورة مع المطعم)": "⚡ داواکاریی خێرا (وردەکاری و پسوڵە لای چێشتخانەیە)",
+  "مبلغ الطعام على الزبون (اختياري)": "بڕی پارەی خواردن لەسەر کڕیار (ئارەزوومەندانە)",
+  "مثال: 15000": "نموونە: 15000",
   "اضغط لتصوير الوصل": "کرتە بکە بۆ وێنەگرتنی پسوڵە",
   "النظام سيستخرج السعر والمنطقة آلياً": "سیستەم نرخ و ناوچە خۆکارانە دەردەهێنێت",
   "حذف وإعادة التصوير": "سڕینەوە و دووبارە وێنەگرتن",
@@ -1404,7 +1412,183 @@ window.nahlaOpen = window.nahlaOpen || function(what, id) {
   ". إن سألك عن لصق عدّة أسطر اختر «الصق على أي حال».": ". ئەگەر پرسیاری دانانی چەند دێڕێکی کرد، «Paste anyway» هەڵبژێرە.",
   "ظهر في PowerShell أن النتيجة «نُسخت»؟ الصقها هنا": "لە PowerShell دەرکەوت کە ئەنجامەکە «کۆپی کرا»؟ لێرە دایبنێ",
   "الصق هنا النصّ الذي يبدأ بـ NAHLASCAN1": "ئەو دەقەی بە NAHLASCAN1 دەست پێدەکات لێرە دابنێ",
-  "النصّ الملصوق غير صحيح — يجب أن يبدأ بـ NAHLASCAN1": "دەقە دانراوەکە هەڵەیە — دەبێت بە NAHLASCAN1 دەست پێبکات"
+  "النصّ الملصوق غير صحيح — يجب أن يبدأ بـ NAHLASCAN1": "دەقە دانراوەکە هەڵەیە — دەبێت بە NAHLASCAN1 دەست پێبکات",
+  "بدّل الكابتن": "کاپتن بگۆڕە",
+  "ألغِ الطلب": "داواکارییەکە هەڵبوەشێنەوە",
+  "الكابتن تأخّر؟": "کاپتنەکە دواکەوت؟",
+  "نقدر نحوّل طلبك لكابتن ثاني ويبقى بأوّل الدور — بدل ما تلغيه ويرجع لآخر الدور.": "دەتوانین داواکارییەکەت بگوازینەوە بۆ کاپتنێکی تر و لە سەرەتای ڕیزدا دەمێنێتەوە — لە جیاتی هەڵوەشاندنەوە و گەڕانەوەی بۆ کۆتایی ڕیز.",
+  "الكابتن ما تحرّك بعد — نتابعه، وإذا ما تحرّك يتحوّل طلبك تلقائياً": "کاپتنەکە هێشتا نەجووڵاوە — بەدوایدا دەچین، ئەگەر نەجووڵا داواکارییەکەت خۆکارانە دەگوازرێتەوە",
+  "الكابتن غير متّصل الآن — نتابعه": "کاپتنەکە ئێستا پەیوەست نییە — بەدوایدا دەچین",
+  "موقع الكابتن غير محدَّث": "شوێنی کاپتنەکە نوێ نەکراوەتەوە",
+  "حوّلنا طلبك لكابتن ثاني — طلبك بأوّل الدور": "داواکارییەکەتمان گواستەوە بۆ کاپتنێکی تر — داواکارییەکەت لە سەرەتای ڕیزدایە",
+  "الكابتن على": "کاپتنەکە لە",
+  "كم ويقترب — يوصل خلال دقايق": "کم دوورە و نزیک دەبێتەوە — لە چەند خولەکێکدا دەگات",
+  "الكابتن وصل قرب مطعمك — اتصل بيه من زرّ الاتصال": "کاپتنەکە گەیشتە نزیک چێشتخانەکەت — لە دوگمەی پەیوەندییەوە پەیوەندی پێوە بکە",
+  "الكابتن متّجه لمنطقة الزبون — يمكن استلم الطلب. اتصل بيه قبل التبديل": "کاپتنەکە بەرەو ناوچەی کڕیار دەڕوات — لەوانەیە داواکارییەکەی وەرگرتبێت. پێش گۆڕین پەیوەندی پێوە بکە",
+  "التبديل متاح بعد": "گۆڕین بەردەست دەبێت دوای",
+  "دقايق من قبول الكابتن": "خولەک لە وەرگرتنی کاپتنەکە",
+  "الكابتن ما تحرّك بعد — نتابعه": "کاپتنەکە هێشتا نەجووڵاوە — بەدوایدا دەچین",
+  "الكابتن يسلّم طلباً قريباً ويجيك خلال": "کاپتنەکە داواکارییەکی نزیک دەگەیەنێت و دێتە لات لە ماوەی",
+  "دقائق تقريباً": "خولەک بە نزیکەیی",
+  "الكابتن يسلّم طلباً قريباً ويجيك بعده — إذا تأخّر يتحوّل طلبك تلقائياً": "کاپتنەکە داواکارییەکی نزیک دەگەیەنێت و دوای ئەوە دێتە لات — ئەگەر دواکەوت داواکارییەکەت خۆکارانە دەگوازرێتەوە",
+  "آخر موقع وصلنا من الكابتن كان عند مطعمك — اتصل بيه من زرّ الاتصال": "دوایین شوێنی کاپتنەکە کە پێمان گەیشت لای چێشتخانەکەت بوو — لە دوگمەی پەیوەندییەوە پەیوەندی پێوە بکە",
+  "الكابتن بجولة عدّة طلبات ومطعمك ضمنها — ما نفصل طلبك منها، نتابعه إحنا هسّه": "کاپتنەکە لە گەشتێکی چەند داواکارییەدایە و چێشتخانەکەت تێیدایە — داواکارییەکەت لێی جیا ناکەینەوە، ئێستا خۆمان بەدوایدا دەچین",
+  "هذا الطلب وصل حدّ التبديل — نتابعه إحنا هسّه": "ئەم داواکارییە گەیشتە سنووری گۆڕین — ئێستا خۆمان بەدوایدا دەچین",
+  "وصلت حدّ التبديل لليوم — نتابع طلبك إحنا هسّه": "گەیشتیتە سنووری گۆڕین بۆ ئەمڕۆ — ئێستا خۆمان بەدوای داواکارییەکەتدا دەچین",
+  "تبديل الكابتن غير متاح حالياً": "گۆڕینی کاپتن ئێستا بەردەست نییە",
+  "حالة الطلب تغيّرت — شوف البطاقة": "دۆخی داواکارییەکە گۆڕا — سەیری کارتەکە بکە",
+  "الطلب ما عاد موجود": "داواکارییەکە چیتر نەماوە",
+  "تعذّر التبديل — حاول بعد شوي": "گۆڕین سەرکەوتوو نەبوو — کەمێکی تر هەوڵ بدەرەوە",
+  "الكابتن ينتظر عندكم منذ": "کاپتن چاوەڕێتان دەکات لە ماوەی",
+  "الكابتن عندكم ينتظر — شكد يحتاج الطلب؟": "کاپتن لای ئێوە چاوەڕێ دەکات — داواکارییەکە چەندی پێویستە؟",
+  "جاهز الآن": "ئێستا ئامادەیە",
+  "أبلغتم الكابتن: الطلب يحتاج": "بە کاپتنتان ڕاگەیاند: داواکارییەکە پێویستی بە",
+  "الطلب مغلّف وبيدك؟": "داواکارییەکە پێچراوە و بە دەستتەوەیە؟",
+  "الكابتن يجي فوراً على «جاهز» — إذا بعده يحتاج وقت، اختار الدقايق من الشريط.": "کاپتن یەکسەر دێت بە «ئامادەیە» — ئەگەر هێشتا کاتی پێویستە، خولەکەکان لە شریتەکە هەڵبژێرە.",
+  "نعم، بيدي": "بەڵێ، بە دەستمەوەیە",
+  "مو بعد": "هێشتا نا",
+  "ليش تلغي الطلب؟": "بۆچی داواکارییەکە هەڵدەوەشێنیتەوە؟",
+  "الزبون ألغى": "کڕیار هەڵیوەشاندەوە",
+  "الكابتن تأخّر": "کاپتن دواکەوت",
+  "مكرّر": "دووبارەیە",
+  "المطعم ما يقدر يجهّزه": "چێشتخانە ناتوانێت ئامادەی بکات",
+  "آخر": "هی تر",
+  "رجوع — لا تلغِ": "گەڕانەوە — هەڵی مەوەشێنەوە",
+  "خلّيه بالدور": "با لە نۆرەدا بمێنێت",
+  "🎂 الطلب بيه كيك — أرسله بسيارة؟": "🎂 داواکارییەکە کێکی تێدایە — بە ئۆتۆمبێل بینێرە؟",
+  "الكيك على الدرّاجة يتخرّب ويُلغى أغلبه.": "کێک لەسەر ماتۆڕ تێکدەچێت و زۆربەی هەڵدەوەشێتەوە.",
+  "نعم، بسيارة": "بەڵێ، بە ئۆتۆمبێل",
+  "لا، بالدرّاجة": "نا، بە ماتۆڕ",
+  "رسالة للزبون": "نامە بۆ کڕیار",
+  "ألغِه": "هەڵیبوەشێنەوە",
+  "🟢 خرج طلبك المؤجّل للكباتن الآن.": "🟢 داواکارییە دواخراوەکەت ئێستا بۆ کاپتنەکان نێردرا.",
+  "✅ عاد استقبال الطلبات البعيدة — أرسل طلبك الآن 🌷": "✅ وەرگرتنی داواکارییە دوورەکان گەڕایەوە — ئێستا داواکارییەکەت بنێرە 🌷",
+  "📋 نُسخت رسالة الزبون — الصقها في الواتساب.": "📋 نامەی کڕیار کۆپی کرا — لە واتسئاپ دایبنێ.",
+  "انسخ الرسالة:": "نامەکە کۆپی بکە:",
+  "🛵 نرسله الآن بدرّاجة.": "🛵 ئێستا بە ماتۆڕ دەینێرین.",
+  "⏳ ننتظر سيّارة، وإذا ما توفّرت نرسله بدرّاجة.": "⏳ چاوەڕێی ئۆتۆمبێل دەکەین، ئەگەر نەبوو بە ماتۆڕ دەینێرین.",
+  "محفوظ بالدور — يخرج للكباتن تلقائيّاً حين يعود الإرسال الساعة": "لە نۆرەدا پارێزراوە — کاتێک ناردن دەگەڕێتەوە خۆکارانە بۆ کاپتنەکان دەچێت، کاتژمێر",
+  "مؤجّل للزحمة منذ": "بەهۆی قەرەباڵغییەوە دواخراوە لە ماوەی",
+  "يخرج تلقائيّاً": "خۆکارانە دەچێت",
+  "عادةً": "بە زۆری",
+  "نبحث عن سيّارة لهذا الطلب البعيد": "بەدوای ئۆتۆمبێلێکدا دەگەڕێین بۆ ئەم داواکارییە دوورە",
+  "لم تتوفّر سيّارة — نرسله بدرّاجة": "ئۆتۆمبێل نەبوو — بە ماتۆڕ دەینێرین",
+  "حُذفت زيادة السيّارة": "زیادەی ئۆتۆمبێل لابرا",
+  "تم حفظ الطلب — يخرج للكباتن تلقائيّاً حين يعود الإرسال 🌷": "داواکارییەکە پارێزرا — کاتێک ناردن دەگەڕێتەوە خۆکارانە بۆ کاپتنەکان دەچێت 🌷",
+  "تم حفظ الطلب — مؤجّل للزحمة ويخرج للكباتن تلقائيّاً (عادةً 10–35 د) 🌷": "داواکارییەکە پارێزرا — بەهۆی قەرەباڵغییەوە دواخراوە و خۆکارانە بۆ کاپتنەکان دەچێت (بە زۆری 10–35 خولەک) 🌷",
+  "هذه المنطقة متوقّفة مؤقّتاً وقت الضغط.": "ئەم ناوچەیە لە کاتی فشاردا بە کاتی ڕاگیراوە.",
+  "أعد المحاولة بعد": "دووبارە هەوڵ بدەرەوە دوای",
+  "ثانية — أو انتظر العلامة الخضراء حين يعود الاستقبال. طلبك باقٍ في النموذج.": "چرکە — یان چاوەڕێی نیشانە سەوزەکە بکە کاتێک وەرگرتن دەگەڕێتەوە. داواکارییەکەت لە فۆرمەکەدا ماوە.",
+  "طلبك باقٍ في النموذج — لا تكتبه من جديد.": "داواکارییەکەت لە فۆرمەکەدا ماوە — دووبارە مەینووسەوە.",
+  "لم يُرسَل الطلب.": "داواکارییەکە نەنێردرا.",
+  "لم يدخل النظام:": "نەچووە ناو سیستەمەکەوە:",
+  "أرسله بعد هذا الموعد.": "دوای ئەم کاتە بینێرە.",
+  "مطعمكم موقوف مؤقّتاً": "چێشتخانەکەتان بە کاتی ڕاگیراوە",
+  "يعود الإرسال الساعة": "ناردن دەگەڕێتەوە لە کاتژمێر",
+  "المطر": "باران",
+  "ضغط الطلبات": "فشاری داواکارییەکان",
+  "مراجعة الحساب": "پێداچوونەوەی حیساب",
+  "مراجعة الإدارة": "پێداچوونەوەی بەڕێوەبەرایەتی",
+  "مساءً": "ئێوارە",
+  "صباحاً": "بەیانی",
+  "طلبك محفوظ بالدور": "داواکارییەکەت لە نۆرەدا پارێزراوە",
+  "كابتن خلال": "کاپتن لە ماوەی",
+  "دقيقة تقريباً": "خولەک بە نزیکەیی",
+  "مقاضي": "کەلوپەل",
+  "أماكني": "شوێنەکانم",
+  "مكان جديد": "شوێنی نوێ",
+  "من وين يجيب الكابتن مقاضيك؟ اختار المحلّ.": "کاپتن کەلوپەلەکانت لە کوێوە بهێنێت؟ دوکانەکە هەڵبژێرە.",
+  "جارٍ تحميل أماكنك…": "شوێنەکانت بار دەکرێن…",
+  "محلّ جديد": "دوکانی نوێ",
+  "تعديل المحلّ": "دەستکاریکردنی دوکان",
+  "اسم المحلّ (مثلاً: مخبز الأمل)": "ناوی دوکان (بۆ نموونە: نانەواخانەی ئەمەل)",
+  "هاتف المحلّ (اختياري)": "مۆبایلی دوکان (ئارەزوومەندانە)",
+  "منطقة المحلّ (منها الأجرة)": "ناوچەی دوکان (کرێکە لەوێوە دەژمێردرێت)",
+  "ابحث باسم المحلّ، أو الصق رابطه من خرائط جوجل": "بە ناوی دوکان بگەڕێ، یان بەستەرەکەی لە گووگڵ ماپەوە دابنێ",
+  "ابحث": "بگەڕێ",
+  "اكتب اسم المحلّ واضغط «ابحث»، أو اضغط على المحلّ بالخريطة، أو حرّك الخريطة لحدّ ما يصير الدبّوس عليه.": "ناوی دوکان بنووسە و «بگەڕێ» دابگرە، یان لەسەر دوکانەکە لە نەخشەکەدا دابگرە، یان نەخشەکە بجوڵێنە تا نیشانەکە دەکەوێتە سەری.",
+  "ملء الشاشة": "پڕ بە شاشە",
+  "تصغير الخريطة": "بچووککردنەوەی نەخشە",
+  "حرّك الخريطة لحدّ ما يصير الدبّوس على المحلّ": "نەخشەکە بجوڵێنە تا نیشانەکە دەکەوێتە سەر دوکانەکە",
+  "تمّ": "تەواو",
+  "افتح خرائط جوجل وانسخ رابط المحلّ": "گووگڵ ماپ بکەرەوە و بەستەری دوکانەکە کۆپی بکە",
+  "احفظ المكان": "شوێنەکە پاشەکەوت بکە",
+  "احذف هذا المكان": "ئەم شوێنە بسڕەوە",
+  "شنو يجيب الكابتن؟": "کاپتن چی بهێنێت؟",
+  "مثلاً: 50 صمونة · رزمة ورق تغليف · 2 كارتون علب": "بۆ نموونە: 50 سەمون · بەستەیەک کاغەزی پێچانەوە · 2 کارتۆن قوتوو",
+  "منو يدفع ثمن المقاضي؟": "کێ پارەی کەلوپەلەکان دەدات؟",
+  "مدفوعة مسبقاً": "پارەکەی پێشتر دراوە",
+  "متّفق ويّا المحلّ — الكابتن يستلم بس": "لەگەڵ دوکان ڕێککەوتوویت — کاپتن تەنها وەریدەگرێت",
+  "الكابتن يدفعها وأرجّعها إله": "کاپتن پارەکەی دەدات و بۆی دەگەڕێنمەوە",
+  "يدفع للمحلّ ويكتب المبلغ، وترجّعه إله ويّا الأجرة": "پارە بە دوکان دەدات و بڕەکە دەنووسێت، تۆش لەگەڵ کرێکە بۆی دەگەڕێنیتەوە",
+  "أقصى مبلغ يدفعه الكابتن عنك (دينار)": "زۆرترین بڕ کە کاپتن لە جیاتی تۆ دەیدات (دینار)",
+  "ملاحظة للكابتن (اختياري)": "تێبینی بۆ کاپتن (ئارەزوومەندانە)",
+  "اختار المحلّ حتى تطلع الأجرة": "دوکانەکە هەڵبژێرە تا کرێکە دەربکەوێت",
+  "أرسل كابتن المقاضي": "کاپتنی کەلوپەل بنێرە",
+  "ما عندك محلّ محفوظ بعد.": "هێشتا هیچ دوکانێکت پاشەکەوت نەکردووە.",
+  "ضيف المخبز أو المحلّ اللي تجيب منه مقاضيك — مرّة وحدة وتبقى.": "ئەو نانەواخانە یان دوکانە زیاد بکە کە کەلوپەلەکانتی لێ دەهێنیت — یەک جار بەسە و دەمێنێتەوە.",
+  "ضيف أوّل محلّ": "یەکەم دوکان زیاد بکە",
+  "الأجرة": "کرێ",
+  "منطقة بلا أجرة": "ناوچەی بێ کرێ",
+  "بلا منطقة": "بێ ناوچە",
+  "عدّل المحلّ": "دوکانەکە دەستکاری بکە",
+  "آخر مرّة:": "دوایین جار:",
+  "اطلب نفس المرّة السابقة": "هەمان داواکاریی جاری پێشوو بکە",
+  "ملخّص الطلب": "پوختەی داواکاری",
+  "المحلّ": "دوکان",
+  "يجيب": "دەیهێنێت",
+  "اكتبها فوق": "لە سەرەوە بینووسە",
+  "الثمن": "نرخ",
+  "الكابتن يدفع": "کاپتن دەیدات",
+  "الكابتن يدفع حتى": "کاپتن دەیدات تا",
+  "أجرة المنطقة": "کرێی ناوچە",
+  "مشوار المقاضي": "گەشتی کەلوپەل",
+  "الكابتن يدفع عنك": "کاپتن لە جیاتی تۆ دەیدات",
+  "تدفع الأجرة للكابتن من يوصّل المقاضي.": "کاتێک کاپتن کەلوپەلەکان دەگەیەنێت کرێکەی پێدەدەیت.",
+  "تدفع للكابتن الأجرة وثمن المقاضي اللي دفعه للمحلّ.": "کرێکە و نرخی ئەو کەلوپەلانەی بە دوکانی داوە دەدەیتەوە بە کاپتن.",
+  "منطقة هذا المحلّ مو بقائمة أجورك — عدّل المحلّ واختر منطقة من القائمة.": "ناوچەی ئەم دوکانە لە لیستی کرێکانتدا نییە — دوکانەکە دەستکاری بکە و ناوچەیەک لە لیستەکە هەڵبژێرە.",
+  "اختار المحلّ من القائمة أو من الأرقام على الخريطة.": "دوکانەکە لە لیستەکە یان لە ژمارەکانی سەر نەخشە هەڵبژێرە.",
+  "لحظة، نجيب اسم المحلّ…": "تۆزێک چاوەڕێ بە، ناوی دوکانەکە دەهێنین…",
+  "صار الدبّوس على المحلّ — اكتب اسمه بنفسك.": "نیشانەکە کەوتە سەر دوکانەکە — ناوەکەی خۆت بنووسە.",
+  "صار الدبّوس على المحلّ اللي اخترته — تأكّد واحفظ.": "نیشانەکە کەوتە سەر ئەو دوکانەی هەڵتبژارد — دڵنیا بەرەوە و پاشەکەوتی بکە.",
+  "اخترت": "هەڵتبژارد",
+  "تأكّد من الدبّوس واحفظ المكان.": "لە نیشانەکە دڵنیا بەرەوە و شوێنەکە پاشەکەوت بکە.",
+  "وقع الدبّوس على المحلّ — تأكّد منه واحفظ المكان.": "نیشانەکە کەوتە سەر دوکانەکە — لێی دڵنیا بەرەوە و شوێنەکە پاشەکەوت بکە.",
+  "رجعنا لموقع مطعمك.": "گەڕاینەوە بۆ شوێنی چێشتخانەکەت.",
+  "في خرائط جوجل: افتح المحلّ ← «مشاركة» ← «نسخ الرابط»، ثمّ ارجع والصقه هنا فيقع الدبّوس عليه.": "لە گووگڵ ماپ: دوکانەکە بکەرەوە ← «هاوبەشکردن» ← «کۆپیکردنی بەستەر»، پاشان بگەڕێوە و لێرە دایبنێ تا نیشانەکە بکەوێتە سەری.",
+  "جارٍ قراءة الرابط…": "بەستەرەکە دەخوێنرێتەوە…",
+  "هذا ليس رابطاً من خرائط جوجل.": "ئەمە بەستەری گووگڵ ماپ نییە.",
+  "لم أجد موقعاً في هذا الرابط.": "هیچ شوێنێکم لەم بەستەرەدا نەدۆزییەوە.",
+  "تعذّر قراءة الرابط — تحقّق من الإنترنت، أو حرّك الخريطة بيدك.": "بەستەرەکە نەخوێنرایەوە — ئینتەرنێتەکەت بپشکنە، یان نەخشەکە بە دەستی خۆت بجوڵێنە.",
+  "هذا المكان خارج كركوك — تأكّد أنّك نسخت رابط المحلّ الصحيح.": "ئەم شوێنە لە دەرەوەی کەرکووکە — دڵنیا بەرەوە کە بەستەری دوکانی دروستت کۆپی کردووە.",
+  "اكتب اسم المحلّ أوّلاً.": "سەرەتا ناوی دوکان بنووسە.",
+  "أبحث عن": "بەدوای",
+  "في خرائط جوجل…": "لە گووگڵ ماپدا دەگەڕێم…",
+  "لم أجد هذا المحلّ.": "ئەم دوکانەم نەدۆزییەوە.",
+  "تعذّر البحث — تحقّق من الإنترنت، أو الصق رابط المحلّ من خرائط جوجل.": "گەڕان سەرکەوتوو نەبوو — ئینتەرنێتەکەت بپشکنە، یان بەستەری دوکانەکە لە گووگڵ ماپەوە دابنێ.",
+  "لم أجد": "نەمدۆزییەوە",
+  "في كركوك على خرائط جوجل — جرّب اسماً أقصر، أو الصق رابطه.": "لە کەرکووک لەسەر گووگڵ ماپ — ناوێکی کورتتر تاقی بکەرەوە، یان بەستەرەکەی دابنێ.",
+  "البحث داخل اللوحة غير متاحٍ الآن — فتحتُ خرائط جوجل بدلاً منه.": "گەڕان لەناو داشبۆرد ئێستا بەردەست نییە — لە جیاتی ئەوە گووگڵ ماپم کردەوە.",
+  "اكتب اسم المحلّ.": "ناوی دوکان بنووسە.",
+  "اختر منطقة المحلّ من قائمة مناطقك — منها تُحسب الأجرة.": "ناوچەی دوکان لە لیستی ناوچەکانت هەڵبژێرە — کرێکە لەوێوە دەژمێردرێت.",
+  "حرّك الخريطة حتى يقع الدبّوس على المحلّ داخل كركوك.": "نەخشەکە بجوڵێنە تا نیشانەکە لەناو کەرکووک بکەوێتە سەر دوکانەکە.",
+  "تعذّر حفظ المكان — تحقّق من الإنترنت وأعد المحاولة.": "شوێنەکە پاشەکەوت نەکرا — ئینتەرنێتەکەت بپشکنە و دووبارە هەوڵ بدەرەوە.",
+  "احذف": "بسڕەوە",
+  "من أماكنك؟": "لە شوێنەکانت؟",
+  "تعذّر الحذف — أعد المحاولة.": "نەسڕایەوە — دووبارە هەوڵ بدەرەوە.",
+  "اختار المحلّ، أو ضيف محلّ جديد.": "دوکانەکە هەڵبژێرە، یان دوکانێکی نوێ زیاد بکە.",
+  "اكتب شنو يجيب الكابتن.": "بنووسە کاپتن چی بهێنێت.",
+  "اكتب أقصى مبلغ يدفعه الكابتن عنك (من 250 إلى مليون دينار).": "زۆرترین بڕ بنووسە کە کاپتن لە جیاتی تۆ دەیدات (لە 250 تا ملیۆنێک دینار).",
+  "تم إرسال كابتن المقاضي — الأجرة": "کاپتنی کەلوپەل نێردرا — کرێ",
+  "تعذّر إرسال طلب المقاضي الآن — أعد المحاولة بعد قليل.": "ئێستا داواکاریی کەلوپەل نەنێردرا — دوای کەمێک دووبارە هەوڵ بدەرەوە.",
+  "منطقة هذا المحلّ": "ناوچەی ئەم دوکانە",
+  "ليست في قائمة أجورك الآن — عدّل المحلّ واختر منطقةً من القائمة.": "ئێستا لە لیستی کرێکانتدا نییە — دوکانەکە دەستکاری بکە و ناوچەیەک لە لیستەکە هەڵبژێرە.",
+  "أجرة هذا المحلّ غير معروفة — تواصل مع الإدارة لتحديث قائمة أجورك.": "کرێی ئەم دوکانە نەزانراوە — پەیوەندی بە بەڕێوەبەرایەتییەوە بکە بۆ نوێکردنەوەی لیستی کرێکانت.",
+  "اكتب اسم المكان (المحلّ).": "ناوی شوێن (دوکان) بنووسە.",
+  "حدّد موقع المحلّ على الخريطة — بدونه لا يعرف الكابتن أين يذهب.": "شوێنی دوکان لەسەر نەخشە دیاری بکە — بەبێ ئەوە کاپتن نازانێت بۆ کوێ بچێت.",
+  "اكتب ما يُجلب (مثلاً: 50 صمونة).": "بنووسە چی بهێنرێت (بۆ نموونە: 50 سەمون).",
+  "اكتب أقصى مبلغٍ يدفعه الكابتن عنك (بين 250 ومليون دينار).": "زۆرترین بڕ بنووسە کە کاپتن لە جیاتی تۆ دەیدات (لە نێوان 250 و ملیۆنێک دینار).",
+  "موقع المطعم غير محدّد — تواصل مع الإدارة لتحديده.": "شوێنی چێشتخانە دیاری نەکراوە — پەیوەندی بە بەڕێوەبەرایەتییەوە بکە بۆ دیاریکردنی."
  };
  var norm = function(s) {
   return String(s).replace(/\s+/g, " ").trim();
@@ -2721,6 +2905,11 @@ window.nahlaOpen = window.nahlaOpen || function(what, id) {
         .btn-ready { background: #FFF4E5; color: #A14B05; font-weight: 600; border: 1px solid #F8D9B0; border-radius: 10px; }
         .ready-pill { background: #FEF6D8; color: #8A5A00; font-weight: 600; border-radius: 10px; }
         .btn-cancel-grace { font-weight: 600; border-color: #F5C2C2; color: #C02626; }
+        
+        .btn-swap { background: #FFFFFF; color: #B42318; font-weight: 700; border: 1px solid #F5C2C2; border-radius: 10px; padding: 6px 14px; font-size: 0.75rem;
+                    cursor: pointer; display: flex; align-items: center; gap: 6px; }
+        .oc-actions .btn-swap { min-height: 44px; padding: 8px 16px; flex: 1; justify-content: center; }
+        .btn-swap:disabled { opacity: .6; }
         .oc-driver { background: #F3FAF6; border-color: #CDEBDD; border-radius: 14px; }
         .oc-driver.waiting { background: #F8FAFC; border-color: var(--line); }
         .oc-av { box-shadow: none; border-color: #A7DCC3; }
@@ -3396,6 +3585,19 @@ window.nahlaOpen = window.nahlaOpen || function(what, id) {
 
     </div>
 
+    
+    <div id="brakeBanner" class="container mt-2 mb-2 hidden-section">
+        <div style="background: #FFF6E0; border: 1px solid #F5D78E; border-radius: 16px; padding: 12px 16px; color: #7A4F00; font-size: 0.85rem; font-weight: 700; line-height: 1.8;">
+            <span id="brakeText"></span>
+        </div>
+    </div>
+    
+    <div id="holdBanner" class="container mt-2 mb-2 hidden-section">
+        <div style="background: #FFF6E0; border: 1px solid #F5D78E; border-radius: 16px; padding: 12px 16px; color: #7A4F00; font-size: 0.85rem; font-weight: 700; line-height: 1.8;">
+            <span id="holdText"></span>
+        </div>
+    </div>
+
     <div id="friendlyMessageBanner" class="container mt-2 mb-3 hidden-section" style="animation: slideDown 0.5s ease;">
         <div style="background: linear-gradient(135deg, #FFF8E1, #f8fafc); border: 1px solid #FDE68A; border-radius: 16px; padding: 12px 16px; display: flex; align-items: center; gap: 12px; box-shadow: 0 4px 15px rgba(255,179,0,0.05);">
             <div id="friendlyIcon" style="font-size: 24px;">🌤️</div>
@@ -3506,6 +3708,12 @@ window.nahlaOpen = window.nahlaOpen || function(what, id) {
                             </div>
                         </div>
 
+                        
+                        <div id="quickFoodField" class="hidden-section mb-3">
+                            <label class="form-label">مبلغ الطعام على الزبون (اختياري)</label>
+                            <input type="number" inputmode="numeric" id="quickFoodPrice" class="custom-input" placeholder="مثال: 15000" autocomplete="off" min="0">
+                        </div>
+
                         <div id="photoSection" class="hidden-section">
                             <div class="mb-4 mt-2">
                                 <input type="file" id="receiptPhoto" accept="image/*" capture="environment" class="d-none" onchange="processImage(this)">
@@ -3575,53 +3783,140 @@ window.nahlaOpen = window.nahlaOpen || function(what, id) {
 
                     
                     <style>
-                        #supplyBox .sup-l{font-weight:700;font-size:.85rem;margin:14px 0 6px;color:var(--text,#10231E)}
-                        #supplyBox .sup-chips{display:flex;flex-wrap:wrap;gap:8px}
-                        #supplyBox .sup-chip{border:1px solid rgba(0,0,0,.12);background:#fff;border-radius:12px;padding:8px 12px;font-size:.82rem;cursor:pointer;text-align:right;line-height:1.35}
-                        #supplyBox .sup-chip small{display:block;opacity:.65;font-size:.72rem}
-                        #supplyBox .sup-chip.on{border-color:var(--accent,#0B5D4B);box-shadow:0 0 0 2px var(--accent,#0B5D4B) inset}
-                        #supplyBox .sup-chip.add{border-style:dashed}
-                        #supplyBox input,#supplyBox textarea,#supplyBox select{width:100%;border:1px solid rgba(0,0,0,.12);border-radius:12px;padding:10px 12px;font:inherit;font-size:.9rem;background:#fff}
+                        #supplyBox .sup-hd{display:flex;align-items:center;justify-content:space-between;gap:8px;margin:2px 0 2px}
+                        #supplyBox .sup-hd b{font-weight:700;font-size:.95rem;color:var(--ink)}
+                        #supplyBox .sup-sub{font-size:.76rem;color:var(--muted);margin-bottom:10px}
+                        #supplyBox .sup-add{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--brand-line);background:var(--brand-soft);color:var(--primary-blue);border-radius:10px;padding:7px 11px;font:inherit;font-weight:600;font-size:.8rem;cursor:pointer}
+                        #supplyBox .sup-add svg{width:15px;height:15px;flex:none}
+                        #supplyBox .sup-cards{display:flex;flex-direction:column;gap:8px}
+                        #supplyBox .sup-empty{border:1px dashed var(--line-2);border-radius:14px;padding:16px;text-align:center;color:var(--muted);font-size:.82rem;line-height:1.75}
+                        #supplyBox .sup-empty .sup-add{margin-top:10px}
+                        #supplyBox .sup-card{border:1px solid var(--line);border-radius:14px;background:#fff;padding:12px;cursor:pointer;transition:border-color .15s ease,box-shadow .15s ease}
+                        #supplyBox .sup-card.on{border-color:var(--primary-blue);box-shadow:0 0 0 1px var(--primary-blue) inset}
+                        #supplyBox .sup-ct{display:flex;align-items:center;gap:10px}
+                        #supplyBox .sup-ic{width:40px;height:40px;border-radius:11px;background:#F1F5F9;color:var(--ink-2);display:flex;align-items:center;justify-content:center;flex:none}
+                        #supplyBox .sup-ic svg{width:19px;height:19px}
+                        #supplyBox .sup-card.on .sup-ic{background:var(--brand-soft);color:var(--primary-blue)}
+                        #supplyBox .sup-cn{flex:1;min-width:0}
+                        #supplyBox .sup-cn b{display:block;font-weight:700;font-size:.92rem;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+                        #supplyBox .sup-cn small{display:block;color:var(--muted);font-size:.74rem;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+                        #supplyBox .sup-cf{text-align:end;flex:none;line-height:1.3}
+                        #supplyBox .sup-cf small{display:block;font-size:.68rem;color:var(--muted)}
+                        #supplyBox .sup-cf b{display:block;font-weight:700;font-size:.9rem;color:var(--ink);font-variant-numeric:tabular-nums;white-space:nowrap}
+                        #supplyBox .sup-cf.bad b{color:#B42318;font-size:.74rem}
+                        #supplyBox .sup-ed{width:34px;height:34px;border-radius:10px;border:1px solid var(--line);background:#fff;color:var(--muted);display:flex;align-items:center;justify-content:center;flex:none;cursor:pointer;padding:0}
+                        #supplyBox .sup-ed svg{width:15px;height:15px}
+                        #supplyBox .sup-last{margin-top:10px;padding-top:10px;border-top:1px dashed var(--line);display:flex;align-items:center;gap:8px}
+                        #supplyBox .sup-last span{flex:1;min-width:0;font-size:.76rem;color:var(--ink-2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+                        #supplyBox .sup-last em{font-style:normal;color:var(--muted)}
+                        #supplyBox .sup-again{border:1px solid var(--line-2);background:#fff;border-radius:10px;padding:7px 10px;font:inherit;font-size:.76rem;font-weight:600;color:var(--ink);display:inline-flex;gap:6px;align-items:center;white-space:nowrap;cursor:pointer;flex:none}
+                        #supplyBox .sup-again svg{width:14px;height:14px;flex:none}
+                        #supplyBox .sup-l{font-weight:700;font-size:.85rem;margin:16px 0 6px;color:var(--ink)}
+                        #supplyBox input,#supplyBox textarea,#supplyBox select{width:100%;border:1px solid var(--line-2);border-radius:12px;padding:10px 12px;font:inherit;font-size:.9rem;background:#fff;color:var(--ink)}
+                        #supplyBox input:focus,#supplyBox textarea:focus,#supplyBox select:focus{outline:none;border-color:var(--primary-blue);box-shadow:0 0 0 3px rgba(36,83,214,.14)}
                         #supplyBox textarea{resize:vertical;min-height:70px}
-                        #supplyBox .sup-row{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px}
-                        #supplyBox .sup-pay label{display:flex;gap:8px;align-items:flex-start;padding:9px 12px;border:1px solid rgba(0,0,0,.1);border-radius:12px;margin-bottom:6px;font-size:.85rem;cursor:pointer;background:#fff}
-                        #supplyBox .sup-pay input{width:auto;margin-top:3px}
-                        #supplyBox .sup-fee{margin:12px 0 4px;padding:10px 12px;border-radius:12px;background:rgba(11,93,75,.08);font-weight:700;font-size:.9rem}
-                        #supplyBox .sup-fee.bad{background:rgba(180,35,24,.08);color:#B42318}
-                        #supplyBox .sup-new{border:1px solid rgba(0,0,0,.08);border-radius:14px;padding:12px;margin-top:10px;background:rgba(0,0,0,.015)}
-                        #supplyBox .sup-mini-act{display:flex;gap:8px;margin-top:8px}
-                        #supplyBox .sup-mini-act button{flex:1;border-radius:10px;padding:8px;border:1px solid rgba(0,0,0,.12);background:#fff;font:inherit;font-size:.8rem}
-                        #supplyBox .sup-gbtn{width:100%;margin-top:8px;padding:11px 12px;border-radius:12px;border:1.5px solid var(--accent,#0B5D4B);background:#fff;color:var(--accent,#0B5D4B);font:inherit;font-weight:700;font-size:.9rem;cursor:pointer}
-                        #supplyBox .sup-hint{font-size:.75rem;opacity:.8;margin:4px 0 8px;line-height:1.5}
+                        #supplyBox .sup-new > select,#supplyBox .sup-new > input{margin-top:8px}
+                        #supplyBox .sup-new > #supName{margin-top:0}
+                        #supplyBox .sup-pay{display:flex;flex-direction:column;gap:6px}
+                        #supplyBox .sup-pay label{display:flex;gap:10px;align-items:flex-start;padding:10px 12px;border:1px solid var(--line);border-radius:12px;font-size:.85rem;cursor:pointer;background:#fff;margin:0}
+                        #supplyBox .sup-pay label.on{border-color:var(--primary-blue);box-shadow:0 0 0 1px var(--primary-blue) inset}
+                        #supplyBox .sup-pay input{width:auto;margin-top:4px;accent-color:var(--primary-blue)}
+                        #supplyBox .sup-pay span{flex:1;min-width:0}
+                        #supplyBox .sup-pay b{display:block;font-weight:700;color:var(--ink)}
+                        #supplyBox .sup-pay small{display:block;color:var(--muted);font-size:.74rem;margin-top:2px;line-height:1.5}
+                        #supplyBox .sup-plus{font-style:normal;font-weight:700;font-size:.76rem;color:var(--primary-blue);background:var(--brand-soft);border-radius:8px;padding:3px 7px;white-space:nowrap;align-self:center;font-variant-numeric:tabular-nums;direction:ltr}
+                        #supplyBox .sup-sum{margin:14px 0 4px;padding:12px 14px;border-radius:14px;border:1px solid var(--line);background:#F8FAFC;font-size:.84rem}
+                        #supplyBox .sup-sum.empty{color:var(--muted);text-align:center}
+                        #supplyBox .sup-sum.bad{background:#FEF3F2;border-color:#FECDCA;color:#B42318;font-weight:600}
+                        #supplyBox .sup-sum.flash{border-color:var(--primary-blue);box-shadow:0 0 0 1px var(--primary-blue) inset}
+                        #supplyBox .sup-sh{font-weight:700;color:var(--ink);font-size:.86rem;margin-bottom:4px}
+                        #supplyBox .sup-sr{display:flex;justify-content:space-between;gap:12px;padding:3px 0}
+                        #supplyBox .sup-sr > span{color:var(--muted);flex:none}
+                        #supplyBox .sup-sr b{font-weight:600;color:var(--ink);text-align:end;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-variant-numeric:tabular-nums}
+                        #supplyBox .sup-sr b i{font-style:normal;color:var(--muted);font-weight:500}
+                        #supplyBox .sup-sf{margin-top:8px;padding-top:6px;border-top:1px solid var(--line)}
+                        #supplyBox .sup-st{display:flex;justify-content:space-between;align-items:baseline;margin-top:6px;padding-top:8px;border-top:1px dashed var(--line-2)}
+                        #supplyBox .sup-st span{font-weight:700;color:var(--ink)}
+                        #supplyBox .sup-st b{font-weight:700;font-size:1.15rem;color:var(--primary-blue);font-variant-numeric:tabular-nums}
+                        #supplyBox .sup-sn{font-size:.74rem;color:var(--muted);margin-top:6px;line-height:1.6}
+                        #supplyBox .sup-new{border:1px solid var(--line);border-radius:16px;padding:12px;margin-top:10px;background:#fff;box-shadow:0 1px 2px rgba(15,23,42,.04)}
+                        #supplyBox .sup-nh{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+                        #supplyBox .sup-nh b{font-weight:700;color:var(--ink);font-size:.92rem}
+                        #supplyBox .sup-x{width:32px;height:32px;border-radius:10px;border:1px solid var(--line);background:#fff;color:var(--muted);display:flex;align-items:center;justify-content:center;padding:0;cursor:pointer}
+                        #supplyBox .sup-x svg{width:16px;height:16px}
+                        #supplyBox .sup-srch{display:flex;gap:6px;margin-top:8px}
+                        #supplyBox .sup-srch button{display:inline-flex;align-items:center;gap:6px;border:0;border-radius:12px;background:var(--primary-blue);color:#fff;font:inherit;font-weight:600;font-size:.85rem;padding:0 14px;white-space:nowrap;cursor:pointer}
+                        #supplyBox .sup-srch button svg{width:16px;height:16px;flex:none}
+                        #supplyBox .sup-res{display:flex;flex-direction:column;gap:6px;margin-top:6px}
+                        #supplyBox .sup-res:empty{display:none}
+                        #supplyBox .sup-ri{display:flex;align-items:center;gap:10px;border:1px solid var(--line);border-radius:12px;background:#fff;padding:8px 10px;text-align:start;font:inherit;cursor:pointer;width:100%}
+                        #supplyBox .sup-ri em{font-style:normal;width:24px;height:24px;border-radius:50%;background:var(--primary-blue);color:#fff;font-weight:700;font-size:.75rem;display:flex;align-items:center;justify-content:center;flex:none}
+                        #supplyBox .sup-ri span{flex:1;min-width:0}
+                        #supplyBox .sup-ri b{display:block;font-weight:600;font-size:.85rem;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+                        #supplyBox .sup-ri small{display:block;font-size:.72rem;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+                        #supplyBox .sup-hint{font-size:.75rem;color:var(--muted);margin:8px 0;line-height:1.6}
+                        #supplyBox .sup-hint.bad{color:#B42318}
+                        #supplyBox .sup-hint.ok{color:var(--success)}
+                        #supplyBox .sup-glink{display:inline-flex;align-items:center;gap:6px;border:0;background:none;color:var(--primary-blue);font:inherit;font-size:.78rem;font-weight:600;padding:8px 0;cursor:pointer}
+                        #supplyBox .sup-glink svg{width:14px;height:14px;flex:none}
+                        #supplyBox .sup-act{display:flex;gap:8px;margin-top:4px}
+                        #supplyBox .sup-act button{flex:1;display:inline-flex;align-items:center;justify-content:center;gap:6px;border-radius:12px;padding:11px;border:1px solid var(--line-2);background:#fff;font:inherit;font-weight:600;font-size:.85rem;color:var(--ink);cursor:pointer}
+                        #supplyBox .sup-act .sup-save{background:var(--primary-blue);border-color:var(--primary-blue);color:#fff}
+                        #supplyBox .sup-act svg{width:16px;height:16px;flex:none}
+                        #supplyBox .sup-del{display:flex;align-items:center;justify-content:center;gap:6px;width:100%;border:0;background:none;color:#B42318;font:inherit;font-size:.78rem;font-weight:600;padding:10px 0 2px;cursor:pointer}
+                        #supplyBox .sup-del svg{width:14px;height:14px;flex:none}
+                        
+                        .sup-map{position:relative;height:260px;border-radius:14px;overflow:hidden;border:1px solid var(--line);background:#E9EEF3;font-family:inherit}
+                        .sup-map .sup-mapc{position:absolute;inset:0}
+                        .sup-map .sup-pin{position:absolute;left:50%;top:50%;width:34px;height:44px;transform:translate(-50%,-100%);z-index:5;pointer-events:none;filter:drop-shadow(0 2px 2px rgba(15,23,42,.3))}
+                        .sup-map .sup-mb{position:absolute;top:10px;z-index:6;display:inline-flex;align-items:center;gap:6px;height:36px;padding:0 10px;border-radius:10px;border:1px solid var(--line);background:#fff;color:var(--ink);font:inherit;font-weight:600;font-size:.78rem;box-shadow:0 1px 3px rgba(15,23,42,.14);cursor:pointer}
+                        .sup-map .sup-mb svg{width:16px;height:16px;flex:none}
+                        .sup-map .sup-me{inset-inline-start:10px}
+                        .sup-map .sup-fsb{inset-inline-end:10px;width:36px;padding:0;justify-content:center}
+                        .sup-map .sup-fsbar{display:none}
+                        .sup-map .sup-lmk{background:#8A5300;color:#fff;border:2px solid #fff;border-radius:50%;font:700 12px/20px sans-serif;text-align:center;box-shadow:0 1px 3px rgba(0,0,0,.3)}
+                        .sup-map.fs{position:fixed;inset:0;z-index:3000;height:auto;border-radius:0;border:0}
+                        .sup-map.fs .sup-mb{top:max(12px, env(safe-area-inset-top))}
+                        .sup-map.fs .leaflet-bottom{bottom:104px}
+                        
+                        .sup-map.fs .sup-fsbar{display:flex;position:absolute;left:12px;right:12px;bottom:calc(max(10px, env(safe-area-inset-bottom)) + 28px);z-index:6;align-items:center;gap:10px;background:#fff;border:1px solid var(--line);border-radius:14px;padding:10px 12px;box-shadow:0 4px 16px rgba(15,23,42,.16)}
+                        .sup-map .sup-fsbar span{flex:1;min-width:0;font-size:.8rem;color:var(--ink-2);line-height:1.5}
+                        .sup-map .sup-fsbar button{border:0;border-radius:10px;background:var(--primary-blue);color:#fff;font:inherit;font-weight:600;padding:9px 20px;cursor:pointer;flex:none}
                     </style>
                     <div id="supplyBox" class="hidden-section">
-                        <div class="sup-l" style="margin-top:4px">من أين يجلبها الكابتن؟</div>
-                        <div class="sup-chips" id="supPlaces"><span style="opacity:.6;font-size:.8rem">جارٍ تحميل أماكنك…</span></div>
+                        <div class="sup-hd"><b>أماكني</b><button type="button" class="sup-add" onclick="supNewPlace()"><i data-lucide="plus"></i><span>مكان جديد</span></button></div>
+                        <div class="sup-sub">من وين يجيب الكابتن مقاضيك؟ اختار المحلّ.</div>
+                        <div class="sup-cards" id="supPlaces"><div class="sup-empty">جارٍ تحميل أماكنك…</div></div>
                         <div class="sup-new hidden-section" id="supNew">
-                            <div class="sup-row"><input id="supName" maxlength="60" placeholder="اسم المحلّ (مثلاً: مخبز الأمل)"><input id="supPh" inputmode="tel" maxlength="16" placeholder="هاتف المحلّ (اختياريّ)"></div>
+                            <div class="sup-nh"><b id="supNewT">محلّ جديد</b><button type="button" class="sup-x" onclick="supCancelNew()" aria-label="رجوع"><i data-lucide="x"></i></button></div>
+                            <input id="supName" maxlength="60" placeholder="اسم المحلّ (مثلاً: مخبز الأمل)" oninput="this.dataset.auto=''">
                             <select id="supArea"></select>
+                            <input id="supPh" inputmode="tel" maxlength="16" placeholder="هاتف المحلّ (اختياري)">
                             
-                            <div style="display:flex;gap:6px;margin-top:8px"><input id="supSearch" placeholder="اكتب اسم المحلّ، أو الصق رابطه من جوجل" oninput="supLinkInput()" onkeydown="if(event.key==='Enter'){event.preventDefault();supSearchMap();}"><button type="button" class="sup-chip" style="white-space:nowrap" onclick="supSearchMap()">🔎 ابحث</button></div>
-                            <div class="sup-chips" id="supResults" style="margin-top:6px"></div>
-                            <div class="sup-hint" id="supLinkMsg">اكتب اسم المحلّ واضغط «ابحث»، ثمّ اختره من القائمة فيقع الدبّوس عليه.</div>
-                            <button type="button" class="sup-chip" style="margin-bottom:8px" onclick="supGoogle()">🗺️ أو افتحه في خرائط جوجل</button>
-                            <div style="font-size:.75rem;opacity:.7;margin:0 0 6px">أو حرّك الخريطة بيدك حتى يقع الدبّوس على المحلّ:</div>
-                            <div class="position-relative">
-                                <div id="supMap" style="height:190px;border-radius:12px;border:1px solid rgba(0,0,0,.08)"></div>
-                                <img src="https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png" alt="" style="position:absolute;top:50%;left:50%;transform:translate(-50%,-100%);z-index:1000;pointer-events:none;width:25px;height:35px">
+                            <div class="sup-srch"><input id="supSearch" placeholder="ابحث باسم المحلّ، أو الصق رابطه من خرائط جوجل" oninput="supLinkInput()" onkeydown="if(event.key==='Enter'){event.preventDefault();supSearchMap();}"><button type="button" onclick="supSearchMap()"><i data-lucide="search"></i><span>ابحث</span></button></div>
+                            <div class="sup-res" id="supResults"></div>
+                            <div class="sup-hint" id="supLinkMsg">اكتب اسم المحلّ واضغط «ابحث»، أو اضغط على المحلّ بالخريطة، أو حرّك الخريطة لحدّ ما يصير الدبّوس عليه.</div>
+                            <div class="sup-map" id="supMapBox">
+                                <div class="sup-mapc" id="supMap"></div>
+                                <svg class="sup-pin" viewBox="0 0 34 44" aria-hidden="true"><path d="M17 1.5C8.4 1.5 1.5 8.3 1.5 16.8 1.5 28.2 17 42.5 17 42.5S32.5 28.2 32.5 16.8C32.5 8.3 25.6 1.5 17 1.5z" fill="#8A5300" stroke="#fff" stroke-width="2"/><circle cx="17" cy="16.5" r="5.5" fill="#fff"/></svg>
+                                <button type="button" class="sup-mb sup-me" onclick="supMapHome()"><i data-lucide="locate-fixed"></i><span>موقعي</span></button>
+                                <button type="button" class="sup-mb sup-fsb" id="supFsBtn" onclick="supMapFs()" aria-label="ملء الشاشة"><i data-lucide="maximize-2"></i></button>
+                                <div class="sup-fsbar"><span id="supFsMsg">حرّك الخريطة لحدّ ما يصير الدبّوس على المحلّ</span><button type="button" onclick="supMapFs(false)">تمّ</button></div>
                             </div>
-                            <div class="sup-mini-act"><button type="button" onclick="supSavePlace()">💾 احفظ المكان</button><button type="button" onclick="supCancelNew()">رجوع</button></div>
+                            <button type="button" class="sup-glink" onclick="supGoogle()"><i data-lucide="external-link"></i><span>افتح خرائط جوجل وانسخ رابط المحلّ</span></button>
+                            <div class="sup-act"><button type="button" class="sup-save" onclick="supSavePlace()"><i data-lucide="check"></i><span>احفظ المكان</span></button><button type="button" onclick="supCancelNew()">رجوع</button></div>
+                            <button type="button" class="sup-del hidden-section" id="supDelBtn" onclick="supDelPlace()"><i data-lucide="trash-2"></i><span>احذف هذا المكان</span></button>
                         </div>
-                        <div class="sup-l">ماذا يجلب؟</div>
-                        <textarea id="supItems" maxlength="600" placeholder="مثلاً: 50 صمونة · رزمة ورق تغليف · 2 كارتون علب"></textarea>
-                        <div class="sup-l">ثمن المقاضي</div>
+                        <div class="sup-l">شنو يجيب الكابتن؟</div>
+                        <textarea id="supItems" maxlength="600" placeholder="مثلاً: 50 صمونة · رزمة ورق تغليف · 2 كارتون علب" oninput="supShowFee()"></textarea>
+                        <div class="sup-l">منو يدفع ثمن المقاضي؟</div>
                         <div class="sup-pay">
-                            <label><input type="radio" name="supPay" value="pre" checked onchange="supPayChanged()"><span><b>مدفوعة مسبقاً</b><br><small>اتّفقتُ مع المحلّ — الكابتن يستلم فقط</small></span></label>
-                            <label><input type="radio" name="supPay" value="cap" onchange="supPayChanged()"><span><b>يدفعها الكابتن وأردّها له</b><br><small>يدفع للمحلّ ويكتب المبلغ، وتدفعه له مع الأجرة عند الوصول</small></span></label>
+                            <label class="on"><input type="radio" name="supPay" value="pre" checked onchange="supPayChanged()"><span><b>مدفوعة مسبقاً</b><small>متّفق ويّا المحلّ — الكابتن يستلم بس</small></span></label>
+                            <label><input type="radio" name="supPay" value="cap" onchange="supPayChanged()"><span><b>الكابتن يدفعها وأرجّعها إله</b><small>يدفع للمحلّ ويكتب المبلغ، وترجّعه إله ويّا الأجرة</small></span><em class="sup-plus" id="supCapPlus">+1,000</em></label>
                         </div>
-                        <input id="supMax" class="hidden-section" inputmode="numeric" maxlength="8" placeholder="أقصى مبلغٍ يدفعه الكابتن عنك (دينار)">
-                        <input id="supNote" maxlength="200" placeholder="ملاحظة للكابتن (اختياريّ)" style="margin-top:8px">
-                        <div class="sup-fee" id="supFee">اختر المكان لتظهر الأجرة</div>
+                        <input id="supMax" class="hidden-section" inputmode="numeric" maxlength="9" placeholder="أقصى مبلغ يدفعه الكابتن عنك (دينار)" oninput="supShowFee()" style="margin-top:8px">
+                        <input id="supNote" maxlength="200" placeholder="ملاحظة للكابتن (اختياري)" style="margin-top:8px">
+                        <div class="sup-sum empty" id="supFee">اختار المحلّ حتى تطلع الأجرة</div>
                         <button type="button" id="supSend" class="magical-submit-btn" onclick="supSend(this)">
                             أرسل كابتن المقاضي <i data-lucide="arrow-left" size="18"></i>
                         </button>
@@ -3794,6 +4089,7 @@ async function sendToAI(payload, {queueOnFail: queueOnFail = true} = {}) {
    const err = new Error(data.err || "HTTP " + r.status);
    err.status = r.status;
    err.terminal = !!data.terminal || [ 400, 403, 413, 429 ].includes(r.status);
+   err.reason = String(data.reason || "");
    throw err;
   }
   return data;
@@ -3951,7 +4247,7 @@ async function aiSendItem(item) {
  } catch (e) {
   if (e && e.terminal) {
    aiRemoveItem(item.id);
-   reportLostIntake(item, "terminal", e.message);
+   reportLostIntake(item, "terminal", e.message, e.reason);
   } else {
    const tries = aiBumpTries(item.id);
    if (tries >= 6) {
@@ -3977,7 +4273,7 @@ function queueAndSendAI(payload) {
 
 let aiQueueBusy = false;
 
-function reportLostIntake(item, why, serverMsg) {
+function reportLostIntake(item, why, serverMsg, reason) {
  try {
   const kind = item && item.payload && item.payload.kind || "";
   const label = kind === "voice" ? "الطلب الصوتي" : kind === "receipt" ? "طلب الوصل" : "الطلب";
@@ -3986,10 +4282,18 @@ function reportLostIntake(item, why, serverMsg) {
    minute: "2-digit"
   }) : "";
   resTrack("intake_lost", {
-   reason: (why || "") + "|" + kind
+   reason: (why || "") + "|" + kind + (reason ? "|" + reason : "")
   });
   setTimeout(() => {
    try {
+    if (reason === "res_brake") {
+     alert(label + " المُرسَل الساعة " + t + ":\n\n" + String(serverMsg || "").slice(0, 300));
+     return;
+    }
+    if (reason === "res_hold") {
+     alert(label + " المُرسَل الساعة " + t + " لم يدخل النظام:\n\n" + String(serverMsg || "").slice(0, 300) + "\n\nأرسله بعد هذا الموعد.");
+     return;
+    }
     alert("🛑 لم يصل " + label + " المُرسَل الساعة " + t + ".\n\n" + (why === "expired" ? "بقي في الانتظار أكثر من ٢٠ دقيقة بلا شبكة، فأُسقط كي لا يدخل الرادار متأخراً بعد أن سُلّم الطعام.\n\n" : why === "terminal" ? "رفضه الخادم: " + String(serverMsg || "").slice(0, 200) + "\n\n" : "فشل الإرسال بعد ستّ محاولات.\n\n") + "⚠️ هذا الطلب غير موجود في النظام. أعد إدخاله.");
    } catch (e) {}
   }, 400);
@@ -4463,6 +4767,73 @@ function resTrack(ev, meta) {
  } catch (e) {}
 }
 
+async function createWithFeeConsent(payload) {
+ let ok = null;
+ for (let k = 0; k < 3; k++) {
+  try {
+   return await createOrderOnServer(ok ? Object.assign({}, payload, {
+    fee_ok: ok
+   }) : payload);
+  } catch (e) {
+   if (!(e && e.message === "SERVER_REJECTED" && e.reason === "fee_consent" && e.details) || k === 2) throw e;
+   ok = await askFeeConsent(e.details);
+   try {
+    resTrack(ok ? "fee_ok" : "fee_no", {
+     far: e.details.far && e.details.far.y || 0,
+     car: e.details.car && e.details.car.y || 0,
+     by: ok ? ok.by : ""
+    });
+   } catch (_) {}
+   if (!ok) throw new Error("FEE_DECLINED");
+  }
+ }
+}
+
+function askFeeConsent(det) {
+ return new Promise(resolve => {
+  const ku = window.RES_LANG === "ckb", far = det && det.far, car = det && det.car;
+  const n = x => vehFmt(Number(x) || 0);
+  const ov = document.createElement("div");
+  ov.setAttribute("data-noku", "");
+  ov.style.cssText = "position:fixed;inset:0;background:rgba(15,23,42,.55);z-index:99999;display:flex;align-items:center;justify-content:center;padding:16px;";
+  const box = document.createElement("div");
+  box.style.cssText = "background:#fff;color:#0f172a;border-radius:18px;max-width:420px;width:100%;padding:18px;font-weight:700;line-height:1.8;font-size:.9rem;box-shadow:0 10px 40px rgba(0,0,0,.25);";
+  let h = '<div style="font-size:1.05rem;font-weight:900;margin-bottom:8px">' + (ku ? "💰 زیادە لەسەر ئەم داواکارییە" : "💰 زيادة على هذا الطلب") + "</div>";
+  if (far) h += '<div style="background:#FFF6E0;border:1px solid #F5D78E;border-radius:12px;padding:10px;margin-bottom:8px;color:#7A4F00">' + (ku ? "📍 داواکارییەکە دوورە (" + far.km + " کم): زیادەی <b>" + n(far.y) + " د.ع</b> بۆ کاپتن <b>لەسەر چێشتخانە</b> — کاپتن لەو پارەیەی دەیگەڕێنێتەوە بۆتان دەیبڕێت." : "📍 الطلب بعيد (" + far.km + " كم): زيادة <b>" + n(far.y) + " د.ع</b> للكابتن <b>على المطعم</b> — الكابتن يخصمها من الفلوس اللي يرجّعها إلكم.") + "</div>";
+  if (car) {
+   h += '<div style="background:#EEF2FF;border:1px solid #C7D2FE;border-radius:12px;padding:10px;margin-bottom:8px">' + (car.why === "rain" ? ku ? "🌧️ زیادەی باران بۆ داواکاریی ئۆتۆمبێل: " : "🌧️ زيادة المطر لطلب السيّارة: " : ku ? "🚗 زیادەی ئۆتۆمبێل: " : "🚗 زيادة السيّارة: ") + "<b>" + n(car.y) + " د.ع</b> — " + (ku ? "کێ دەیدات؟" : "منو يدفعها؟") + '<div style="display:flex;flex-direction:column;gap:6px;margin-top:6px">' + [ [ "res", ku ? "لەسەر چێشتخانە" : "على المطعم" ], [ "cust", ku ? "بخرێتە سەر کڕیار (سەر نرخ و کرێی گەیاندن)" : "تُضاف على الزبون (على السعر وأجرة التوصيل)" ], [ "none", ku ? "بێ زیادە" : "بلا زيادة" ] ].map(([v, t]) => '<label style="display:flex;gap:8px;align-items:center;cursor:pointer"><input type="radio" name="feeBy" value="' + v + '">' + t + "</label>").join("") + "</div></div>";
+  }
+  h += '<div style="display:flex;gap:8px;margin-top:10px"><button type="button" data-fee="ok" style="flex:1;border:0;border-radius:12px;padding:12px;background:#16a34a;color:#fff;font-weight:900">' + (ku ? "✅ باشە — بنێرە" : "✅ موافق — أرسل") + "</button>" + '<button type="button" data-fee="no" style="flex:1;border:0;border-radius:12px;padding:12px;background:#e2e8f0;color:#0f172a;font-weight:800">' + (ku ? "هەڵوەشاندنەوە" : "إلغاء") + "</button></div>";
+  box.innerHTML = h;
+  ov.appendChild(box);
+  document.body.appendChild(ov);
+  const done = v => {
+   try {
+    ov.remove();
+   } catch (_) {}
+   resolve(v);
+  };
+  box.querySelector('[data-fee="no"]').onclick = () => done(null);
+  box.querySelector('[data-fee="ok"]').onclick = () => {
+   let by = "none";
+   if (car) {
+    const r = box.querySelector('input[name="feeBy"]:checked');
+    if (!r) {
+     const l = box.querySelectorAll('input[name="feeBy"]');
+     if (l[0]) l[0].parentElement.parentElement.style.outline = "2px solid #dc2626";
+     return;
+    }
+    by = r.value;
+   }
+   done({
+    far: far ? Number(far.y) || 0 : 0,
+    car: car ? Number(car.y) || 0 : 0,
+    by: by
+   });
+  };
+ });
+}
+
 async function createOrderOnServer(payload) {
  const cid = beginAttemptCid();
  let lastCode = "";
@@ -4470,7 +4841,8 @@ async function createOrderOnServer(payload) {
   try {
    const call = httpsCallable(fns, "createOrder");
    const r = await Promise.race([ call(Object.assign({}, payload, {
-    cid: cid
+    cid: cid,
+    allow_hold: true
    })), new Promise((_, rej) => setTimeout(() => rej(new Error("cid_timeout")), 15e3)) ]);
    const oid = r && r.data && r.data.orderId;
    if (!oid) throw new Error("no_order_id");
@@ -4485,6 +4857,8 @@ async function createOrderOnServer(payload) {
    resTrack("create_server", {
     orderId: oid
    });
+   window.__lastP10 = String(r.data && r.data.p10_hold || "");
+   window.__lastSupFee = Number(r.data && r.data.sup_fee || 0);
    endAttemptCid();
    return oid;
   } catch (e) {
@@ -4494,9 +4868,11 @@ async function createOrderOnServer(payload) {
     resTrack("create_rejected", {
      reason: lastCode
     });
-    endAttemptCid();
+    if (String(e && e.details && e.details.reason || "") !== "fee_consent") endAttemptCid();
     const er = new Error("SERVER_REJECTED");
-    er.serverMsg = String(e && e.message || "").slice(0, 200);
+    er.serverMsg = String(e && e.message || "").slice(0, 300);
+    er.reason = String(e && e.details && e.details.reason || "");
+    er.details = e && e.details || null;
     throw er;
    }
    if (isSafeToFallback(lastCode)) {
@@ -7778,13 +8154,67 @@ window.showLoading = function(s) {
  document.getElementById("loadingOverlay").style.display = s ? "flex" : "none";
 };
 
-let _supNext = null, _supPlaces = {}, _supSel = "", _supMap = null, _supPick = null, _supLoaded = false;
+let _supNext = null, _supPlaces = {}, _supSel = "", _supPick = null, _supLoaded = false, _supEdit = "";
+
+let _supK = {
+ add: 1e3,
+ cap: 1e3
+}, _supKAt = 0;
 
 const supResPhone = () => String(regPhone || "").replace(/\D/g, "").replace(/^964/, "").replace(/^0+/, "");
 
-const supNum = s => parseInt(String(s || "").replace(/[٠-٩]/g, d => "٠١٢٣٤٥٦٧٨٩".indexOf(d)).replace(/[^\d]/g, ""), 10) || 0;
+const supNum = s => parseInt(String(s == null ? "" : s).replace(/[٠-٩]/g, d => "٠١٢٣٤٥٦٧٨٩".indexOf(d)).replace(/[۰-۹]/g, d => "۰۱۲۳۴۵۶۷۸۹".indexOf(d)).replace(/[^\d]/g, ""), 10) || 0;
 
-const supFeeOf = p => p && p.area && myCustomPriceList && myCustomPriceList[p.area] !== undefined ? parseInt(myCustomPriceList[p.area], 10) || 0 : 0;
+const supFmt = n => (Number(n) || 0).toLocaleString("en-US");
+
+const supKu = () => window.RES_LANG === "ckb";
+
+const supIcons = () => {
+ try {
+  if (typeof lucide !== "undefined") lucide.createIcons();
+ } catch (_) {}
+};
+
+const supPayNow = () => document.querySelector('input[name="supPay"]:checked')?.value === "cap" ? "cap" : "pre";
+
+const supBase = p => p && p.area && myCustomPriceList && Object.prototype.hasOwnProperty.call(myCustomPriceList, p.area) ? supNum(myCustomPriceList[p.area]) : 0;
+
+function supKnobs(v) {
+ v = v && typeof v === "object" ? v : {};
+ const one = x => {
+  const n = typeof x === "number" ? x : typeof x === "string" && x.trim() ? Number(x.replace(/[,\s]/g, "")) : NaN;
+  return isFinite(n) && n >= 0 && n <= 2e4 ? Math.round(n) : 1e3;
+ };
+ return {
+  add: one(v.add),
+  cap: one(v.cap)
+ };
+}
+
+function supFeeOf(p, pay) {
+ const base = supBase(p);
+ if (!base) return null;
+ const add = _supK.add, cap = pay === "cap" ? _supK.cap : 0;
+ return {
+  base: base,
+  add: add,
+  cap: cap,
+  total: base + add + cap
+ };
+}
+
+async function supLoadKnobs() {
+ if (_supKAt && Date.now() - _supKAt < 10 * 6e4) return;
+ _supKAt = Date.now();
+ try {
+  const s = await get(ref(db, "system_settings/supply_fee"));
+  _supK = supKnobs(s.val());
+ } catch (e) {
+  _supKAt = 0;
+ }
+}
+
+const supIds = () => Object.keys(_supPlaces).sort((a, b) => (_supPlaces[b].at || 0) - (_supPlaces[a].at || 0));
 
 async function supInit() {
  const ph = supResPhone();
@@ -7793,7 +8223,10 @@ async function supInit() {
   return;
  }
  const sel = document.getElementById("supArea");
- if (sel) sel.innerHTML = '<option value="">منطقة المحلّ (للأجرة)</option>' + Object.keys(myCustomPriceList || {}).sort().map(a => `<option value="${escapeHtml(a)}">${escapeHtml(a)} — ${escapeHtml(String(myCustomPriceList[a]))}</option>`).join("");
+ if (sel) sel.innerHTML = '<option value="">' + (supKu() ? "ناوچەی دوکان (کرێکە لەوێوە دەژمێردرێت)" : "منطقة المحلّ (منها الأجرة)") + "</option>" + Object.keys(myCustomPriceList || {}).sort().map(a => `<option value="${escapeHtml(a)}">${escapeHtml(a)} — ${supFmt(supNum(myCustomPriceList[a]))}</option>`).join("");
+ supLoadKnobs().then(() => {
+  if (_supLoaded) supRenderPlaces();
+ });
  if (_supLoaded) {
   supRenderPlaces();
   return;
@@ -7805,100 +8238,381 @@ async function supInit() {
  } catch (e) {
   _supPlaces = {};
  }
- const ids = Object.keys(_supPlaces);
- if (!_supSel && ids.length) _supSel = ids.sort((a, b) => (_supPlaces[b].at || 0) - (_supPlaces[a].at || 0))[0];
+ const ids = supIds();
+ if (!_supSel && ids.length) _supSel = ids[0];
  supRenderPlaces();
- if (!ids.length) supNewPlace();
+}
+
+function supCardHtml(id) {
+ const p = _supPlaces[id] || {}, f = supFeeOf(p, "pre"), sv = sid(id), L = p.last;
+ const fee = f ? `<div class="sup-cf"><small>الأجرة</small><b>${supFmt(f.total)}</b></div>` : `<div class="sup-cf bad"><b>منطقة بلا أجرة</b></div>`;
+ const last = L && L.items ? `<div class="sup-last"><span><em>آخر مرّة:</em> <bdi data-noku>${escapeHtml(String(L.items).replace(/\s*\n\s*/g, "، "))}</bdi></span>` + `<button type="button" class="sup-again" onclick="event.stopPropagation();supAgain('${sv}')"><i data-lucide="rotate-ccw"></i><span>اطلب نفس المرّة السابقة</span></button></div>` : "";
+ return `<div class="sup-card${id === _supSel ? " on" : ""}" role="button" tabindex="0" onclick="supPick('${sv}')">` + `<div class="sup-ct"><span class="sup-ic"><i data-lucide="store"></i></span>` + `<div class="sup-cn"><b data-noku>${escapeHtml(p.n)}</b><small>${p.area ? `<bdi data-noku>${escapeHtml(p.area)}</bdi>` : "بلا منطقة"}</small></div>` + fee + `<button type="button" class="sup-ed" onclick="event.stopPropagation();supEditPlace('${sv}')" aria-label="عدّل المحلّ"><i data-lucide="pencil"></i></button></div>` + last + `</div>`;
 }
 
 function supRenderPlaces() {
  const box = document.getElementById("supPlaces");
  if (!box) return;
- const ids = Object.keys(_supPlaces).sort((a, b) => (_supPlaces[b].at || 0) - (_supPlaces[a].at || 0));
- box.innerHTML = ids.map(id => {
-  const p = _supPlaces[id];
-  return `<button type="button" class="sup-chip ${id === _supSel ? "on" : ""}" onclick="supPick('${sid(id)}')">${escapeHtml(p.n)}<small>${escapeHtml(p.area || "بلا منطقة")} · ${supFeeOf(p) ? supFeeOf(p).toLocaleString("en-US") + " د.ع" : "بلا أجرة"}</small></button>`;
- }).join("") + `<button type="button" class="sup-chip add" onclick="supNewPlace()">＋ مكانٌ جديد</button>` + (_supSel && _supPlaces[_supSel] ? `<button type="button" class="sup-chip" style="opacity:.7" onclick="supDelPlace()">حذف «${escapeHtml(_supPlaces[_supSel].n)}»</button>` : "");
+ const ids = supIds();
+ box.innerHTML = ids.length ? ids.map(supCardHtml).join("") : `<div class="sup-empty">ما عندك محلّ محفوظ بعد.<br>ضيف المخبز أو المحلّ اللي تجيب منه مقاضيك — مرّة وحدة وتبقى.<br><button type="button" class="sup-add" onclick="supNewPlace()"><i data-lucide="plus"></i><span>ضيف أوّل محلّ</span></button></div>`;
+ supIcons();
  supShowFee();
 }
 
 function supShowFee() {
  const el = document.getElementById("supFee");
  if (!el) return;
- const p = _supPlaces[_supSel];
+ const plus = document.getElementById("supCapPlus");
+ if (plus) plus.textContent = "+" + supFmt(_supK.cap);
+ const p = _supPlaces[_supSel], pay = supPayNow();
  if (!p) {
-  el.className = "sup-fee";
-  el.textContent = "اختر المكان لتظهر الأجرة";
+  el.className = "sup-sum empty";
+  el.textContent = "اختار المحلّ حتى تطلع الأجرة";
   return;
  }
- const fee = supFeeOf(p);
- el.className = "sup-fee" + (fee ? "" : " bad");
- el.textContent = fee ? `أجرة المشوار: ${fee.toLocaleString("en-US")} د.ع (من ${p.area})` : "منطقة هذا المحلّ ليست في قائمة أجورك — احذفه وأضفه بمنطقةٍ من القائمة";
+ const f = supFeeOf(p, pay);
+ if (!f) {
+  el.className = "sup-sum bad";
+  el.textContent = "منطقة هذا المحلّ مو بقائمة أجورك — عدّل المحلّ واختر منطقة من القائمة.";
+  return;
+ }
+ const items = (document.getElementById("supItems").value || "").trim().replace(/\s*\n\s*/g, "، ");
+ const max = supNum(document.getElementById("supMax").value);
+ const row = (k, v) => `<div class="sup-sr"><span>${k}</span><b>${v}</b></div>`;
+ el.className = "sup-sum";
+ el.innerHTML = `<div class="sup-sh">ملخّص الطلب</div>` + row("المحلّ", `<bdi data-noku>${escapeHtml(p.n)}</bdi> · <bdi data-noku>${escapeHtml(p.area)}</bdi>`) + row("يجيب", items ? `<bdi data-noku>${escapeHtml(items)}</bdi>` : "<i>اكتبها فوق</i>") + row("الثمن", pay === "cap" ? max ? `<span>الكابتن يدفع حتى</span> <bdi dir="ltr">${supFmt(max)}</bdi>` : "<span>الكابتن يدفع</span>" : "<span>مدفوعة مسبقاً</span>") + `<div class="sup-sf">` + row("أجرة المنطقة", supFmt(f.base)) + row("مشوار المقاضي", '<bdi dir="ltr">+' + supFmt(f.add) + "</bdi>") + (f.cap ? row("الكابتن يدفع عنك", '<bdi dir="ltr">+' + supFmt(f.cap) + "</bdi>") : "") + `<div class="sup-st"><span>الأجرة</span><b>${supFmt(f.total)} د.ع</b></div></div>` + `<div class="sup-sn">${pay === "cap" ? "تدفع للكابتن الأجرة وثمن المقاضي اللي دفعه للمحلّ." : "تدفع الأجرة للكابتن من يوصّل المقاضي."}</div>`;
 }
 
+window.supShowFee = supShowFee;
+
 window.supPick = function(id) {
+ if (!_supPlaces[id]) return;
  _supSel = id;
- document.getElementById("supNew").classList.add("hidden-section");
+ window.supCancelNew();
  supRenderPlaces();
 };
 
 window.supPayChanged = function() {
- const cap = document.querySelector('input[name="supPay"]:checked')?.value === "cap";
+ const cap = supPayNow() === "cap";
+ document.querySelectorAll("#supplyBox .sup-pay label").forEach(l => {
+  const i = l.querySelector("input");
+  l.classList.toggle("on", !!(i && i.checked));
+ });
  document.getElementById("supMax").classList.toggle("hidden-section", !cap);
- if (cap) document.getElementById("supMax").focus();
+ if (cap && !document.getElementById("supMax").value) document.getElementById("supMax").focus();
+ supShowFee();
 };
 
-window.supNewPlace = function() {
- document.getElementById("supNew").classList.remove("hidden-section");
- [ "supName", "supPh", "supSearch" ].forEach(i => {
-  const e = document.getElementById(i);
-  if (e) e.value = "";
+window.supAgain = function(id) {
+ const p = _supPlaces[id], L = p && p.last;
+ if (!L) return;
+ _supSel = id;
+ window.supCancelNew();
+ document.getElementById("supItems").value = String(L.items || "");
+ document.getElementById("supNote").value = String(L.note || "");
+ const cap = L.pay === "cap";
+ document.querySelectorAll('input[name="supPay"]').forEach(r => {
+  r.checked = r.value === (cap ? "cap" : "pre");
  });
+ document.getElementById("supMax").value = cap && L.max ? String(L.max) : "";
+ supRenderPlaces();
+ window.supPayChanged();
+ const el = document.getElementById("supFee");
+ if (el) {
+  el.classList.add("flash");
+  setTimeout(() => el.classList.remove("flash"), 1600);
+  try {
+   el.scrollIntoView({
+    behavior: "smooth",
+    block: "center"
+   });
+  } catch (_) {}
+ }
+};
+
+function supOpenNew(title, p) {
+ const box = document.getElementById("supNew");
+ box.classList.remove("hidden-section");
+ document.getElementById("supNewT").textContent = title;
+ document.getElementById("supName").value = p ? String(p.n || "") : "";
+ document.getElementById("supName").dataset.auto = "";
+ document.getElementById("supPh").value = p ? String(p.ph || "") : "";
+ document.getElementById("supArea").value = p && p.area ? p.area : "";
+ document.getElementById("supSearch").value = "";
+ document.getElementById("supDelBtn").classList.toggle("hidden-section", !p);
  supShowResults([]);
  supMsg(SUP_FIND_HINT);
- supMapInit(regLat, regLng);
+ if (p) supMapInit(p.lat, p.lng, 18); else supMapInit(regLat, regLng, 16);
+ try {
+  box.scrollIntoView({
+   behavior: "smooth",
+   block: "start"
+  });
+ } catch (_) {}
+}
+
+window.supNewPlace = function() {
+ _supEdit = "";
+ supOpenNew("محلّ جديد", null);
  setTimeout(() => document.getElementById("supName").focus(), 50);
 };
 
-window.supCancelNew = function() {
- document.getElementById("supNew").classList.add("hidden-section");
+window.supEditPlace = function(id) {
+ if (!_supPlaces[id]) return;
+ _supEdit = id;
+ supOpenNew("تعديل المحلّ", _supPlaces[id]);
 };
 
-function supMapInit(lat, lng, tries) {
+window.supCancelNew = function() {
+ window.supMapFs(false);
+ const b = document.getElementById("supNew");
+ if (b) b.classList.add("hidden-section");
+ _supEdit = "";
+ _supPoiSeq++;
+ supShowResults([]);
+};
+
+const SUP_GM_KEY = "";
+
+const SUP_KRK = {
+ south: 34.6,
+ west: 43.2,
+ north: 36.1,
+ east: 45
+};
+
+let _supMapK = "", _supG = null, _supL = null, _supGmP = null, _supGmDead = false, _supMk = [];
+
+function supGmLoad() {
+ if (_supGmDead || !SUP_GM_KEY) return Promise.resolve(false);
+ if (window.google && google.maps && google.maps.Map) return Promise.resolve(true);
+ if (_supGmP) return _supGmP;
+ _supGmP = new Promise(resolve => {
+  let done = false;
+  const fin = ok => {
+   if (done) return;
+   done = true;
+   if (!ok) _supGmDead = true;
+   resolve(ok);
+  };
+  window.__supGmReady = () => fin(!!(window.google && google.maps && google.maps.Map));
+  const s = document.createElement("script");
+  s.src = "https://maps.googleapis.com/maps/api/js?key=" + SUP_GM_KEY + "&callback=__supGmReady&loading=async&language=ar&region=IQ&v=weekly";
+  s.async = true;
+  s.onerror = () => fin(false);
+  document.head.appendChild(s);
+  setTimeout(() => fin(false), 15e3);
+ });
+ return _supGmP;
+}
+
+window.gm_authFailure = function() {
+ _supGmDead = true;
+ if (_supMapK === "g") supMapFallback("auth");
+};
+
+function supMapHost() {
+ const box = document.getElementById("supMap");
+ box.innerHTML = "";
+ const el = document.createElement("div");
+ el.style.cssText = "position:absolute;inset:0";
+ box.appendChild(el);
+ return el;
+}
+
+function supGInit(c, z) {
+ const G = google.maps;
+ if (!_supG) {
+  _supG = new G.Map(supMapHost(), {
+   center: c,
+   zoom: z,
+   disableDefaultUI: true,
+   zoomControl: true,
+   zoomControlOptions: {
+    position: G.ControlPosition.LEFT_BOTTOM
+   },
+   clickableIcons: true,
+   gestureHandling: "greedy",
+   keyboardShortcuts: false,
+   restriction: {
+    latLngBounds: SUP_KRK,
+    strictBounds: false
+   }
+  });
+  _supMapK = "g";
+  _supG.addListener("center_changed", () => {
+   const p = _supG && _supG.getCenter();
+   if (p) _supPick = {
+    lat: p.lat(),
+    lng: p.lng()
+   };
+  });
+  _supG.addListener("click", e => {
+   if (e && e.placeId) {
+    if (e.stop) e.stop();
+    supPoi(e.placeId, e.latLng);
+   }
+  });
+  setTimeout(() => {
+   if (_supMapK === "g" && document.querySelector("#supMap .gm-err-container")) {
+    _supGmDead = true;
+    supMapFallback("err");
+   }
+  }, 4e3);
+  if (_supRes.length) supMarkers();
+ } else {
+  _supG.setCenter(c);
+  _supG.setZoom(z);
+ }
+ _supPick = {
+  lat: c.lat,
+  lng: c.lng
+ };
+}
+
+function supLInit(c, z, tries) {
  if (typeof L === "undefined") {
-  if ((tries || 0) < 60) setTimeout(() => supMapInit(lat, lng, (tries || 0) + 1), 500);
+  if ((tries || 0) < 60) setTimeout(() => supLInit(c, z, (tries || 0) + 1), 500);
   return;
  }
- const c = [ parseFloat(lat) || 35.468, parseFloat(lng) || 44.392 ];
- if (!_supMap) {
-  _supMap = L.map("supMap", {
+ if (!_supL) {
+  _supL = L.map(supMapHost(), {
    zoomControl: false
-  }).setView(c, 15);
+  }).setView([ c.lat, c.lng ], z);
   L.control.zoom({
    position: "bottomleft"
-  }).addTo(_supMap);
+  }).addTo(_supL);
   L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
    maxZoom: 19,
    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
-  }).addTo(_supMap);
-  _supMap.on("move", () => {
-   const p = _supMap.getCenter();
+  }).addTo(_supL);
+  _supL.on("move", () => {
+   const p = _supL.getCenter();
    _supPick = {
     lat: p.lat,
     lng: p.lng
    };
   });
- } else _supMap.setView(c, 15);
+  _supMapK = "l";
+  if (_supRes.length) supMarkers();
+ } else _supL.setView([ c.lat, c.lng ], z);
  _supPick = {
-  lat: c[0],
-  lng: c[1]
+  lat: c.lat,
+  lng: c.lng
  };
- setTimeout(() => _supMap && _supMap.invalidateSize(), 120);
+ setTimeout(() => _supL && _supL.invalidateSize(), 120);
 }
+
+function supMapInit(lat, lng, z) {
+ const c = {
+  lat: parseFloat(lat) || 35.468,
+  lng: parseFloat(lng) || 44.392
+ };
+ z = z || 16;
+ _supPick = {
+  lat: c.lat,
+  lng: c.lng
+ };
+ if (_supMapK === "g" && _supG) return supGInit(c, z);
+ if (_supMapK === "l" && _supL) return supLInit(c, z);
+ supGmLoad().then(ok => {
+  if (_supMapK) return;
+  if (ok && !_supGmDead) {
+   try {
+    return supGInit(c, z);
+   } catch (e) {
+    _supGmDead = true;
+    _supG = null;
+   }
+  }
+  try {
+   resTrack("sup_gm", {
+    why: "load"
+   });
+  } catch (_) {}
+  supLInit(c, z);
+ });
+}
+
+function supMapFallback(why) {
+ const c = _supPick || {
+  lat: parseFloat(regLat) || 35.468,
+  lng: parseFloat(regLng) || 44.392
+ };
+ supClearMarkers();
+ _supG = null;
+ _supMapK = "";
+ try {
+  resTrack("sup_gm", {
+   why: why || "auth"
+  });
+ } catch (_) {}
+ supLInit(c, 17);
+}
+
+function supMapGo(lat, lng, z) {
+ lat = Number(lat);
+ lng = Number(lng);
+ if (!isFinite(lat) || !isFinite(lng)) return;
+ if (_supMapK === "g" && _supG) {
+  _supG.panTo({
+   lat: lat,
+   lng: lng
+  });
+  if (z) _supG.setZoom(z);
+ } else if (_supMapK === "l" && _supL) _supL.setView([ lat, lng ], z || _supL.getZoom());
+ _supPick = {
+  lat: lat,
+  lng: lng
+ };
+}
+
+window.supMapHome = function() {
+ supMapGo(parseFloat(regLat) || 35.468, parseFloat(regLng) || 44.392, 16);
+ supMsg("رجعنا لموقع مطعمك.");
+};
+
+let _supFsHome = null;
+
+window.supMapFs = function(on) {
+ const box = document.getElementById("supMapBox");
+ if (!box) return;
+ const fs = on === undefined ? !box.classList.contains("fs") : !!on;
+ if (fs === box.classList.contains("fs")) return;
+ if (fs) {
+  _supFsHome = document.createComment("sup-map");
+  box.parentNode.insertBefore(_supFsHome, box);
+  document.body.appendChild(box);
+ } else if (_supFsHome && _supFsHome.parentNode) {
+  _supFsHome.parentNode.insertBefore(box, _supFsHome);
+  _supFsHome.remove();
+  _supFsHome = null;
+ }
+ box.classList.toggle("fs", fs);
+ document.documentElement.style.overflow = fs ? "hidden" : "";
+ const b = document.getElementById("supFsBtn");
+ if (b) {
+  b.setAttribute("aria-label", fs ? "تصغير الخريطة" : "ملء الشاشة");
+  b.innerHTML = '<i data-lucide="' + (fs ? "minimize-2" : "maximize-2") + '"></i>';
+  supIcons();
+ }
+ if (_supG && window.google) {
+  try {
+   _supG.setOptions({
+    zoomControlOptions: {
+     position: google.maps.ControlPosition[fs ? "LEFT_CENTER" : "LEFT_BOTTOM"]
+    }
+   });
+  } catch (_) {}
+ }
+ setTimeout(() => {
+  if (_supL) _supL.invalidateSize();
+ }, 80);
+};
 
 const SUP_HINT = "في خرائط جوجل: افتح المحلّ ← «مشاركة» ← «نسخ الرابط»، ثمّ ارجع والصقه هنا فيقع الدبّوس عليه.";
 
-const SUP_FIND_HINT = "اكتب اسم المحلّ واضغط «ابحث»، ثمّ اختره من القائمة فيقع الدبّوس عليه.";
+const SUP_FIND_HINT = "اكتب اسم المحلّ واضغط «ابحث»، أو اضغط على المحلّ بالخريطة، أو حرّك الخريطة لحدّ ما يصير الدبّوس عليه.";
 
 const supEsc = s => String(s || "").replace(/[&<>"']/g, c => ({
  "&": "&amp;",
@@ -7911,10 +8625,74 @@ const supEsc = s => String(s || "").replace(/[&<>"']/g, c => ({
 let _supRes = [];
 
 function supShowResults(list) {
- _supRes = Array.isArray(list) ? list : [];
+ _supRes = (Array.isArray(list) ? list : []).filter(p => p && isFinite(Number(p.lat)) && isFinite(Number(p.lng))).slice(0, 6);
  const box = document.getElementById("supResults");
- if (!box) return;
- box.innerHTML = _supRes.map((p, i) => '<button type="button" class="sup-chip" onclick="supPickResult(' + i + ')">' + supEsc(p.name) + (p.addr ? "<small>" + supEsc(p.addr) + "</small>" : "") + "</button>").join("");
+ if (box) box.innerHTML = _supRes.map((p, i) => `<button type="button" class="sup-ri" onclick="supPickResult(${i})"><em>${i + 1}</em><span><b data-noku>${supEsc(p.name)}</b>${p.addr ? `<small data-noku>${supEsc(p.addr)}</small>` : ""}</span></button>`).join("");
+ supMarkers();
+}
+
+function supClearMarkers() {
+ _supMk.forEach(m => {
+  try {
+   if (m.setMap) m.setMap(null); else if (m.remove) m.remove();
+  } catch (_) {}
+ });
+ _supMk = [];
+}
+
+function supMarkers() {
+ supClearMarkers();
+ if (!_supRes.length) return;
+ const pts = _supRes.map(p => ({
+  lat: Number(p.lat),
+  lng: Number(p.lng)
+ }));
+ if (_supMapK === "g" && _supG) {
+  const G = google.maps, bd = new G.LatLngBounds;
+  pts.forEach((pt, i) => {
+   const m = new G.Marker({
+    map: _supG,
+    position: pt,
+    title: String(_supRes[i].name || ""),
+    zIndex: 20 - i,
+    label: {
+     text: String(i + 1),
+     color: "#FFFFFF",
+     fontSize: "12px",
+     fontWeight: "700"
+    },
+    icon: {
+     path: G.SymbolPath.CIRCLE,
+     scale: 12,
+     fillColor: "#8A5300",
+     fillOpacity: 1,
+     strokeColor: "#FFFFFF",
+     strokeWeight: 2
+    }
+   });
+   m.addListener("click", () => window.supPickResult(i));
+   _supMk.push(m);
+   bd.extend(pt);
+  });
+  if (pts.length > 1) _supG.fitBounds(bd, 56); else {
+   _supG.panTo(pts[0]);
+   _supG.setZoom(17);
+  }
+ } else if (_supMapK === "l" && _supL) {
+  pts.forEach((pt, i) => {
+   const m = L.marker([ pt.lat, pt.lng ], {
+    icon: L.divIcon({
+     className: "sup-lmk",
+     html: String(i + 1),
+     iconSize: [ 24, 24 ]
+    })
+   }).addTo(_supL).on("click", () => window.supPickResult(i));
+   _supMk.push(m);
+  });
+  if (pts.length > 1) _supL.fitBounds(pts.map(p => [ p.lat, p.lng ]), {
+   padding: [ 40, 40 ]
+  }); else _supL.setView([ pts[0].lat, pts[0].lng ], 17);
+ }
 }
 
 window.supPickResult = function(i) {
@@ -7955,11 +8733,21 @@ function supLinkName(u) {
  }
 }
 
-function supMsg(t, bad) {
+function supMsg(t, kind) {
  const el = document.getElementById("supLinkMsg");
  if (el) {
   el.textContent = t;
-  el.style.color = bad ? "#B42318" : "";
+  el.className = "sup-hint" + (kind === true || kind === "bad" ? " bad" : kind === "ok" ? " ok" : "");
+ }
+ const fm = document.getElementById("supFsMsg");
+ if (fm) fm.textContent = t;
+}
+
+function supAutoName(name) {
+ const nm = document.getElementById("supName");
+ if (name && nm && (!nm.value.trim() || nm.dataset.auto === "1")) {
+  nm.value = String(name).slice(0, 60);
+  nm.dataset.auto = "1";
  }
 }
 
@@ -7968,14 +8756,48 @@ function supApplyPoint(p, name) {
   supMsg("هذا المكان خارج كركوك — تأكّد أنّك نسخت رابط المحلّ الصحيح.", true);
   return;
  }
+ supAutoName(name);
+ supMapGo(p.lat, p.lng, 18);
+ supMsg("وقع الدبّوس على المحلّ — تأكّد منه واحفظ المكان.", "ok");
+}
+
+let _supPoiSeq = 0, _supPoiT = null;
+
+const _supPoiC = {};
+
+function supPoi(pid, ll) {
+ const la = ll && typeof ll.lat === "function" ? ll.lat() : null, ln = ll && typeof ll.lng === "function" ? ll.lng() : null;
+ if (la != null && ln != null) supMapGo(la, ln);
  const nm = document.getElementById("supName");
- if (name && nm && !nm.value.trim()) nm.value = String(name).slice(0, 60);
- _supPick = {
-  lat: p.lat,
-  lng: p.lng
- };
- if (_supMap) _supMap.setView([ p.lat, p.lng ], 18);
- supMsg("✅ وُضع الدبّوس على المحلّ من خرائط جوجل — تأكّد منه ثمّ اضغط «احفظ المكان».");
+ if (!(nm && (!nm.value.trim() || nm.dataset.auto === "1"))) {
+  supMsg("صار الدبّوس على المحلّ اللي اخترته — تأكّد واحفظ.", "ok");
+  return;
+ }
+ if (_supPoiC[pid]) return supPoiName(_supPoiC[pid]);
+ clearTimeout(_supPoiT);
+ const seq = ++_supPoiSeq;
+ supMsg("لحظة، نجيب اسم المحلّ…");
+ _supPoiT = setTimeout(async () => {
+  try {
+   const r = await Promise.race([ httpsCallable(fns, "resolveMapLink")({
+    placeId: String(pid)
+   }), new Promise((_, rej) => setTimeout(() => rej(new Error("timeout")), 12e3)) ]);
+   if (seq !== _supPoiSeq) return;
+   const d = r && r.data || {};
+   if (d.success && d.place) {
+    _supPoiC[pid] = d.place;
+    supPoiName(d.place);
+   } else supMsg("صار الدبّوس على المحلّ — اكتب اسمه بنفسك.");
+  } catch (e) {
+   if (seq === _supPoiSeq) supMsg("صار الدبّوس على المحلّ — اكتب اسمه بنفسك.");
+  }
+ }, 450);
+}
+
+function supPoiName(p) {
+ supAutoName(p.name);
+ if (supInKirkuk(p)) supMapGo(p.lat, p.lng);
+ supMsg("اخترت «" + String(p.name || "") + "» — تأكّد من الدبّوس واحفظ المكان.", "ok");
 }
 
 window.supGoogle = function() {
@@ -8012,7 +8834,7 @@ async function supResolveLink() {
   return;
  }
  const seq = ++_supLinkSeq;
- supMsg("⏳ جارٍ قراءة الرابط…");
+ supMsg("جارٍ قراءة الرابط…");
  try {
   const r = await Promise.race([ httpsCallable(fns, "resolveMapLink")({
    url: url
@@ -8046,7 +8868,7 @@ window.supSearchMap = function() {
 async function supFind(q) {
  const seq = ++_supLinkSeq;
  supShowResults([]);
- supMsg("⏳ أبحث عن «" + q + "» في خرائط جوجل…");
+ supMsg("أبحث عن «" + q + "» في خرائط جوجل…");
  try {
   const r = await Promise.race([ httpsCallable(fns, "resolveMapLink")({
    q: q
@@ -8055,7 +8877,7 @@ async function supFind(q) {
   const d = r && r.data || {};
   if (d.success) {
    supShowResults(d.places);
-   supMsg("اختر المحلّ من القائمة فيقع الدبّوس عليه — وإن لم يكن فيها فاكتب اسماً أدقّ.");
+   supMsg("اختار المحلّ من القائمة أو من الأرقام على الخريطة.");
    return;
   }
   if (d.off) {
@@ -8076,8 +8898,9 @@ window.supSavePlace = async function() {
  const ph = String(document.getElementById("supPh").value || "").replace(/[٠-٩]/g, d => "٠١٢٣٤٥٦٧٨٩".indexOf(d)).replace(/\D/g, "").slice(0, 16);
  if (!n) return alert("اكتب اسم المحلّ.");
  if (!area) return alert("اختر منطقة المحلّ من قائمة مناطقك — منها تُحسب الأجرة.");
- if (!_supPick || !(_supPick.lat > 34.6 && _supPick.lat < 36.1 && _supPick.lng > 43.2 && _supPick.lng < 45)) return alert("حرّك الخريطة حتى يقع الدبّوس على المحلّ داخل كركوك.");
- const id = "p" + Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
+ if (!_supPick || !supInKirkuk(_supPick)) return alert("حرّك الخريطة حتى يقع الدبّوس على المحلّ داخل كركوك.");
+ const id = _supEdit && _supPlaces[_supEdit] ? _supEdit : "p" + Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
+ const old = _supPlaces[id] || {};
  const p = {
   n: n.slice(0, 60),
   ph: ph,
@@ -8086,11 +8909,12 @@ window.supSavePlace = async function() {
   lng: Math.round(_supPick.lng * 1e6) / 1e6,
   at: Date.now()
  };
+ if (old.last) p.last = old.last;
  try {
   await set(ref(db, "res_places/" + supResPhone() + "/" + id), p);
   _supPlaces[id] = p;
   _supSel = id;
-  document.getElementById("supNew").classList.add("hidden-section");
+  window.supCancelNew();
   supRenderPlaces();
  } catch (e) {
   alert("تعذّر حفظ المكان — تحقّق من الإنترنت وأعد المحاولة.");
@@ -8098,13 +8922,14 @@ window.supSavePlace = async function() {
 };
 
 window.supDelPlace = async function() {
- const p = _supPlaces[_supSel];
+ const id = _supEdit, p = _supPlaces[id];
  if (!p) return;
- if (!confirm("حذف «" + p.n + "» من أماكنك؟")) return;
+ if (!confirm("احذف «" + p.n + "» من أماكنك؟")) return;
  try {
-  await set(ref(db, "res_places/" + supResPhone() + "/" + _supSel), null);
-  delete _supPlaces[_supSel];
-  _supSel = Object.keys(_supPlaces)[0] || "";
+  await set(ref(db, "res_places/" + supResPhone() + "/" + id), null);
+  delete _supPlaces[id];
+  if (_supSel === id) _supSel = supIds()[0] || "";
+  window.supCancelNew();
   supRenderPlaces();
  } catch (e) {
   alert("تعذّر الحذف — أعد المحاولة.");
@@ -8113,16 +8938,16 @@ window.supDelPlace = async function() {
 
 window.supSend = async function(btn) {
  const p = _supPlaces[_supSel];
- if (!p) return alert("اختر المكان أو أضف مكاناً جديداً.");
+ if (!p) return alert("اختار المحلّ، أو ضيف محلّ جديد.");
  const items = document.getElementById("supItems").value.trim();
- if (!items) return alert("اكتب ما يجلبه الكابتن.");
- const fee = supFeeOf(p);
- if (!fee) return alert("منطقة هذا المحلّ ليست في قائمة أجورك — أضفه من جديد بمنطقةٍ من القائمة.");
- const pay = document.querySelector('input[name="supPay"]:checked')?.value === "cap" ? "cap" : "pre";
+ if (!items) return alert("اكتب شنو يجيب الكابتن.");
+ const pay = supPayNow();
+ const f = supFeeOf(p, pay);
+ if (!f) return alert("منطقة هذا المحلّ مو بقائمة أجورك — عدّل المحلّ واختر منطقة من القائمة.");
  const max = pay === "cap" ? supNum(document.getElementById("supMax").value) : 0;
- if (pay === "cap" && !(max >= 250)) return alert("اكتب أقصى مبلغٍ يدفعه الكابتن عنك.");
+ if (pay === "cap" && !(max >= 250 && max <= 1e6)) return alert("اكتب أقصى مبلغ يدفعه الكابتن عنك (من 250 إلى مليون دينار).");
  const note = document.getElementById("supNote").value.trim().slice(0, 200);
- const area = `🛒 مقاضي من ${p.n} — ${p.area} (توصيل: ${fee})`.slice(0, 200);
+ const area = `🛒 مقاضي من ${p.n} — ${p.area} (توصيل: ${f.total})`.slice(0, 200);
  const details = (`🛒 مقاضي من ${p.n}: ${items.replace(/\s*\n\s*/g, "، ")}` + (pay === "cap" ? ` | الكابتن يدفع الثمن حتى ${max.toLocaleString("en-US")} ويستردّه من المطعم` : " | الثمن مدفوعٌ مسبقاً") + (note ? " | ملاحظة: " + note : "")).slice(0, 3900);
  const html = btn.innerHTML;
  btn.innerHTML = `<div class="spinner-border spinner-border-sm me-1"></div> إرسال…`;
@@ -8142,18 +8967,29 @@ window.supSend = async function(btn) {
    note: note
   }
  };
+ nx.fee = f.total;
  try {
-  await finalizeOrderPlacement(details, "", fee, area, btn, html);
+  await finalizeOrderPlacement(details, "", f.total, area, btn, html);
   if (nx.ok) {
    document.getElementById("supItems").value = "";
    document.getElementById("supNote").value = "";
-   try {
-    const pl = _supPlaces[_supSel];
-    if (pl) {
-     pl.at = Date.now();
-     set(ref(db, "res_places/" + supResPhone() + "/" + _supSel + "/at"), pl.at).catch(() => {});
-    }
-   } catch (e) {}
+   const now = Date.now(), last = {
+    items: items.slice(0, 600),
+    pay: pay,
+    max: max,
+    note: note,
+    at: now
+   };
+   const pl = _supPlaces[_supSel];
+   if (pl) {
+    pl.at = now;
+    pl.last = last;
+    update(ref(db, "res_places/" + supResPhone() + "/" + _supSel), {
+     at: now,
+     last: last
+    }).catch(() => {});
+   }
+   supRenderPlaces();
   }
  } finally {
   _supNext = null;
@@ -8161,9 +8997,10 @@ window.supSend = async function(btn) {
 };
 
 function supMiniHtml(o) {
- const s = o.sup || {}, fee = Number(o.price) || 0, paid = Number(s.paid) || 0;
- const pay = s.pay === "cap" ? paid > 0 ? `💵 دفع الكابتن ${paid.toLocaleString("en-US")} للمحلّ — ادفع له ${(paid + fee).toLocaleString("en-US")} د.ع (الثمن + الأجرة)` : `💵 يدفع الكابتن الثمن (حتى ${(Number(s.max) || 0).toLocaleString("en-US")}) وتدفعه له مع الأجرة` : `✅ الثمن مدفوعٌ مسبقاً — تدفع الأجرة ${fee.toLocaleString("en-US")} فقط`;
- return `<div class="order-details-row mt-1" style="flex-direction:column;align-items:flex-start;gap:4px">\n            <div class="detail-item" style="white-space:pre-line">🛒 ${escapeHtml(s.items || "")}</div>\n            <div class="detail-item" style="font-weight:700">${escapeHtml(pay)}</div></div>`;
+ const s = o.sup || {}, fee = Number(o.price) || 0, paid = Number(s.paid) || 0, ku = supKu(), f = supFmt;
+ const pay = s.pay === "cap" ? paid > 0 ? ku ? `کاپتن ${f(paid)}ی بە دوکان دا — ${f(paid + fee)} د.ع بدە بە کاپتن (نرخ + کرێ)` : `دفع الكابتن ${f(paid)} للمحلّ — ادفع له ${f(paid + fee)} د.ع (الثمن + الأجرة)` : ku ? `کاپتن نرخەکە دەدات (تا ${f(s.max)}) و لەگەڵ کرێی ${f(fee)} بۆی دەگەڕێنیتەوە` : `يدفع الكابتن الثمن (حتى ${f(s.max)}) وتردّه له مع الأجرة ${f(fee)}` : ku ? `نرخەکە پێشتر دراوە — تەنها کرێی ${f(fee)} د.ع دەدەیت` : `الثمن مدفوعٌ مسبقاً — تدفع الأجرة ${f(fee)} د.ع فقط`;
+ const brk = Number(s.fb) > 0 ? ku ? `کرێ ${f(fee)} = ناوچە ${f(s.fb)} + گەشتی کەلوپەل ${f(s.fa)}` + (Number(s.fc) > 0 ? ` + کاپتن لە جیاتی تۆ دەیدات ${f(s.fc)}` : "") : `الأجرة ${f(fee)} = المنطقة ${f(s.fb)} + مشوار المقاضي ${f(s.fa)}` + (Number(s.fc) > 0 ? ` + الكابتن يدفع عنك ${f(s.fc)}` : "") : "";
+ return `<div class="order-details-row mt-1" style="flex-direction:column;align-items:flex-start;gap:4px">\n            <div class="detail-item" style="white-space:pre-line"><i data-lucide="shopping-basket"></i> ${escapeHtml(s.items || "")}</div>\n            <div class="detail-item" style="font-weight:700"><i data-lucide="wallet"></i> ${escapeHtml(pay)}</div>${brk ? `\n            <div class="detail-item" style="font-size:.78rem;color:var(--muted)">${escapeHtml(brk)}</div>` : ""}</div>`;
 }
 
 window.switchTab = function(mode, triggerSave = true) {
@@ -8232,6 +9069,10 @@ window.switchTab = function(mode, triggerSave = true) {
   try {
    resetCar();
   } catch (e) {}
+ }
+ {
+  const qf = document.getElementById("quickFoodField");
+  if (qf) qf.classList.toggle("hidden-section", !(mode === "quick" && window.__quickFoodOn !== false));
  }
  localStorage.setItem("hut_res_preferred_mode", mode);
  if (triggerSave) window.saveDraft();
@@ -8860,6 +9701,15 @@ async function startHotDataListeners() {
  if (!had) resTrack("listen_before_auth", {});
  attachOrdersListener(myPhone, 0);
  attachLedgerListener(myPhone, 0);
+ attachBrakeListener(0);
+ attachHoldListener(myPhone, 0);
+ get(ref(db, "system_settings/res_ui/quick_food_field")).then(sn => {
+  const v = sn.val();
+  window.__quickFoodOn = !(v === 0 || v === "0" || v === false);
+  const qf = document.getElementById("quickFoodField");
+  if (qf) qf.classList.toggle("hidden-section", !(currentOrderMode === "quick" && window.__quickFoodOn));
+ }).catch(() => {});
+ attachResUiListener(myPhone, 0);
  attachMirrorListener(myPhone, 0);
  attachAdvisorMetaListener(myPhone, 0);
 }
@@ -8873,6 +9723,474 @@ function attachMirrorListener(myPhone, attempt) {
  }, _ => {
   if ((attempt || 0) < 5) setTimeout(() => attachMirrorListener(myPhone, (attempt || 0) + 1), 6e4);
  });
+}
+
+var RES_UI_DEF = {
+ wait_alert_min: 8,
+ need_chips: 1,
+ ready_confirm: 1,
+ cancel_reason: 1,
+ fragile_hint: 1,
+ ab: 0
+};
+
+function resUiNorm_(v) {
+ const o = {}, D = RES_UI_DEF || {
+  wait_alert_min: 8,
+  need_chips: 1,
+  ready_confirm: 1,
+  cancel_reason: 1,
+  fragile_hint: 1,
+  ab: 0
+ };
+ v = v && typeof v === "object" ? v : {};
+ const n = (k, lo, hi) => {
+  const x = v[k] === undefined || v[k] === null || v[k] === "" ? NaN : Number(v[k]);
+  return isFinite(x) ? Math.min(hi, Math.max(lo, x)) : D[k];
+ };
+ o.wait_alert_min = n("wait_alert_min", 0, 60);
+ [ "need_chips", "ready_confirm", "cancel_reason", "fragile_hint" ].forEach(k => {
+  o[k] = n(k, 0, 1) ? 1 : 0;
+ });
+ o.ab = Math.round(n("ab", 0, 2));
+ return o;
+}
+
+function abSlot_(phone) {
+ const m = String(phone == null ? "" : phone).replace(/\D/g, "").match(/(\d)$/);
+ return m ? Number(m[1]) % 2 === 0 ? 1 : 2 : 0;
+}
+
+function abOn_(ab, phone) {
+ ab = Number(ab) || 0;
+ return !ab || abSlot_(phone) === ab;
+}
+
+var RES_ASK_SHOW_MIN = 15;
+
+function resNeedLeft_(rn, nowMs) {
+ if (!rn || typeof rn !== "object") return null;
+ const m = Number(rn.m), at = Number(rn.at);
+ if (!(m >= 1 && m <= 60) || !(at > 0)) return null;
+ const left = m - (nowMs - at) / 6e4;
+ return left > 0 ? Math.ceil(left) : null;
+}
+
+function resWaitInfo_(o, nowMs, cfg, arrAt) {
+ const out = {
+  show: false,
+  mins: null,
+  why: "",
+  left: null
+ };
+ if (!o || o.kind === "supply") return out;
+ const st = String(o.status || "");
+ if (st !== "arrived_at_res" && st !== "accepted") return out;
+ if (st === "arrived_at_res" && arrAt > 0) out.mins = Math.max(0, Math.floor((nowMs - arrAt) / 6e4));
+ const byArr = st === "arrived_at_res" && cfg.wait_alert_min > 0 && out.mins != null && out.mins >= cfg.wait_alert_min;
+ const askAt = Number(o.resAsk) || 0;
+ const byAsk = askAt > 0 && nowMs - askAt >= 0 && nowMs - askAt < (RES_ASK_SHOW_MIN || 15) * 6e4;
+ if (!byArr && !byAsk) return out;
+ out.left = resNeedLeft_(o.resNeed, nowMs);
+ if (out.left != null) return out;
+ out.show = true;
+ out.why = byArr ? "arr" : "ask";
+ return out;
+}
+
+function resNeedPatch_(m, nowMs, confirmed, stamp) {
+ m = Math.round(Number(m));
+ if (m === 0) {
+  const p = {
+   ready_for_pickup: true,
+   ready_ts: new Date(nowMs).toISOString()
+  };
+  if (confirmed) p.ready_ok = true;
+  return p;
+ }
+ if (!(m >= 1 && m <= 60)) return null;
+ return {
+  res_need: {
+   m: m,
+   at: stamp !== undefined && stamp !== null ? stamp : nowMs
+  }
+ };
+}
+
+function readyNeedsConfirm_(cfg, re, minEarly) {
+ return !!(cfg && cfg.ready_confirm && Number(minEarly) > 0 && Number(re) >= Number(minEarly));
+}
+
+const CANCEL_REASONS = [ {
+ k: "customer",
+ t: "الزبون ألغى"
+}, {
+ k: "late",
+ t: "الكابتن تأخّر"
+}, {
+ k: "dup",
+ t: "مكرّر"
+}, {
+ k: "cant",
+ t: "المطعم ما يقدر يجهّزه"
+}, {
+ k: "other",
+ t: "آخر"
+} ];
+
+function cancelDefault_(o, nowMs) {
+ const c = Date.parse(o && o.timestamp);
+ return isFinite(c) && nowMs - c >= 0 && nowMs - c < 2 * 6e4 ? "dup" : "";
+}
+
+function cancelPatch_(reason, nowIso) {
+ const p = {
+  status: "deleted",
+  last_update: nowIso,
+  cancelled_by: "restaurant"
+ };
+ const r = String(reason == null ? "" : reason).replace(/\s+/g, " ").trim().slice(0, 80);
+ if (r) p.cancel_reason = r;
+ return p;
+}
+
+const CAKE_RE_UI = /كيك|كيكة|تورت|قالب/;
+
+function isCake_(details) {
+ return CAKE_RE_UI.test(String(details || ""));
+}
+
+var RES_UI = null, MY_READY_EARLY = 0, READY_TRUST_MIN = 3;
+
+function resUi() {
+ return RES_UI || resUiNorm_(null);
+}
+
+var RES_SRV_OFF = 0;
+
+function resNow() {
+ return Date.now() + (Number(RES_SRV_OFF) || 0);
+}
+
+var _readyTrustAt = 0, _readyTrustP = null;
+
+const READY_TRUST_TTL = 30 * 6e4;
+
+function readyTrustLoad(myPhone) {
+ if (_readyTrustP) return _readyTrustP;
+ const ph = myPhone || normalizeSystemPhone(window.__resPhone || "");
+ if (!ph) return Promise.resolve();
+ _readyTrustP = Promise.all([ get(ref(db, "system_settings/prep_profile/re/" + ph)), get(ref(db, "system_settings/tunables/READY_TRUST_MIN_EARLY")) ]).then(([a, b]) => {
+  MY_READY_EARLY = Number(a.val()) || 0;
+  const v = b.val();
+  READY_TRUST_MIN = v !== null && v !== undefined && v !== "" && isFinite(Number(v)) ? Math.min(20, Math.max(0, Math.round(Number(v)))) : 3;
+  _readyTrustAt = Date.now();
+ }).catch(() => {}).then(() => {
+  _readyTrustP = null;
+ });
+ return _readyTrustP;
+}
+
+async function readyTrustFresh() {
+ if (_readyTrustAt && Date.now() - _readyTrustAt < READY_TRUST_TTL) return;
+ try {
+  await Promise.race([ readyTrustLoad(), new Promise(r => setTimeout(r, 2500)) ]);
+ } catch (_) {}
+}
+
+function attachResUiListener(myPhone, attempt) {
+ onValue(ref(db, "system_settings/res_ui"), snap => {
+  RES_UI = resUiNorm_(snap.val());
+  try {
+   renderActiveOrdersUI();
+  } catch (_) {}
+ }, _ => {
+  if ((attempt || 0) < 5) setTimeout(() => attachResUiListener(myPhone, (attempt || 0) + 1), 6e4);
+ });
+ if (!attempt) {
+  readyTrustLoad(myPhone);
+  try {
+   onValue(ref(db, ".info/serverTimeOffset"), s => {
+    RES_SRV_OFF = Number(s.val()) || 0;
+   });
+  } catch (_) {}
+ }
+}
+
+var _arrSeen = null;
+
+function arrSeenLoad() {
+ if (_arrSeen) return _arrSeen;
+ try {
+  _arrSeen = JSON.parse(localStorage.getItem("nahla_arr_seen") || "{}") || {};
+ } catch (_) {
+  _arrSeen = {};
+ }
+ return _arrSeen;
+}
+
+function arrSeenSync(list, nowMs) {
+ let ch = false;
+ arrSeenLoad();
+ (list || []).forEach(o => {
+  if (o && o.status === "arrived_at_res" && !_arrSeen[o.id]) {
+   _arrSeen[o.id] = nowMs;
+   ch = true;
+  }
+ });
+ Object.keys(_arrSeen).forEach(k => {
+  if (nowMs - Number(_arrSeen[k]) > 3 * 36e5) {
+   delete _arrSeen[k];
+   ch = true;
+  }
+ });
+ if (ch) {
+  try {
+   localStorage.setItem("nahla_arr_seen", JSON.stringify(_arrSeen));
+  } catch (_) {}
+ }
+}
+
+var _waitRang = null, _resWaitTmr = null;
+
+function waitTickSync(list) {
+ const need = (list || []).some(o => o && (o.status === "arrived_at_res" || Number(o.resAsk) > 0 && o.status === "accepted"));
+ if (need && !_resWaitTmr) _resWaitTmr = setInterval(() => {
+  try {
+   renderActiveOrdersUI();
+  } catch (_) {}
+ }, 3e4); else if (!need && _resWaitTmr) {
+  clearInterval(_resWaitTmr);
+  _resWaitTmr = null;
+ }
+}
+
+function waitBarHtml(o, w, hasReady) {
+ const sid0 = sid(o.id);
+ const head = w.why === "ask" && w.mins == null ? "الكابتن عندكم ينتظر — شكد يحتاج الطلب؟" : "الكابتن ينتظر عندكم منذ " + (w.mins || 0) + " د";
+ let chips = "";
+ if (resUi().need_chips) {
+  const b = (m, t) => `<button type="button" onclick="resNeedSet('${sid0}', ${m}, this)" style="flex:1;min-width:0;border:0;border-radius:10px;padding:9px 4px;font-weight:800;font-size:.9rem;background:${m === 0 ? "#0b7a43" : "#fff"};color:${m === 0 ? "#fff" : "#9a3412"}">${t}</button>`;
+  chips = `<div style="display:flex;gap:6px;margin-top:8px">${hasReady ? "" : b(0, "جاهز الآن")}${b(5, "5 د")}${b(10, "10 د")}${b(15, "15 د")}</div>`;
+ }
+ return `<div class="oc-wait" role="alert" style="margin-top:10px;background:#f97316;color:#fff;border-radius:14px;padding:10px 12px;direction:rtl">\n                    <div style="font-weight:800;font-size:1rem">⏳ ${escapeHtml(head)}</div>${chips}</div>`;
+}
+
+window.resNeedSet = async function(orderId, m, btn) {
+ const o = liveActiveOrders.find(x => String(x.id) === String(orderId));
+ if (!o) return;
+ let confirmed = false;
+ if (Number(m) === 0) await readyTrustFresh();
+ if (Number(m) === 0 && readyNeedsConfirm_(resUi(), MY_READY_EARLY, READY_TRUST_MIN)) {
+  if (!await readyConfirmAsk()) {
+   try {
+    resTrack("ready_confirm_no", {
+     orderId: orderId
+    });
+   } catch (_) {}
+   return;
+  }
+  confirmed = true;
+ }
+ const p = resNeedPatch_(m, Date.now(), confirmed, serverTimestamp());
+ if (!p) return;
+ if (btn) btn.disabled = true;
+ await requireCloudAuth();
+ update(ref(db, `active_orders/${orderId}`), p).then(() => {
+  try {
+   resTrack("res_need", {
+    orderId: orderId,
+    ms: Number(m),
+    code: "ab" + abSlot_(window.__resPhone)
+   });
+  } catch (_) {}
+  if (p.res_need) {
+   o.resNeed = {
+    m: p.res_need.m,
+    at: resNow()
+   };
+  } else {
+   o.readyForPickup = true;
+  }
+  renderActiveOrdersUI();
+ }).catch(() => {
+  if (btn) btn.disabled = false;
+ });
+};
+
+function readyConfirmAsk() {
+ return new Promise(resolve => {
+  let el = document.getElementById("readyAsk");
+  if (el) el.remove();
+  el = document.createElement("div");
+  el.id = "readyAsk";
+  el.style.cssText = "position:fixed;inset:0;z-index:99999;background:rgba(15,23,42,.45);display:flex;align-items:center;justify-content:center;padding:16px;direction:rtl";
+  el.innerHTML = '<div style="background:#fff;border-radius:18px;max-width:420px;width:100%;padding:20px 18px;text-align:center;box-shadow:0 12px 40px rgba(0,0,0,.25)">' + '<div style="font-size:1.15rem;font-weight:800;color:#0f172a">الطلب مغلّف وبيدك؟</div>' + '<div style="font-size:.95rem;color:#475569;margin-top:8px;line-height:1.7">الكابتن يجي فوراً على «جاهز» — إذا بعده يحتاج وقت، اختار الدقايق من الشريط.</div>' + '<div style="display:flex;gap:10px;margin-top:16px"><button id="readyYes" style="flex:2;border:0;border-radius:12px;padding:13px;background:#0b7a43;color:#fff;font-weight:800;font-size:1rem">نعم، بيدي</button>' + '<button id="readyNo" style="flex:1;border:0;border-radius:12px;padding:13px;background:#f1f5f9;color:#334155;font-weight:800;font-size:.95rem">مو بعد</button></div></div>';
+  document.body.appendChild(el);
+  document.getElementById("readyYes").onclick = () => {
+   el.remove();
+   resolve(true);
+  };
+  document.getElementById("readyNo").onclick = () => {
+   el.remove();
+   resolve(false);
+  };
+ });
+}
+
+function cancelReasonAsk(o, pre) {
+ return new Promise(resolve => {
+  let el = document.getElementById("cxReason");
+  if (el) el.remove();
+  el = document.createElement("div");
+  el.id = "cxReason";
+  el.style.cssText = "position:fixed;inset:0;z-index:99999;background:rgba(15,23,42,.45);display:flex;align-items:flex-end;justify-content:center;padding:16px;direction:rtl";
+  const def = cancelDefault_(o, Date.now());
+  const btns = CANCEL_REASONS.map(r => `<button type="button" data-k="${r.k}" style="width:100%;border:${r.k === def ? "2px solid #b91c1c" : "1px solid #e2e8f0"};border-radius:12px;padding:13px;margin-top:8px;background:${r.k === def ? "#fef2f2" : "#fff"};color:#0f172a;font-weight:800;font-size:1rem;text-align:right">${escapeHtml(r.t)}</button>`).join("");
+  el.innerHTML = '<div style="background:#fff;border-radius:18px;max-width:440px;width:100%;padding:18px 16px;box-shadow:0 12px 40px rgba(0,0,0,.25)">' + (pre ? '<div style="font-size:.95rem;color:#0b7a43;font-weight:800;margin-bottom:6px;line-height:1.7;text-align:center">' + pre + "</div>" : "") + '<div style="font-size:1.1rem;font-weight:800;color:#0f172a;text-align:center">ليش تلغي الطلب؟</div>' + btns + '<button type="button" id="cxBack" style="width:100%;border:0;border-radius:12px;padding:13px;margin-top:12px;background:#0b7a43;color:#fff;font-weight:800;font-size:1rem">' + (pre ? "خلّيه بالدور" : "رجوع — لا تلغِ") + "</button></div>";
+  document.body.appendChild(el);
+  el.querySelectorAll("button[data-k]").forEach(b => {
+   b.onclick = () => {
+    const r = CANCEL_REASONS.find(x => x.k === b.dataset.k);
+    el.remove();
+    resolve(r || null);
+   };
+  });
+  document.getElementById("cxBack").onclick = () => {
+   el.remove();
+   resolve(null);
+  };
+ });
+}
+
+function cakeCarAsk() {
+ return new Promise(resolve => {
+  let el = document.getElementById("cakeAsk");
+  if (el) el.remove();
+  el = document.createElement("div");
+  el.id = "cakeAsk";
+  el.style.cssText = "position:fixed;inset:0;z-index:99999;background:rgba(15,23,42,.45);display:flex;align-items:center;justify-content:center;padding:16px;direction:rtl";
+  el.innerHTML = '<div style="background:#fff;border-radius:18px;max-width:420px;width:100%;padding:20px 18px;text-align:center;box-shadow:0 12px 40px rgba(0,0,0,.25)">' + '<div style="font-size:1.15rem;font-weight:800;color:#0f172a">🎂 الطلب بيه كيك — أرسله بسيارة؟</div>' + '<div style="font-size:.95rem;color:#475569;margin-top:8px;line-height:1.7">الكيك على الدرّاجة يتخرّب ويُلغى أغلبه.</div>' + '<div style="display:flex;gap:10px;margin-top:16px"><button id="cakeCar" style="flex:2;border:0;border-radius:12px;padding:13px;background:#0b7a43;color:#fff;font-weight:800;font-size:1rem">نعم، بسيارة</button>' + '<button id="cakeBike" style="flex:1;border:0;border-radius:12px;padding:13px;background:#f1f5f9;color:#334155;font-weight:800;font-size:.95rem">لا، بالدرّاجة</button></div></div>';
+  document.body.appendChild(el);
+  document.getElementById("cakeCar").onclick = () => {
+   el.remove();
+   resolve(true);
+  };
+  document.getElementById("cakeBike").onclick = () => {
+   el.remove();
+   resolve(false);
+  };
+ });
+}
+
+let _brakeT = null;
+
+function attachBrakeListener(attempt) {
+ onValue(ref(db, "system_settings/res_brake"), snap => {
+  const _p = window.__resBrake, _sw = x => String(x && x.sw || 0) + "/" + String(x && x.sm || 0);
+  window.__resBrake = snap.val() || null;
+  renderBrakeBanner();
+  try {
+   const nb = window.__resBrake, u = nb && nb.v2 && nb.v2.u || _p && _p.v2 && _p.v2.u;
+   if (u && Number(u.t) && _p && Number(_p.lv) > 0 && !(nb && Number(nb.lv) > 0) && Date.now() - Number(window.__p10RejAt || 0) < 60 * 6e4) {
+    window.__p10RejAt = 0;
+    window.__p10Lock = null;
+    showToastMsg("✅ عاد استقبال الطلبات البعيدة — أرسل طلبك الآن 🌷", 15e3);
+    const el = document.getElementById("resNoticeToast");
+    if (el) el.style.background = "#15803d";
+   }
+  } catch (_) {}
+  if (_sw(_p) !== _sw(window.__resBrake)) {
+   try {
+    renderActiveOrdersUI();
+   } catch (_) {}
+  }
+ }, _ => {
+  if ((attempt || 0) < 5) setTimeout(() => attachBrakeListener((attempt || 0) + 1), 6e4);
+ });
+}
+
+function renderBrakeBanner() {
+ const el = document.getElementById("brakeBanner"), tx = document.getElementById("brakeText");
+ if (!el || !tx) return;
+ clearTimeout(_brakeT);
+ const b = window.__resBrake, age = Date.now() - Number(b && b.at || 0);
+ const closing = !!b && Number(b.lv) > 0, warn = !!b && !closing && Number(b.w) > 0;
+ if (!b || !(closing || warn) || Number(b.live) !== 1 || age >= 12 * 6e4) {
+  el.classList.add("hidden-section");
+  return;
+ }
+ _brakeT = setTimeout(renderBrakeBanner, 12 * 6e4 - age + 1e3);
+ const farOf = rk => {
+  try {
+   const c = Array.isArray(b.c) ? b.c : [ 35.4408, 44.3791 ], R = 6371, rad = Math.PI / 180;
+   const real = regLat && regLng && !(Math.abs(regLat - 35.468) < .001 && Math.abs(regLng - 44.392) < .001);
+   if (!(Number(rk) > 0) || !real) return false;
+   const x = (regLat - c[0]) * rad, y = (regLng - c[1]) * rad;
+   const h = Math.sin(x / 2) ** 2 + Math.cos(c[0] * rad) * Math.cos(regLat * rad) * Math.sin(y / 2) ** 2;
+   return R * 2 * Math.atan2(Math.sqrt(h), Math.sqrt(1 - h)) > Number(rk);
+  } catch (e) {
+   return false;
+  }
+ };
+ const ku = window.RES_LANG === "ckb";
+ tx.setAttribute("data-noku", "");
+ if (warn) {
+  const far = farOf(b.wrkm), km = String(b.wkm || "").replace(/\.0$/, ""), kmOk = b.mode === "trip" && km;
+  const ff = b.fx && b.fx.ff, fee = ff && !far ? {
+   f: String(ff.f).replace(/\.0$/, ""),
+   p: Number(ff.p) || 0
+  } : null;
+  tx.textContent = far ? ku ? "⚠️ ئاگاداری: داواکارییەکان زۆر بوون و چێشتخانەکەتان لە ناوەندی داواکارییەکان دوورە، ئەگەر فشارەکە بەردەوام بێت لە چەند خولەکێکدا وەرگرتنی داواکارییەکانتان ڕادەگیرێت — ئێستا داواکارییەکانت بنێرە یان ئاگاداری کڕیارەکانت بکەرەوە." : "⚠️ تنبيه: الطلبات زادت، ومطعمكم بعيد عن مركز الطلبات، فإذا استمرّ الضغط راح يتوقّف استقبال طلباتكم خلال دقائق — أرسل طلباتك الآن أو بلّغ زبائنك." : (ku ? "⚠️ ئاگاداری: داواکارییەکان زۆر بوون، ئەگەر فشارەکە بەردەوام بێت لە چەند خولەکێکدا وەرگرتنی داواکارییە دوورەکان" + (kmOk ? " (زیاتر لە " + km + " کم)" : "") + " ڕادەگیرێت — ئێستا داواکارییە دوورەکانت بنێرە یان ئاگاداری کڕیارەکانت بکەرەوە." : "⚠️ تنبيه: الطلبات زادت، وإذا استمرّ الضغط راح يتوقّف قبول الطلبات البعيدة" + (kmOk ? " (أكثر من " + km + " كم)" : "") + " خلال دقائق — أرسل طلباتك البعيدة الآن أو بلّغ زبائنك.") + (fee && fee.p ? ku ? " ئێستا داواکاریی دوورتر لە " + fee.f + " کم زیادەیەکی لەسەر چێشتخانەیە بۆ کاپتن (" + vehFmt(fee.p) + " د.ع بۆ هەر کیلۆمەترێک)، پێش ناردن دەیبینیت." : " وهسه الطلب الأبعد من " + fee.f + " كم عليه زيادة يتحمّلها المطعم للكابتن (" + vehFmt(fee.p) + " د.ع لكل كم)، تشوفها قبل الإرسال." : "");
+  el.classList.remove("hidden-section");
+  return;
+ }
+ const far = farOf(b.rkm);
+ const km = String(b.km || "").replace(/\.0$/, "");
+ tx.textContent = far ? ku ? "⏳ ئێستا فشار زۆرە و چێشتخانەکەتان لە ناوەندی داواکارییەکان دوورە، بۆیە وەرگرتنی داواکارییەکانتان بۆ چەند خولەکێک ڕاگیراوە و کاتێک فشار کەم بووەوە خۆکارانە دەگەڕێتەوە. سوپاس بۆ ئارامگرتنتان 🌷" : "⏳ الضغط عالٍ الآن، ومطعمكم بعيدٌ عن مركز الطلبات، فاستقبال طلباتكم متوقّفٌ دقائق قليلة، ويعود تلقائيّاً حين يخفّ الضغط. شكراً لصبركم 🌷" : ku ? "⏳ ئێستا فشار زۆرە، بۆیە بە کاتی تەنها داواکارییە نزیکەکان وەردەگرین" + (b.mode === "trip" && km ? " (تا نزیکەی " + km + " کم لە چێشتخانەکەتان)" : "") + "، و دوورەکان کاتێک فشار کەم بووەوە خۆکارانە دەگەڕێنەوە. سوپاس بۆ ئارامگرتنتان 🌷" : "⏳ الضغط عالٍ الآن، فنستقبل مؤقّتاً الطلبات القريبة وحدها" + (b.mode === "trip" && km ? " (إلى " + km + " كم تقريباً من مطعمكم)" : "") + "، والبعيدة تعود تلقائيّاً حين يخفّ الضغط. شكراً لصبركم 🌷";
+ el.classList.remove("hidden-section");
+}
+
+let _holdT = null;
+
+function attachHoldListener(myPhone, attempt) {
+ onValue(ref(db, `system_settings/res_hold/${myPhone}`), snap => {
+  window.__resHold = snap.val() || null;
+  renderHoldBanner();
+ }, _ => {
+  if ((attempt || 0) < 5) setTimeout(() => attachHoldListener(myPhone, (attempt || 0) + 1), 6e4);
+ });
+}
+
+function renderHoldBanner() {
+ const el = document.getElementById("holdBanner"), tx = document.getElementById("holdText");
+ if (!el || !tx) return;
+ clearTimeout(_holdT);
+ const h = window.__resHold, until = Number(h && h.until), left = until - Date.now();
+ if (!h || h.inf || !(left > 0)) {
+  el.classList.add("hidden-section");
+  return;
+ }
+ const ku = window.RES_LANG === "ckb";
+ tx.setAttribute("data-noku", "");
+ const why = ku ? {
+  rain: "باران",
+  press: "فشاری داواکارییەکان",
+  debt: "پێداچوونەوەی حیساب",
+  beh: "پێداچوونەوەی بەڕێوەبەرایەتی"
+ } : {
+  rain: "المطر",
+  press: "ضغط الطلبات",
+  debt: "مراجعة الحساب",
+  beh: "مراجعة الإدارة"
+ };
+ const lbl = String(h.msg || why[h.why] || "").replace(/[()]/g, "").trim().slice(0, 80);
+ const t = new Date(until + 3 * 36e5), hh = t.getUTCHours(), mm = t.getUTCMinutes();
+ const hm = (hh % 12 || 12) + ":" + String(mm).padStart(2, "0") + (hh >= 12 ? ku ? " ئێوارە" : " مساءً" : ku ? " بەیانی" : " صباحاً");
+ const m = Math.ceil(left / 6e4);
+ tx.textContent = ku ? "⏸ چێشتخانەکەتان بە کاتی ڕاگیراوە" + (lbl ? " (" + lbl + ")" : "") + " — ناردن لە کاتژمێر " + hm + " دەگەڕێتەوە" + (m <= 90 ? " (دوای " + m + " خولەک)" : "") + "، خۆکارانە، پێویست بە نامەناردن بۆ کەس ناکات. سوپاس بۆ ئارامگرتنتان 🌷" : "⏸ مطعمكم موقوف مؤقّتاً" + (lbl ? " (" + lbl + ")" : "") + " — يعود الإرسال الساعة " + hm + (m <= 90 ? " (بعد " + m + " د)" : "") + "، تلقائيّاً بلا حاجةٍ لمراسلة أحد. شكراً لصبركم 🌷";
+ el.classList.remove("hidden-section");
+ _holdT = setTimeout(renderHoldBanner, Math.min(3e4, left + 500));
 }
 
 function attachLedgerListener(myPhone, attempt) {
@@ -8934,6 +10252,10 @@ function noteAutoCancelled(snap) {
    } catch (e) {}
    const ageMin = (Date.now() - Date.parse(o.auto_cancelled_at || o.last_update || o.timestamp || 0)) / 6e4;
    if (!(ageMin < 60)) continue;
+   if (o.brake_car && o.cancel_reason) {
+    showToastMsg(String(o.cancel_reason).slice(0, 300) + " (" + String(o.area || "").slice(0, 40) + ")", 15e3);
+    continue;
+   }
    showToastMsg("🔁 ألغى النظام طلباً ظنّه مكرّراً (" + String(o.area || "").slice(0, 40) + "). إن كان طلباً مختلفاً فأعد إرساله.", 15e3);
   }
  } catch (e) {}
@@ -9145,8 +10467,25 @@ function rebuildOrderLists() {
     area: fbOrder.area,
     readyForPickup: fbOrder.ready_for_pickup || false,
     photoUrl: fbOrder.photoUrl,
+    eta: fbOrder.eta_band || "",
+    resEta: fbOrder.res_eta || "",
+    holdUntil: fbOrder.prep_hold_until || "",
     src: fbOrder.src || "",
-    itt: fbOrder.src === "ittihad" ? fbOrder.itt || null : null
+    itt: fbOrder.src === "ittihad" ? fbOrder.itt || null : null,
+    vehicle: fbOrder.vehicle || "bike",
+    carNone: fbOrder.car_none || null,
+    carBikeOk: fbOrder.car_bike_ok === true,
+    brakeCar: fbOrder.brake_car || null,
+    carBikeAt: fbOrder.car_bike_at || 0,
+    carFeeBack: (Number(fbOrder.car_fee_back) || 0) + (Number(fbOrder.car_bonus_back && fbOrder.car_bonus_back.y) || 0),
+    accAt: fwdAcc_(fbOrder) || fbOrder.accepted_at || null,
+    wdAt: fbOrder.wd_auto && fbOrder.wd_auto.at || null,
+    trip: !!(fbOrder.trip_of || fbOrder.trip),
+    sup: fbOrder.kind === "supply",
+    bh: fbOrder.brake_hold && Number(fbOrder.brake_hold.at) || 0,
+    ph: fbOrder.pause_hold && Number(fbOrder.pause_hold.until) || 0,
+    resNeed: fbOrder.res_need || null,
+    resAsk: Number(fbOrder.res_ask) || 0
    });
   }
  });
@@ -9174,10 +10513,17 @@ function rebuildOrderLists() {
  });
  newLiveOrders.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
  newLiveOrders.sort((a, b) => (b.status === "res_pending") - (a.status === "res_pending"));
+ try {
+  arrSeenSync(newLiveOrders, resNow());
+  waitTickSync(newLiveOrders);
+ } catch (_) {}
  liveActiveOrders = newLiveOrders;
  renderActiveOrdersUI();
  try {
   ittRingSync(newLiveOrders);
+ } catch (_) {}
+ try {
+  p10ReleaseSync(newLiveOrders);
  } catch (_) {}
  try {
   window.updAreaLiveCount();
@@ -9223,8 +10569,221 @@ window.filterArchiveOrders = function() {
  });
 };
 
+function resEtaOn() {
+ try {
+  let p = regPhone || "";
+  if (!p) {
+   const x = localStorage.getItem("hut_res_session");
+   if (x) p = JSON.parse(x).phone || "";
+  }
+  p = normalizeSystemPhone(p) || "";
+  return !!p && (parseInt(String(p).slice(-1), 10) || 0) % 2 === 0;
+ } catch (_) {
+  return false;
+ }
+}
+
+function fwdAcc_(f) {
+ try {
+  const w = f && f.fwd;
+  if (!w || typeof w !== "object" || !w.by || normalizeSystemPhone(String(w.by)) !== normalizeSystemPhone(String(f.driverPhone || ""))) return 0;
+  const fa = Number(w.free_at) || 0, a = swpMs(f.accepted_at);
+  return fa > 0 ? Math.max(fa, isFinite(a) ? a : 0) : 0;
+ } catch (_) {
+  return 0;
+ }
+}
+
+function etaTxt(b) {
+ b = String(b || "");
+ return b.slice(-1) === "+" ? b.slice(0, -1) + " أو أكثر" : b.replace("-", "–");
+}
+
+function etaCancelAsk(o) {
+ return new Promise(resolve => {
+  let el = document.getElementById("etaCancel");
+  if (el) el.remove();
+  el = document.createElement("div");
+  el.id = "etaCancel";
+  el.style.cssText = "position:fixed;inset:0;z-index:99999;background:rgba(15,23,42,.45);display:flex;align-items:center;justify-content:center;padding:16px;direction:rtl";
+  el.innerHTML = '<div style="background:#fff;border-radius:18px;max-width:420px;width:100%;padding:20px 18px;text-align:center;box-shadow:0 12px 40px rgba(0,0,0,.25)">' + '<div style="font-size:1.15rem;font-weight:800;color:#0f172a">طلبك محفوظ بالدور</div>' + '<div style="font-size:.95rem;color:#475569;margin-top:8px;line-height:1.7">كابتن خلال ' + escapeHtml(etaTxt(o.eta)) + " دقيقة تقريباً.<br>إذا ألغيته وأعدت إرساله بعد وقت، يرجع لآخر الدور.</div>" + '<div style="display:flex;gap:10px;margin-top:16px"><button id="etaKeep" style="flex:2;border:0;border-radius:12px;padding:13px;background:#0b7a43;color:#fff;font-weight:800;font-size:1rem">خلّيه بالدور</button>' + '<button id="etaGo" style="flex:1;border:0;border-radius:12px;padding:13px;background:#f1f5f9;color:#b91c1c;font-weight:800;font-size:.95rem">ألغِ الطلب</button></div></div>';
+  document.body.appendChild(el);
+  document.getElementById("etaKeep").onclick = () => {
+   el.remove();
+   try {
+    resTrack("eta_keep", {});
+   } catch (_) {}
+   resolve(false);
+  };
+  document.getElementById("etaGo").onclick = () => {
+   el.remove();
+   try {
+    resTrack("eta_cancel", {});
+   } catch (_) {}
+   resolve(true);
+  };
+ });
+}
+
+function swpMs(v) {
+ if (v === null || v === undefined || v === "") return NaN;
+ if (typeof v === "number") return v < 1e11 ? v * 1e3 : v;
+ const s = String(v).trim();
+ return /^\d{10}$/.test(s) ? Number(s) * 1e3 : /^\d{12,13}$/.test(s) ? Number(s) : Date.parse(s);
+}
+
+function swOn() {
+ const b = window.__resBrake, sw = Number(b && b.sw) || 0;
+ return sw === 2 || sw === 1 && resEtaOn();
+}
+
+function swSm() {
+ const m = Number(window.__resBrake && window.__resBrake.sm);
+ return m > 0 ? m : 10;
+}
+
+function swapAvail(o) {
+ return !!o && o.status === "accepted" && !o.trip && !o.sup && swOn() && isFinite(swpMs(o.accAt)) && Date.now() - swpMs(o.accAt) >= swSm() * 6e4;
+}
+
+function swapShow(o) {
+ return swapAvail(o) && ([ "stall", "stall0", "off", "gps" ].indexOf(o.resEta) >= 0 || Date.now() - swpMs(o.accAt) >= 15 * 6e4);
+}
+
+var _swapT = null;
+
+function swapArm() {
+ clearTimeout(_swapT);
+ _swapT = null;
+ if (!swOn()) return;
+ const now = Date.now();
+ let next = Infinity;
+ liveActiveOrders.forEach(o => {
+  if (!o || o.status !== "accepted" || o.trip || o.sup) return;
+  const a = swpMs(o.accAt);
+  if (!isFinite(a)) return;
+  [ a + swSm() * 6e4, a + 15 * 6e4 ].forEach(x => {
+   if (x > now && x < next) next = x;
+  });
+ });
+ if (next < Infinity) _swapT = setTimeout(() => {
+  _swapT = null;
+  renderActiveOrdersUI();
+ }, Math.min(next - now + 1e3, 30 * 6e4));
+}
+
+function swapNoTxt(r) {
+ const why = r && r.why, km = r && r.km;
+ if ((why === "near" || why === "coming") && km !== null && km !== undefined && isFinite(km)) return "الكابتن على " + km + " كم ويقترب — يوصل خلال دقايق";
+ if (why === "young") return "التبديل متاح بعد " + Math.round(swSm()) + " دقايق من قبول الكابتن";
+ const T = {
+  near: "الكابتن وصل قرب مطعمك — اتصل بيه من زرّ الاتصال",
+  near_old: "آخر موقع وصلنا من الكابتن كان عند مطعمك — اتصل بيه من زرّ الاتصال",
+  food: "الكابتن متّجه لمنطقة الزبون — يمكن استلم الطلب. اتصل بيه قبل التبديل",
+  trip: "الكابتن بجولة عدّة طلبات ومطعمك ضمنها — ما نفصل طلبك منها، نتابعه إحنا هسّه",
+  fwd: "الكابتن يسلّم طلباً قريباً ويجيك بعده — إذا تأخّر يتحوّل طلبك تلقائياً",
+  max_order: "هذا الطلب وصل حدّ التبديل — نتابعه إحنا هسّه",
+  max_day: "وصلت حدّ التبديل لليوم — نتابع طلبك إحنا هسّه",
+  off: "تبديل الكابتن غير متاح حالياً",
+  status: "حالة الطلب تغيّرت — شوف البطاقة",
+  changed: "حالة الطلب تغيّرت — شوف البطاقة",
+  gone: "الطلب ما عاد موجود"
+ };
+ return T[why] || r && r.msg || "تعذّر التبديل — حاول بعد شوي";
+}
+
+window.swapCaptain = async function(orderId, btn) {
+ if (btn) btn.disabled = true;
+ try {
+  await requireCloudAuth();
+  const r = await httpsCallable(fns, "resSwapCaptain")({
+   orderId: String(orderId)
+  });
+  const d = r && r.data || {};
+  try {
+   resTrack(d.ok ? "swap_ok" : "swap_no", {
+    why: d.why || ""
+   });
+  } catch (_) {}
+  if (d.ok) showToastMsg("حوّلنا طلبك لكابتن ثاني — طلبك بأوّل الدور", 6e3); else alert(swapNoTxt(d));
+ } catch (e) {
+  alert("تعذّر التبديل — حاول بعد شوي");
+ } finally {
+  if (btn) btn.disabled = false;
+ }
+};
+
+function swapCancelAsk() {
+ return new Promise(resolve => {
+  let el = document.getElementById("swapCancel");
+  if (el) el.remove();
+  el = document.createElement("div");
+  el.id = "swapCancel";
+  el.style.cssText = "position:fixed;inset:0;z-index:99999;background:rgba(15,23,42,.45);display:flex;align-items:center;justify-content:center;padding:16px;direction:rtl";
+  el.innerHTML = '<div style="background:#fff;border-radius:18px;max-width:420px;width:100%;padding:20px 18px;text-align:center;box-shadow:0 12px 40px rgba(0,0,0,.25)">' + '<div style="font-size:1.15rem;font-weight:800;color:#0f172a">الكابتن تأخّر؟</div>' + '<div style="font-size:.95rem;color:#475569;margin-top:8px;line-height:1.7">نقدر نحوّل طلبك لكابتن ثاني ويبقى بأوّل الدور — بدل ما تلغيه ويرجع لآخر الدور.</div>' + '<div style="display:flex;gap:10px;margin-top:16px"><button id="swapGo" style="flex:2;border:0;border-radius:12px;padding:13px;background:#0b7a43;color:#fff;font-weight:800;font-size:1rem">بدّل الكابتن</button>' + '<button id="swapCx" style="flex:1;border:0;border-radius:12px;padding:13px;background:#f1f5f9;color:#b91c1c;font-weight:800;font-size:.95rem">ألغِ الطلب</button></div>' + '<button id="swapBack" style="margin-top:10px;border:0;background:none;color:#64748b;font-weight:700;font-size:.9rem;padding:6px">رجوع</button></div>';
+  document.body.appendChild(el);
+  document.getElementById("swapGo").onclick = () => {
+   el.remove();
+   resolve("swap");
+  };
+  document.getElementById("swapCx").onclick = () => {
+   el.remove();
+   try {
+    resTrack("swap_cancel", {});
+   } catch (_) {}
+   resolve("cancel");
+  };
+  document.getElementById("swapBack").onclick = () => {
+   el.remove();
+   resolve(null);
+  };
+ });
+}
+
 window.cancelOrderGrace = async function(orderId) {
- if (!confirm("تأكيد الإلغاء؟")) return;
+ const _o = liveActiveOrders.find(x => String(x.id) === String(orderId));
+ const _noDrv = _o && !(_o.driverPhone && ![ "pending_driver", "manual_pending", "system_routing" ].includes(_o.driverPhone));
+ let _why = "";
+ const _sw = swapAvail(_o);
+ if (_sw) {
+  const c = await swapCancelAsk();
+  if (c === "swap") {
+   await window.swapCaptain(orderId);
+   return;
+  }
+  if (c !== "cancel") return;
+ }
+ if (resUi().cancel_reason && _o) {
+  const _eta = _noDrv && _o.eta && _o.eta !== "defer" && resEtaOn();
+  const r = await cancelReasonAsk(_o, _eta ? "طلبك محفوظ بالدور · كابتن خلال " + escapeHtml(etaTxt(_o.eta)) + " دقيقة تقريباً" : "");
+  if (!r) {
+   if (_eta) {
+    try {
+     resTrack("eta_keep", {});
+    } catch (_) {}
+   }
+   return;
+  }
+  if (_eta) {
+   try {
+    resTrack("eta_cancel", {});
+   } catch (_) {}
+  }
+  if (r.k === "late" && !_noDrv && !_sw && typeof window.__swapOffer === "function") {
+   try {
+    if (await window.__swapOffer(_o)) return;
+   } catch (_) {}
+  }
+  _why = r.t;
+  try {
+   resTrack("cancel_reason", {
+    orderId: orderId,
+    reason: r.k
+   });
+  } catch (_) {}
+ } else if (_sw) {} else if (_o && _noDrv && _o.eta && resEtaOn()) {
+  if (!await etaCancelAsk(_o)) return;
+ } else if (!confirm("تأكيد الإلغاء؟")) return;
  const card = document.getElementById(`order-${orderId}`);
  if (card) {
   card.style.opacity = "0";
@@ -9235,11 +10794,7 @@ window.cancelOrderGrace = async function(orderId) {
   actionBlacklist = actionBlacklist.filter(id => id !== String(orderId));
  }, BLACKLIST_TTL_MS);
  await requireCloudAuth();
- update(ref(db, `active_orders/${orderId}`), {
-  status: "deleted",
-  last_update: (new Date).toISOString(),
-  cancelled_by: "restaurant"
- }).catch(() => {
+ update(ref(db, `active_orders/${orderId}`), cancelPatch_(_why, (new Date).toISOString())).catch(() => {
   if (card) {
    card.style.opacity = "1";
    card.style.display = "";
@@ -9250,12 +10805,22 @@ window.cancelOrderGrace = async function(orderId) {
 };
 
 window.markOrderReady = async function(orderId, btn) {
+ let _ok = false;
+ await readyTrustFresh();
+ if (readyNeedsConfirm_(resUi(), MY_READY_EARLY, READY_TRUST_MIN)) {
+  if (!await readyConfirmAsk()) {
+   try {
+    resTrack("ready_confirm_no", {
+     orderId: orderId
+    });
+   } catch (_) {}
+   return;
+  }
+  _ok = true;
+ }
  btn.disabled = true;
  await requireCloudAuth();
- update(ref(db, `active_orders/${orderId}`), {
-  ready_for_pickup: true,
-  ready_ts: (new Date).toISOString()
- }).then(() => {
+ update(ref(db, `active_orders/${orderId}`), resNeedPatch_(0, Date.now(), _ok)).then(() => {
   btn.classList.add("sent");
   btn.innerHTML = `<i data-lucide="check" size="12"></i> جاهز`;
   if (typeof lucide !== "undefined") lucide.createIcons({
@@ -9266,7 +10831,135 @@ window.markOrderReady = async function(orderId, btn) {
  });
 };
 
+const _carWaitOnly = new Set;
+
+window.carNoneChoice = async function(orderId, mode, btn) {
+ if (mode === "wait") {
+  _carWaitOnly.add(String(orderId));
+  renderActiveOrdersUI();
+  return;
+ }
+ if (btn) btn.disabled = true;
+ await requireCloudAuth();
+ const u = mode === "now" ? {
+  car_bike_ok: true,
+  car_bike_now: true
+ } : {
+  car_bike_ok: true
+ };
+ try {
+  resTrack(mode === "now" ? "car_bike_now" : "car_bike_after", {});
+ } catch (_) {}
+ update(ref(db, `active_orders/${orderId}`), u).then(() => {
+  _carWaitOnly.add(String(orderId));
+  showToastMsg(mode === "now" ? "🛵 نرسله الآن بدرّاجة." : "⏳ ننتظر سيّارة، وإذا ما توفّرت نرسله بدرّاجة.", 6e3);
+  renderActiveOrdersUI();
+ }).catch(() => {
+  if (btn) btn.disabled = false;
+ });
+};
+
+function carLineHtml(o, hasDriver) {
+ if (hasDriver || o.vehicle !== "car" || !o.carNone || typeof o.carNone !== "object") return "";
+ if (_carWaitOnly.has(String(o.id)) && !o.carBikeOk) return "";
+ const bike = Number(o.carNone.bike) || 0;
+ const ku = window.RES_LANG === "ckb";
+ const head = Number(o.carNone.on) > 0 ? ku ? "🚗 ئۆتۆمبێلەکان ئێستا سەرقاڵن" : "🚗 السيّارات مشغولة الآن" : ku ? "🚗 ئێستا هیچ ئۆتۆمبێلێک بەردەست نییە" : "🚗 لا سيّارة متاحة الآن";
+ const b = "border:0;border-radius:10px;padding:8px 10px;font-weight:800;font-size:.8rem;cursor:pointer;";
+ if (o.carBikeOk) return '<div class="mt-2" data-noku style="background:#fff7ed;border-radius:12px;padding:8px 10px;font-weight:800;font-size:.85rem;color:#9a3412">' + head + (bike ? ku ? " — ئەگەر لە ماوەی " + bike + " خولەکدا نەبوو بە ماتۆڕ دەینێرین" : " — إذا ما توفّرت خلال " + bike + " د نرسله بدرّاجة" : "") + ' <button style="' + b + 'background:#0b7a43;color:#fff;margin-inline-start:6px" onclick="carNoneChoice(\'' + sid(o.id) + "', 'now', this)\">" + (ku ? "ئێستا بە ماتۆڕ بینێرە" : "أرسله بدرّاجة الآن") + "</button></div>";
+ return '<div class="mt-2" data-noku style="background:#fff7ed;border-radius:12px;padding:8px 10px;font-weight:800;font-size:.85rem;color:#9a3412">' + head + ":" + '<div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:6px">' + '<button style="' + b + 'background:#0b7a43;color:#fff" onclick="carNoneChoice(\'' + sid(o.id) + "', 'now', this)\">" + (ku ? "بە ماتۆڕ بینێرە" : "أرسله بدرّاجة") + "</button>" + (bike ? '<button style="' + b + 'background:#e2e8f0;color:#0f172a" onclick="carNoneChoice(\'' + sid(o.id) + "', 'after', this)\">" + (ku ? "چاوەڕێی ئۆتۆمبێل بکە، دوای " + bike + " خولەک بە ماتۆڕ" : "انتظر سيّارة، وبعد " + bike + " د بدرّاجة") + "</button>" : "") + '<button style="' + b + 'background:#e2e8f0;color:#0f172a" onclick="carNoneChoice(\'' + sid(o.id) + "', 'wait', this)\">" + (ku ? "چاوەڕێی ئۆتۆمبێل بکە" : "انتظر سيّارة") + "</button></div></div>";
+}
+
+const p10Seen = new Set;
+
+let p10T = null;
+
+function p10Mins(o) {
+ return Math.max(0, Math.round((Date.now() - (o.bh || Date.parse(o.timestamp) || Date.now())) / 6e4));
+}
+
+function p10Ask() {
+ const a = Number(window.__resBrake && window.__resBrake.v2 && window.__resBrake.v2.a);
+ return a > 0 ? a : 30;
+}
+
+function p10Kept(id) {
+ try {
+  return localStorage.getItem("p10k_" + id) === "1";
+ } catch (_) {
+  return false;
+ }
+}
+
+window.p10Keep = function(id) {
+ try {
+  localStorage.setItem("p10k_" + id, "1");
+ } catch (_) {}
+ renderActiveOrdersUI();
+};
+
+window.p10CustMsg = function() {
+ const t = "هلا بيك 🌷 طلبك محفوظ بالدور، والتوصيل متأخّر شويّة بسبب الزحمة — يطلع للكابتن تلقائيّاً بأقرب وقت. نعتذر عن التأخير.";
+ const ok = () => showToastMsg("📋 نُسخت رسالة الزبون — الصقها في الواتساب.", 5e3);
+ try {
+  navigator.clipboard.writeText(t).then(ok, () => prompt("انسخ الرسالة:", t));
+ } catch (_) {
+  prompt("انسخ الرسالة:", t);
+ }
+};
+
+function p10Tone() {
+ try {
+  const ctx = audioCtx || (audioCtx = new (window.AudioContext || window.webkitAudioContext));
+  if (ctx.state === "suspended" && ctx.resume) ctx.resume().catch(() => {});
+  const t0 = ctx.currentTime + .03;
+  [ 784, 1046 ].forEach((f, i) => {
+   const o = ctx.createOscillator(), g = ctx.createGain();
+   o.frequency.value = f;
+   g.gain.setValueAtTime(1e-4, t0 + i * .18);
+   g.gain.exponentialRampToValueAtTime(.5, t0 + i * .18 + .02);
+   g.gain.exponentialRampToValueAtTime(1e-4, t0 + i * .18 + .16);
+   o.connect(g);
+   g.connect(ctx.destination);
+   o.start(t0 + i * .18);
+   o.stop(t0 + i * .18 + .17);
+  });
+ } catch (_) {}
+}
+
+function p10ReleaseSync(list) {
+ const now = new Set(list.filter(o => o.bh || o.ph).map(o => String(o.id)));
+ let rel = 0;
+ p10Seen.forEach(id => {
+  if (!now.has(id)) {
+   p10Seen.delete(id);
+   if (list.some(o => String(o.id) === id && o.status !== "deleted")) rel++;
+  }
+ });
+ now.forEach(id => p10Seen.add(id));
+ if (rel) {
+  p10Tone();
+  showToastMsg("🟢 خرج طلبك المؤجّل للكباتن الآن.", 8e3);
+ }
+ if (now.size && !p10T) p10T = setInterval(() => {
+  if (!p10Seen.size) {
+   clearInterval(p10T);
+   p10T = null;
+  }
+  renderActiveOrdersUI();
+ }, 6e4);
+}
+
+function p10Html(o) {
+ const btn = (cls, on, txt) => `<button type="button" class="btn-ready ${cls}" onclick="${on}">${txt}</button>`;
+ const sid0 = sid(o.id), m = p10Mins(o), ask = !o.ph && m >= p10Ask() && !p10Kept(o.id);
+ return `<div class="order-details-row mt-2" style="flex-wrap:wrap;gap:6px">` + (ask ? `<div class="detail-item" style="width:100%">${window.RES_LANG === "ckb" ? "ماوەی " + m + " خولەکە — لە نۆرەدا بمێنێت یان هەڵیبوەشێنیتەوە؟" : "صار له " + m + " د — نخلّيه بالدور لو تلغيه؟"}</div>` + btn("", `p10Keep('${sid0}')`, "خلّيه بالدور") : btn("", "p10CustMsg()", "رسالة للزبون")) + btn("", `cancelOrderGrace('${sid0}')`, "ألغِه") + `</div>`;
+}
+
 function renderActiveOrdersUI() {
+ try {
+  swapArm();
+ } catch (_) {}
  let activeOrdersHtml = "";
  liveActiveOrders.forEach(o => {
   const {status: status, id: orderId, area: orderArea, driverPhone: driverPhone, timestamp: orderDateStr, readyForPickup: readyForPickup} = o;
@@ -9301,12 +10994,48 @@ function renderActiveOrdersUI() {
    }
   }
   const STATUS_TEXT = o.kind === "supply" ? [ "", "نبحث عن كابتن للمقاضي", "الكابتن متوجّه إلى المحلّ", "الكابتن عند المحلّ", "المقاضي في الطريق إليك" ] : [ "", "نبحث عن كابتن قريب", "الكابتن متوجّه إليك", "الكابتن عند بابك", "الطلب في طريقه للزبون" ];
-  const statusLine = offered ? "عُرض على كابتن — بانتظار قبوله" : STATUS_TEXT[step] || "قيد المتابعة";
-  const showReadyBtn = o.kind !== "supply" && hasDriver && (status === "accepted" || status === "heading" || status === "arrived_at_res");
+  let statusLine = offered ? "عُرض على كابتن — بانتظار قبوله" : STATUS_TEXT[step] || "قيد المتابعة";
+  const _band = o.resEta, _stBand = hasDriver && !offered && status === "accepted" && (resEtaOn() || swapAvail(o));
+  const p10 = !hasDriver && status === "pending_driver" && (o.bh || o.ph);
+  if (p10) statusLine = o.ph && !o.bh ? "محفوظ بالدور — يخرج للكباتن تلقائيّاً حين يعود الإرسال الساعة " + new Date(o.ph).toLocaleTimeString("ar-EG", {
+   hour: "2-digit",
+   minute: "2-digit"
+  }) : "مؤجّل للزحمة منذ " + p10Mins(o) + " د · يخرج تلقائيّاً (عادةً 10–35 د)"; else if (!hasDriver && o.brakeCar && Number(o.brakeCar.until) > Date.now()) statusLine = "نبحث عن سيّارة لهذا الطلب البعيد"; else if (o.carBikeAt && o.vehicle !== "car") statusLine = (hasDriver ? statusLine : "لم تتوفّر سيّارة — نرسله بدرّاجة") + (o.carFeeBack ? " · حُذفت زيادة السيّارة (" + o.carFeeBack + ")" : ""); else if (!hasDriver && status === "pending_driver" && o.wdAt && Date.now() - Number(o.wdAt) < 20 * 6e4) statusLine = "حوّلنا طلبك لكابتن ثاني — طلبك بأوّل الدور"; else if (hasDriver && !offered && status === "accepted" && typeof _band === "string" && _band.charAt(0) === "f" && /^\d/.test(_band.slice(1))) statusLine = "الكابتن يسلّم طلباً قريباً ويجيك خلال " + etaTxt(_band.slice(1)) + " دقائق تقريباً"; else if (_stBand && _band === "stall") statusLine = "الكابتن ما تحرّك بعد — نتابعه، وإذا ما تحرّك يتحوّل طلبك تلقائياً"; else if (_stBand && _band === "stall0") statusLine = "الكابتن ما تحرّك بعد — نتابعه"; else if (_stBand && _band === "off") statusLine = "الكابتن غير متّصل الآن — نتابعه"; else if (_stBand && _band === "gps") statusLine = "موقع الكابتن غير محدَّث"; else if (!hasDriver && o.eta === "defer") statusLine = "وقت زحمة — طلبك يخرج بعد الزحمة خلال 30 دقيقة تقريباً"; else if (!hasDriver && o.holdUntil && Date.parse(o.holdUntil) > Date.now()) statusLine = "نرسل الكابتن ليصل مع جاهزيّة طلبك — اضغط «جاهز» إن جهز قبل"; else if (resEtaOn()) {
+   if (!hasDriver && o.eta && o.eta !== "defer" && o.kind !== "supply") statusLine = "طلبك محفوظ بالدور · كابتن خلال " + etaTxt(o.eta) + " دقيقة تقريباً"; else if (hasDriver && !offered && status === "accepted" && o.resEta && /^\d/.test(o.resEta)) statusLine = "الكابتن بالطريق إلك · يوصل خلال " + etaTxt(o.resEta) + " دقائق تقريباً";
+  }
+  const showReadyBtn = o.kind !== "supply" && (hasDriver && (status === "accepted" || status === "heading" || status === "arrived_at_res") || !hasDriver && o.holdUntil && Date.parse(o.holdUntil) > Date.now());
   const readyBtnHtml = showReadyBtn ? readyForPickup ? `<span class="ready-pill"><i data-lucide="check-circle" size="10"></i> جاهز للاستلام</span>` : `<button class="btn-ready" onclick="markOrderReady('${sid(orderId)}', this)"><i data-lucide="package-check" size="14"></i> إبلاغ الكابتن بالجهوزية</button>` : "";
+  const _w = hasDriver && !offered && abOn_(resUi().ab, window.__resPhone) ? resWaitInfo_(o, resNow(), resUi(), Number(arrSeenLoad()[o.id]) || 0) : {
+   show: false,
+   left: null
+  };
+  let waitHtml = "";
+  if (_w.show) {
+   waitHtml = waitBarHtml(o, _w, !!readyForPickup);
+   if (!_waitRang) _waitRang = new Set;
+   const _rk = String(orderId) + ":" + _w.why + ":" + (o.resNeed && o.resNeed.at || 0);
+   if (!_waitRang.has(_rk)) {
+    _waitRang.add(_rk);
+    try {
+     playAskChime();
+     if (navigator.vibrate) navigator.vibrate([ 300, 120, 300 ]);
+    } catch (_) {}
+    try {
+     resTrack("wait_bar", {
+      orderId: orderId,
+      reason: _w.why,
+      ms: _w.mins || 0,
+      code: "ab" + abSlot_(window.__resPhone)
+     });
+    } catch (_) {}
+   }
+  } else if (_w.left != null) {
+   waitHtml = `<div class="oc-need" style="margin-top:8px;background:#fff7ed;color:#9a3412;border-radius:12px;padding:7px 10px;font-weight:700;font-size:.9rem">أبلغتم الكابتن: الطلب يحتاج ~${_w.left} د</div>`;
+  }
+  const swapBtnHtml = swapShow(o) ? `<button class="btn-swap" onclick="swapCaptain('${sid(orderId)}', this)"><i data-lucide="repeat" size="14"></i> بدّل الكابتن</button>` : "";
   const photoUrl = o.photoUrl || o.image;
   const imgBtnHtml = photoUrl ? `<button class="oc-icon-btn receipt" onclick="document.getElementById('fullReceiptImage').src='${jss(photoUrl)}'; document.getElementById('imageViewerModal').style.display='flex';" title="عرض الوصل" aria-label="عرض وصل الطلب"><i data-lucide="image" size="18"></i></button>` : "";
-  activeOrdersHtml += `\n            <div class="live-order-card" id="order-${sid(orderId)}">\n                <div class="oc-rail"><div class="oc-rail-fill" style="width: ${fillWidth};"></div></div>\n                <div class="oc-body">\n                <div class="order-header-row">\n                    <div class="oc-status ${hasDriver ? "" : "searching"}">${escapeHtml(statusLine)}</div>\n                    <div class="oc-meta">\n                        <span class="order-id-text">#${escapeHtml(orderId)}</span>\n                        <div class="order-time-text"><i data-lucide="clock" size="10"></i> ${escapeHtml(orderTime)}</div>\n                    </div>\n                </div>\n                <div class="oc-driver ${hasDriver ? "" : "waiting"}">\n                    <div class="oc-av ${hasDriver ? "" : "waiting"}">${hasDriver && driverAvatarHtml(driverPhone) || `<i data-lucide="${hasDriver ? "bike" : "radar"}" size="24"></i>`}</div>\n                    <div class="oc-dwrap">\n                        <div class="oc-dname">${driverName}</div>\n                        <div class="oc-drole">${hasDriver ? "كابتن التوصيل" : "جارٍ الإسناد…"}</div>\n                    </div>\n                    ${hasDriver ? `<button class="oc-call" onclick="window.open('tel:${jss(driverPhone)}')" title="اتصال بالكابتن" aria-label="اتصال بالكابتن"><i data-lucide="phone" size="17"></i></button>` : ""}\n                </div>\n                <div class="order-details-row mt-2">\n                    <div class="detail-item"><i data-lucide="map-pin" size="14" style="color: var(--accent);"></i> ${escapeHtml(orderArea || "غير محددة")}</div>\n                </div>\n                ${o.src === "ittihad" && o.itt ? ittMiniHtml(o) : ""}\n                ${o.kind === "supply" && o.sup ? supMiniHtml(o) : ""}\n                <div class="progress-tracker mt-3">\n                    <div class="progress-line"></div>\n                    <div class="progress-line-fill" style="width: ${fillWidth};"></div>\n                    <div class="progress-step ${step >= 1 ? step === 1 ? "current" : "active" : ""}"><div class="progress-dot"><i data-lucide="radar" size="10"></i></div><span class="progress-label">بانتظار</span></div>\n                    <div class="progress-step ${step >= 2 ? step === 2 ? "current" : "active" : ""}"><div class="progress-dot"><i data-lucide="truck" size="10"></i></div><span class="progress-label">متوجه</span></div>\n                    <div class="progress-step ${step >= 3 ? step === 3 ? "current" : "active" : ""}"><div class="progress-dot"><i data-lucide="store" size="10"></i></div><span class="progress-label">${o.kind === "supply" ? "بالمحلّ" : "بالمطعم"}</span></div>\n                    <div class="progress-step ${step >= 4 ? step === 4 ? "current" : "active" : ""}"><div class="progress-dot"><i data-lucide="user" size="10"></i></div><span class="progress-label">بالطريق</span></div>\n                </div>\n                ${readyBtnHtml || imgBtnHtml || isCancelable ? `<div class="oc-actions">\n                    ${readyBtnHtml}\n                    ${imgBtnHtml}\n                    ${isCancelable ? `<button class="oc-icon-btn danger" onclick="cancelOrderGrace('${sid(orderId)}')" title="إلغاء الطلب" aria-label="إلغاء الطلب"><i data-lucide="x" size="19"></i></button>` : ""}\n                </div>` : ""}\n                </div>\n            </div>`;
+  activeOrdersHtml += `\n            <div class="live-order-card" id="order-${sid(orderId)}">\n                <div class="oc-rail"><div class="oc-rail-fill" style="width: ${fillWidth};"></div></div>\n                <div class="oc-body">\n                <div class="order-header-row">\n                    <div class="oc-status ${hasDriver ? "" : "searching"}">${escapeHtml(statusLine)}</div>\n                    <div class="oc-meta">\n                        <span class="order-id-text">#${escapeHtml(orderId)}</span>\n                        <div class="order-time-text"><i data-lucide="clock" size="10"></i> ${escapeHtml(orderTime)}</div>\n                    </div>\n                </div>\n                <div class="oc-driver ${hasDriver ? "" : "waiting"}">\n                    <div class="oc-av ${hasDriver ? "" : "waiting"}">${hasDriver && driverAvatarHtml(driverPhone) || `<i data-lucide="${hasDriver ? "bike" : "radar"}" size="24"></i>`}</div>\n                    <div class="oc-dwrap">\n                        <div class="oc-dname">${driverName}</div>\n                        <div class="oc-drole">${hasDriver ? "كابتن التوصيل" : "جارٍ الإسناد…"}</div>\n                    </div>\n                    ${hasDriver ? `<button class="oc-call" onclick="window.open('tel:${jss(driverPhone)}')" title="اتصال بالكابتن" aria-label="اتصال بالكابتن"><i data-lucide="phone" size="17"></i></button>` : ""}\n                </div>\n                <div class="order-details-row mt-2">\n                    <div class="detail-item"><i data-lucide="map-pin" size="14" style="color: var(--accent);"></i> ${escapeHtml(orderArea || "غير محددة")}</div>\n                </div>\n                ${o.src === "ittihad" && o.itt ? ittMiniHtml(o) : ""}\n                ${o.kind === "supply" && o.sup ? supMiniHtml(o) : ""}\n                ${waitHtml}\n                ${carLineHtml(o, hasDriver)}\n                ${p10 ? p10Html(o) : ""}\n                <div class="progress-tracker mt-3">\n                    <div class="progress-line"></div>\n                    <div class="progress-line-fill" style="width: ${fillWidth};"></div>\n                    <div class="progress-step ${step >= 1 ? step === 1 ? "current" : "active" : ""}"><div class="progress-dot"><i data-lucide="radar" size="10"></i></div><span class="progress-label">بانتظار</span></div>\n                    <div class="progress-step ${step >= 2 ? step === 2 ? "current" : "active" : ""}"><div class="progress-dot"><i data-lucide="truck" size="10"></i></div><span class="progress-label">متوجه</span></div>\n                    <div class="progress-step ${step >= 3 ? step === 3 ? "current" : "active" : ""}"><div class="progress-dot"><i data-lucide="store" size="10"></i></div><span class="progress-label">${o.kind === "supply" ? "بالمحلّ" : "بالمطعم"}</span></div>\n                    <div class="progress-step ${step >= 4 ? step === 4 ? "current" : "active" : ""}"><div class="progress-dot"><i data-lucide="user" size="10"></i></div><span class="progress-label">بالطريق</span></div>\n                </div>\n                ${readyBtnHtml || swapBtnHtml || imgBtnHtml || isCancelable ? `<div class="oc-actions">\n                    ${readyBtnHtml}\n                    ${swapBtnHtml}\n                    ${imgBtnHtml}\n                    ${isCancelable ? `<button class="oc-icon-btn danger" onclick="cancelOrderGrace('${sid(orderId)}')" title="إلغاء الطلب" aria-label="إلغاء الطلب"><i data-lucide="x" size="19"></i></button>` : ""}\n                </div>` : ""}\n                </div>\n            </div>`;
  });
  if (lastActiveHtml !== activeOrdersHtml) {
   document.getElementById("activeOrdersList").innerHTML = activeOrdersHtml || `<div class="text-center text-muted fw-bold py-4 small" style="font-size: 0.8rem; background: rgba(255,255,255,0.4); border-radius: 20px;"><i data-lucide="inbox" size="24" class="mb-2 opacity-50"></i><br>لا توجد طلبات نشطة حالياً.</div>`;
@@ -9360,6 +11089,11 @@ document.getElementById("orderForm").onsubmit = function(e) {
     finalPrice = myCustomPriceList[finalArea] || 0;
    }
    finalDetails = "⚡ طلب سريع (التفاصيل والفاتورة مع المطعم)";
+   {
+    const fe = document.getElementById("quickFoodPrice");
+    const fv = fe && window.__quickFoodOn !== false ? vehNum(fe.value) : 0;
+    window._quickFood = fv > 0 && fv <= 1e8 ? Math.round(fv) : 0;
+   }
   }
   btn.innerHTML = `<div class="spinner-border spinner-border-sm me-1"></div> إرسال إلى الرادار...`;
   btn.disabled = true;
@@ -9535,23 +11269,48 @@ function resetCar() {
 }
 
 async function finalizeOrderPlacement(details, imageUrl, price, area, btn, originalBtnHtml) {
+ const _lk = window.__p10Lock;
+ if (_lk && _lk.area === String(area || "") && Date.now() < _lk.until) {
+  btn.innerHTML = originalBtnHtml;
+  btn.disabled = false;
+  alert("⏳ هذه المنطقة متوقّفة مؤقّتاً وقت الضغط.\n\nأعد المحاولة بعد " + Math.ceil((_lk.until - Date.now()) / 1e3) + " ثانية — أو انتظر العلامة الخضراء حين يعود الاستقبال. طلبك باقٍ في النموذج.");
+  return;
+ }
+ window.__lastP10 = "";
  try {
   await finalizeOrderPlacementSilent(details, imageUrl, price, area, currentResName);
   if (_supNext) _supNext.ok = true;
   resetCar();
   btn.innerHTML = originalBtnHtml;
   btn.disabled = false;
-  showSuccessMessage(`<div style="background: var(--success); width: 48px; height: 48px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-bottom: 8px; box-shadow: 0 4px 15px rgba(16,185,129,0.3);"><i data-lucide="check" size="24" color="white"></i></div><div class="fw-black" style="font-size: 1rem;">تم إرسال الطلب عبر خوادم الحوت بنجاح! 🚀</div>`);
+  const _held = window.__lastP10;
+  const _supFee = _supNext ? Number(window.__lastSupFee) || Number(_supNext.fee) || 0 : 0;
+  showSuccessMessage(`<div style="background: var(--success); width: 48px; height: 48px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-bottom: 8px; box-shadow: 0 4px 15px rgba(16,185,129,0.3);"><i data-lucide="check" size="24" color="white"></i></div><div class="fw-black" style="font-size: 1rem;">${_supFee && !_held ? "تم إرسال كابتن المقاضي — الأجرة " + _supFee.toLocaleString("en-US") + " د.ع" : _held ? _held === "pause" ? "تم حفظ الطلب — يخرج للكباتن تلقائيّاً حين يعود الإرسال 🌷" : "تم حفظ الطلب — مؤجّل للزحمة ويخرج للكباتن تلقائيّاً (عادةً 10–35 د) 🌷" : "تم إرسال الطلب عبر خوادم الحوت بنجاح! 🚀"}</div>`);
  } catch (e) {
   btn.innerHTML = originalBtnHtml;
   btn.disabled = false;
   if (e && e.message === "DUPLICATE_CANCELLED") return;
+  if (e && e.message === "FEE_DECLINED") return;
   if (e && e.message === "SERVER_DEDUP") {
    alert("⚠️ لم يُنشأ طلب جديد.\n\n" + "هذا الإرسال طابق طلباً أُرسل قبل قليل، فأعاد النظام رقمه:\n" + "#" + (e.orderId || "—") + "\n\n" + "راجع «طلبات نشطة». وإن كان طلباً مختلفاً فعلاً فأعد الإرسال الآن.");
    endAttemptCid();
    return;
   }
   if (e && e.message === "SERVER_REJECTED") {
+   if (e.reason === "res_brake") {
+    const _u = window.__resBrake && window.__resBrake.v2 && window.__resBrake.v2.u;
+    if (_u && Number(_u.l) > 0) window.__p10Lock = {
+     area: String(area || ""),
+     until: Date.now() + Number(_u.l) * 1e3
+    };
+    if (_u) window.__p10RejAt = Date.now();
+    alert((e.serverMsg || "⏳ الضغط عالٍ الآن — أعد الإرسال بعد قليل.") + (_u && Number(_u.d) ? "\n\nطلبك باقٍ في النموذج — لا تكتبه من جديد." : ""));
+    return;
+   }
+   if (e.reason === "res_hold") {
+    alert("⏸ لم يُرسَل الطلب.\n\n" + (e.serverMsg || "مطعمكم موقوف مؤقّتاً.") + "\n\nأرسله بعد هذا الموعد.");
+    return;
+   }
    alert("🛑 لم يُرسَل الطلب.\n\n" + (e.serverMsg || "رفضه الخادم."));
    return;
   }
@@ -9620,6 +11379,13 @@ async function finalizeOrderPlacementSilent(details, imageUrl, price, area, resN
  const authed = await requireCloudAuth();
  if (!authed) throw new Error("NO_AUTH");
  window.__resPhone = normResPhone;
+ if (resUi().fragile_hint && !carMode && !_supNext && isCake_(details)) {
+  const _toCar = await cakeCarAsk();
+  try {
+   resTrack(_toCar ? "cake_car" : "cake_bike", {});
+  } catch (_) {}
+  if (_toCar) setVehicle("car");
+ }
  const _car = _supNext ? {
   price: price,
   area: area,
@@ -9634,7 +11400,7 @@ async function finalizeOrderPlacementSilent(details, imageUrl, price, area, resN
  if (USE_SERVER_CREATE) {
   let serverId = null, unsure = false;
   try {
-   serverId = await createOrderOnServer({
+   serverId = await createWithFeeConsent({
     resPhone: normResPhone,
     details: details,
     area: area,
@@ -9646,6 +11412,9 @@ async function finalizeOrderPlacementSilent(details, imageUrl, price, area, resN
     lat: regLat,
     lng: regLng,
     dup_confirmed: dupConfirmed,
+    ...currentOrderMode === "quick" && !_supNext && window._quickFood > 0 ? {
+     food_price: window._quickFood
+    } : {},
     ..._supNext || {}
    });
   } catch (e) {
@@ -9704,6 +11473,11 @@ function showSuccessMessage(customHTML) {
  document.getElementById("orderPrice").value = "";
  document.getElementById("customAreaName").value = "";
  document.getElementById("customAreaPrice").value = "";
+ {
+  const qf = document.getElementById("quickFoodPrice");
+  if (qf) qf.value = "";
+  window._quickFood = 0;
+ }
  document.getElementById("customerPhoneWrap").classList.remove("cleaned");
  document.getElementById("priceHint").classList.add("hidden-section");
  document.getElementById("customerArea").value = "";

@@ -18,7 +18,7 @@ try {
 <meta charset="UTF-8">
 <meta name="robots" content="noindex, nofollow">
 <script>
-const ADMIN_APP_VERSION = "5.6-PlaceFind";
+const ADMIN_APP_VERSION = "6.0-Nahla";
 
 try {
  if (localStorage.getItem("hut_adm_version") !== ADMIN_APP_VERSION) {
@@ -400,6 +400,7 @@ button,input,select,textarea{font-family:'Cairo',sans-serif;}
   position:relative;overflow:hidden;}
 .ec:hover{transform:translateY(-2px);box-shadow:var(--sh-md);}
 .ec::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;}
+
 .ec.ek::before{background:linear-gradient(90deg,var(--jade),#047857);}
 .ec.ei::before{background:linear-gradient(90deg,var(--amber),#d97706);}
 .ec.ep::before{background:linear-gradient(90deg,var(--sky),var(--sky-d));}
@@ -410,6 +411,7 @@ button,input,select,textarea{font-family:'Cairo',sans-serif;}
   background:var(--sky-l);color:var(--sky);flex-shrink:0;font-size:18px;}
 .ec-n{font-size:.86rem;font-weight:900;color:var(--ink);margin-bottom:1px;}
 .ec-ph{font-size:.7rem;font-weight:700;color:var(--ink4);direction:ltr;margin-bottom:6px;}
+.ec-sg{direction:rtl;font-weight:800}.ec-sg.ok{color:#15803d}.ec-sg.no{color:#be123c}   
 .ls{display:grid;grid-template-columns:1fr 1fr;gap:5px;margin-bottom:9px;}
 .lm{background:var(--base2);border-radius:10px;padding:7px 8px;
   border:1px solid var(--line2);text-align:center;transition:background .3s;}
@@ -933,6 +935,28 @@ button,input,select,textarea{font-family:'Cairo',sans-serif;}
   </div>
 </div>
 
+<div id="holdMod" class="mbg" onclick="clMod('holdMod')">
+  <div class="mcard" style="max-width:480px" onclick="event.stopPropagation()">
+    <div style="width:46px;height:46px;border-radius:14px;background:#FFF6E0;display:flex;align-items:center;justify-content:center;color:#7A4F00;margin:0 auto 11px;font-size:22px">⏸</div>
+    <h4 style="font-weight:900;text-align:center;color:var(--ink);margin-bottom:3px">إيقاف الإرسال مؤقّتاً</h4>
+    <p id="holdSub" style="font-size:.75rem;font-weight:700;color:var(--ink4);text-align:center;margin-bottom:14px"></p>
+    <label class="el">المدّة — يعود الإرسال وحده بعدها</label>
+    <div id="holdDur" style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px"></div>
+    <label class="el">السبب — يراه المطعم بين قوسين</label>
+    <div id="holdWhy" style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px"></div>
+    <input type="text" id="holdMsg" class="fc" maxlength="80" style="margin-bottom:10px" placeholder="نصٌّ يراه المطعم بدل السبب (اختياريّ)" oninput="holdPaint()">
+    <label style="display:flex;gap:8px;align-items:center;font-size:.78rem;font-weight:700;color:var(--ink3);margin-bottom:12px;cursor:pointer">
+      <input type="checkbox" id="holdQ"> وصولات الجسر تبقى بطاقاتٍ عند الكاشير يرسلها بعد العودة (بدل رفضها)
+    </label>
+    <div id="holdPrev" style="white-space:pre-line;background:var(--base2);border:1px solid var(--line2);border-radius:12px;padding:9px 12px;margin-bottom:12px;font-size:.74rem;font-weight:700;color:var(--ink3);line-height:1.7"></div>
+    <div style="display:flex;gap:8px">
+      <button id="holdSave" onclick="holdSave()" style="flex:1;padding:11px;background:#B7791F;color:#fff;border:0;border-radius:12px;font-weight:800;cursor:pointer;font-family:'Cairo'">⏸ أوقف</button>
+      <button onclick="clMod('holdMod')" style="flex:1;padding:11px;background:var(--base2);border:1px solid var(--line2);border-radius:12px;font-weight:800;cursor:pointer;color:var(--ink3);font-family:'Cairo'">إلغاء</button>
+    </div>
+    <button type="button" onclick="holdForever()" style="width:100%;margin-top:8px;padding:9px;background:none;border:1px dashed var(--line2);border-radius:12px;font-weight:700;cursor:pointer;color:var(--ink4);font-size:.74rem;font-family:'Cairo'">استراحة بلا مدّة (إجراءٌ إداريّ — لا تنتهي وحدها)</button>
+  </div>
+</div>
+
 <div id="prefMod" class="mbg" onclick="clMod('prefMod')">
   <div class="mcard" style="max-width:520px" onclick="event.stopPropagation()">
     <div style="width:46px;height:46px;border-radius:14px;background:var(--sky-l);display:flex;align-items:center;justify-content:center;color:var(--sky);margin:0 auto 11px;font-size:22px">🍽️</div>
@@ -1022,6 +1046,8 @@ button,input,select,textarea{font-family:'Cairo',sans-serif;}
         <div><label class="el" style="margin-bottom:3px">خط العرض (Lat)</label><input type="number" id="eLat" class="fc" placeholder="35.468" step="any" oninput="gPrevSoon()"></div>
         <div><label class="el" style="margin-bottom:3px">خط الطول (Lng)</label><input type="number" id="eLng" class="fc" placeholder="44.392" step="any" oninput="gPrevSoon()"></div>
       </div>
+      
+      <button type="button" class="map-b" id="nuBtn" onclick="nuToggle()" style="width:100%;margin-bottom:11px">⏳ …</button>
     </div>
     <div id="eDF" style="display:none">
       
@@ -1289,6 +1315,7 @@ button,input,select,textarea{font-family:'Cairo',sans-serif;}
         <button class="fp fa" onclick="setSF('RES','inactive',this)">استراحة <span class="fc" id="br-inactive">0</span></button>
         <button class="fp fr" onclick="setSF('RES','banned',this)">موقوف <span class="fc" id="br-banned">0</span></button>
         <button class="fp" onclick="setSF('RES','deleted',this)" title="المحذوفة — ✓ يعيد تفعيلها">🗑 محذوف <span class="fc" id="br-deleted">0</span></button>
+        <button class="fp fr" onclick="setSF('RES','unsigned',this)" title="المطاعم المفعّلة وفي الاستراحة بلا عقدٍ موقّع — الأكثر طلباً أوّلاً">✍️ غير موقّع <span class="fc" id="br-unsigned">…</span></button>
       </div>
       <div class="eg" id="resList"></div>
     </div>
@@ -1399,6 +1426,7 @@ button,input,select,textarea{font-family:'Cairo',sans-serif;}
         <button class="fp" onclick="insSetF('today',this)">وجبة اليوم</button>
         <button class="fp fr" onclick="insSetF('blocked',this)">متأخّرون</button>
         <button class="fp fg" onclick="insSetF('ok',this)">دفعوا</button>
+        <button class="fp" onclick="insSetF('frozen',this)">⏸ مجمّدون <span class="fc" id="insKFrz">0</span></button>
         <button class="fp" onclick="insSetF('notice',this)">أبلغوا بالترك</button>
         <button class="fp" onclick="insSetF('all',this)">الكل</button>
       </div>
@@ -3179,6 +3207,14 @@ function updBadges(type, list) {
   const el = document.getElementById(p + "-" + k);
   if (el) el.textContent = cnt[k];
  });
+ if (type === "RES" && _ctMap) {
+  let u = 0;
+  list.slice(1).forEach(i => {
+   if (ctOpen(i[R.STATUS]) && !ctOf(nP(i[2]))) u++;
+  });
+  const ue = document.getElementById("br-unsigned");
+  if (ue) ue.textContent = u;
+ }
 }
 
 function patchCards(type) {
@@ -3223,6 +3259,14 @@ function filtEnt(type) {
  } else if (filter === "mostDebt") {
   const lM = type === "RES" ? liveLed.restaurants : liveLed.drivers;
   list.sort((a, b) => (lM?.[nP(b[2])]?.debt || 0) - (lM?.[nP(a[2])]?.debt || 0));
+ } else if (filter === "unsigned" && type === "RES") {
+  if (!_ctMap) {
+   ctLoad();
+   cont.innerHTML = `<div class="empty-s" style="grid-column:1/-1"><div class="es-ic">⏳</div><div class="es-t">جاري تحميل العقود…</div></div>`;
+   return;
+  }
+  const lM = liveLed.restaurants;
+  list = list.filter(i => ctOpen(i[R.STATUS]) && !ctOf(nP(i[2]))).sort((a, b) => (lM?.[nP(b[2])]?.completed_orders || 0) - (lM?.[nP(a[2])]?.completed_orders || 0));
  } else if (filter === "pending" || filter === "waiting") list = list.filter(i => (type === "RES" ? i[R.STATUS] : i[D.STATUS]) === "pending" || (type === "RES" ? i[R.STATUS] : i[D.STATUS]) === "waiting"); else if (filter === "active" && type === "DRV") list = list.filter(i => i[D.STATUS] === "active" && actDrv.has(nP(i[D.PHONE]))); else if ([ "active", "inactive", "banned" ].includes(filter)) list = list.filter(i => (type === "RES" ? i[R.STATUS] : i[D.STATUS]) === filter);
  updBadges(type, type === "RES" ? gD.restaurants : gD.drivers);
  if (!list.length) {
@@ -3308,7 +3352,7 @@ function filtEnt(type) {
    return;
   }
   const pj = ej(phone);
-  const html = `<div id="${cid}" class="ec ec-${status}">\n      ${extra}\n      <div class="ec-top">\n        <div class="ec-av">${type === "DRV" && drvPhoto[n] ? `<img src="${esc(drvPhoto[n])}" alt="" loading="lazy" style="width:100%;height:100%;border-radius:inherit;object-fit:cover">` : type === "RES" ? "🍽" : "🛵"}</div>\n        <span class="sp ${spC}">${esc(spL)}</span>\n      </div>\n      <div class="ec-n">${esc(name)}</div>\n      <div class="ec-ph">${esc(phone)}</div>\n      ${type === "DRV" ? `<div class="ec-ph sh-click" style="color:#0369a1;font-weight:700" title="تعديل الشفت — ساعة البدء والمدّة" onclick="opShift('${pj}')">🕐 ${drvShift[n] ? esc(drvShift[n]) : "بلا موعد — اضغط للتحديد"}</div>` : ""}\n      <div class="ls">\n        <div class="lm"><div class="lv b ls-ord">${orders.toLocaleString("ar-EG")}</div><div class="ll">طلبات منجزة</div></div>\n        <div class="lm"><div class="lv r ls-debt">${debt.toLocaleString("ar-EG")} د.ع</div><div class="ll">عمولة مستحقة</div></div>\n      </div>\n      <div class="ec-acts">\n        <div style="display:flex;gap:4px">\n          <button class="ea ea-a" title="تفعيل"   onclick="doAct('ACCEPT','${type}','${pj}',this)">✓</button>\n          <button class="ea ea-p" title="استراحة" onclick="doAct('PAUSE','${type}','${pj}',this)">⏸</button>\n          <button class="ea ea-b" title="حظر"      onclick="doAct('BAN','${type}','${pj}',this)">🚫</button>\n          ${type === "DRV" ? `<button class="ea" title="${ldrSet.has(n) ? "إلغاء صفة الليدر" : "جعله ليدر"}" style="background:${ldrSet.has(n) ? "#7c3aed" : "#e2e8f0"};color:${ldrSet.has(n) ? "#fff" : "#64748b"}" onclick="toggleLeader('${pj}',${ldrSet.has(n) ? "false" : "true"},this)">&#128081;</button>${ldrSet.has(n) ? `<button class="ea" title="مدّة نافذة هذا الليدر" style="background:#ede9fe;color:#7c3aed" onclick="pickLeaderHours('${pj}')">⏱</button>` : ""}` : ""}\n          ${type === "RES" ? `<button class="ea ea-pref" title="كباتن المطعم الثابتون" style="background:${prefCount[n] ? "#0ea5e9" : "#e2e8f0"};color:${prefCount[n] ? "#fff" : "#64748b"}" onclick="opPref('${pj}')">&#127869;</button>` : ""}\n          <button class="ea ea-d" title="حذف"      onclick="doAct('DEL','${type}','${pj}',this)">🗑</button>\n          <button class="ea ea-e" title="تعديل"   onclick="opEdit('${type}','${pj}')">✏️</button>\n        </div>\n        <div style="display:flex;gap:4px">\n          <button class="ea ea-money" title="تصفير"  onclick="rstDebt('${type}','${pj}',this)">💵</button>\n          ${type === "DRV" ? `<button class="ea" title="فتح الشفت — يبدأ شفتاً جديداً اليوم" style="background:#f59e0b;color:#fff" onclick="rstShift('${pj}',this)">🔓</button><button class="ea" title="تعديل الشفت — ساعة البدء والمدّة" style="background:var(--sky);color:#fff" onclick="opShift('${pj}')">🕐</button><button class="ea" title="${_lastLocs && _lastLocs[n] && _lastLocs[n].vehicle === "car" ? "كابتن سيارة — اضغط لإعادته دراجة" : "اجعله كابتن سيارة (تصله طلبات السيارة، والطلبات العاديّة كغيره)"}" style="background:${_lastLocs && _lastLocs[n] && _lastLocs[n].vehicle === "car" ? "#0ea5e9" : "#cbd5e1"};color:#fff" onclick="setVehicle('${pj}',this)">🚗</button>` : ``}\n          <button class="ea ea-c" title="اتصال"   onclick="window.open('tel:${pj}')">📞</button>\n        </div>\n      </div>\n    </div>`;
+  const html = `<div id="${cid}" class="ec ec-${status}">\n      ${extra}\n      <div class="ec-top">\n        <div class="ec-av">${type === "DRV" && drvPhoto[n] ? `<img src="${esc(drvPhoto[n])}" alt="" loading="lazy" style="width:100%;height:100%;border-radius:inherit;object-fit:cover">` : type === "RES" ? "🍽" : "🛵"}</div>\n        <span class="sp ${spC}">${esc(spL)}</span>\n      </div>\n      <div class="ec-n">${esc(name)}</div>\n      <div class="ec-ph">${esc(phone)}</div>\n      ${type === "RES" ? `<div class="ec-ph" id="hold-${n}" style="display:none;color:#7A4F00;font-weight:800"></div>` : ""}\n      ${type === "RES" ? `<div class="ec-ph ec-sg" id="sg-${n}" style="display:none"></div>` : ""}\n      ${type === "DRV" ? `<div class="ec-ph sh-click" style="color:#0369a1;font-weight:700" title="تعديل الشفت — ساعة البدء والمدّة" onclick="opShift('${pj}')">🕐 ${drvShift[n] ? esc(drvShift[n]) : "بلا موعد — اضغط للتحديد"}</div>` : ""}\n      <div class="ls">\n        <div class="lm"><div class="lv b ls-ord">${orders.toLocaleString("ar-EG")}</div><div class="ll">طلبات منجزة</div></div>\n        <div class="lm"><div class="lv r ls-debt">${debt.toLocaleString("ar-EG")} د.ع</div><div class="ll">عمولة مستحقة</div></div>\n      </div>\n      <div class="ec-acts">\n        <div style="display:flex;gap:4px">\n          <button class="ea ea-a" title="تفعيل"   onclick="doAct('ACCEPT','${type}','${pj}',this)">✓</button>\n          <button class="ea ea-p" title="استراحة" onclick="doAct('PAUSE','${type}','${pj}',this)">⏸</button>\n          <button class="ea ea-b" title="حظر"      onclick="doAct('BAN','${type}','${pj}',this)">🚫</button>\n          ${type === "DRV" ? `<button class="ea" title="${ldrSet.has(n) ? "إلغاء صفة الليدر" : "جعله ليدر"}" style="background:${ldrSet.has(n) ? "#7c3aed" : "#e2e8f0"};color:${ldrSet.has(n) ? "#fff" : "#64748b"}" onclick="toggleLeader('${pj}',${ldrSet.has(n) ? "false" : "true"},this)">&#128081;</button>${ldrSet.has(n) ? `<button class="ea" title="مدّة نافذة هذا الليدر" style="background:#ede9fe;color:#7c3aed" onclick="pickLeaderHours('${pj}')">⏱</button>` : ""}` : ""}\n          ${type === "RES" ? `<button class="ea ea-pref" title="كباتن المطعم الثابتون" style="background:${prefCount[n] ? "#0ea5e9" : "#e2e8f0"};color:${prefCount[n] ? "#fff" : "#64748b"}" onclick="opPref('${pj}')">&#127869;</button>` : ""}\n          <button class="ea ea-d" title="حذف"      onclick="doAct('DEL','${type}','${pj}',this)">🗑</button>\n          <button class="ea ea-e" title="تعديل"   onclick="opEdit('${type}','${pj}')">✏️</button>\n        </div>\n        <div style="display:flex;gap:4px">\n          <button class="ea ea-money" title="تصفير"  onclick="rstDebt('${type}','${pj}',this)">💵</button>\n          ${type === "DRV" ? `<button class="ea" title="فتح الشفت — يبدأ شفتاً جديداً اليوم" style="background:#f59e0b;color:#fff" onclick="rstShift('${pj}',this)">🔓</button><button class="ea" title="تعديل الشفت — ساعة البدء والمدّة" style="background:var(--sky);color:#fff" onclick="opShift('${pj}')">🕐</button><button class="ea" title="${_lastLocs && _lastLocs[n] && _lastLocs[n].vehicle === "car" ? "كابتن سيارة — اضغط لإعادته دراجة" : "اجعله كابتن سيارة (تصله طلبات السيارة، والطلبات العاديّة كغيره)"}" style="background:${_lastLocs && _lastLocs[n] && _lastLocs[n].vehicle === "car" ? "#0ea5e9" : "#cbd5e1"};color:#fff" onclick="setVehicle('${pj}',this)">🚗</button>` : ``}\n          <button class="ea ea-c" title="اتصال"   onclick="window.open('tel:${pj}')">📞</button>\n        </div>\n      </div>\n    </div>`;
   cont.insertAdjacentHTML("beforeend", html);
  });
  rendered.forEach(id => {
@@ -3319,6 +3363,55 @@ function filtEnt(type) {
     el.style.transition = ".2s";
     setTimeout(() => el.remove(), 210);
    }
+  }
+ });
+ if (type === "RES") {
+  holdListen();
+  holdPaintCards();
+  ctLoad();
+  ctPaintCards();
+ }
+}
+
+let _ctMap = null, _ctAt = 0, _ctBusy = false;
+
+const ctOf = n => _ctMap && _ctMap[n];
+
+const ctOpen = st => st !== "deleted" && st !== "banned" && st !== "pending" && st !== "waiting";
+
+function ctLoad() {
+ if (_ctBusy || _ctMap && Date.now() - _ctAt < 6e5) return;
+ _ctBusy = true;
+ db.ref("res_contracts").once("value").then(s => {
+  _ctMap = s.val() || {};
+  _ctAt = Date.now();
+  if (gD) updBadges("RES", gD.restaurants);
+  if (resSF === "unsigned") filtEnt("RES"); else ctPaintCards();
+ }).catch(e => {
+  console.warn("res_contracts:", e && e.message);
+  if (!_ctMap) _ctMap = {};
+ }).finally(() => {
+  _ctBusy = false;
+ });
+}
+
+function ctPaintCards() {
+ if (!_ctMap) return;
+ document.querySelectorAll("[id^='sg-']").forEach(el => {
+  const c = ctOf(el.id.slice(3));
+  if (c) {
+   el.style.display = "";
+   el.className = "ec-ph ec-sg ok";
+   el.textContent = "✍️ عقدٌ موقّع" + (c.d ? " · " + c.d : "");
+   el.title = c.t ? "الاتّفاق في العقد: " + c.t : "";
+  } else if (resSF === "unsigned") {
+   el.style.display = "";
+   el.className = "ec-ph ec-sg no";
+   el.textContent = "✍️ بلا عقدٍ موقّع";
+   el.title = "";
+  } else {
+   el.style.display = "none";
+   el.textContent = "";
   }
  });
 }
@@ -3465,7 +3558,8 @@ window.prefSave = function() {
  });
 };
 
-function doAct(cmd, type, id, el) {
+function doAct(cmd, type, id, el, raw, keepHold) {
+ if (cmd === "PAUSE" && type === "RES" && !raw) return opHold(id, el);
  const stM = {
   ACCEPT: "active",
   PAUSE: "inactive",
@@ -3507,7 +3601,7 @@ function doAct(cmd, type, id, el) {
   }
   toast("⚠️ لم يتغيّر حال " + esc(nm) + (why ? " — " + esc(why) : "") + ". أعد المحاولة.", "e");
  };
- fetch(API, {
+ return fetch(API, {
   method: "POST",
   headers: {
    "Content-Type": "text/plain"
@@ -3523,10 +3617,19 @@ function doAct(cmd, type, id, el) {
  }).then(r => r.json()).then(d => {
   if (!(d && d.success)) {
    undo(d && d.msg);
-   return;
+   return false;
   }
   logAudit(cmd, `${type === "RES" ? "مطعم" : "كابتن"}: ${nm} → ${nSt}`);
-  if (type !== "DRV") return;
+  if (type === "RES" && _holdOn) {
+   const hk = "system_settings/res_hold/" + nP(rawPhone);
+   if (cmd === "PAUSE") db.ref(hk).set({
+    inf: 1,
+    at: Date.now(),
+    by: "admin",
+    name: String(nm || "").slice(0, 80)
+   }).catch(e => console.warn("res_hold inf:", e && e.message)); else if (_holdMap[nP(rawPhone)] && !keepHold) db.ref(hk).remove().catch(e => console.warn("res_hold lift:", e && e.message));
+  }
+  if (type !== "DRV") return true;
   return fnCall("adminDriverAccount", {
    items: [ {
     phone: rawPhone,
@@ -3535,8 +3638,176 @@ function doAct(cmd, type, id, el) {
   }).then(() => {
    if (nSt === "deleted" || nSt === "banned") toast((nSt === "deleted" ? "🗑 حُذف " : "🚫 حُظر ") + esc(nm) + " — لا يدخل ولا تصله طلبات"); else if (prevSt === "deleted" || prevSt === "banned") toast("✅ أُعيد تفعيل " + esc(nm));
   }).catch(e => toast("⚠️ تغيّر في الشيت لكن لم يُثبَّت في النظام: " + esc(e && e.message || e), "e")).finally(() => _flPeek(rawPhone));
- }).catch(e => undo(e && e.message)).finally(() => {
+ }).catch(e => {
+  undo(e && e.message);
+  return false;
+ }).finally(() => {
   if (el) el.disabled = false;
+ });
+}
+
+let _holdOn = null, _holdDef = 60, _holdMap = {}, _holdLis = false, _holdCur = null;
+
+const HOLD_WHY = {
+ rain: "مطر",
+ press: "ضغط",
+ debt: "دَين",
+ beh: "سلوك",
+ other: "أخرى"
+};
+
+const HOLD_SHOW = {
+ rain: "المطر",
+ press: "ضغط الطلبات",
+ debt: "مراجعة الحساب",
+ beh: "مراجعة الإدارة",
+ other: ""
+};
+
+function holdHm(ms) {
+ const t = new Date(ms + 3 * 36e5), h = t.getUTCHours(), m = t.getUTCMinutes();
+ return (h % 12 || 12) + ":" + String(m).padStart(2, "0") + (h >= 12 ? " مساءً" : " صباحاً");
+}
+
+async function holdTun() {
+ try {
+  const t = (await db.ref("system_settings/tunables").once("value")).val() || {};
+  const v = t.RES_HOLD;
+  _holdOn = v === undefined || v === null || v === "" ? 1 : Number(v) ? 1 : 0;
+  const d = Number(t.RES_HOLD_DEFAULT_MIN);
+  _holdDef = t.RES_HOLD_DEFAULT_MIN != null && isFinite(d) && d > 0 ? Math.min(240, Math.max(15, Math.round(d))) : 60;
+ } catch (e) {
+  if (_holdOn === null) _holdOn = 1;
+ }
+ return _holdOn;
+}
+
+function holdUntil(k) {
+ const now = Date.now();
+ if (k === "4am") {
+  const b = new Date(now + 3 * 36e5);
+  let u = Date.UTC(b.getUTCFullYear(), b.getUTCMonth(), b.getUTCDate(), 4, 0, 0) - 3 * 36e5;
+  if (u <= now) u += 864e5;
+  return u;
+ }
+ return Math.ceil((now + Number(k) * 6e4) / 6e4) * 6e4;
+}
+
+window.opHold = async function(id, el) {
+ const on = await holdTun();
+ if (!on) return doAct("PAUSE", "RES", id, el, true);
+ const item = gD?.restaurants?.find(i => nP(i[2]) === nP(id));
+ const n = nP(id), nm = item ? String(item[1]) : String(id);
+ const durs = [ [ 30, "30 د" ], [ 60, "ساعة" ], [ 120, "ساعتان" ], [ "4am", "حتى 4 فجراً" ] ];
+ if (![ 30, 60, 120 ].includes(_holdDef)) durs.splice(1, 0, [ _holdDef, _holdDef + " د" ]);
+ const inact = !!(item && typeof R !== "undefined" && String(item[R.STATUS] || "").trim() === "inactive");
+ _holdCur = {
+  n: n,
+  nm: nm,
+  el: el,
+  dur: _holdDef,
+  why: "rain",
+  inact: inact
+ };
+ document.getElementById("holdSub").textContent = nm + " · " + n + (inact ? " · ⚠️ في استراحةٍ بلا مدّة الآن — يُفعَّل ثمّ يُوقف بالمدّة فيعود وحده بموعدها" : "");
+ document.getElementById("holdMsg").value = "";
+ document.getElementById("holdQ").checked = false;
+ const chip = (grp, k, lbl) => `<button type="button" class="fp" data-g="${grp}" data-k="${esc(String(k))}" onclick="holdPick('${grp}','${esc(String(k))}')" style="padding:7px 12px">${esc(lbl)}</button>`;
+ document.getElementById("holdDur").innerHTML = durs.map(d => chip("dur", d[0], d[1])).join("");
+ document.getElementById("holdWhy").innerHTML = Object.keys(HOLD_WHY).map(k => chip("why", k, HOLD_WHY[k])).join("");
+ holdPaint();
+ opMod("holdMod");
+};
+
+window.holdPick = function(g, k) {
+ if (!_holdCur) return;
+ _holdCur[g] = g === "dur" && k !== "4am" ? Number(k) : k;
+ holdPaint();
+};
+
+window.holdPaint = function() {
+ if (!_holdCur) return;
+ document.querySelectorAll("#holdMod .fp").forEach(b => {
+  const on = String(_holdCur[b.dataset.g]) === b.dataset.k;
+  b.classList.toggle("on", on);
+ });
+ const u = holdUntil(_holdCur.dur), msg = document.getElementById("holdMsg").value.trim().replace(/[()]/g, "");
+ const lbl = msg || HOLD_SHOW[_holdCur.why] || "";
+ document.getElementById("holdPrev").textContent = "يقرأ المطعم: «مطعمكم موقوف مؤقّتاً" + (lbl ? " (" + lbl + ")" : "") + " — يعود الإرسال الساعة " + holdHm(u) + ".»" + (_holdCur.why === "press" ? "\n🔁 «ضغط» يُرفع وحده قبل موعده إن هدأ الضغط ٢٠ دقيقة." : "");
+};
+
+window.holdSave = async function() {
+ const c = _holdCur;
+ if (!c) return;
+ const btn = document.getElementById("holdSave");
+ btn.disabled = true;
+ const until = holdUntil(c.dur), msg = document.getElementById("holdMsg").value.trim().replace(/[()]/g, "").slice(0, 80), q = document.getElementById("holdQ").checked ? 1 : 0;
+ const rec = {
+  until: until,
+  why: c.why,
+  name: String(c.nm).slice(0, 80),
+  by: "admin",
+  at: Date.now(),
+  q: q
+ };
+ if (msg) rec.msg = msg;
+ try {
+  if (c.inact && !await doAct("ACCEPT", "RES", c.n, null, true, true)) {
+   toast("لم يُوقف «" + esc(c.nm) + "» بمدّة: تعذّر رفع الاستراحة القديمة — أعد المحاولة.", "e");
+   return;
+  }
+  await db.ref("system_settings/res_hold/" + c.n).set(rec);
+  logAudit("RES_HOLD", `مطعم: ${c.nm} ⏸ حتى ${holdHm(until)} (${HOLD_WHY[c.why]}${msg ? " — " + msg : ""})${q ? " · بطاقات الجسر" : ""}`);
+  toast("⏸ أُوقف " + esc(c.nm) + " حتى " + holdHm(until) + " — يعود وحده");
+  clMod("holdMod");
+  _holdCur = null;
+ } catch (e) {
+  toast("تعذّر الإيقاف: " + esc(e && e.message || e), "e");
+ } finally {
+  btn.disabled = false;
+ }
+};
+
+window.holdForever = function() {
+ const c = _holdCur;
+ if (!c) return;
+ if (!confirm("استراحة بلا مدّة؟\n\nلا تنتهي وحدها: يبقى «" + c.nm + "» لا يرسل حتى يفعّله أحدٌ من بطاقته (✓).\nوتصلك تذكرةٌ إن طالت ساعتين والضغط صفر.\n\nللمطر والضغط استعمل المدّة.")) return;
+ clMod("holdMod");
+ _holdCur = null;
+ doAct("PAUSE", "RES", c.n, c.el, true);
+};
+
+window.holdLift = async function(n) {
+ const h = _holdMap[n];
+ if (!h) return;
+ if (!confirm("رفع إيقاف «" + (h.name || n) + "» الآن؟ يعود الإرسال فوراً.")) return;
+ try {
+  await db.ref("system_settings/res_hold/" + n).remove();
+  logAudit("RES_HOLD_LIFT", "مطعم: " + (h.name || n) + " ▶ رُفع الإيقاف يدويّاً");
+  toast("▶ عاد إرسال " + esc(h.name || n));
+ } catch (e) {
+  toast("تعذّر: " + esc(e && e.message || e), "e");
+ }
+};
+
+function holdListen() {
+ if (_holdLis) return;
+ _holdLis = true;
+ holdTun();
+ listen(() => db.ref("system_settings/res_hold"), snap => {
+  _holdMap = snap.val() || {};
+  holdPaintCards();
+ });
+ setInterval(holdPaintCards, 6e4);
+}
+
+function holdPaintCards() {
+ document.querySelectorAll("[id^='hold-']").forEach(el => {
+  const n = el.id.slice(5), h = _holdMap[n], now = Date.now();
+  let html = "";
+  if (h && h.inf) html = "⏸ استراحة بلا مدّة منذ " + esc(holdHm(Number(h.at) || now)); else if (h && Number(h.until) > now) html = "⏸ موقوف حتى " + esc(holdHm(Number(h.until))) + (HOLD_WHY[h.why] ? " (" + esc(h.msg || HOLD_WHY[h.why]) + ")" : "") + (Number(h.q) === 1 ? " · بطاقات" : "") + ` <a href="javascript:void 0" onclick="holdLift('${esc(n)}')" style="color:#16a34a;font-weight:900">▶ رفع</a>`;
+  el.innerHTML = html;
+  el.style.display = html ? "" : "none";
  });
 }
 
@@ -4668,6 +4939,9 @@ window.opEdit = function(type, phone) {
  if (!entity) return toast("لم يُعثر على البيانات", "e");
  document.getElementById("eTitle").textContent = type === "DRV" ? "تحديث بيانات الكابتن" : "تحديث بيانات المطعم";
  document.getElementById("eSub").textContent = type === "DRV" ? "الكابتن: " + entity[D.NAME] : "المطعم: " + entity[R.NAME];
+ try {
+  if (type !== "DRV") nuPaint(phone);
+ } catch (_) {}
  document.getElementById("eN").value = entity[1] || "";
  document.getElementById("ePH").value = "0" + nP(entity[2] || phone);
  document.getElementById("ePW").value = "";
@@ -5201,13 +5475,35 @@ function insStateA(cfgRaw, acc, nowMs) {
   state: "not_started",
   starts: add(startW, base.day)
  });
+ const fz = c.freeze && typeof c.freeze === "object" ? c.freeze : null;
+ const fzOk = !!fz && /^\d{4}-\d{2}-\d{2}$/.test(String(fz.from)) && /^\d{4}-\d{2}-\d{2}$/.test(String(fz.until)) && String(fz.from) <= String(fz.until);
+ let fzSkip = false;
+ if (fzOk) {
+  const fzMin = Math.max(0, Math.round(Number(fz.min_paid) || 0));
+  if (today <= fz.until) {
+   if (today >= fz.from && paid >= fzMin) return Object.assign(base, {
+    state: "frozen",
+    until: String(fz.until)
+   });
+  } else {
+   const endMs = Date.parse(fz.until + "T00:00:00Z") + 864e5 - 3 * 36e5;
+   let pb = 0;
+   Object.values(acc.payments || {}).forEach(p => {
+    const a = Number(p && p.amount), t = Number(p && p.at);
+    if (isFinite(a) && a > 0 && (!isFinite(t) || t < endMs)) pb += Math.round(a);
+   });
+   fzSkip = pb >= fzMin;
+  }
+ }
+ const fzIn = d => fzSkip && d >= fz.from && d <= fz.until;
  let weeksPast = 0;
  for (let w = startW; w <= curW; w = add(w, 7)) {
-  if (add(w, base.day) < today) weeksPast++;
+  const d = add(w, base.day);
+  if (d < today && !fzIn(d)) weeksPast++;
  }
  const expectedPast = Math.min(target, weeksPast * c.weekly);
  const dueThis = add(curW, base.day);
- const expectedNow = Math.min(target, (weeksPast + (dueThis >= today ? 1 : 0)) * c.weekly);
+ const expectedNow = Math.min(target, (weeksPast + (dueThis >= today && !fzIn(dueThis) ? 1 : 0)) * c.weekly);
  base.expected = expectedPast;
  base.due_date = dueThis;
  const gu = /^\d{4}-\d{2}-\d{2}$/.test(String(c.grace_until || "")) ? String(c.grace_until) : "";
@@ -5291,13 +5587,18 @@ function insRender() {
  }
  const start = cfg.start || "2026-10-10";
  document.getElementById("insHead").innerHTML = on ? `🛡️ <b>مفعّل</b> — ${insFmt(cfg.target || 1e5)} د.ع على كلّ كابتن، ${insFmt(cfg.weekly || 1e4)} كلّ أسبوع في يومه (السبت…الخميس). بدء التحصيل: <b>${esc(start)}</b>. اليوم: <b>${todayIdx < 6 ? esc(INS_DAYS_AR[todayIdx]) : "الجمعة (بلا تحصيل)"}</b>. الكابتن يُنذر في يومه، ويتوقّف عن استلام الطلبات من اليوم التالي حتى تؤكّد الاستلام هنا — ثم يعود تلقائياً خلال دقائق.` : `🛡️ <b>غير مفعّل</b> — حين تفعّله يبدأ التحصيل يوم <b>${esc(start)}</b>، ويُوزَّع الكباتن النشطون على ٦ وجبات (السبت…الخميس) تلقائياً.`;
+ try {
+  const fz = cfg.freeze;
+  if (on && fz && fz.until && new Date(Date.now() + 3 * 36e5).toISOString().slice(0, 10) <= fz.until) document.getElementById("insHead").innerHTML += `<div style="margin-top:6px">⏸ <b>تجميد الأقساط</b> من ${esc(fz.from)} حتى <b>${esc(fz.until)}</b> لمن سدّد ${insFmt(fz.min_paid)} د.ع فأكثر: لا منع ولا قسط، والتسديد مفتوح. وبعده يكملون من حيث توقّفوا.</div>`;
+ } catch (_) {}
  const q = (document.getElementById("insSch") || {}).value || "";
  const rows = [];
- let kB = 0, kT = 0, kO = 0, kS = 0;
+ let kB = 0, kT = 0, kO = 0, kS = 0, kF = 0;
  Object.keys(insAccs).forEach(p => {
   if (!/^7\d{9}$/.test(p)) return;
   const a = insAccs[p] || {}, s = insStateA(cfg, a, now), name = insName(p), notice = a.notice_at || (insNotices[p] && insNotices[p].at ? new Date(Number(insNotices[p].at)).toISOString() : null);
   kS += s.paid || 0;
+  if (s.state === "frozen") kF++;
   if (s.state === "blocked" || s.state === "overdue") kB++; else if (s.state === "due_today") kT++; else if (s.state === "ok" || s.state === "complete") kO++;
   if (q && !(name.includes(q) || p.includes(q.replace(/^0/, "")))) return;
   const f = insF;
@@ -5305,6 +5606,7 @@ function insRender() {
   if (f === "today" && s.day !== todayIdx) return;
   if (f === "blocked" && ![ "blocked", "overdue" ].includes(s.state)) return;
   if (f === "ok" && ![ "ok", "complete" ].includes(s.state)) return;
+  if (f === "frozen" && s.state !== "frozen") return;
   if (f === "notice" && !notice && !a.left_at) return;
   rows.push({
    p: p,
@@ -5314,7 +5616,7 @@ function insRender() {
    notice: notice
   });
  });
- [ [ "insKBlocked", kB ], [ "insKToday", kT ], [ "insKOk", kO ], [ "insKSum", insFmt(kS) ] ].forEach(([id, v]) => {
+ [ [ "insKBlocked", kB ], [ "insKToday", kT ], [ "insKOk", kO ], [ "insKSum", insFmt(kS) ], [ "insKFrz", kF ] ].forEach(([id, v]) => {
   const e = document.getElementById(id);
   if (e) e.textContent = v;
  });
@@ -5327,6 +5629,7 @@ function insRender() {
   upcoming: [ "🗓 قادم", "ep" ],
   ok: [ "✅ دفع هذا الأسبوع", "ek" ],
   complete: [ "🎉 مكتمل", "ek" ],
+  frozen: [ "⏸ مجمّد حتى 05-01", "ep" ],
   exempt: [ "معفى", "ep" ],
   left: [ "ترك العمل", "ep" ],
   not_started: [ "لم يبدأ", "ep" ],
@@ -5472,11 +5775,30 @@ window.insLeadSettle = async function(lp) {
 };
 
 window.insSetDay = async function(p, d) {
+ const from = insAccs[p] && insAccs[p].day != null ? Number(insAccs[p].day) : null, to = Number(d);
+ try {
+  const cnt = {};
+  let n = 0;
+  Object.values(insAccs || {}).forEach(a => {
+   if (a && !a.left_at && a.day != null) {
+    cnt[a.day] = (cnt[a.day] || 0) + 1;
+    n++;
+   }
+  });
+  const avg = n / INS_DAYS_AR.length, after = (cnt[to] || 0) + (from === to ? 0 : 1);
+  if (n >= 14 && after > avg * 1.15 && !confirm("⚠️ يوم " + INS_DAYS_AR[to] + " فيه الآن " + (cnt[to] || 0) + " حساباً، والمتوسّط " + Math.round(avg) + ".\nتكديس الحسابات في يومٍ واحد يمنع كباتن كثيرين معاً في اليوم التالي.\n\nأتنقله إليه مع ذلك؟")) {
+   try {
+    insRender();
+   } catch (_) {}
+   return;
+  }
+ } catch (_) {}
  try {
   await db.ref("insurance/accounts/" + p).update({
-   day: Number(d)
+   day: to
   });
-  toast("تغيّر يوم القسط إلى " + INS_DAYS_AR[Number(d)]);
+  logAudit("INS_SET_DAY", "الكابتن " + p + " · من " + (from != null && INS_DAYS_AR[from] ? INS_DAYS_AR[from] : "؟") + " إلى " + INS_DAYS_AR[to]);
+  toast("تغيّر يوم القسط إلى " + INS_DAYS_AR[to]);
  } catch (e) {
   toast("تعذّر: " + esc(e.message || e), "e");
  }
@@ -7471,6 +7793,11 @@ async function asgnCall(oId, dPhone, force) {
   }), new Promise((_, rej) => setTimeout(() => rej(new Error("cloud_timeout")), ASGN_RACE_MS)) ]);
   if (r && r.data) return r.data;
  } catch (e) {
+  if (e && /failed-precondition/.test(String(e.code || ""))) return {
+   success: false,
+   locked: true,
+   msg: e.message
+  };
   console.warn("assignDriver سحابياً:", e && (e.code || e.message));
  }
  const res = await fetch(API, {
@@ -7495,6 +7822,10 @@ window.asgnDrv = async function(oId, dPhone, el, force) {
  if (el) el.disabled = true;
  try {
   const d = await asgnCall(oId, dPhone, force === true);
+  if (d && d.locked) {
+   alert(d.msg || "وضع الطوارئ: التوزيع آليٌّ كلّه.");
+   return;
+  }
   if (d && d.needsConfirm) {
    if (!confirm(d.msg || "⚠️ الكابتن غير متاح. أتؤكّد التعيين القسري؟")) return;
    if (el) el.disabled = false;

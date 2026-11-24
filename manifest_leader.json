@@ -1,27 +1,41 @@
 {
-  "name": "ليدر نحلة | غرفة العمليات",
-  "short_name": "ليدر نحلة",
-  "description": "لوحة الليدر — متابعة الطلبات والكباتن لحظةً بلحظة",
-  "start_url": "./Nahlelidersas.html",
-  "scope": "./",
-  "display": "standalone",
-  "background_color": "#f6f8fc",
-  "theme_color": "#1e3a5f",
-  "orientation": "any",
+  "id": "/NHLwithalhut/Nahlelidersas.html",
+  "scope": "./Nahlelidersas.html",
+  "name": "لوحة الليدرز | نحلة",
+  "short_name": "ليدرز نحلة",
+  "description": "لوحة ليدرز نحلة: الرادار الميداني والكباتن والمحادثات",
+  "start_url": "./Nahlelidersas.html?source=pwa",
   "lang": "ar",
   "dir": "rtl",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#ffffff",
+  "theme_color": "#111111",
   "icons": [
     {
-      "src": "./admin-logo.png",
+      "src": "./leaders-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "./leaders-512.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any"
     },
     {
-      "src": "./admin-logo.png",
+      "src": "./leaders-maskable-512.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "maskable"
+    }
+  ],
+  "prefer_related_applications": false,
+  "related_applications": [
+    {
+      "platform": "webapp",
+      "url": "https://shrkttwsylrqmathnan-netizen.github.io/NHLwithalhut/manifest_leader.json"
     }
   ]
 }
